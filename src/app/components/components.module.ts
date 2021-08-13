@@ -9,6 +9,8 @@ import { SocietySummaryComponent } from './society-summary/society-summary.compo
 import { VoteComponent } from './vote/vote.component';
 import { CommonModule } from '@angular/common';
 import { MatBottomSheetModule } from '@angular/material/bottom-sheet';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { PlayerDeckComponent } from './player-deck/player-deck.component';
 
 const components = [
   AnnouncementComponent,
@@ -16,6 +18,7 @@ const components = [
   DialogComponent,
   HarvestComponent,
   PlayerHandsComponent,
+  PlayerDeckComponent,
   ScorecardComponent,
   SocietySummaryComponent,
   VoteComponent
@@ -28,6 +31,7 @@ const ngMaterial = [
 @NgModule({
   imports: [
     CommonModule,
+    FontAwesomeModule,
     ...ngMaterial
   ],
   declarations: [

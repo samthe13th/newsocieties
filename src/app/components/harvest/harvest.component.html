@@ -38,11 +38,23 @@
   </div>
 </div>
 <button (click)="newHarvest()">New</button>
-<button (click)="gatherOwnedLand()">Gather</button>
 
 <ng-template #tileSelectSheet>
-  <div>
-    <button>Explore (e)</button>
-    <button>Gather (g)</button>
+  <div class="action-sheet">
+    {{ selectedResourceStatus?.message }}
+    <div 
+      *ngIf="selectedResourceStatus?.status === 'explorable'" 
+      class="large-action-button"
+      (click)="explore()">
+      <fa-icon size="lg" [icon]="exploreIcon"></fa-icon>
+      Explore (e)
+    </div>
+    <div 
+      *ngIf="selectedResourceStatus?.status === 'explored' || selectedResourceStatus?.status === 'explorable'"
+      class="large-action-button"
+      (click)="gather()">
+      <fa-icon size="lg" [icon]="gatherIcon"></fa-icon>
+      Gather (g)
+    </div>
   </div>
 </ng-template>

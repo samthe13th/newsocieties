@@ -26,6 +26,83 @@ $new-societies-theme: mat-light-theme($new-societies-primary, $new-societies-acc
 // that you are using.
 @include angular-material-theme($new-societies-theme);
 
+/** LAYOUT **/
+.flex-column {
+  display: flex; 
+  flex-direction: column;
+
+  &.flex-center-h {
+    align-items: center;
+  }
+
+  &.flex-center-v {
+    justify-content: center;
+  }
+}
+
+.stretch-h {
+  width: 100%;
+}
+
+.stretch-v {
+  height: 100%;
+}
+
+.stretch-vh {
+  height: 100vh
+}
+
+.flex-row {
+  display: flex; 
+  flex-direction: row;
+
+  &.flex-center-h {
+    justify-content: center;
+  }
+
+  &.flex-center-v {
+    align-items: center;
+  }
+}
+
+.flex-center {
+  justify-content: center;
+  align-items: center;
+}
+
+/** OBJECTS **/
+.large-action-button {
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  text-align: center;
+  padding: 15px;
+  font-size: 18px;
+  background: white;
+  border: solid lightgrey 1px;
+  border-radius: 10px;
+  margin: 10px;
+  font-family: sans-serif;
+  justify-content: center;
+  align-items: center;
+  
+  fa-icon {
+    margin-bottom: 10px;
+  }
+
+  &:hover {
+    box-shadow: 1px 1px 5px lightgrey;
+  }
+}
+
+.action-sheet {
+  display: flex; 
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  font-size: 18px;
+}
+
 /** COMPONENTS **/
 .announcement {
   display: flex;
@@ -35,6 +112,7 @@ $new-societies-theme: mat-light-theme($new-societies-primary, $new-societies-acc
   width:100%;
   height:100%;
   position: absolute;
+  border: solid 1px white;
   top: 0;
   left: 0;
   transform-style: preserve-3d;
@@ -46,7 +124,7 @@ $new-societies-theme: mat-light-theme($new-societies-primary, $new-societies-acc
   overflow: hidden;
 
   &.mark {
-    box-shadow: 1px 1px 10px 5px #dd9ee2;
+    box-shadow: 1px 1px 10px 5px grey;
   }
 
   &.disabled {

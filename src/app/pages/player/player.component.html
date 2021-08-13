@@ -1,1 +1,6 @@
-<app-harvest [player]="id" [division]="division"></app-harvest>
+<app-harvest
+  [player]="id"
+  [division]="division"
+  (gatherResource)="onGather($event)">
+</app-harvest>
+<app-player-deck [id]="id" [division]="division"></app-player-deck>
