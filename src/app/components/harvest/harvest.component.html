@@ -1,0 +1,28 @@
+<div class="harvest-cards">
+  <div *ngFor="let row of cards; let r = index" class="card-row">
+    <card
+      *ngFor="let card of row; let i = index"
+      (click)="flip(r, i)"
+      [(side)]="card.side"
+      width="50"
+      height="50"
+      [class.disabled]="card.value === -1"
+      (sideChange)="afterFlip(r, i)">
+      <div front class="harvest-card">
+        <div 
+          *ngIf="card.value > 0"
+          class="resource" 
+          [class.one]="card.value === 1"
+          [class.two]="card.value === 2"
+          [class.three]="card.value === 3">
+          {{card.value}}
+        </div>
+        <div *ngIf="card.value === 0" class="contamination">
+          <img src="../assets/contamination.png"/>
+        </div>
+      </div>
+      <div back class="harvest-card back"></div>
+    </card>
+  </div>
+
+</div>

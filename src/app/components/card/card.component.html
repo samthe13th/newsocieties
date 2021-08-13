@@ -1,0 +1,12 @@
+<div 
+  class="face front"
+  [class.up]="side == 'front'"
+  [class.down]="side == 'back'">
+  <ng-content select=[front]></ng-content>
+</div>
+<div 
+  class="face back"
+  [class.up]="side == 'back'"
+  [class.down]="side == 'front'">
+  <ng-content select=[back]></ng-content>
+</div>
