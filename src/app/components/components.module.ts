@@ -8,6 +8,7 @@ import { ScorecardComponent } from './scorecard/scorecard.component';
 import { SocietySummaryComponent } from './society-summary/society-summary.component';
 import { VoteComponent } from './vote/vote.component';
 import { CommonModule } from '@angular/common';
+import { MatBottomSheetModule } from '@angular/material/bottom-sheet';
 
 const components = [
   AnnouncementComponent,
@@ -20,9 +21,14 @@ const components = [
   VoteComponent
 ]
 
+const ngMaterial = [
+  MatBottomSheetModule
+]
+
 @NgModule({
   imports: [
-    CommonModule
+    CommonModule,
+    ...ngMaterial
   ],
   declarations: [
     ...components

@@ -11,7 +11,9 @@ export type CardSide = 'front' | 'back';
     '[class.card]': 'true',
     '[class.animate]': 'animate',
     '[style.width.px]': 'width',
-    '[style.height.px]': 'height'
+    '[style.height.px]': 'height',
+    '[class.mark]': 'mark !== null',
+    '[attr.data-mark]': 'mark'
   }
 })
 export class CardComponent implements OnInit {
@@ -21,6 +23,8 @@ export class CardComponent implements OnInit {
 
   @Output() sideChange: EventEmitter<CardSide> = new EventEmitter<CardSide>();
 
+  @Input() mark;
+  @Input() xray = false;
   @Input() 
   set side(val) {
     if (this._side && this.animate === false && val !== this._side) {

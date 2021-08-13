@@ -7,6 +7,9 @@ import { AngularFirestore } from '@angular/fire/firestore';
   styleUrls: ['./player.component.scss']
 })
 export class PlayerComponent {
+  id = 1;
+  division = 'N';
+
   cards = [
     { side: 'back', value: 0 },
     { side: 'back', value: 2 },
