@@ -136,7 +136,7 @@ export class HarvestComponent implements OnInit {
     this.landGrid = this.generateHarvest(13, 2);
     setTimeout(() => {
       this.gatherOwnedLand();
-    }, 1000)
+    }, 500)
   }
 
   getOwner() {
