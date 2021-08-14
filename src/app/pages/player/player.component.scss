@@ -1,1 +1,13 @@
- 
+.resource {
+  display: block;
+
+  &.one {
+    background: #3f7ba3;
+  }
+  &.two {
+    background: #8148a7;
+  }
+  &.three {
+    background: #a74578;
+  }
+}

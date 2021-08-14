@@ -133,7 +133,7 @@ export class HarvestComponent implements OnInit {
   }
 
   newHarvest() {
-    this.landGrid = this.generateHarvest(41, 10);
+    this.landGrid = this.generateHarvest(13, 2);
     setTimeout(() => {
       this.gatherOwnedLand();
     }, 1000)

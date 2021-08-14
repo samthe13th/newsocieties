@@ -1,7 +1,29 @@
-PLAYER: {{id}}
-DIVISION: {{division}}
-<div class="player-hand">
-  <div *ngFor="let card of resources">
-    {{card.value}}
+PLAYER: {{id}} | WEALTH: {{wealth}}
+<div class="flex-row">
+  <div class="flex-column">
+    Harvested
+    <div class="player-hand">
+      <div 
+        class="resource" 
+        [class.one]="resource.value == 1"
+        [class.two]="resource.value == 2"
+        [class.three]="resource.value == 3"
+        *ngFor="let resource of resources">
+        {{resource.value}}
+      </div>
+    </div>
+  </div>
+  <div class="flex-column">
+    GLA
+    <div class="gla-resources">
+      <div 
+        class="resource" 
+        [class.one]="resource.value == 1"
+        [class.two]="resource.value == 2"
+        [class.three]="resource.value == 3"
+        *ngFor="let resource of ($GLAResources | async)">
+        {{resource.value}}
+      </div>
+    </div>
   </div>
 </div>

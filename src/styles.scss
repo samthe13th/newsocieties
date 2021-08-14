@@ -71,6 +71,15 @@ $new-societies-theme: mat-light-theme($new-societies-primary, $new-societies-acc
 }
 
 /** OBJECTS **/
+.action-sheet {
+  display: flex; 
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  font-size: 24px;
+  height: 200px;
+}
+
 .large-action-button {
   display: flex;
   flex-direction: column;
@@ -95,12 +104,21 @@ $new-societies-theme: mat-light-theme($new-societies-primary, $new-societies-acc
   }
 }
 
-.action-sheet {
+.resource {
   display: flex; 
-  justify-content: center;
   align-items: center;
-  width: 100%;
-  font-size: 18px;
+  justify-content: center;
+  color: white;
+
+  &.one {
+    background: #3f7ba3;
+  }
+  &.two {
+    background: #8148a7;
+  }
+  &.three {
+    background: #a74578;
+  }
 }
 
 /** COMPONENTS **/

@@ -20,4 +20,8 @@ export class PlayerComponent {
     console.log("ON GATHER: ", card)
     this.playerDeck.add(card);
   }
+
+  buy(item) {
+    this.playerDeck.spend(item.cost);
+  }
 }

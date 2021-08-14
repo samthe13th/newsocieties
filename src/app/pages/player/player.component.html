@@ -1,6 +1,10 @@
+DIVISION: {{division}}
 <app-harvest
   [player]="id"
   [division]="division"
   (gatherResource)="onGather($event)">
 </app-harvest>
 <app-player-deck [id]="id" [division]="division"></app-player-deck>
+<button (click)="buy({ cost: 2 })">Spend $2</button>
+<button (click)="buy({ cost: 5 })">Spend $5</button>
+<button (click)="buy({ cost: 6 })">Spend $6</button>
