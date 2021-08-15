@@ -12,8 +12,8 @@ export type CardSide = 'front' | 'back';
     '[class.animate]': 'animate',
     '[style.width.px]': 'width',
     '[style.height.px]': 'height',
-    '[class.mark]': 'mark !== null',
-    '[attr.data-mark]': 'mark'
+    '[class.mark]': 'mark !== null && mark !== undefined',
+    '[attr.data-mark]': 'mark !== playerId ? mark : undefined'
   }
 })
 export class CardComponent implements OnInit {
@@ -25,6 +25,7 @@ export class CardComponent implements OnInit {
 
   @Input() mark = null
   @Input() xray = false;
+  @Input() playerId;
   @Input() 
   set side(val) {
     if (this._side && this.animate === false && val !== this._side) {

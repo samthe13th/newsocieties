@@ -1,5 +1,5 @@
-import { Output, Component, OnInit, HostListener, Input, EventEmitter } from '@angular/core';
-import { range, chunk, isEqual } from 'lodash';
+import { Output, Component, OnInit, Input, EventEmitter } from '@angular/core';
+import { range, chunk, isEqual, isEmpty } from 'lodash';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { Subject } from 'rxjs';
@@ -32,6 +32,7 @@ export class LandGridComponent implements OnInit {
   @Input() markCards: boolean;
   @Input() updatePath;
   @Input() showId;
+  @Input() playerId = 0;
 
   constructor(
     private db: AngularFireDatabase,
@@ -92,32 +93,27 @@ export class LandGridComponent implements OnInit {
   }
 
   selectTile(card) {
-    this.select.emit(card);
-    // this.mark(i);
-    // this.landSelectSheet = this._bottomSheet.open(sheetTemplate);
-    // this.selectedResourceStatus = this.getResourceStatus();
-    // this.landSelectSheet.afterDismissed()
-    //   .pipe(takeUntil(this.destroy$))
-    //   .subscribe(() => {
-    //     if (this.selectedCardIndex) {
-    //       this.clearSelection();
-    //     }
-    //   })
+    console.log('select: ', card, isEmpty(card.mark))
+    if (!card.mark || card.mark === this.playerId) {
+      this.select.emit(card);
+      this.mark(card);
+    }
   }
 
-  clearSelection(card) {
-    this.landTiles[card?.index].mark = null;
+  clearSelection(index) {
+    this.landTiles[index].mark = null;
     this.selectedCardIndex = null;
+    this.updateDB();
   }
 
-  mark(i) {
-    // if (this.selectedCardIndex) {
-    //   this.clearSelection();
-    // }
-    // const card = this.landTiles[i];
-    // card.mark = card.mark ? null : 1;
-    // this.updateDB();
-    // this.selectedCardIndex = i;
+  mark(_card) {
+    if (this.selectedCardIndex) {
+      this.clearSelection(this.selectedCardIndex);
+    }
+    const card = this.landTiles[_card.index];
+    card.mark = card.mark ? null : this.playerId;
+    this.selectedCardIndex = card.index;
+    this.updateDB();
   }
 
   explore(card) {
@@ -127,7 +123,7 @@ export class LandGridComponent implements OnInit {
       console.log('updates: ', this.landTiles);
       this.updateDB();
     }
-    this.clearSelection(card);
+    this.clearSelection(card.index);
   }
 
   gather(card) {
@@ -135,7 +131,7 @@ export class LandGridComponent implements OnInit {
     this.gatherResource.emit({ value: card.value });
     this.landTiles[card.index].value = -1;
     this.updateDB();
-    this.clearSelection(card);
+    this.clearSelection(card.index);
   }
 
   updateDB() {

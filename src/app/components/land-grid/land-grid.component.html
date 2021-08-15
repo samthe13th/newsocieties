@@ -14,6 +14,8 @@
       width="40"
       height="40"
       [class.owned]="true"
+      [mark]="card.mark"
+      [playerId]="playerId"
       [class.disabled]="card.value == -1 || card.contaminated == true"
       (sideChange)="process(i)">
       <div front class="harvest-card">

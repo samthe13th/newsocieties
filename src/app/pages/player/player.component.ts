@@ -35,7 +35,7 @@ export class PlayerComponent implements OnInit {
 
   private destroy$ = new Subject<boolean>();
 
-  id = 1;
+  id;
   division = 'N';
   divisionData;
   showId;
@@ -55,9 +55,10 @@ export class PlayerComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    const { show, division } = this.route.snapshot.params;
+    const { show, division, id } = this.route.snapshot.params;
     const showPath = `shows/${show}`;
     this.showId = show;
+    this.id = id;
     this.landTilesPath = `${showPath}/divisions/${division}/landTiles`
   }
 
@@ -71,7 +72,11 @@ export class PlayerComponent implements OnInit {
     this.selectedResourceStatus = this.getResourceStatus(card);
     this.actionSheet.afterDismissed()
       .pipe(takeUntil(this.destroy$))
-      .subscribe()
+      .subscribe(() => {
+        if (this.selectedCard) {
+          this.landGrid.clearSelection(this.selectedCard.index)
+        }
+      })
   }
 
   getResourceStatus(card) {

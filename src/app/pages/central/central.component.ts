@@ -16,9 +16,7 @@ export class CentralComponent implements OnInit {
   showKey: string;
   divisionChanges;
 
-  constructor(private db: AngularFireDatabase) {
-    console.log('DB: ', db);
-  }
+  constructor(private db: AngularFireDatabase) {}
 
   ngOnInit() {
     this.db.list('shows', ref => ref.limitToLast(1))
