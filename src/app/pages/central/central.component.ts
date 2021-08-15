@@ -65,18 +65,13 @@ export class CentralComponent implements OnInit {
 
   generateLandTiles() {
     const slots = range(MAX_HARVEST);
-    return slots.map(() => ({ 
+    return slots.map((_, index) => ({ 
       value: -1, 
       owner: null, 
       harvested: false, 
       contaminated: false,
-      mark: null
+      mark: null, 
+      index
      }))
   }
-}
-
-function getRandomInt(min, max) {
-  min = Math.ceil(min);
-  max = Math.floor(max);
-  return Math.floor(Math.random() * (max - min + 1)) + min;
 }

@@ -23,7 +23,7 @@ export class CardComponent implements OnInit {
 
   @Output() sideChange: EventEmitter<CardSide> = new EventEmitter<CardSide>();
 
-  @Input() mark;
+  @Input() mark = null
   @Input() xray = false;
   @Input() 
   set side(val) {
@@ -39,8 +39,7 @@ export class CardComponent implements OnInit {
   @Input() width: number = 50;
   @Input() height: number = 100;
 
-  constructor(firestore: AngularFirestore) {
-  }
+  constructor() {}
 
   ngOnInit() {
     this.side = this.side ?? 'front';

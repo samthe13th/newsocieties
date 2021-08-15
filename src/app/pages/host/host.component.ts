@@ -15,22 +15,30 @@ export class HostComponent implements OnInit {
   contamination;
   harvest;
 
+  divisionId;
+  showId;
+  divisionPath;
+  landTilesPath;
+
   constructor(
     private db: AngularFireDatabase,
     private route: ActivatedRoute
   ) {}
 
   ngOnInit() {
-    const { show, division } = this.route.snapshot.params;
-    const showPath = `shows/${show}`;
+    this.divisionId = this.route.snapshot.params.division;
+    this.showId = this.route.snapshot.params.show;
+    this.divisionPath = `shows/${this.showId}/divisions/${this.divisionId}`;
     
-    this.db.object(`${showPath}/divisions/${division}`)
+    this.landTilesPath = `${this.divisionPath}/landTiles`
+
+    this.db.object(this.divisionPath)
       .valueChanges()
       .subscribe((division) => {
         this.division = division
       })
 
-    this.db.object(`${showPath}/contamination/current`)
+    this.db.object(`shows/${this.showId}/contamination/current`)
       .valueChanges()
       .subscribe((level) => {
         this.adjustContamination(level);
@@ -39,12 +47,13 @@ export class HostComponent implements OnInit {
 
   newSeason() {
     const { landTiles, harvest } = this.division;
-    console.log({ landTiles, harvest })
     this.harvest = this.generateHarvest(landTiles, harvest);
+    this.db.object(`${this.divisionPath}/landTiles`).set({ ...this.harvest })
     console.log('NEW HARVEST: ', this.harvest)
   }
 
   private adjustContamination(level) {
+    console.log('adjust contam')
     this.contamination = level;
     if (this.harvest) {
       const cardIndexes = this.harvest

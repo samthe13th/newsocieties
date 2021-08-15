@@ -8,4 +8,8 @@
   [division]="division">
 </app-society-summary>
 <button (click)="newSeason()">New Season</button>
-<app-land-grid [landTiles]="harvest"></app-land-grid>
+<app-land-grid 
+  [markCards]="true"
+  [showId]="showId"
+  [updatePath]="landTilesPath">
+</app-land-grid>

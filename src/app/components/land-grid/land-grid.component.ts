@@ -1,19 +1,12 @@
 import { Output, Component, OnInit, HostListener, Input, EventEmitter } from '@angular/core';
-import { range, chunk, includes, difference } from 'lodash';
+import { range, chunk, isEqual } from 'lodash';
+import { AngularFireDatabase } from '@angular/fire/database';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
-import { faEye, faShoppingBag } from '@fortawesome/free-solid-svg-icons';
-import { getRandomInt, shuffle } from 'src/app/utilties';
-import { LandTile, LandCardValues } from 'src/app/interfaces';
-
-type LandGrid = LandTile[];
+import { LandCardValues, LandTile } from 'src/app/interfaces';
 
 const MAX_HARVEST = 49;
-const KEY_CODE = {
-  e: 69,
-  g: 71
-}
+const HARVEST_ROW_LENGTH = 7;
 
 @Component({
   selector: 'app-land-grid',
@@ -24,221 +17,157 @@ const KEY_CODE = {
   }
 })
 export class LandGridComponent implements OnInit {
+  landTiles;
+  animateTiles;
+
   landSelectSheet;
   selectedResourceStatus;
   selectedCardIndex;
-
-  // ICONS
-  exploreIcon = faEye;
-  gatherIcon = faShoppingBag;
   
   private destroy$ = new Subject<boolean>();
-  private selectedCardCoords: [number, number] | undefined;
-
-  @HostListener('window:keyup', ['$event'])
-  keyEvent(event: KeyboardEvent) {
-    // const [r, i] = this.selectedCardCoords;
-    // if(event.keyCode === KEY_CODE.e){
-    //   this.explore();
-    // } else if (event.keyCode === KEY_CODE.g) {
-    //   this.gather(); 
-    // }
-  }
 
   @Output() gatherResource: EventEmitter<{ value: number }> = new EventEmitter();
+  @Output() select: EventEmitter<LandTile> = new EventEmitter();
 
-  @Input() landTiles: LandTile[];
+  @Input() markCards: boolean;
+  @Input() updatePath;
+  @Input() showId;
 
-  constructor(private _bottomSheet: MatBottomSheet) {}
+  constructor(
+    private db: AngularFireDatabase,
+    private _bottomSheet: MatBottomSheet
+  ) {}
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.db.object(this.updatePath)
+      .valueChanges()
+      .subscribe((tiles: any[]) => {
+        if (!this.landTiles) {
+          this.landTiles = tiles;
+        }
+        tiles.forEach((update, i) => {
+          if (!isEqual(update, this.landTiles[i])) {
+            console.log('update: ', update)
+            const tile = this.landTiles[i];
+            tile.harvested = update.harvested;
+            tile.value = update.value;
+            tile.contaminated = update.contaminated;
+            tile.mark = update.mark ?? null;
+            tile.owner = update.owner ?? null;
+          }
+        })
+      })
+
+    this.db.object(`shows/${this.showId}/contamination/current`)
+      .valueChanges()
+      .subscribe((level) => {
+        console.log('adjust contam: ', level)
+        //this.adjustContamination(level);
+      })
+  }
 
   ngOnDestroy() {
     this.destroy$.next(true);
   }
 
-  getResourceStatus() {
-    const card = this.getSelectedCard();
-
-    if (!card) {
-      return
-    }
-    if (!card.harvested) {
-      return {
-        status: 'explorable'
-      }
-    } else if (card.value == LandCardValues.CONTAM) {
-      return {
-        status: 'contaminated',
-        message: 'This land is contaminated'
-      }
-    } else if (card.owner) {
-      const ownedBy = card.owner.division == card.owner.name
-        ? 'a member of the ' + card.owner.division + ' division'
-        : 'player ' + card.owner.name
-      return {
-        status: 'owned',
-        message: 'This land is owned by ' + ownedBy
-      }
-    }
-    return {
-      status: 'explored',
-    }
-  }
-
-  getSelectedCard() {
-    if (this.selectedCardIndex) {
-      return this.landTiles[this.selectedCardIndex];
-    }
-    return null;
-  }
-
-  // newHarvest() {
-  //   this.landGrid = this.generateHarvest(13, 2);
-  //   setTimeout(() => {
-  //     this.gatherOwnedLand();
-  //   }, 500)
-  // }
-
-  // getOwner() {
-  //   const owned = getRandomInt(0,3) == 0;
-  //   const div = getRandomInt(0,1) == 0 ? 'NE' : 'W';
-
-  //   return owned ? {
-  //     name: div,
-  //     division: div
-  //   } : null
-  // }
-
-  // resetLandTiles() {
-  //   this.landTiles = <LandTile[]>[ 
-  //     ...this.landTiles.map((tile: LandTile) => ({
-  //       ...tile,
-  //       side: 'back',
-  //       value: getRandomInt(1, 3), 
-  //       contaminated: false,
-  //       mark: null
-  //   }))]
-  // }
-
-  // generateHarvest(totalCards, totalContaminents): LandGrid {
-  //   // Start with a range of integers
-  //   const slots = range(MAX_HARVEST);
-  //   this.resetLandTiles();
-
-  //   // Generate indexes for removing tiles
-  //   const removals = this.pluck(slots, MAX_HARVEST - totalCards)
-  //   removals.forEach((i) => {
-  //     this.landTiles[i].value = LandCardValues.EMPTY;
-  //   })
-
-  //   // Generate harvest (selectable card tiles)
-  //   const harvest = difference(slots, removals);
-
-  //   // Add contaminants
-  //   const contaminents = this.pluck(harvest, totalContaminents);
-  //   contaminents.forEach((i) => {
-  //     this.landTiles[i].value = LandCardValues.CONTAM;
-  //   })
-
-  //   // Build matrix (2D array)
-  //   return chunk(this.landTiles, 7);
-  // }
-
-  // gatherOwnedLand() {
-  //   this.landGrid.forEach(((row, r) => {
-  //     row.forEach((card, i) => {
-  //       if (card.owner) {
-  //         card.side = 'front';
-  //         this.process(r, i);
-  //       }
-  //     })
-  //   }))
-  // }
-
-  // pluck(array, remove) {
-  //   const toRemove = [];
-  //   while(toRemove.length < remove) {
-  //     const value = array[getRandomInt(0, array.length - 1)];
-  //     if (!includes(toRemove, value)) {
-  //       toRemove.push(value)
-  //     }
-  //   }
-  //   return toRemove;
-  // }
-
-  selectTile(i, sheetTemplate) {
-    this.mark(i);
-    this.landSelectSheet = this._bottomSheet.open(sheetTemplate);
-    this.selectedResourceStatus = this.getResourceStatus();
-    this.landSelectSheet.afterDismissed().pipe(
-      takeUntil(this.destroy$)
-    ).subscribe(() => {
-      if (this.selectedCardCoords) {
-        this.clearSelection();
+  cardUpdates(tiles) {
+    tiles.forEach((tile, i) => {
+      if (isEqual(tile, this.landTiles[i])) {
+        this.landTiles[i] = { ...tile };
       }
     })
   }
 
-  clearSelection() {
-    this.landTiles[this.selectedCardIndex].mark = null;
-    this.selectedCardCoords = null;
+  getSelectedCard() {
+    return this.landTiles?.[this.selectedCardIndex] ?? null;
+  }
+
+  gatherOwnedLand() {
+    this.landTiles.forEach((card, i) => {
+      if (card.owner) {
+        card.harvested = false;
+        this.process(i);
+      }
+    })
+  }
+
+  selectTile(card) {
+    this.select.emit(card);
+    // this.mark(i);
+    // this.landSelectSheet = this._bottomSheet.open(sheetTemplate);
+    // this.selectedResourceStatus = this.getResourceStatus();
+    // this.landSelectSheet.afterDismissed()
+    //   .pipe(takeUntil(this.destroy$))
+    //   .subscribe(() => {
+    //     if (this.selectedCardIndex) {
+    //       this.clearSelection();
+    //     }
+    //   })
+  }
+
+  clearSelection(card) {
+    this.landTiles[card?.index].mark = null;
+    this.selectedCardIndex = null;
   }
 
   mark(i) {
-    if (this.selectedCardCoords) {
-      this.clearSelection();
-    }
-    const card = this.landTiles[i];
-    card.mark = card.mark ? null : 1;
-    this.selectedCardIndex = i;
-  }
-
-  explore() {
-    console.log('explore')
-    if (this.selectedCardIndex) {
-      const card = this.landTiles[this.selectedCardIndex];
-      if (!card.harvested && card.value !== -1) {
-        this.landTiles[this.selectedCardIndex].harvested = true;
-      }
-      if (this.landSelectSheet) {
-        this.landSelectSheet.dismiss();
-      }
-      this.clearSelection();
-    }
-  }
-
-  gather() {
-    // if (this.selectedCardCoords && this.selectedResourceStatus) {
-    //   const status = this.selectedResourceStatus.status;
-    //   if (status === 'explorable' || status === 'explored') {
-    //     console.log('do gather')
-    //     const [r, i] = this.selectedCardCoords;
-    //     const card = this.landGrid[r][i];
-    //     this.gatherResource.emit({ value: card.value });
-    //     this.landGrid[r][i].value = -1;
-    //   }
-    //   if (this.landSelectSheet) {
-    //     this.landSelectSheet.dismiss();
-    //   }
+    // if (this.selectedCardIndex) {
     //   this.clearSelection();
     // }
+    // const card = this.landTiles[i];
+    // card.mark = card.mark ? null : 1;
+    // this.updateDB();
+    // this.selectedCardIndex = i;
+  }
+
+  explore(card) {
+    console.log('explore: ', card);
+    if (!card.harvested && card.value !== LandCardValues.EMPTY) {
+      this.landTiles[card.index].harvested = true;
+      console.log('updates: ', this.landTiles);
+      this.updateDB();
+    }
+    this.clearSelection(card);
+  }
+
+  gather(card) {
+    console.log('do gather')
+    this.gatherResource.emit({ value: card.value });
+    this.landTiles[card.index].value = -1;
+    this.updateDB();
+    this.clearSelection(card);
+  }
+
+  updateDB() {
+    this.db.object(this.updatePath).update(this.landTiles);
+  }
+
+  getRelativeGridIndex(index, dir, dist) {
+    const grid = chunk(range(MAX_HARVEST), HARVEST_ROW_LENGTH);
+    const r = Math.floor(index / HARVEST_ROW_LENGTH);
+    const c = index % HARVEST_ROW_LENGTH;
+    
+    if (dir === 'left') { return grid[r]?.[c - dist] }
+    if (dir === 'right') { return grid[r]?.[c + dist] }
+    if (dir === 'top') { return grid[r - dist]?.[c] }
+    if (dir === 'bottom') { return grid[r + dist]?.[c] }
   }
 
   process(i) {
-    console.log('process..', this.landTiles[i])
-    // if (this.landGrid[r][i].value === LandCardValues.CONTAM) {
-    //   const left = this.landGrid[r]?.[i - 1];
-    //   const right = this.landGrid[r]?.[i + 1];
-    //   const top = this.landGrid[r - 1]?.[i];
-    //   const bottom = this.landGrid[r + 1]?.[i];
+    const tile = this.landTiles[i];
+    if (tile.value === LandCardValues.CONTAM && tile.harvested) {
+      const left = this.landTiles[this.getRelativeGridIndex(i, 'left', 1)];
+      const right = this.landTiles[this.getRelativeGridIndex(i, 'right', 1)];
+      const top = this.landTiles[this.getRelativeGridIndex(i, 'top', 1)];
+      const bottom = this.landTiles[this.getRelativeGridIndex(i, 'bottom', 1)];
 
-    //   setTimeout(() => {
-    //     if (left && !left.owner) { left.contaminated = true }
-    //     if (right && !right.owner) { right.contaminated = true }
-    //     if (top && !top.owner) { top.contaminated = true }
-    //     if (bottom && !bottom.owner) { bottom.contaminated = true }
-    //   })
-    // }
+      setTimeout(() => {
+        if (left && !left.owner) { left.contaminated = true }
+        if (right && !right.owner) { right.contaminated = true }
+        if (top && !top.owner) { top.contaminated = true }
+        if (bottom && !bottom.owner) { bottom.contaminated = true }
+        this.updateDB();
+      })
+    }
   }
 }

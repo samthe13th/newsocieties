@@ -4,6 +4,7 @@ import { CentralComponent } from './central/central.component';
 import { PlayerComponent } from './player/player.component';
 import { ComponentsModule } from '../components/components.module';
 import { CommonModule } from '@angular/common';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 const pages = [
   CentralComponent,
@@ -14,6 +15,7 @@ const pages = [
 @NgModule({
   imports: [
     ComponentsModule,
+    FontAwesomeModule,
     CommonModule,
   ],
   declarations: [

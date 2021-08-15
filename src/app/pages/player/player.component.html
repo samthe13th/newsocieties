@@ -1,10 +1,37 @@
 DIVISION: {{division}}
-<app-harvest
-  [player]="id"
-  [division]="division"
-  (gatherResource)="onGather($event)">
-</app-harvest>
+
+<app-land-grid 
+  #landGrid
+  [markCards]="false"
+  [updatePath]="landTilesPath"
+  [showId]="showId"
+  (gatherResource)="onGather($event)"
+  (select)="onSelect($event)"
+>
+</app-land-grid>
+
 <app-player-deck [id]="id" [division]="division"></app-player-deck>
+
 <button (click)="buy({ cost: 2 })">Spend $2</button>
 <button (click)="buy({ cost: 5 })">Spend $5</button>
 <button (click)="buy({ cost: 6 })">Spend $6</button>
+
+<ng-template #tileSelectSheet>
+  <div class="action-sheet">
+    {{ selectedResourceStatus?.message }}
+    <div 
+      *ngIf="selectedResourceStatus?.status === 'explorable'" 
+      class="large-action-button"
+      (click)="explore()">
+      <fa-icon size="lg" [icon]="exploreIcon"></fa-icon>
+      Explore (e)
+    </div>
+    <div 
+      *ngIf="selectedResourceStatus?.status === 'explored' || selectedResourceStatus?.status === 'explorable'"
+      class="large-action-button"
+      (click)="gather()">
+      <fa-icon size="lg" [icon]="gatherIcon"></fa-icon>
+      Gather (g)
+    </div>
+  </div>
+</ng-template>
