@@ -11,12 +11,14 @@ import { CommonModule } from '@angular/common';
 import { MatBottomSheetModule } from '@angular/material/bottom-sheet';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { PlayerDeckComponent } from './player-deck/player-deck.component';
+import { LandGridComponent } from './land-grid/land-grid.component';
 
 const components = [
   AnnouncementComponent,
   CardComponent,
   DialogComponent,
   HarvestComponent,
+  LandGridComponent,
   PlayerHandsComponent,
   PlayerDeckComponent,
   ScorecardComponent,

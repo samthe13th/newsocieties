@@ -1,0 +1,12 @@
+<ng-container *ngIf="division">
+  <strong>Division: {{ division?.code }}</strong>
+  <div><strong>Season:</strong>{{ division.season }}</div>
+  <div><strong>Score:</strong>{{ division.score }}</div>
+  <div><strong>Land cost:</strong>{{ division.landCost }}</div>
+  <ng-container *ngIf="details === 'full'">
+    <div><strong>Reserve:</strong>{{ calculateReserve(division.reserve) }}</div>
+    <div><strong>Harvested (actual):</strong>{{ division.harvested }}</div>
+    <div><strong>Capacity:</strong>{{ division.capacity }}+{{ division.extra }}</div>
+    <div><strong>Harvest:</strong>{{ division.harvest }}</div>
+  </ng-container>
+</ng-container>

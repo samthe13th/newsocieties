@@ -1,40 +1,19 @@
 import { Output, Component, OnInit, HostListener, Input, EventEmitter } from '@angular/core';
-import { AngularFirestore } from '@angular/fire/firestore';
 import { range, chunk, includes, difference } from 'lodash';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { faEye, faShoppingBag } from '@fortawesome/free-solid-svg-icons';
+import { getRandomInt, shuffle } from 'src/app/utilties';
+import { LandTile, LandCardValues } from 'src/app/interfaces';
+
+type LandGrid = Array<LandTile[]>;
 
 const MAX_HARVEST = 49;
 const KEY_CODE = {
   e: 69,
   g: 71
 }
-
-export enum LandCardValues {
-  EMPTY = -1,
-  CONTAM = 0,
-  V1 = 1,
-  V2 = 2,
-  V3 = 3
-}
-export type LandCardValue = LandCardValues | keyof typeof LandCardValues;
-
-export interface LandOwner {
-  name: string;
-  division: string;
-}
-
-export interface LandTile {
-  value: number;
-  owner: LandOwner, 
-  side: 'back' | 'front';
-  contaminated: boolean;
-  mark: string | number | null;
-}
-
-export type LandGrid = Array<LandTile[]>;
 
 @Component({
   selector: 'app-harvest',
@@ -74,7 +53,6 @@ export class HarvestComponent implements OnInit {
   @Input() division: string;
 
   constructor(
-    firestore: AngularFirestore, 
     private _bottomSheet: MatBottomSheet
     ) {
     this.landGrid = shuffle(this.landGrid);
@@ -281,18 +259,4 @@ export class HarvestComponent implements OnInit {
       })
     }
   }
-}
-
-function shuffle(a) {
-  for (let i = a.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-
-function getRandomInt(min, max) {
-  min = Math.ceil(min);
-  max = Math.floor(max);
-  return Math.floor(Math.random() * (max - min + 1)) + min;
 }

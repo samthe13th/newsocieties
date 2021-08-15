@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
-import { LandCardValues } from '../harvest/harvest.component';
-import { sortBy, maxBy, slice, findIndex } from 'lodash';
+import { slice } from 'lodash';
 import { Observable } from 'rxjs';
+import { LandCardValues } from 'src/app/interfaces';
 
 @Component({
   selector: 'app-player-deck',

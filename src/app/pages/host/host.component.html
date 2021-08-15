@@ -1,1 +1,11 @@
-host
+<span *ngIf="contamination !== undefined">
+  Contamination Level: {{contamination}}%
+</span>
+<hr/>
+<app-society-summary
+  *ngIf="division"
+  details="full"
+  [division]="division">
+</app-society-summary>
+<button (click)="newSeason()">New Season</button>
+<app-land-grid [landTiles]="harvest"></app-land-grid>

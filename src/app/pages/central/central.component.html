@@ -1,16 +1,8 @@
 <button (click)="newShow()">New Show</button>
 <div class="division-summary" *ngFor="let $division of divisionChanges">
-  <div *ngIf="($division | async) as division">
-    <strong>{{ division?.code }}</strong>
-    localhost:4200/{{showKey}}/{{division?.code}}/X
-    <ul>
-      <div><strong>Season:</strong>{{ division.season }}</div>
-      <div><strong>Score:</strong>{{ division.score }}</div>
-      <div><strong>Land cost:</strong>{{ division.landCost }}</div>
-      <div><strong>Reserve:</strong>{{ calculateReserve(division.reserve) }}</div>
-      <div><strong>Harvested (actual):</strong>{{ division.harvested }}</div>
-      <div><strong>Capacity:</strong>{{ division.capacity }}+{{ division.extra }}</div>
-      <div><strong>Harvest:</strong>{{ division.harvest }}</div>
-    </ul>
-  </div>
+  localhost:4200/{{showKey}}/{{ ($division | async)?.code }}/X
+  <app-society-summary
+    details="full"
+    [division]="$division | async">
+  </app-society-summary>
 </div>

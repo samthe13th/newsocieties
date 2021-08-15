@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { AngularFireDatabase } from '@angular/fire/database';
-import { Observable, BehaviorSubject } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { toArray, each } from 'lodash';
+import { toArray, range } from 'lodash';
 import { DIVISION_TEMPLATE, SHOW_TEMPLATE } from './templates';
 
 const DIVISIONS = ['N', 'S', 'E', 'W', 'NE', 'SE', 'SW', 'NW']
+const MAX_HARVEST = 49;
 
 @Component({
   selector: 'app-central',
@@ -28,10 +28,6 @@ export class CentralComponent implements OnInit {
         this.showKey = snapshot.key
         this.createDivisionListeners(snapshot.payload.val())
       })
-  }
-
-  calculateReserve(reserve) {
-    return reserve.reduce((acc, R) => acc + R, 0)
   }
 
   createDivisionListeners(show) {
@@ -59,7 +55,28 @@ export class CentralComponent implements OnInit {
 
   generateDivisions() {
     return DIVISIONS.reduce((acc, abv) => {
-      return { ...acc, [abv]: { code: abv, ...DIVISION_TEMPLATE } }
+      return { ...acc, [abv]: { 
+        code: abv, 
+        landTiles: this.generateLandTiles(),
+        ...DIVISION_TEMPLATE
+      } }
     }, {});
   }
+
+  generateLandTiles() {
+    const slots = range(MAX_HARVEST);
+    return slots.map(() => ({ 
+      value: -1, 
+      owner: null, 
+      harvested: false, 
+      contaminated: false,
+      mark: null
+     }))
+  }
+}
+
+function getRandomInt(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
