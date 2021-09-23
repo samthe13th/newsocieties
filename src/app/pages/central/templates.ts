@@ -67,8 +67,8 @@ export const SHOW_TEMPLATE = {
   },
   newsFeed: [],
   content: {},
-  gla: {
-    actual: 0,
-    capacity: 0
+  global: {
+    actual: 63,
+    capacity: 50
   }
 }

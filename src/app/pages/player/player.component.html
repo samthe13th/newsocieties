@@ -64,12 +64,7 @@
   </div>
 
   <div class="player-folder__body global" *ngIf="currentTab === 'Global'">
-    <div *ngFor="let $division of divisionSummaries">
-      <app-society-summary
-        details="partial"
-        [division]="$division | async">
-      </app-society-summary>
-    </div>
+    <app-society-grid></app-society-grid>
   </div>
 </div>
 

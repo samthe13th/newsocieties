@@ -6,6 +6,7 @@ import { HarvestComponent } from './harvest/harvest.component';
 import { PlayerHandsComponent } from './player-hands/player-hands.component';
 import { ScorecardComponent } from './scorecard/scorecard.component';
 import { SocietySummaryComponent } from './society-summary/society-summary.component';
+import { SocietyGridComponent } from './society-grid/society-grid.component';
 import { VoteComponent } from './vote/vote.component';
 import { CommonModule } from '@angular/common';
 import { MatBottomSheetModule } from '@angular/material/bottom-sheet';
@@ -22,6 +23,7 @@ const components = [
   PlayerHandsComponent,
   PlayerDeckComponent,
   ScorecardComponent,
+  SocietyGridComponent,
   SocietySummaryComponent,
   VoteComponent
 ]

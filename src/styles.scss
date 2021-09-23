@@ -285,6 +285,14 @@ $new-societies-theme: mat-light-theme($new-societies-primary, $new-societies-acc
   display: flex;
 }
 
+.society-grid {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+
 .vote {
   display: flex;
 }

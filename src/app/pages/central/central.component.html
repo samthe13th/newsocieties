@@ -1,8 +1,3 @@
 <button (click)="newShow()">New Show</button>
-<div class="division-summary" *ngFor="let $division of divisionChanges">
-  localhost:4200/{{showKey}}/{{ ($division | async)?.code }}/X
-  <app-society-summary
-    details="full"
-    [division]="$division | async">
-  </app-society-summary> 
-</div>
+localhost:4200/{{showKey}}
+<app-society-grid></app-society-grid>
