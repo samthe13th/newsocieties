@@ -1,4 +1,4 @@
-<div class="harvest-cards">
+<div class="grid">
   <div 
     *ngFor="let card of landTiles; let i = index"
     class="land-tile"
@@ -11,8 +11,6 @@
     <card
       (click)="selectTile(card)"
       [side]="card.harvested ? 'front' : 'back'"
-      width="40"
-      height="40"
       [class.owned]="true"
       [mark]="card.mark"
       [playerId]="playerId"

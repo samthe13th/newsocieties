@@ -13,7 +13,7 @@ const HARVEST_ROW_LENGTH = 7;
   templateUrl: './land-grid.component.html',
   styleUrls: ['./land-grid.component.scss'],
   host: {
-    '[class.harvest]': 'true'
+    '[class.grid-wrapper]': 'true'
   }
 })
 export class LandGridComponent implements OnInit {

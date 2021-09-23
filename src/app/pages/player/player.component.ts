@@ -4,9 +4,10 @@ import { PlayerDeckComponent } from 'src/app/components/player-deck/player-deck.
 import { ActivatedRoute } from '@angular/router';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { LandGridComponent } from 'src/app/components/land-grid/land-grid.component';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil, tap, take } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { LandCardValues } from 'src/app/interfaces';
+import { toArray, range, toNumber } from 'lodash';
 import { faEye, faShoppingBag } from '@fortawesome/free-solid-svg-icons';
 
 const KEY_CODE = {
@@ -20,9 +21,12 @@ const KEY_CODE = {
   styleUrls: ['./player.component.scss']
 })
 export class PlayerComponent implements OnInit {
+  $division;
+  divisionSummaries;
+
   @ViewChild(PlayerDeckComponent, { static: false }) playerDeck: PlayerDeckComponent;
   @ViewChild(LandGridComponent, { static: false }) landGrid: LandGridComponent;
-  @ViewChild(TemplateRef, { static: false }) sheetTemplate: TemplateRef<any>;
+  @ViewChild('tileSelectSheet', { static: false }) sheetTemplate: TemplateRef<any>;
   
   @HostListener('window:keyup', ['$event'])
   keyEvent(event: KeyboardEvent) {
@@ -34,7 +38,7 @@ export class PlayerComponent implements OnInit {
   }
 
   private destroy$ = new Subject<boolean>();
-
+  currentTab = 'Division';
   id;
   division = 'N';
   divisionData;
@@ -58,12 +62,33 @@ export class PlayerComponent implements OnInit {
     const { show, division, id } = this.route.snapshot.params;
     const showPath = `shows/${show}`;
     this.showId = show;
+    this.division = division;
     this.id = id;
-    this.landTilesPath = `${showPath}/divisions/${division}/landTiles`
+    this.landTilesPath = `${showPath}/divisions/${division}/landTiles`;
+    this.$division = this.db.object(`shows/${show}/divisions/${division}`).valueChanges();
+    this.db.object(`shows/${show}/divisions`)
+      .valueChanges()
+      .pipe(
+        take(1)
+      )
+      .subscribe((divisions) => {
+        this.createDivisionListeners(divisions)
+      })
+  }
+
+  createDivisionListeners(divisions) {
+    this.divisionSummaries = toArray(divisions).map(division => {
+      return this.db.object(`shows/${this.showId}/divisions/${division.code}`).valueChanges();
+    })
+    console.log('divisions: ', this.divisionSummaries);
   }
 
   onGather(card) {
     this.playerDeck.add(card);
+  }
+
+  filterOutCitizen(citizens, id) {
+    return citizens.filter((citizen) => citizen.id !== toNumber(id))
   }
 
   onSelect(card) {
@@ -122,5 +147,9 @@ export class PlayerComponent implements OnInit {
       this.landGrid.gather(this.selectedCard)
     }
     this.actionSheet.dismiss();
+  }
+
+  addResources(resources) {
+    return resources.reduce((acc, R) => acc + R, 0)
   }
 }

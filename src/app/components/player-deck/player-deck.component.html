@@ -1,19 +1,22 @@
-PLAYER: {{id}} | WEALTH: {{wealth}}
+<div class="player-deck__summary">
+  <div class="flex-row flex-center-v">
+    <span class="citizen-id">{{id}}</span>
+    <span class="citizen-name">{{name}}</span>
+  </div>
+  <div class="resources">Resources: {{wealth}}</div>
+</div>
 <div class="flex-row">
-  <div class="flex-column">
-    Harvested
-    <div class="player-hand">
-      <div 
-        class="resource" 
-        [class.one]="resource.value == 1"
-        [class.two]="resource.value == 2"
-        [class.three]="resource.value == 3"
-        *ngFor="let resource of resources">
-        {{resource.value}}
-      </div>
+  <div class="player-hand">
+    <div 
+      class="resource" 
+      [class.one]="resource.value == 1"
+      [class.two]="resource.value == 2"
+      [class.three]="resource.value == 3"
+      *ngFor="let resource of resources">
+      {{resource.value}}
     </div>
   </div>
-  <div class="flex-column">
+  <!-- <div class="flex-column">
     GLA
     <div class="gla-resources">
       <div 
@@ -25,5 +28,5 @@ PLAYER: {{id}} | WEALTH: {{wealth}}
         {{resource.value}}
       </div>
     </div>
-  </div>
+  </div> -->
 </div>

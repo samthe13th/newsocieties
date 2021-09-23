@@ -1,6 +1,6 @@
 .harvest-cards {
   perspective: 50em;
-  max-width: 400px;
+  justify-content: space-between;
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
@@ -24,6 +24,7 @@
   display: flex; 
   justify-content: center;
   position: relative;
+  cursor: pointer;
 
   .contamination {
     background: tomato;
@@ -41,7 +42,7 @@
   }
 
   &.back {
-    background: #fdd08a;
+    background: #5E9B7E;
 
     img {
       margin: 5px;
@@ -53,22 +54,21 @@
     font-size: 22px;
     height: 100%;
   }
-
 }
 
 .land-tile {
-  position: relative; 
+  position: relative;
   display: block;
-  width: 40px;
-  height: 40px;
-  margin: 6px;
-  border-radius: 10px;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
   transition: background-color 1s ease;
   transition-delay: 0.5s;
   flex-shrink: 0;
 
-  &.empty {
-    background: #f1ede7;
+  &.empty .harvest-card.back {
+    background: #DDD7A5;
+    cursor: default;
   }
 
   &:not(.empty) {
@@ -76,7 +76,9 @@
   }
 
   &.contaminated {
-    background-color: black;
+    .harvest-card.back {
+      background-color: black;
+    }
   }
 
   &.owned[data-badge] {

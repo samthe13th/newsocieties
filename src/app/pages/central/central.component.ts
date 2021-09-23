@@ -6,6 +6,8 @@ import { DIVISION_TEMPLATE, SHOW_TEMPLATE } from './templates';
 
 const DIVISIONS = ['N', 'S', 'E', 'W', 'NE', 'SE', 'SW', 'NW']
 const MAX_HARVEST = 49;
+const CITIZEN_NAMES = ['Sam', 'Mark', 'Mandy', 'Sarah', 'Kimmy', 'Zed']
+
 
 @Component({
   selector: 'app-central',
@@ -38,6 +40,7 @@ export class CentralComponent implements OnInit {
 
   newShow() {
     const divisions = this.generateDivisions();
+    console.log({divisions})
     this.db.list('shows').push({ divisions, ...SHOW_TEMPLATE })
       .then((res) => { this.buildShow(res.key) })
   }
@@ -52,13 +55,25 @@ export class CentralComponent implements OnInit {
   }
 
   generateDivisions() {
-    return DIVISIONS.reduce((acc, abv) => {
-      return { ...acc, [abv]: { 
+    return DIVISIONS.reduce((acc, abv) => ({ 
+      ...acc, 
+      [abv]: { 
+        ...DIVISION_TEMPLATE,
         code: abv, 
         landTiles: this.generateLandTiles(),
-        ...DIVISION_TEMPLATE
-      } }
-    }, {});
+        citizens: this.generateCitizens(),
+      } 
+    }), {});
+  }
+
+  generateCitizens() {
+    const citizens = CITIZEN_NAMES.map((name, index) => ({
+      name,
+      id: index + 1,
+      resources: [3,2,1]
+    }))
+    console.log({citizens});
+    return citizens;
   }
 
   generateLandTiles() {

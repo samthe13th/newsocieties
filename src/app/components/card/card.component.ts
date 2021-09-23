@@ -10,8 +10,6 @@ export type CardSide = 'front' | 'back';
   host: {
     '[class.card]': 'true',
     '[class.animate]': 'animate',
-    '[style.width.px]': 'width',
-    '[style.height.px]': 'height',
     '[class.mark]': 'mark !== null && mark !== undefined',
     '[attr.data-mark]': 'mark !== playerId ? mark : undefined'
   }

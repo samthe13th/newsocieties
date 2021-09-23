@@ -29,6 +29,7 @@ export class PlayerDeckComponent {
   wealth = 0;
 
   @Input() id;
+  @Input() name = "Sam"
   @Input() division;
 
   ngOnInit() {
