@@ -8,17 +8,21 @@ import { includes, range, difference } from 'lodash';
 @Component({
   selector: 'app-host',
   templateUrl: './host.component.html',
-  styleUrls: ['./host.component.scss']
+  styleUrls: ['./host.component.scss'],
+  host: {
+    '[class.app-host]': 'true'
+  }
 })
 export class HostComponent implements OnInit {
   division;
   contamination;
   harvest;
-
   divisionId;
   showId;
   divisionPath;
   landTilesPath;
+
+  fontSize = 16;
 
   constructor(
     private db: AngularFireDatabase,
@@ -43,6 +47,18 @@ export class HostComponent implements OnInit {
       .subscribe((level) => {
         this.adjustContamination(level);
       })
+  }
+
+  fontSizeUp() {
+    if (this.fontSize + 2 < 100) {
+      this.fontSize += 2;
+    }
+  }
+
+  fontSizeDown() {
+    if (this.fontSize - 2 > 0) {
+      this.fontSize -= 2;
+    }
   }
 
   newSeason() {

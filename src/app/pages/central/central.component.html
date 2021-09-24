@@ -1,3 +1,24 @@
-<button (click)="newShow()">New Show</button>
-localhost:4200/{{showKey}}
-<app-society-grid></app-society-grid>
+<app-tabs 
+  *ngIf="tabs"
+  selectedClass="central-selected-tab"
+  [tabs]="tabs">
+</app-tabs>
+
+<ng-template #show>Show</ng-template>
+<ng-template #summary>Summary</ng-template>
+
+<ng-template #showBody>
+  <button (click)="newShow()">New Show</button>
+  localhost:4200/{{showKey}}
+</ng-template>
+
+<ng-template #summaryBody>
+  <app-society-grid></app-society-grid>
+</ng-template>
+
+<ng-container *ngFor="let div of divisions">
+  <ng-template #tab>{{div}}</ng-template>
+  <ng-template #division>
+    <div>BODY: {{div}}</div>
+  </ng-template>
+</ng-container>

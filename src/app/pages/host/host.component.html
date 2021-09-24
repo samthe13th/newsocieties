@@ -1,15 +1,63 @@
-<span *ngIf="contamination !== undefined">
-  Contamination Level: {{contamination}}%
-</span>
-<hr/>
-<app-society-summary
-  *ngIf="division"
-  details="full"
-  [division]="division">
-</app-society-summary>
-<button (click)="newSeason()">New Season</button>
-<app-land-grid 
-  [markCards]="true"
-  [showId]="showId"
-  [updatePath]="landTilesPath">
-</app-land-grid>
+<app-tabs 
+  class="host-side-panel"
+  selectedClass="host-selected-tab"
+  [tabs]="[
+    { id: 'division', tabTemplate: division, bodyTemplate: divisionBody },
+    { id: 'global', tabTemplate: global, bodyTemplate: globalBody },
+    { id: 'io', tabTemplate: io, bodyTemplate: ioBody },
+    { id: 'central', tabTemplate: central, bodyTemplate: centralBody },
+    { id: 'notes', tabTemplate: notes, bodyTemplate: notesBody }
+  ]">
+</app-tabs>
+
+<div class="harvest-wrapper">
+  <app-land-grid 
+    [markCards]="true"
+    [showId]="showId"
+    [updatePath]="landTilesPath"> 
+  </app-land-grid>
+</div>
+
+<!-- TABS-->
+<ng-template #division>Division</ng-template>
+<ng-template #global>Global</ng-template>
+<ng-template #io>I/O</ng-template>
+<ng-template #central>Central</ng-template>
+<ng-template #notes>Notes</ng-template>
+
+<!-- DIVISION -->
+<ng-template #divisionBody>
+  <app-society-summary
+    *ngIf="division"
+    details="full"
+    [division]="division">
+  </app-society-summary>
+  <button (click)="newSeason()">New Season</button>
+</ng-template>
+
+<!-- GLOBAL -->
+<ng-template #globalBody>
+  <span *ngIf="contamination !== undefined">
+    Contamination Level: {{contamination}}%
+  </span>
+</ng-template>
+
+<!-- I/O -->
+<ng-template #ioBody>
+  I/O
+</ng-template>
+
+<!-- CENTRAL -->
+<ng-template #centralBody>
+  CENTRAL
+</ng-template>
+
+<!-- NOTES -->
+<ng-template #notesBody>
+  <div class="button-row">
+    <button [style.font-size.px]="14" (click)="fontSizeDown()">Aa</button>
+    <button [style.font-size.px]="20" (click)="fontSizeUp()">Aa</button>
+  </div>
+  <br/>
+  <textarea [style.font-size.px]="fontSize" class="host-notes">Type notes here!</textarea>
+</ng-template>

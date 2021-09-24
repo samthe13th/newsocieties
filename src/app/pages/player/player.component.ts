@@ -18,7 +18,10 @@ const KEY_CODE = {
 @Component({
   selector: 'app-player',
   templateUrl: './player.component.html',
-  styleUrls: ['./player.component.scss']
+  styleUrls: ['./player.component.scss'],
+  host: {
+    '[class.app-player]': 'true'
+  }
 })
 export class PlayerComponent implements OnInit {
   $division;

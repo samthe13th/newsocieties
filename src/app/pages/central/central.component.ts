@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild, ViewChildren, TemplateRef, ContentChildren, ElementRef, QueryList } from '@angular/core';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { take } from 'rxjs/operators';
 import { toArray, range } from 'lodash';
@@ -12,11 +12,23 @@ const CITIZEN_NAMES = ['Sam', 'Mark', 'Mandy', 'Sarah', 'Kimmy', 'Zed']
 @Component({
   selector: 'app-central',
   templateUrl: './central.component.html',
-  styleUrls: ['./central.component.scss']
+  styleUrls: ['./central.component.scss'],
+  host: {
+    '[class.app-central]': 'true'
+  }
 })
-export class CentralComponent implements OnInit {
+export class CentralComponent implements OnInit, AfterViewInit {
+  @ViewChild('show') showTab: TemplateRef<any>;
+  @ViewChild('summary') summaryTab: TemplateRef<any>;
+  @ViewChild('showBody') showBody: TemplateRef<any>;
+  @ViewChild('summaryBody') summaryBody: TemplateRef<any>;
+  
+  @ViewChildren('division') bodyTemplates: QueryList<TemplateRef<any>>;
+  @ViewChildren('tab') tabTemplates: QueryList<TemplateRef<any>>;
+
   showKey: string;
-  divisionChanges;
+  divisions = DIVISIONS;
+  tabs;
 
   constructor(private db: AngularFireDatabase) {}
 
@@ -26,17 +38,24 @@ export class CentralComponent implements OnInit {
       .pipe(take(1))
       .subscribe(([snapshot]) => {
         this.showKey = snapshot.key
-        this.createDivisionListeners(snapshot.payload.val())
       })
   }
 
-  createDivisionListeners(show) {
-    if (show?.divisions) {
-      this.divisionChanges = toArray(show.divisions).map(division => {
-        return this.db.object(`shows/${this.showKey}/divisions/${division.code}`).valueChanges();
-      })
-    }
+  ngAfterViewInit() {
+    const bodyTemplates = this.bodyTemplates.toArray();
+    const tabTemplates = this.tabTemplates.toArray();
+
+    setTimeout(() => {
+      this.tabs = [
+        { id: 'show', tabTemplate: this.showTab, bodyTemplate: this.showBody },
+        { id: 'summary', tabTemplate: this.summaryTab, bodyTemplate: this.summaryBody },
+        ...this.divisions.map((div, i) => {
+          return { id: div, tabTemplate: tabTemplates[i], bodyTemplate: bodyTemplates[i] }
+        })
+      ]
+    })
   }
+
 
   newShow() {
     const divisions = this.generateDivisions();
@@ -50,7 +69,6 @@ export class CentralComponent implements OnInit {
       .pipe(take(1))
       .subscribe((show) => {
         this.showKey = key;
-        this.createDivisionListeners(show);
       })
   }
 

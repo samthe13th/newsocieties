@@ -1,0 +1,13 @@
+<div class="folder__tabs">
+  <div 
+    *ngFor="let tab of tabs; let i = index" 
+    class="folder__tab {{ tab.id === currentTab.id ? selectedClass : unselectedClass }}"
+    (click)="selectTab(tab)"
+  >
+    <ng-container *ngTemplateOutlet="tab.tabTemplate"></ng-container>
+  </div>
+</div>
+<div 
+  class="folder__body {{ selectedClass }}">
+  <ng-container *ngTemplateOutlet="currentTab.bodyTemplate"></ng-container>
+</div>

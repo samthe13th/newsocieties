@@ -14,6 +14,6 @@ export class SocietySummaryComponent {
   @Input() details: 'full' | 'brief';
 
   calculateReserve(reserve) {
-    return reserve.reduce((acc, R) => acc + R, 0)
+    return reserve ? reserve.reduce((acc, R) => acc + R, 0) : undefined
   }
 }

@@ -1,89 +1,92 @@
-<!-- <ng-container >
-  <p>SCORE: {{ division?.score }}</p>
-</ng-container> -->
+<ng-container *ngIf="($division | async) as division">
+  <app-tabs
+    selectedClass="player-selected-tab"
+    [tabs]="[
+      { id: 'division', tabTemplate: divisionTab, bodyTemplate: divisionBody },
+      { id: 'global', tabTemplate: global, bodyTemplate: globalBody }
+    ]"
+  ></app-tabs>
 
-<div class="player-folder" *ngIf="($division | async) as division">
-  <div class="player-folder__tabs">
-    <div class="player-folder__tab" (click)="currentTab = 'Division'">
-      <div class="player-folder__tab-division">
-        {{ division?.code }}
-      </div>
-       Season {{ division?.season }}
+  <ng-template #divisionTab>
+    <div class="player-folder__tab-division">
+      {{ division?.code }}
     </div>
-    <div class="player-folder__tab global" (click)="currentTab = 'Global'">
-      Global
-    </div>
-  </div>
-  <div class="player-folder__body" *ngIf="currentTab === 'Division'">
-    <div class="player-hints">It's your turn! Click on a harvest resource to explore or gather.</div>
-    <div class="flex-row">
-      <div class="player-folder__body-harvest">
-        <div class="player-folder__body-title">
-          <h1>Harvest</h1>
-          <div class="harvest-details">
-            <div>Capacity: {{division?.capacity}}+{{division?.extra}}</div>
-            <div>Harvested: {{division?.harvested}}</div>
-          </div>
-        </div>
-        <app-land-grid 
-          #landGrid
-          [markCards]="false"
-          [updatePath]="landTilesPath"
-          [showId]="showId"
-          [playerId]="id"
-          (gatherResource)="onGather($event)"
-          (select)="onSelect($event)"
-        >
-        </app-land-grid>
-      </div>
-      <div class="player-folder__body-citizens space-between">
-        <app-player-deck 
-          [id]="id" 
-          [division]="division">
-        </app-player-deck>
+    Season {{ division?.season }}
+  </ng-template>
 
-        <div class="citizen-list">
-          <div 
-            class="citizen-summary flex-row space-between"
-            *ngFor="let citizen of filterOutCitizen(division.citizens, id)">
-            <div class="flex-row flex-center-v">
-              <span class="citizen-id">{{citizen.id}}</span>
-              <span>{{citizen.name}}</span>
-            </div>
-            <div *ngIf="citizen">
-              {{ addResources(citizen.resources) }}
+  <ng-template #global>Global</ng-template>
+
+  <ng-template #divisionBody>
+      <div class="player-hints">It's your turn! Click on a harvest resource to explore or gather.</div>
+      <div class="flex-row">
+        <div class="player-folder__body-harvest">
+          <div class="player-folder__body-title">
+            <h1>Harvest</h1>
+            <div class="harvest-details">
+              <div>Capacity: {{division?.capacity}}+{{division?.extra}}</div>
+              <div>Harvested: {{division?.harvested}}</div>
             </div>
           </div>
+          <app-land-grid 
+            #landGrid
+            [markCards]="false"
+            [updatePath]="landTilesPath"
+            [showId]="showId"
+            [playerId]="id"
+            (gatherResource)="onGather($event)"
+            (select)="onSelect($event)"
+          >
+          </app-land-grid>
         </div>
-  
-        <!-- <button (click)="buy({ cost: 2 })">Spend $2</button>
-        <button (click)="buy({ cost: 5 })">Spend $5</button>
-        <button (click)="buy({ cost: 6 })">Spend $6</button> -->
-      </div>
-    </div>
-  </div>
+        <div class="player-folder__body-citizens space-between">
+          <app-player-deck 
+            [id]="id" 
+            [division]="division">
+          </app-player-deck>
 
-  <div class="player-folder__body global" *ngIf="currentTab === 'Global'">
+          <div class="citizen-list">
+            <div 
+              class="citizen-summary flex-row space-between"
+              *ngFor="let citizen of filterOutCitizen(division.citizens, id)">
+              <div class="flex-row flex-center-v">
+                <span class="citizen-id">{{citizen.id}}</span>
+                <span>{{citizen.name}}</span>
+              </div>
+              <div *ngIf="citizen">
+                {{ addResources(citizen.resources) }}
+              </div>
+            </div>
+          </div>
+    
+        <button (click)="buy({ cost: 2 })">Spend $2</button>
+          <button (click)="buy({ cost: 5 })">Spend $5</button>
+          <button (click)="buy({ cost: 6 })">Spend $6</button>
+        </div>
+      </div>
+  </ng-template>
+
+  <ng-template #globalBody>
     <app-society-grid></app-society-grid>
-  </div>
-</div>
+  </ng-template>
 
-<ng-template #tileSelectSheet>
-  <div class="action-sheet">
-    {{ selectedResourceStatus?.message }}
-    <div 
-      *ngIf="selectedResourceStatus?.status === 'explorable'" 
-      class="large-action-button"
-      (click)="explore()">
-      <fa-icon size="lg" [icon]="exploreIcon"></fa-icon>
-      Explore (e)
+  <ng-template #tileSelectSheet>
+    <div class="action-sheet">
+      {{ selectedResourceStatus?.message }}
+      <div 
+        *ngIf="selectedResourceStatus?.status === 'explorable'" 
+        class="large-action-button"
+        (click)="explore()">
+        <fa-icon size="lg" [icon]="exploreIcon"></fa-icon>
+        Explore (e)
+      </div>
+      <div 
+        *ngIf="selectedResourceStatus?.status === 'explored' || selectedResourceStatus?.status === 'explorable'"
+        class="large-action-button"
+        (click)="gather()">
+        <fa-icon size="lg" [icon]="gatherIcon"></fa-icon>
+        Gather (g)
+      </div>
     </div>
-    <div 
-      *ngIf="selectedResourceStatus?.status === 'explored' || selectedResourceStatus?.status === 'explorable'"
-      class="large-action-button"
-      (click)="gather()">
-      <fa-icon size="lg" [icon]="gatherIcon"></fa-icon>
-      Gather (g)
-    </div>
-  </div>
-</ng-template>
+  </ng-template>
+
+</ng-container>

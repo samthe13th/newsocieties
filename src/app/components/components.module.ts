@@ -13,6 +13,8 @@ import { MatBottomSheetModule } from '@angular/material/bottom-sheet';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { PlayerDeckComponent } from './player-deck/player-deck.component';
 import { LandGridComponent } from './land-grid/land-grid.component';
+import { TabsComponent } from './tabs/tabs.component';
+import { TemplateIdDirective } from './template-id.directive';
 
 const components = [
   AnnouncementComponent,
@@ -25,7 +27,12 @@ const components = [
   ScorecardComponent,
   SocietyGridComponent,
   SocietySummaryComponent,
+  TabsComponent,
   VoteComponent
+]
+
+const directives = [
+  TemplateIdDirective
 ]
 
 const ngMaterial = [
@@ -39,10 +46,12 @@ const ngMaterial = [
     ...ngMaterial
   ],
   declarations: [
-    ...components
+    ...components,
+    ...directives
   ],
   exports: [
-    ...components
+    ...components,
+    ...directives
   ]
 })
 export class ComponentsModule { }
