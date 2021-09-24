@@ -21,6 +21,7 @@ export class HostComponent implements OnInit {
   showId;
   divisionPath;
   landTilesPath;
+  chatInput = "";
 
   fontSize = 16;
 
@@ -46,6 +47,17 @@ export class HostComponent implements OnInit {
       .valueChanges()
       .subscribe((level) => {
         this.adjustContamination(level);
+      })
+  }
+
+
+  submitChat(division) {
+    console.log("SUBMIT: ", division, this.showId, this.chatInput);
+    this.db.list(`shows/${this.showId}/feeds/${this.divisionId}`)
+      .push({ from: this.divisionId, type: 'chat', value: this.chatInput })
+      .then((res) => { 
+        console.log('callback: ', res)
+        this.chatInput = "";
       })
   }
 

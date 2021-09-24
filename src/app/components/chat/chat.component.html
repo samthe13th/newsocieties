@@ -1,4 +1,8 @@
-<div class="chat-feed" [class.central]="sender === 'central'">
+<div 
+  class="chat-feed"
+  #feedWrapper
+  [class.host]="sender !== 'central'"
+  [class.central]="sender === 'central'">
   <div
     *ngFor="let feedItem of ($feed | async)"
     class="chat-bubble"

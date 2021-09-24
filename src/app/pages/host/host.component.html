@@ -49,7 +49,15 @@
 
 <!-- CENTRAL -->
 <ng-template #centralBody>
-  CENTRAL
+  <app-chat [sender]="divisionId" [feedName]="divisionId" [showKey]="showId"></app-chat>
+  <textarea
+    (keydown.enter)="submitChat(divisionId)"
+    class="host-chat-input"
+    name="chatInput"
+    type="text"
+    [(ngModel)]="chatInput">
+  </textarea>
+  <button (click)="submitChat(divisionId)">Submit</button>
 </ng-template>
 
 <!-- NOTES -->

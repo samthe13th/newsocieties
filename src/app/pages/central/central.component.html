@@ -31,6 +31,7 @@
           <div class="flex-column stretch-h">
             <div class="central__division-chat-attachment"></div>
             <textarea
+              (keydown.enter)="submitChat(div)"
               class="central__division-chat-input"
               name="chatInput"
               type="text"

@@ -1,5 +1,5 @@
-import { Component, Input } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Component, AfterViewInit, ViewChild, ElementRef, Input } from '@angular/core';
+import { Observable, Subscription } from 'rxjs';
 import { AngularFireDatabase } from '@angular/fire/database';
 
 @Component({
@@ -10,22 +10,45 @@ import { AngularFireDatabase } from '@angular/fire/database';
     '[class.app-chat]': 'true'
   }
 })
-export class ChatComponent {
-  $feed: Observable<any>;
-
-  constructor(private db: AngularFireDatabase) {}
+export class ChatComponent implements AfterViewInit {
+  @ViewChild('feedWrapper') feedWrapper: ElementRef;
 
   @Input() showKey: string; 
   @Input() feedName: string;
   @Input() sender: string;
+
+  $feed: Observable<any>;
+
+  private subscriptions: Subscription[] = [];
+
+  constructor(private db: AngularFireDatabase) {}
 
   ngOnInit() {
     console.log('sub to ', this.showKey)
     this.$feed = this.db.list(
       `shows/${this.showKey}/feeds/${this.feedName}`
     ).valueChanges();
-    this.$feed.subscribe((n) => {
-      console.log("sub: ", n)
-    })
+
+    this.subscriptions.push(this.$feed.subscribe((n) => {
+      console.log("sub: ", n);
+      setTimeout(() => {
+        this.scrollToBottom();
+      })
+    }))
+  }
+
+  ngAfterViewInit() {
+    setTimeout(() => {
+      this.scrollToBottom();
+    });
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.forEach((sub) => sub.unsubscribe());
+  }
+
+  scrollToBottom() {
+    console.log("scroll to bottom: ", this.feedWrapper, this.feedWrapper.nativeElement)
+    this.feedWrapper.nativeElement.scrollTop = this.feedWrapper.nativeElement.scrollHeight;
   }
 }

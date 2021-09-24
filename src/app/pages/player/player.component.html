@@ -17,7 +17,9 @@
   <ng-template #global>Global</ng-template>
 
   <ng-template #divisionBody>
-      <div class="player-hints">It's your turn! Click on a harvest resource to explore or gather.</div>
+      <div class="player-hints">
+        It's your turn! Click on a harvest resource to explore or gather.
+      </div>
       <div class="flex-row">
         <div class="player-folder__body-harvest">
           <div class="player-folder__body-title">
@@ -35,8 +37,7 @@
             [playerId]="id"
             (gatherResource)="onGather($event)"
             (select)="onSelect($event)"
-          >
-          </app-land-grid>
+          ></app-land-grid>
         </div>
         <div class="player-folder__body-citizens space-between">
           <app-player-deck 
