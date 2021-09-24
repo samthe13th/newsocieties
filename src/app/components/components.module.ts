@@ -14,11 +14,13 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { PlayerDeckComponent } from './player-deck/player-deck.component';
 import { LandGridComponent } from './land-grid/land-grid.component';
 import { TabsComponent } from './tabs/tabs.component';
+import { ChatComponent } from './chat/chat.component';
 import { TemplateIdDirective } from './template-id.directive';
 
 const components = [
   AnnouncementComponent,
   CardComponent,
+  ChatComponent,
   DialogComponent,
   HarvestComponent,
   LandGridComponent,

@@ -19,6 +19,36 @@
 <ng-container *ngFor="let div of divisions">
   <ng-template #tab>{{div}}</ng-template>
   <ng-template #division>
-    <div>BODY: {{div}}</div>
+    <div class="central__division">
+      <div class="central__division-chat">
+        <app-chat 
+          [showKey]="showKey"
+          [feedName]="div"
+          sender='central'
+        >
+        </app-chat>
+        <div class="central__division-chat-controls">
+          <div class="flex-column stretch-h">
+            <div class="central__division-chat-attachment"></div>
+            <textarea
+              class="central__division-chat-input"
+              name="chatInput"
+              type="text"
+              [(ngModel)]="chatInput">
+            </textarea>
+          </div>
+          <div class="flex-column stretch-h">
+            <div class="flex-row stretch-h">
+              <button>Evnt</button>
+              <button>Bcst</button>
+            </div>
+            <button (click)="submitChat(div)">Submit</button>
+          </div>
+        </div>
+      </div>
+      <div class="central__division-main">
+        {{div.code}}
+      </div>
+    </div>
   </ng-template>
 </ng-container>

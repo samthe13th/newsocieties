@@ -54,6 +54,13 @@ $new-societies-theme: mat-light-theme($new-societies-primary, $new-societies-acc
   background: black;
 }
 
+.app-chat {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: calc(100% - 100px);
+}
+
 .app-player {
   @extend %app-page;
   padding-top: 5px;

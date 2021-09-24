@@ -1,0 +1,12 @@
+<div class="chat-feed" [class.central]="sender === 'central'">
+  <div
+    *ngFor="let feedItem of ($feed | async)"
+    class="chat-bubble"
+    [class.incoming]="feedItem.from !== sender"
+    [class.outgoing]="feedItem.from === sender"
+    [class.event]="feedItem.type === 'event'"
+    [class.resolution]="feedItem.type === 'resolution'"
+    >
+    {{ feedItem.value }}
+  </div>
+</div>

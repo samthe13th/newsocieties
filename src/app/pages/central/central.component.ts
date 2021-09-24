@@ -28,6 +28,7 @@ export class CentralComponent implements OnInit, AfterViewInit {
 
   showKey: string;
   divisions = DIVISIONS;
+  chatInput = "";
   tabs;
 
   constructor(private db: AngularFireDatabase) {}
@@ -56,11 +57,20 @@ export class CentralComponent implements OnInit, AfterViewInit {
     })
   }
 
+  submitChat(division) {
+    console.log("SUBMIT: ", division, this.showKey, this.chatInput);
+    this.db.list(`shows/${this.showKey}/feeds/${division}`)
+      .push({ from: 'central', type: 'chat', value: this.chatInput })
+      .then((res) => { 
+        console.log('callback: ', res)
+        this.chatInput = "";
+      })
+  }
 
   newShow() {
     const divisions = this.generateDivisions();
-    console.log({divisions})
-    this.db.list('shows').push({ divisions, ...SHOW_TEMPLATE })
+    this.db.list('shows')
+      .push({ divisions, ...SHOW_TEMPLATE })
       .then((res) => { this.buildShow(res.key) })
   }
 

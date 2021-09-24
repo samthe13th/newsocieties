@@ -8,6 +8,8 @@ import { environment } from '../environments/environment';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { NgModule } from '@angular/core';
 import { PagesModule } from './pages/pages.module';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+
 
 @NgModule({
   declarations: [
@@ -16,6 +18,8 @@ import { PagesModule } from './pages/pages.module';
   imports: [
     AngularFireModule.initializeApp(environment.firebase),
     AppRoutingModule,
+    FormsModule,
+    ReactiveFormsModule,
     BrowserModule,
     BrowserAnimationsModule,
     ComponentsModule,
