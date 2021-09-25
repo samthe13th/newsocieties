@@ -11,7 +11,7 @@
 
 .central__division-chat {
   flex: 1;
-  min-width: 350px;
+  min-width: 400px;
   display: flex; 
   flex-direction: column;
 }
@@ -20,7 +20,8 @@
   font-size: 20px;
   border-radius: 8px;
 
-  &.secondary {
+  &.icon {
+    width: 40px;
     background: white;
     border: transparent;
   }
@@ -48,9 +49,11 @@
 
 .central__division-chat-input {
   height: 100%;
-  margin-right: 5px;
+  margin-right: 10px;
   font-size: 18px;
   font-weight: 400;
   font-family: sans-serif;
   resize: none;
+  border-radius: 10px;
+  border: none;
 }

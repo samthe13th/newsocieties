@@ -1,7 +1,7 @@
 import { Component, OnInit, AfterViewInit, ViewChild, ViewChildren, TemplateRef, ContentChildren, ElementRef, QueryList } from '@angular/core';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { take } from 'rxjs/operators';
-import { toArray, range } from 'lodash';
+import { trim, range } from 'lodash';
 import { DIVISION_TEMPLATE, SHOW_TEMPLATE } from './templates';
 
 const DIVISIONS = ['N', 'S', 'E', 'W', 'NE', 'SE', 'SW', 'NW']
@@ -57,8 +57,17 @@ export class CentralComponent implements OnInit, AfterViewInit {
     })
   }
 
+  newShow() {
+    const divisions = this.generateDivisions();
+    this.db.list('shows')
+      .push({ divisions, ...SHOW_TEMPLATE })
+      .then((res) => { this.buildShow(res.key) })
+  }
+
   submitChat(division) {
     console.log("SUBMIT: ", division, this.showKey, this.chatInput);
+    if (!trim(this.chatInput)) return;
+    
     this.db.list(`shows/${this.showKey}/feeds/${division}`)
       .push({ from: 'central', type: 'chat', value: this.chatInput })
       .then((res) => { 
@@ -67,11 +76,16 @@ export class CentralComponent implements OnInit, AfterViewInit {
       })
   }
 
-  newShow() {
-    const divisions = this.generateDivisions();
-    this.db.list('shows')
-      .push({ divisions, ...SHOW_TEMPLATE })
-      .then((res) => { this.buildShow(res.key) })
+  sendEvent(division) {
+    console.log('sent event')
+    this.db.list(`shows/${this.showKey}/feeds/${division}`)
+      .push({ from: 'central', type: 'event', value: 'This is an event!' })
+  }
+
+  sendBroacastNotification(division) {
+    console.log("notification");
+    this.db.list(`shows/${this.showKey}/feeds/${division}`)
+      .push({ from: 'central', type: 'broadcast' })
   }
 
   buildShow(key) {

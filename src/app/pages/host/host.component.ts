@@ -3,7 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { getRandomInt, pluckRandom } from 'src/app/utilties';
 import { LandTile, LandCardValues } from 'src/app/interfaces';
-import { includes, range, difference } from 'lodash';
+import { includes, range, difference, trim } from 'lodash';
 
 @Component({
   selector: 'app-host',
@@ -52,6 +52,8 @@ export class HostComponent implements OnInit {
 
 
   submitChat(division) {
+    if (!trim(this.chatInput)) return;
+    
     console.log("SUBMIT: ", division, this.showId, this.chatInput);
     this.db.list(`shows/${this.showId}/feeds/${this.divisionId}`)
       .push({ from: this.divisionId, type: 'chat', value: this.chatInput })

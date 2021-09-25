@@ -34,6 +34,10 @@ $new-societies-theme: mat-light-theme($new-societies-primary, $new-societies-acc
   height: 100vh;
 }
 
+button {
+  cursor: pointer;
+}
+
 .app-host {
   @extend %app-page;
   padding: 15px;
@@ -91,7 +95,7 @@ $new-societies-theme: mat-light-theme($new-societies-primary, $new-societies-acc
 }
 
 .central-selected-tab {
-  background: #8BD79C;
+  background: #6EC2DD;
   color: black;
 }
 

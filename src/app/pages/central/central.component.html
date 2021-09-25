@@ -41,17 +41,21 @@
           </div>
           <div class="central__division-chat-buttons">
             <div class="button-row">
-              <button class="central__division-chat-button secondary">
-                Evnt
+              <button 
+                (click)="sendEvent(div)"
+                class="central__division-chat-button icon">
+                E
               </button>
-              <button class="central__division-chat-button secondary">
-                Bcst
+              <button
+                (click)="sendBroacastNotification(div)"
+                class="central__division-chat-button icon">
+                B
               </button>
             </div>
             <button 
               class="central__division-chat-button primary"
               (click)="submitChat(div)">
-              Submit
+              SEND
             </button>
           </div>
         </div>

@@ -10,7 +10,17 @@
     [class.outgoing]="feedItem.from === sender"
     [class.event]="feedItem.type === 'event'"
     [class.resolution]="feedItem.type === 'resolution'"
+    [class.broadcast]="feedItem.type === 'broadcast'"
     >
+    <div *ngIf="feedItem.type === 'broadcast'">
+      INCOMING BROADCAST from Central in 1 min
+    </div>
+    <div *ngIf="feedItem.type === 'event'">
+      EVENT
+    </div>
+    <div *ngIf="feedItem.type === 'resolution'">
+      RESOLUTION
+    </div>
     {{ feedItem.value }}
   </div>
 </div>

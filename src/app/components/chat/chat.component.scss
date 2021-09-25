@@ -6,20 +6,20 @@
   overflow: auto;
   height: 100%;
 
-  &.host {
-    .chat-bubble.incoming {
-      background: #6EC2DD;
-      border: transparent;
-    }
-  }
+  // &.host {
+  //   .chat-bubble.incoming {
+  //     background: #6EC2DD;
+  //     border: transparent;
+  //   }
+  // }
 
-  &.central {
-    .chat-bubble.incoming {
-      background: #367D94;
-      color: white;
-      border: transparent;
-    }
-  }
+  // &.central {
+  //   .chat-bubble.incoming {
+  //     background: #367D94;
+  //     color: white;
+  //     border: transparent;
+  //   }
+  // }
 }
 
 .chat-bubble {
@@ -32,17 +32,27 @@
   border-radius: 10px; 
 
   &.event, 
-  &.resolution {
+  &.resolution,
+  &.broadcast {
     border-radius: 0;
   }
 
   &.incoming {
+    background: #6EC2DD;
     margin-right: 40px;
   }
 
   &.outgoing {
-    background: white;
     border: solid 1px;
     margin-left: 40px;
+  }
+
+  &.outgoing:not(.broadcast) {
+    background: white;
+  }
+
+  &.broadcast {
+    background: black;
+    color: white;
   }
 }
