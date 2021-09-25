@@ -58,7 +58,9 @@ $new-societies-theme: mat-light-theme($new-societies-primary, $new-societies-acc
   display: flex;
   flex-direction: column;
   width: 100%;
-  height: calc(100% - 100px);
+  flex: 1 1 auto;
+  min-height: 0;
+  flex-basis: 0;
 }
 
 .app-player {
@@ -66,6 +68,17 @@ $new-societies-theme: mat-light-theme($new-societies-primary, $new-societies-acc
   padding-top: 5px;
   background: lightgrey;
 }
+
+.button-row {
+  height: 100%;
+  display: flex; 
+  width: 100%;
+  flex-direction: row;
+
+  button:not(:last-child) {
+    margin-right: 5px;
+  }
+ }
 
 .player-selected-tab {
   background: #394D6B;

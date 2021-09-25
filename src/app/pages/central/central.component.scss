@@ -12,6 +12,30 @@
 .central__division-chat {
   flex: 1;
   min-width: 350px;
+  display: flex; 
+  flex-direction: column;
+}
+
+.central__division-chat-button {
+  font-size: 20px;
+  border-radius: 8px;
+
+  &.secondary {
+    background: white;
+    border: transparent;
+  }
+
+  &.primary {
+    background: black;
+    color: white;
+    margin-top: 5px;
+    height: 100%;
+  }
+}
+
+.central__division-chat-buttons {
+  display: flex; 
+  flex-direction: column;
 }
 
 .central__division-chat-controls {
@@ -19,12 +43,11 @@
   flex-direction: row;
   height: 100px;
   box-sizing: border-box;
-  padding: 10px 0;
+  padding-top: 10px;
 }
 
 .central__division-chat-input {
   height: 100%;
-  min-width: 250px;
   margin-right: 5px;
   font-size: 18px;
   font-weight: 400;

@@ -21,6 +21,8 @@
   <ng-template #division>
     <div class="central__division">
       <div class="central__division-chat">
+        <!-- <div class="test-class"></div> -->
+        <!-- <div class="test-class-2"></div> -->
         <app-chat 
           [showKey]="showKey"
           [feedName]="div"
@@ -29,7 +31,6 @@
         </app-chat>
         <div class="central__division-chat-controls">
           <div class="flex-column stretch-h">
-            <div class="central__division-chat-attachment"></div>
             <textarea
               (keydown.enter)="submitChat(div)"
               class="central__division-chat-input"
@@ -38,12 +39,20 @@
               [(ngModel)]="chatInput">
             </textarea>
           </div>
-          <div class="flex-column stretch-h">
-            <div class="flex-row stretch-h">
-              <button>Evnt</button>
-              <button>Bcst</button>
+          <div class="central__division-chat-buttons">
+            <div class="button-row">
+              <button class="central__division-chat-button secondary">
+                Evnt
+              </button>
+              <button class="central__division-chat-button secondary">
+                Bcst
+              </button>
             </div>
-            <button (click)="submitChat(div)">Submit</button>
+            <button 
+              class="central__division-chat-button primary"
+              (click)="submitChat(div)">
+              Submit
+            </button>
           </div>
         </div>
       </div>
