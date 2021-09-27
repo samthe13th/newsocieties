@@ -16,11 +16,12 @@
       INCOMING BROADCAST from Central in 1 min
     </div>
     <div *ngIf="feedItem.type === 'event'">
-      EVENT
+      <strong>EVENT</strong>
     </div>
     <div *ngIf="feedItem.type === 'resolution'">
-      RESOLUTION
+     <strong>RESOLUTION</strong>
     </div>
-    {{ feedItem.value }}
+    <div class="chat-bubble-header" *ngIf="feedItem.header">{{feedItem.header}}</div>
+    <div [innerHTML]="feedItem?.value"></div>
   </div>
 </div>

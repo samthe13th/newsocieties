@@ -17,6 +17,7 @@
   <ng-template #global>Global</ng-template>
 
   <ng-template #divisionBody>
+    <ng-container *ngIf="focus === 'harvest'">
       <div class="player-hints">
         It's your turn! Click on a harvest resource to explore or gather.
       </div>
@@ -64,6 +65,21 @@
           <button (click)="buy({ cost: 6 })">Spend $6</button>
         </div>
       </div>
+    </ng-container>
+    <ng-container *ngIf="focus === 'resolution'">
+      <h1>Resolution</h1>
+      <div *ngIf="voted">Thanks for voting :)</div>
+      <ng-container *ngIf="!voted">
+        <app-vote
+          *ngIf="vote && !voted"
+          (selectionChange)="onSelectionChange($event)"
+          [showVotes]="false"
+          [showId]="showId"
+          [divisionId]="division.code"
+        ></app-vote>
+        <button (click)="castVote()">Vote</button>
+      </ng-container>
+    </ng-container>
   </ng-template>
 
   <ng-template #globalBody>

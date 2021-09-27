@@ -4,10 +4,10 @@ import { PlayerDeckComponent } from 'src/app/components/player-deck/player-deck.
 import { ActivatedRoute } from '@angular/router';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { LandGridComponent } from 'src/app/components/land-grid/land-grid.component';
-import { takeUntil, tap, take } from 'rxjs/operators';
+import { takeUntil, take } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { LandCardValues } from 'src/app/interfaces';
-import { toArray, range, toNumber } from 'lodash';
+import { toArray, includes, findIndex, toNumber } from 'lodash';
 import { faEye, faShoppingBag } from '@fortawesome/free-solid-svg-icons';
 
 const KEY_CODE = {
@@ -25,6 +25,9 @@ const KEY_CODE = {
 })
 export class PlayerComponent implements OnInit {
   $division;
+  $focus; 
+  vote;
+
   divisionSummaries;
 
   @ViewChild(PlayerDeckComponent, { static: false }) playerDeck: PlayerDeckComponent;
@@ -46,10 +49,16 @@ export class PlayerComponent implements OnInit {
   division = 'N';
   divisionData;
   showId;
-  landTilesPath;
   selectedResourceStatus;
   actionSheet;
   selectedCard;
+  voteSelection;
+  focus;
+  voted = false;
+
+  // DB PATHS
+  landTilesPath;
+  votePath;
 
   // ICONS
   exploreIcon = faEye;
@@ -68,7 +77,27 @@ export class PlayerComponent implements OnInit {
     this.division = division;
     this.id = id;
     this.landTilesPath = `${showPath}/divisions/${division}/landTiles`;
+    this.votePath = `${showPath}/divisions/${division}/vote`;
+    
     this.$division = this.db.object(`shows/${show}/divisions/${division}`).valueChanges();
+    this.$focus = this.db.object(`shows/${show}/divisions/${division}/focus`).valueChanges();
+    this.$focus.subscribe((focus) => {
+      console.log({focus});
+      this.focus = focus;
+      if (focus === 'resolution') {
+        this.db.object(`shows/${show}/divisions/${division}/vote`)
+          .valueChanges()
+          .pipe(take(1)).subscribe((vote: any) => {
+            if (includes(JSON.parse(vote?.voted), this.id)) {
+              console.log('already voted: ', this.id);
+              this.voted = true;
+            } else {
+              this.vote = vote;
+            }
+          })
+      }
+    })
+
     this.db.object(`shows/${show}/divisions`)
       .valueChanges()
       .pipe(
@@ -77,6 +106,27 @@ export class PlayerComponent implements OnInit {
       .subscribe((divisions) => {
         this.createDivisionListeners(divisions)
       })
+  }
+
+  onSelectionChange(vote) {
+    this.voteSelection = findIndex(this.vote.options, ["value", vote.value]);
+    console.log("selection: ", this.voteSelection, this.vote.options[this.voteSelection]);
+  }
+
+  castVote() {
+    if (this.voteSelection !== undefined) {
+      console.log("vote: ", this.voteSelection, this.vote.options[this.voteSelection]);
+      this.vote.options[this.voteSelection].votes += 1;
+      const voted =  JSON.parse(this.vote.voted)
+      console.log('push vote: ', this.vote, voted)
+      voted.push(this.id);
+      this.db.object(`shows/${this.showId}/divisions/${this.division}/vote`).set({
+        ...this.vote,
+        voted: JSON.stringify(voted)
+      }).then(() => {
+        this.voted = true;
+      })
+    }
   }
 
   createDivisionListeners(divisions) {

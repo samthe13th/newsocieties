@@ -2,7 +2,6 @@ import { NgModule } from '@angular/core';
 import { AnnouncementComponent } from './announcement/announcement.component';
 import { CardComponent } from './card/card.component';
 import { DialogComponent } from './dialog/dialog.component';
-import { HarvestComponent } from './harvest/harvest.component';
 import { PlayerHandsComponent } from './player-hands/player-hands.component';
 import { ScorecardComponent } from './scorecard/scorecard.component';
 import { SocietySummaryComponent } from './society-summary/society-summary.component';
@@ -16,13 +15,14 @@ import { LandGridComponent } from './land-grid/land-grid.component';
 import { TabsComponent } from './tabs/tabs.component';
 import { ChatComponent } from './chat/chat.component';
 import { TemplateIdDirective } from './template-id.directive';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+
 
 const components = [
   AnnouncementComponent,
   CardComponent,
   ChatComponent,
   DialogComponent,
-  HarvestComponent,
   LandGridComponent,
   PlayerHandsComponent,
   PlayerDeckComponent,
@@ -43,6 +43,8 @@ const ngMaterial = [
 
 @NgModule({
   imports: [
+    FormsModule,
+    ReactiveFormsModule,
     CommonModule,
     FontAwesomeModule,
     ...ngMaterial

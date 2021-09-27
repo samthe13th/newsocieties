@@ -22,6 +22,18 @@ export class HostComponent implements OnInit {
   divisionPath;
   landTilesPath;
   chatInput = "";
+  focus = 'resolution';
+  action = null;
+  divisionVote;
+  voteNotes = "";
+
+  resPrompt = 'Citizens were addicted to a newly discovered vegetation.';
+  resOptions = [
+    { id: 'A', value: 'Set-up places for safe consumption and rehabilitation.', selected: false, votes: 0 },
+    { id: 'B', value: 'Prohibit the use of the plant.', selected: false, votes: 0  },
+    { id: 'C', value: 'Made it their main export and sent it to other divisions.', selected: false, votes: 0 },
+    { id: 'D', value: 'Do nothing.', selected: false, votes: 0  },
+  ]
 
   fontSize = 16;
 
@@ -43,17 +55,76 @@ export class HostComponent implements OnInit {
         this.division = division
       })
 
-    this.db.object(`shows/${this.showId}/contamination/current`)
+      this.db.object(`shows/${this.showId}/contamination/current`)
       .valueChanges()
       .subscribe((level) => {
         this.adjustContamination(level);
       })
   }
 
+  startVote() {
+    this.action = 'voting';
+    this.db.object(`${this.divisionPath}/vote`).set({
+      type: 'resolution',
+      prompt: this.resPrompt,
+      options: this.resOptions,
+      voted: "[]"
+    }).then(() => {
+      this.db.object(`${this.divisionPath}/focus`).set('resolution');
+    })
+  }
+
+  startHarvest() {
+    this.action = 'harvesting';
+    this.db.object(`${this.divisionPath}/focus`).set('harvest');
+  }
+
+  onSelectionChange(selection) {
+    console.log("selection change: ", selection);
+    this.divisionVote = selection;
+  }
+
+  resolveVote() {
+    console.log("send to central: ", this.divisionVote, this.voteNotes)
+    const value = (this.voteNotes.trim() !== '')
+      ? `DECISION: ${this.divisionVote.value}<br/><br/>NOTES: ${this.voteNotes}`
+      : `DECISION: ${this.divisionVote.value}`
+
+    this.db.list(`shows/${this.showId}/feeds/${this.divisionId}`)
+      .push({ 
+        from: this.divisionId, 
+        type: 'resolution',
+        header: `${this.divisionVote.prompt}`,
+        value
+      })
+
+    if (this.divisionVote.type === 'resolution') {
+      this.setResolution(this.divisionVote);
+    }
+
+    this.clearVote();
+  }
+  get voteReady() {
+    return this.divisionVote !== undefined
+  }
+
+  setResolution(vote) {
+    console.log('set reso')
+    this.db.list(`${this.divisionPath}/resolutions`).push({
+      event: vote.prompt,
+      resolution: vote.value
+    })
+  }
+
+  clearVote() {
+    this.divisionVote = null;
+    this.voteNotes = '';
+    this.db.object(`${this.divisionPath}/vote`).set(null);
+  }
 
   submitChat(division) {
     if (!trim(this.chatInput)) return;
-    
+
     console.log("SUBMIT: ", division, this.showId, this.chatInput);
     this.db.list(`shows/${this.showId}/feeds/${this.divisionId}`)
       .push({ from: this.divisionId, type: 'chat', value: this.chatInput })

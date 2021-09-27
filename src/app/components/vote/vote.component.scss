@@ -1,0 +1,37 @@
+.vote-prompt {
+  padding: 40px;
+  font-size: 24px;
+  line-height: 30px;
+  font-weight: 200;
+  color: black;
+  text-align: center;
+  display: flex;
+  flex-shrink: 0;
+  justify-content: center;
+  background: white;
+  border-radius: 15px;
+  margin-bottom: 20px; 
+}
+
+.vote-options {
+  display: flex; 
+  flex-direction: column; 
+  width: 100%;
+
+  .vote-options-header, 
+  .vote-options-row {
+    display: flex; 
+    flex-direction: row;
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .vote-options-data {
+    width: 100%;
+    text-align: start;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    margin-left: 5px;
+  }
+}

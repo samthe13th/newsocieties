@@ -10,12 +10,47 @@
   ]">
 </app-tabs>
 
-<div class="harvest-wrapper">
-  <app-land-grid 
-    [markCards]="true"
-    [showId]="showId"
-    [updatePath]="landTilesPath"> 
-  </app-land-grid>
+<div class="host-main">
+  <div class="button-row">
+    <button (click)="focus = 'harvest'">Harvest</button>
+    <button (click)="focus = 'resolution'">Resolution</button>
+  </div>
+  <div *ngIf="focus === 'harvest'" class="harvest-wrapper">
+    <h1>Harvest</h1>
+    <div *ngIf="action !== 'harvesting'">
+      <button (click)="startHarvest()" class="large-action-button">
+        Start Harvest
+      </button>
+    </div>
+    <app-land-grid 
+      *ngIf="action === 'harvesting'"
+      [markCards]="true"
+      [showId]="showId"
+      [updatePath]="landTilesPath"> 
+    </app-land-grid>
+  </div>
+  <div *ngIf="focus === 'resolution'" class="resolution-wrapper">
+    <h1>Resolution</h1>
+    <div *ngIf="action !== 'voting'">
+      {{ resPrompt }}
+      <button (click)="startVote()" class="large-action-button">
+        Start Vote
+      </button>
+    </div>
+    <ng-container *ngIf="action === 'voting'">
+      <app-vote 
+        (selectionChange)="onSelectionChange($event)"
+        [showVotes]="true"
+        [showId]="showId"
+        [divisionId]="divisionId"
+        [includeOtherOption]="true"
+      ></app-vote>
+      <ng-container *ngIf="divisionVote && divisionVote.value !== ''">
+        <h2>Set Resolution</h2>
+        <button (click)="resolveVote()">CONFIRM</button>
+      </ng-container>
+    </ng-container>
+  </div>
 </div>
 
 <!-- TABS-->

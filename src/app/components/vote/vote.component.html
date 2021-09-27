@@ -1,0 +1,46 @@
+<ng-container *ngIf="vote">
+  <div class="vote-prompt">
+    {{ vote?.prompt }}
+  </div>
+  
+  <div class="vote-options">
+  
+    <div class="vote-options-header">
+      <div>OPTIONS</div>
+      <div>VOTES</div>
+    </div>
+  
+    <div
+      *ngFor="let option of vote?.options; let i = index"
+      class="vote-options-row">
+     <div>
+      <input 
+       name="vote-options"
+       type="radio" 
+       [value]="option.value"
+       [(ngModel)]="selectedOption"
+       />
+     </div>
+     <div class="vote-options-data"><div>{{ option.value }}</div></div>
+     <div *ngIf="showVotes">{{ option.votes }}</div>
+    </div>
+
+    <div
+      *ngIf="includeOtherOption"
+      class="vote-options-row">
+      <div>
+        <input 
+        name="vote-options"
+        type="radio" 
+        [value]="other"
+        [(ngModel)]="selectedOption"
+        />
+        </div>
+        <div class="vote-options-data">
+          <div style="margin-right: 10px">Other:</div>
+          <input [(ngModel)]="other" type="text"/>
+        </div>
+    </div>
+  
+  </div>
+</ng-container>
