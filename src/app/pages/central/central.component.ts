@@ -2,6 +2,7 @@ import { Component, OnInit, AfterViewInit, ViewChild, ViewChildren, TemplateRef,
 import { AngularFireDatabase } from '@angular/fire/database';
 import { take } from 'rxjs/operators';
 import { trim, range } from 'lodash';
+import * as Papa from 'papaparse';
 import { DIVISION_TEMPLATE, SHOW_TEMPLATE } from './templates';
 
 const DIVISIONS = ['N', 'S', 'E', 'W', 'NE', 'SE', 'SW', 'NW']
@@ -22,14 +23,31 @@ export class CentralComponent implements OnInit, AfterViewInit {
   @ViewChild('summary') summaryTab: TemplateRef<any>;
   @ViewChild('showBody') showBody: TemplateRef<any>;
   @ViewChild('summaryBody') summaryBody: TemplateRef<any>;
-  
+  @ViewChild('fileUpload') fileUpload: ElementRef;
+  @ViewChild('resolutionsPreview') resolutionsPreview: TemplateRef<any>;
+  @ViewChild('principlesPreview') principlesPreview: TemplateRef<any>;
+  @ViewChild('sceneriosPreview') sceneriosPreview: TemplateRef<any>;
+
   @ViewChildren('division') bodyTemplates: QueryList<TemplateRef<any>>;
   @ViewChildren('tab') tabTemplates: QueryList<TemplateRef<any>>;
+
+  modalContent: TemplateRef<any>;
 
   showKey: string;
   divisions = DIVISIONS;
   chatInput = "";
   tabs;
+  voteFileValues = {
+    resolutions: '', 
+    principles: '',
+    scenerios: ''
+  }
+  voteData = {
+    resolutions: undefined,
+    principles: undefined,
+    scenerios: undefined,
+  }
+  showModal = false; 
 
   constructor(private db: AngularFireDatabase) {}
 
@@ -55,6 +73,122 @@ export class CentralComponent implements OnInit, AfterViewInit {
         })
       ]
     })
+  }
+
+  uploadSceneriosData(e) {
+    console.log({e})
+    this.parseVoteData(e, 'scenerios');
+  }
+
+  uploadPrinciplesData(e) {
+    this.parseVoteData(e, 'principles');
+  }
+
+  uploadResolutionsData(e) {
+    this.parseVoteData(e, 'resolutions');
+  }
+
+  parsePrinciplesData(_data) {
+    const data = _data.map(([principle, ...options]) => {
+      return {
+        principle, 
+        options
+      }
+    })
+    data.shift();
+    return data;
+  }
+
+  parseSceneriosData(_data) {
+    const data = _data.map(([_header, _costs, _consequences, ...options]) => {
+      const header = _header.split('|');
+
+      return {
+        prompt: header[0], 
+        result: header[1],
+        options: options.map((option, i) => { 
+          return option ? { 
+            prompt: option.split('|')[0],
+            result: option.split('|')[1],
+          } : null
+        })
+      }
+    });
+    data.shift();
+    return data;
+  }
+
+  parseResolutionsData(_data) {
+    const data = _data.map(([_header, _costs, _consequences, ...options]) => {
+      const header = _header.split('|');
+      const costs = _costs.split('|');
+      const consequences = _consequences.split('|');
+
+      return {
+        prompt: header[0], 
+        result: header[1],
+        options: options.map((option, i) => { 
+          return option ? { 
+            prompt: option.split('|')[0],
+            result: option.split('|')[1],
+            cost: costs[i] ?? 0,
+            consequence: consequences[i] ?? 'none'
+          } : null
+        })
+      }
+    });
+    data.shift();
+    return data;
+  }
+
+  parseVoteData(e, type) {
+    Papa.parse(e.target.files[0], {
+      transform: function(value) {
+        return value === '' ? null : value
+      },
+      complete: (results) => {
+        let data;
+        if (type === 'resolutions') {
+          data = this.parseResolutionsData(results.data);
+        } else if (type === 'principles') {
+          data = this.parsePrinciplesData(results.data);
+        } else if (type === 'scenerios') {
+          data = this.parseSceneriosData(results.data);
+        }
+        console.log("parsed data: ", data)
+        this.voteData[type] = data;
+        this.previewVoteData(type);
+      }
+    });
+  }
+
+  cancelUpdate(type) {
+    this.showModal = false;
+    this.voteFileValues[type] = '';
+  }
+
+  updateVoteData(type) {
+    console.log('update vote data for ', type)
+    this.db.object(`shows/${this.showKey}/${type}`)
+      .set(this.voteData[type])
+      .then(() => {
+        this.showModal = false;
+        this.voteFileValues[type] = '';
+        alert(`Update successful for ${type} file`)
+      })
+  }
+
+  previewVoteData(type) {
+    if (type === 'resolutions') {
+      this.modalContent = this.resolutionsPreview;
+      this.showModal = true;
+    } else if (type === 'principles') {
+      this.modalContent = this.principlesPreview;
+      this.showModal = true;
+    } else if (type === 'scenerios') {
+      this.modalContent = this.sceneriosPreview;
+      this.showModal = true;
+    }
   }
 
   newShow() {

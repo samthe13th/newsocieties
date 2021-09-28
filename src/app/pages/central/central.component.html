@@ -4,12 +4,125 @@
   [tabs]="tabs">
 </app-tabs>
 
+<div *ngIf="showModal === true" class="modal-wrap">
+  <div class="modal">
+    <ng-container *ngTemplateOutlet="modalContent"></ng-container>
+  </div>
+</div>
+
+<ng-template #sceneriosPreview>
+  <div class="button-row">
+    <button (click)="cancelUpdate('scenerios')">Cancel</button>
+    <button (click)="updateVoteData('scenerios')">Update</button>
+  </div>
+  <table *ngIf="voteData?.scenerios" style="width: 100%">
+    <tr>
+      <th>Citizen-facing</th>
+      <th>Host-facing</th>
+    </tr>
+    <tr *ngFor="let scenerio of voteData.scenerios">
+      <td>
+        <p><strong>{{ scenerio.prompt }}</strong></p>
+        <ul>
+          <ng-container *ngFor="let option of scenerio.options">
+            <li *ngIf="option?.prompt">
+              {{option?.prompt}}
+            </li>
+          </ng-container>
+        </ul>
+      </td>
+
+      <td>
+        <p><strong>{{ scenerio.result }}</strong></p>
+        <ul>
+          <ng-container *ngFor="let option of scenerio.options">
+            <li *ngIf="option?.result">
+              {{option?.result}}
+            </li>
+          </ng-container>
+        </ul>
+      </td>
+
+    </tr>
+  </table>
+</ng-template>
+
+<ng-template #principlesPreview>
+  <div class="button-row">
+    <button (click)="cancelUpdate('principles')">Cancel</button>
+    <button (click)="updateVoteData('principles')">Update</button>
+  </div>
+  <div *ngIf="voteData?.principles" class="flex-column">
+    <ng-container *ngFor="let principle of voteData.principles">
+      <p><strong>{{principle.principle}}</strong></p>
+      <ol>
+        <ng-container *ngFor="let option of principle.options">
+          <li *ngIf="option">{{option}}</li>
+        </ng-container>
+      </ol>
+    </ng-container>
+  </div>
+</ng-template>
+
+<ng-template #resolutionsPreview>
+  <div class="button-row">
+    <button (click)="cancelUpdate('resolutions')">Cancel</button>
+    <button (click)="updateVoteData('resolutions')">Update</button>
+  </div>
+  <table *ngIf="voteData?.resolutions" style="width: 100%">
+    <tr>
+      <th>Citizen-facing</th>
+      <th>Host-facing</th>
+    </tr>
+    <tr *ngFor="let resolution of voteData.resolutions">
+      <td>
+        <p><strong>{{ resolution.prompt }}</strong></p>
+        <ul>
+          <ng-container *ngFor="let option of resolution.options">
+            <li *ngIf="option?.prompt">
+              {{option?.prompt}}({{option?.cost}})
+            </li>
+          </ng-container>
+        </ul>
+      </td>
+
+      <td>
+        <p><strong>{{ resolution.result }}</strong></p>
+        <ul>
+          <ng-container *ngFor="let option of resolution.options">
+            <li *ngIf="option?.result">
+              {{option?.result}}({{option?.consequence}})
+            </li>
+          </ng-container>
+        </ul>
+      </td>
+
+    </tr>
+  </table>
+</ng-template>
+
 <ng-template #show>Show</ng-template>
 <ng-template #summary>Summary</ng-template>
 
 <ng-template #showBody>
   <button (click)="newShow()">New Show</button>
   localhost:4200/{{showKey}}
+
+  <div class="vote-data">
+    Principles
+    <input [(ngModel)]="voteFileValues.principles" (change)="uploadPrinciplesData($event)" type="file" #fileUpload/>
+  </div>
+
+  <div class="vote-data">
+    Resolutions
+    <input [(ngModel)]="voteFileValues.resolutions" (change)="uploadResolutionsData($event)" type="file" #fileUpload/>
+  </div>
+
+  <div class="vote-data">
+    Scenerios
+    <input [(ngModel)]="voteFileValues.scenerios" (change)="uploadSceneriosData($event)" type="file" #fileUpload/>
+  </div>
+
 </ng-template>
 
 <ng-template #summaryBody>

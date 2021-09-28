@@ -26,6 +26,10 @@ $new-societies-theme: mat-light-theme($new-societies-primary, $new-societies-acc
 // that you are using.
 @include angular-material-theme($new-societies-theme);
 
+table, th, td {
+  border:1px solid black;
+}
+
 %app-page {
   display: flex; 
   flex-direction: row;
@@ -176,6 +180,33 @@ button {
 
   &:hover {
     box-shadow: 1px 1px 5px lightgrey;
+  }
+}
+
+.modal-wrap {
+  position: fixed; 
+  top: 0; 
+  left: 0;
+  height: 100vh; 
+  width: 100%;
+  background: rgba(black, 0.5);
+  display: flex; 
+  justify-content: center;
+  align-items: center;
+  padding: 50px; 
+  z-index: 999;
+  box-sizing: border-box;
+
+  .modal {
+    background: white;
+    border-radius: 15px; 
+    color: black; 
+    padding: 20px;
+    display: flex; 
+    flex-direction: column;
+    overflow: auto; 
+    height: 100%; 
+    width: 100%;
   }
 }
 
