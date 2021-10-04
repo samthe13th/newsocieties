@@ -46,15 +46,15 @@ export class PlayerComponent implements OnInit {
   private destroy$ = new Subject<boolean>();
   currentTab = 'Division';
   id;
-  division = 'N';
+  divisionKey = 'N';
   divisionData;
-  showId;
+  showKey;
   selectedResourceStatus;
   actionSheet;
   selectedCard;
   voteSelection;
   focus;
-  voted = false;
+  hasVoted = false;
 
   // DB PATHS
   landTilesPath;
@@ -73,8 +73,8 @@ export class PlayerComponent implements OnInit {
   ngOnInit() {
     const { show, division, id } = this.route.snapshot.params;
     const showPath = `shows/${show}`;
-    this.showId = show;
-    this.division = division;
+    this.showKey = show;
+    this.divisionKey = division;
     this.id = id;
     this.landTilesPath = `${showPath}/divisions/${division}/landTiles`;
     this.votePath = `${showPath}/divisions/${division}/vote`;
@@ -84,54 +84,54 @@ export class PlayerComponent implements OnInit {
     this.$focus.subscribe((focus) => {
       console.log({focus});
       this.focus = focus;
-      if (focus === 'resolution') {
+      if (focus === 'vote') {
         this.db.object(`shows/${show}/divisions/${division}/vote`)
           .valueChanges()
-          .pipe(take(1)).subscribe((vote: any) => {
-            if (includes(JSON.parse(vote?.voted), this.id)) {
-              console.log('already voted: ', this.id);
-              this.voted = true;
+          .subscribe((vote: any) => {
+            this.vote = { ...vote };
+            if (includes(JSON.parse(this.vote?.voted), this.id)) {
+              this.hasVoted = true;
             } else {
-              this.vote = vote;
+              this.hasVoted = false;
             }
+            console.log('player: this.vote... ', this.vote)
           })
       }
     })
 
     this.db.object(`shows/${show}/divisions`)
       .valueChanges()
-      .pipe(
-        take(1)
-      )
+      .pipe(take(1))
       .subscribe((divisions) => {
         this.createDivisionListeners(divisions)
       })
   }
 
-  onSelectionChange(vote) {
-    this.voteSelection = findIndex(this.vote.options, ["value", vote.value]);
-    console.log("selection: ", this.voteSelection, this.vote.options[this.voteSelection]);
+  onSelectionChange({ vote, selection }) {
+    this.vote = vote;
+    this.voteSelection = findIndex(this.vote.options, ["prompt", selection.prompt]);
+    console.log("selection: ", this.voteSelection, this.vote);
   }
 
   castVote() {
     if (this.voteSelection !== undefined) {
       console.log("vote: ", this.voteSelection, this.vote.options[this.voteSelection]);
       this.vote.options[this.voteSelection].votes += 1;
-      const voted =  JSON.parse(this.vote.voted)
-      console.log('push vote: ', this.vote, voted)
+      const voted = JSON.parse(this.vote.voted)
       voted.push(this.id);
-      this.db.object(`shows/${this.showId}/divisions/${this.division}/vote`).set({
+      console.log('push vote: ', this.vote, voted)
+      this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/vote`).set({
         ...this.vote,
         voted: JSON.stringify(voted)
       }).then(() => {
-        this.voted = true;
+        this.hasVoted = true;
       })
     }
   }
 
   createDivisionListeners(divisions) {
     this.divisionSummaries = toArray(divisions).map(division => {
-      return this.db.object(`shows/${this.showId}/divisions/${division.code}`).valueChanges();
+      return this.db.object(`shows/${this.showKey}/divisions/${division.code}`).valueChanges();
     })
     console.log('divisions: ', this.divisionSummaries);
   }

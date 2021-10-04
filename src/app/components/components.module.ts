@@ -16,14 +16,19 @@ import { TabsComponent } from './tabs/tabs.component';
 import { ChatComponent } from './chat/chat.component';
 import { TemplateIdDirective } from './template-id.directive';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-
+import { NumberPickerModule } from 'ng-number-picker';
+import { FundraisingComponent } from './fundraising/fundraising.component';
+import { NumberChangeComponent } from './number-change/number-change.component';
+ 
 
 const components = [
   AnnouncementComponent,
   CardComponent,
   ChatComponent,
   DialogComponent,
+  FundraisingComponent,
   LandGridComponent,
+  NumberChangeComponent,
   PlayerHandsComponent,
   PlayerDeckComponent,
   ScorecardComponent,
@@ -47,6 +52,7 @@ const ngMaterial = [
     ReactiveFormsModule,
     CommonModule,
     FontAwesomeModule,
+    NumberPickerModule,
     ...ngMaterial
   ],
   declarations: [

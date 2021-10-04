@@ -1,7 +1,7 @@
 import { Component, OnInit, AfterViewInit, ViewChild, ViewChildren, TemplateRef, ContentChildren, ElementRef, QueryList } from '@angular/core';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { take } from 'rxjs/operators';
-import { trim, range } from 'lodash';
+import { trim, range, capitalize } from 'lodash';
 import * as Papa from 'papaparse';
 import { DIVISION_TEMPLATE, SHOW_TEMPLATE } from './templates';
 
@@ -89,10 +89,17 @@ export class CentralComponent implements OnInit, AfterViewInit {
   }
 
   parsePrinciplesData(_data) {
-    const data = _data.map(([principle, ...options]) => {
+    const data = _data.map(([title, principle, ...options]) => {
+      console.log({options})
       return {
-        principle, 
-        options
+        title,
+        prompt: `${principle}:`, 
+        result: principle,
+        options: options.map(option => option ? ({
+          prompt: `${capitalize(option)}`,
+          result: option,
+          votes: 0
+        }) : null)
       }
     })
     data.shift();
@@ -100,16 +107,19 @@ export class CentralComponent implements OnInit, AfterViewInit {
   }
 
   parseSceneriosData(_data) {
-    const data = _data.map(([_header, _costs, _consequences, ...options]) => {
+    const data = _data.map(([title, _header, ...options]) => {
       const header = _header.split('|');
+      console.log({options})
 
       return {
+        title,
         prompt: header[0], 
         result: header[1],
         options: options.map((option, i) => { 
           return option ? { 
             prompt: option.split('|')[0],
             result: option.split('|')[1],
+            votes: 0
           } : null
         })
       }
@@ -119,12 +129,13 @@ export class CentralComponent implements OnInit, AfterViewInit {
   }
 
   parseResolutionsData(_data) {
-    const data = _data.map(([_header, _costs, _consequences, ...options]) => {
+    const data = _data.map(([title, _header, _costs, _consequences, ...options]) => {
       const header = _header.split('|');
       const costs = _costs.split('|');
       const consequences = _consequences.split('|');
 
       return {
+        title: title.trim(),
         prompt: header[0], 
         result: header[1],
         options: options.map((option, i) => { 
@@ -132,7 +143,8 @@ export class CentralComponent implements OnInit, AfterViewInit {
             prompt: option.split('|')[0],
             result: option.split('|')[1],
             cost: costs[i] ?? 0,
-            consequence: consequences[i] ?? 'none'
+            consequence: consequences[i] ?? 'none',
+            votes: 0
           } : null
         })
       }

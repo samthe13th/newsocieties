@@ -34,7 +34,7 @@
             #landGrid
             [markCards]="false"
             [updatePath]="landTilesPath"
-            [showId]="showId"
+            [showId]="showKey"
             [playerId]="id"
             (gatherResource)="onGather($event)"
             (select)="onSelect($event)"
@@ -66,18 +66,25 @@
         </div>
       </div>
     </ng-container>
-    <ng-container *ngIf="focus === 'resolution'">
+    <ng-container *ngIf="focus === 'vote'">
       <h1>Resolution</h1>
-      <div *ngIf="voted">Thanks for voting :)</div>
-      <ng-container *ngIf="!voted">
+      <div *ngIf="hasVoted && vote?.state === 'voting'">Thanks for voting! Waiting for polls to close...</div>
+      <ng-container *ngIf="!(hasVoted && vote?.state === 'voting')">
         <app-vote
-          *ngIf="vote && !voted"
           (selectionChange)="onSelectionChange($event)"
-          [showVotes]="false"
-          [showId]="showId"
+          [showVotes]="vote?.state === 'review'"
+          [allowSelection]="vote?.state === 'voting'"
+          [showId]="showKey"
+          [hideLast]="vote?.type !== 'principles'"
           [divisionId]="division.code"
         ></app-vote>
-        <button (click)="castVote()">Vote</button>
+        <button *ngIf="!hasVoted && vote?.state === 'voting'" (click)="castVote()">Vote</button>
+        <app-fundraising
+          *ngIf="vote?.state === 'review'"
+          [showKey]="showKey"
+          [divisionKey]="divisionKey"
+          [playerId]="id">
+        </app-fundraising>
       </ng-container>
     </ng-container>
   </ng-template>

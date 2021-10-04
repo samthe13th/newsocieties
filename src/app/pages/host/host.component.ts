@@ -1,9 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { getRandomInt, pluckRandom } from 'src/app/utilties';
 import { LandTile, LandCardValues } from 'src/app/interfaces';
-import { includes, range, difference, trim } from 'lodash';
+import { includes, range, difference, trim, differenceBy, toNumber, each } from 'lodash';
+import { take } from 'rxjs/operators'
+import { BankService } from 'src/app/services/bank.service';
 
 @Component({
   selector: 'app-host',
@@ -14,6 +16,20 @@ import { includes, range, difference, trim } from 'lodash';
   }
 })
 export class HostComponent implements OnInit {
+  @ViewChild('harvestTemplate') harvestTemplate: TemplateRef<any>;
+  @ViewChild('voteTemplate') voteTemplate: TemplateRef<any>;
+
+  modalContent: TemplateRef<any>;
+
+  showModal = false;
+
+  $vote;
+  $division;
+  $resolutions;
+  $principles;
+  $scenerios;
+
+  voteResultFunds = 0;
   division;
   contamination;
   harvest;
@@ -22,56 +38,113 @@ export class HostComponent implements OnInit {
   divisionPath;
   landTilesPath;
   chatInput = "";
-  focus = 'resolution';
-  action = null;
+  focus = 'vote';
+  action = 'harvesting';
   divisionVote;
   voteNotes = "";
-
-  resPrompt = 'Citizens were addicted to a newly discovered vegetation.';
+  voteType;
+  resPrompt = 'Your citizens are addicted to a newly discovered vegetation. Resolve to:';
   resOptions = [
     { id: 'A', value: 'Set-up places for safe consumption and rehabilitation.', selected: false, votes: 0 },
     { id: 'B', value: 'Prohibit the use of the plant.', selected: false, votes: 0  },
     { id: 'C', value: 'Made it their main export and sent it to other divisions.', selected: false, votes: 0 },
     { id: 'D', value: 'Do nothing.', selected: false, votes: 0  },
   ]
-
   fontSize = 16;
+  globalResolutions;
+  globalPrinciples; 
+  globalScenerios;
+  voteDropdown;
+  voteDropdownSelect;
 
   constructor(
     private db: AngularFireDatabase,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private bank: BankService,
   ) {}
 
   ngOnInit() {
     this.divisionId = this.route.snapshot.params.division;
     this.showId = this.route.snapshot.params.show;
     this.divisionPath = `shows/${this.showId}/divisions/${this.divisionId}`;
+    console.log('division path: ', this.divisionPath)
     
     this.landTilesPath = `${this.divisionPath}/landTiles`
 
-    this.db.object(this.divisionPath)
-      .valueChanges()
-      .subscribe((division) => {
-        this.division = division
-      })
+    this.$vote = this.db.object(`${this.divisionPath}/vote`).valueChanges();
+    this.$division = this.db.object(this.divisionPath).valueChanges();
+    this.$resolutions = this.db.list(`${this.divisionPath}/resolutions`).valueChanges();
+    this.$principles = this.db.list(`${this.divisionPath}/principles`).valueChanges();
+    this.$scenerios = this.db.list(`${this.divisionPath}/scenerios`).valueChanges();
 
-      this.db.object(`shows/${this.showId}/contamination/current`)
+    this.db.object(`shows/${this.showId}/contamination/current`)
       .valueChanges()
       .subscribe((level) => {
         this.adjustContamination(level);
       })
+
+    this.getResolutions();
+    this.getPrinciples();
+    this.getScenerios();
+  }
+
+  changeDivisionProperty(prop) {
+    console.log("change: ", prop)
+  }
+
+  percentHarvested(harvested, capacity) {
+    return Math.round((toNumber(harvested)/toNumber(capacity)) * 100)
+  }
+
+  getResolutions() {
+    this.db.list(`shows/${this.showId}/resolutions`)
+      .valueChanges()
+      .pipe(take(1))
+      .subscribe((resolutions) => {
+        this.globalResolutions = resolutions
+      });
+  }
+
+  getPrinciples() {
+    this.db.list(`shows/${this.showId}/principles`)
+      .valueChanges()
+      .pipe(take(1))
+      .subscribe((principles) => {
+        console.log('principles: ', principles)
+        this.globalPrinciples = principles
+      });
+  }
+
+  getScenerios() {
+    this.db.list(`shows/${this.showId}/scenerios`)
+      .valueChanges()
+      .pipe(take(1))
+      .subscribe((scenerios) => {
+        this.globalScenerios = scenerios
+      });
   }
 
   startVote() {
+    this.showModal = false;
     this.action = 'voting';
+    
     this.db.object(`${this.divisionPath}/vote`).set({
-      type: 'resolution',
-      prompt: this.resPrompt,
-      options: this.resOptions,
+      type: this.voteType,
+      ...this.voteDropdownSelect,
+      state: 'voting',
       voted: "[]"
     }).then(() => {
-      this.db.object(`${this.divisionPath}/focus`).set('resolution');
+      this.db.object(`${this.divisionPath}/focus`).set('vote');
     })
+  }
+
+  setFocus(type) {
+    this.showModal = true;
+    if (type === 'vote') {
+      this.modalContent = this.voteTemplate;
+    } else if (type === 'harvest') {
+      this.modalContent = this.harvestTemplate;
+    }
   }
 
   startHarvest() {
@@ -80,45 +153,155 @@ export class HostComponent implements OnInit {
   }
 
   onSelectionChange(selection) {
-    console.log("selection change: ", selection);
     this.divisionVote = selection;
   }
 
-  resolveVote() {
-    console.log("send to central: ", this.divisionVote, this.voteNotes)
-    const value = (this.voteNotes.trim() !== '')
-      ? `DECISION: ${this.divisionVote.value}<br/><br/>NOTES: ${this.voteNotes}`
-      : `DECISION: ${this.divisionVote.value}`
-
-    this.db.list(`shows/${this.showId}/feeds/${this.divisionId}`)
-      .push({ 
-        from: this.divisionId, 
-        type: 'resolution',
-        header: `${this.divisionVote.prompt}`,
-        value
-      })
-
-    if (this.divisionVote.type === 'resolution') {
-      this.setResolution(this.divisionVote);
-    }
-
-    this.clearVote();
+  closePolls() {
+    this.db.object(`${this.divisionPath}/vote/state`).set('review');
   }
+
+  onFundsChange(funds) {
+    this.voteResultFunds = funds;
+  }
+
+  collectFunds() {
+    console.log('collect', this.divisionVote.selection)
+    each(this.divisionVote.vote.funds, (source) => {
+      const sourceKey = source.key.split('-')[0];
+      if (sourceKey === 'reserve') {
+        console.log("take from reserve");
+        this.bank.spendResources(`${this.divisionPath}/reserve`, source.value)
+      }
+    })
+  };
+
+  fundResolution() {
+    const availableFunds = this.voteResultFunds;
+    const requiredFunds = toNumber(this.divisionVote.selection.cost);
+
+    let warning = null;
+
+    if (availableFunds < requiredFunds) {
+      warning = `Not enough funds to enact this resolution. Required funds: ${requiredFunds}. Provided funds: ${availableFunds}.`
+    } else if (availableFunds > requiredFunds) {
+      warning = `Warning: You are over-paying for this resolution. Extra funds will be added the reserve. Required funds: ${requiredFunds}. Provided funds: ${availableFunds}.`
+    }
+    return { 
+      canEnact: availableFunds >= requiredFunds,
+      warning
+    }
+  }
+
+  implement() {
+    console.log('IMPLEMENT: ', this.divisionVote)
+    let confirmed = false;
+    if (this.divisionVote.vote.type === 'resolution') {
+      const fundResolutionResult = this.fundResolution();
+      if (!fundResolutionResult.canEnact) {
+        alert(fundResolutionResult.warning);
+      } else if (fundResolutionResult.warning) {
+        confirmed = confirm(fundResolutionResult.warning);
+      } else {
+        confirmed = true;
+      }
+      if (confirmed) {
+        this.collectFunds();
+        this.setResolution();
+      }
+    } else if (this.divisionVote.vote.type === 'principle') {
+      console.log('implement ', this.divisionVote.vote.type)
+      this.setPrinciple();
+    } else if (this.divisionVote.vote.type === 'scenerio') {
+      this.setScenerio();
+    }
+  }
+
   get voteReady() {
     return this.divisionVote !== undefined
   }
 
-  setResolution(vote) {
-    console.log('set reso')
+  setVoteDropdown(type) {
+    console.log("set dropdown: ", type)
+    const divisionPath = `shows/${this.showId}/divisions/${this.divisionId}`;
+    this.voteDropdown = null;
+    this.voteDropdownSelect = null;
+    
+    if (type === 'resolutions') {
+      this.db.list(`${divisionPath}/resolutions`)
+        .valueChanges()
+        .subscribe((resolutions) => {
+          this.voteType = 'resolution';
+          this.voteDropdown = differenceBy(this.globalResolutions, resolutions, 'title');
+          console.log(resolutions, this.voteDropdown);
+        });
+    } else if (type === 'principles') {
+      this.db.list(`${divisionPath}/principles`)
+        .valueChanges()
+        .subscribe((principles) => {
+          console.log('principles: ', principles)
+          this.voteType = 'principle';
+          this.voteDropdown = differenceBy(this.globalPrinciples, principles, 'title');
+          console.log(principles, this.voteDropdown);
+        })
+    } else if (type === 'scenerios') {
+      this.db.list(`${divisionPath}/scenerios`)
+        .valueChanges()
+        .subscribe((scenerios) => {
+          this.voteType = 'scenerio';
+          this.voteDropdown = differenceBy(this.globalScenerios, scenerios, 'title');
+          console.log(scenerios, this.voteDropdown);
+        })
+    }
+  }
+
+  setScenerio() {
+    const scenerio = `${this.divisionVote.vote.result} ${this.divisionVote.selection.result}`;
+
+    this.db.object(`${this.divisionPath}/vote`).update({
+      state: 'final',
+      selected: this.divisionVote.selection
+    })
+
+    this.db.list(`${this.divisionPath}/scenerios`).push({
+      title: this.divisionVote.vote.title,
+      value: scenerio
+    })
+  }
+
+  setPrinciple() {
+    const principle = `${this.divisionVote.vote.result} ${this.divisionVote.selection.result}`;
+
+    this.db.object(`${this.divisionPath}/vote`).update({
+      state: 'final',
+      selected: this.divisionVote.selection
+    })
+
+    this.db.list(`${this.divisionPath}/principles`).push({
+      title: this.divisionVote.vote.title,
+      value: principle
+    })
+  }
+
+  setResolution() {
+    const resolution = `${this.divisionVote.vote.result} ${this.divisionVote.selection.result}`;
+    const consequence = this.divisionVote.selection.consequence;
+
+    this.db.object(`${this.divisionPath}/vote`).update({
+      state: 'final',
+      selected: this.divisionVote.selection
+    })
+
     this.db.list(`${this.divisionPath}/resolutions`).push({
-      event: vote.prompt,
-      resolution: vote.value
+      title: this.divisionVote.vote.title,
+      value: resolution,
+      consequence, 
+      cosequencesImplemented: false
     })
   }
 
   clearVote() {
     this.divisionVote = null;
-    this.voteNotes = '';
+    this.action = 'resolution-review';
     this.db.object(`${this.divisionPath}/vote`).set(null);
   }
 

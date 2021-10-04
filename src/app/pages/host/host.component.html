@@ -10,10 +10,45 @@
   ]">
 </app-tabs>
 
+<div *ngIf="showModal === true" class="modal-wrap">
+  <div class="modal">
+    <button (click)="showModal = false">Close</button>
+    <ng-container *ngTemplateOutlet="modalContent"></ng-container>
+  </div>
+</div>
+
+<ng-template #harvestTemplate>
+  Start harvest
+  <button>Start</button>
+</ng-template>
+
+<ng-template #voteTemplate>
+  Vote for: 
+  <div class="button-row">
+    <button (click)="setVoteDropdown('resolutions')">Resolution</button>
+    <button (click)="setVoteDropdown('principles')">Principle</button>
+    <button (click)="setVoteDropdown('scenerios')">Scenerio</button>
+  </div>
+
+  <select
+    *ngIf="voteDropdown"
+    [(ngModel)]="voteDropdownSelect"
+    name="vote-options"
+    id="vote-options">
+    <option
+      *ngFor="let option of voteDropdown"
+      [ngValue]="option">
+      {{option?.title}}
+    </option>
+  </select>
+
+  <button *ngIf="voteDropdownSelect" (click)="startVote()">Vote</button>
+</ng-template>
+
 <div class="host-main">
   <div class="button-row">
-    <button (click)="focus = 'harvest'">Harvest</button>
-    <button (click)="focus = 'resolution'">Resolution</button>
+    <button (click)="setFocus('harvest')">Harvest</button>
+    <button (click)="setFocus('vote')">Vote</button>
   </div>
   <div *ngIf="focus === 'harvest'" class="harvest-wrapper">
     <h1>Harvest</h1>
@@ -29,32 +64,38 @@
       [updatePath]="landTilesPath"> 
     </app-land-grid>
   </div>
-  <div *ngIf="focus === 'resolution'" class="resolution-wrapper">
-    <h1>Resolution</h1>
-    <div *ngIf="action !== 'voting'">
-      {{ resPrompt }}
-      <button (click)="startVote()" class="large-action-button">
-        Start Vote
-      </button>
-    </div>
-    <ng-container *ngIf="action === 'voting'">
+
+  <div *ngIf="focus === 'vote'" class="resolution-wrapper">
+    <!-- <ng-container *ngIf="action === 'funding'">
+      Resolution:  {{ divisionVote?.value }}
+      <button (click)="enactVoteResult()">Enact resolution</button>
+      <button (click)="clearVote()">Cancel resolution</button>
+    </ng-container> -->
+    <ng-container *ngIf="($vote | async) as vote">
       <app-vote 
         (selectionChange)="onSelectionChange($event)"
         [showVotes]="true"
+        [allowSelection]="vote?.state === 'review'"
         [showId]="showId"
         [divisionId]="divisionId"
-        [includeOtherOption]="true"
       ></app-vote>
-      <ng-container *ngIf="divisionVote && divisionVote.value !== ''">
-        <h2>Set Resolution</h2>
-        <button (click)="resolveVote()">CONFIRM</button>
-      </ng-container>
+      <app-fundraising
+        *ngIf="vote?.state === 'review' && voteType === 'resolution'"
+        [showKey]="showId"
+        [divisionKey]="divisionId"
+        [isCentral]="true"
+        (fundsChange)="onFundsChange($event)"
+        >
+      </app-fundraising>
+      <button *ngIf="vote?.state === 'voting'" (click)="closePolls()">Close Polls</button>
+      <button *ngIf="vote?.state === 'review' && divisionVote" (click)="implement()">Implement</button>
     </ng-container>
+
   </div>
 </div>
 
 <!-- TABS-->
-<ng-template #division>Division</ng-template>
+<ng-template #division>{{divisionId}}</ng-template>
 <ng-template #global>Global</ng-template>
 <ng-template #io>I/O</ng-template>
 <ng-template #central>Central</ng-template>
@@ -62,12 +103,68 @@
 
 <!-- DIVISION -->
 <ng-template #divisionBody>
-  <app-society-summary
-    *ngIf="division"
-    details="full"
-    [division]="division">
-  </app-society-summary>
-  <button (click)="newSeason()">New Season</button>
+  <div class="stack" *ngIf="$division | async as division">
+    <div class="tab-card">
+      <h2>Division</h2>
+      <div><strong>Score: </strong>{{ division.score }}</div>
+      <div><strong>Harvested: </strong>
+        {{ division.harvested }} ({{ percentHarvested(division.harvested, division.capacity) }}% of capacity)
+      </div>
+      <div><strong>Season:</strong>
+        {{ division.season }}
+        <button (click)="newSeason()">New Season</button>
+      </div>
+      <hr/>
+      <div>
+        <strong>Land cost: </strong>{{ division.landCost }}
+        <button (click)="changeDivisionProperty('landCost')">Change</button>
+      </div>
+      <div>
+        <strong>Capacity: </strong>
+        {{ division.capacity }}
+        <button (click)="changeDivisionProperty('capacity')">Change</button>
+      </div>
+      <div>
+        <strong>Extra: </strong>
+        {{ division.extra }}
+        <button (click)="changeDivisionProperty('extra')">Change</button>
+      </div>
+      <div><strong>Harvest size:</strong>
+        {{ division.harvest }}
+        <button (click)="changeDivisionProperty('harvest')">Change</button>
+      </div>
+    </div>
+
+    <div class="tab-card">
+      <h2>Citizens</h2>
+      <div *ngFor="let citizen of division.citizens">
+        <div><strong>{{citizen.id}}</strong>: <button>{{citizen.name}}</button></div>
+        <div><strong>Resources: </strong>{{ citizen.resources.length }}</div>
+      </div>
+    </div>
+
+    <div class="tab-card">
+      <h2>Resolutions</h2>
+      <p *ngFor="let resolution of ($resolutions | async)">
+        {{ resolution.value }}
+      </p>
+    </div>
+
+    <div class="tab-card">
+      <h2>Principles</h2>
+      <p *ngFor="let principle of ($principles | async)">
+        {{ principle.value }}
+      </p>
+    </div>
+
+    <div class="tab-card">
+      <h2>Scenerios</h2>
+      <p *ngFor="let scenerio of ($scenerios | async)">
+        {{ scenerio.value }}
+      </p>
+    </div>
+  </div>
+
 </ng-template>
 
 <!-- GLOBAL -->

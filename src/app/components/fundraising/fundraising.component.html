@@ -1,0 +1,19 @@
+
+<ng-container *ngIf="($funds | async) as funds">
+  <div class="contributers">
+    Funds contributed: {{ totalFunds }}
+    <ng-container *ngFor="let fund of funds">
+      <div *ngIf="fund?.value && fund?.name">
+        {{fund.name}}: {{fund.value}}
+        <button 
+          (click)="takeBack(fund.value)"
+          *ngIf="fundsAdded(funds) && fund.key == fundsKey">
+          Take back
+        </button>
+      </div>
+    </ng-container>
+  </div>
+  <div class="flex-row" *ngIf="!fundsAdded(funds)">
+    <app-number-change [writePath]="writePath" [min]="0" [max]="$max | async"></app-number-change>
+  </div>
+</ng-container>

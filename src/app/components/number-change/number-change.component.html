@@ -1,0 +1,11 @@
+<div class="flex-row">
+  <ng-number-picker
+    class="number-picker"
+    [arrowKeys]="true"
+    [max]="[max]"
+    [min]="[min]"
+    (valueChange)="onValueChange($event)"
+    [(value)]="value">
+  </ng-number-picker>
+  <button (click)="write()">Contribute</button>
+</div>
