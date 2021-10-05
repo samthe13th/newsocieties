@@ -21,7 +21,7 @@ export class FundraisingComponent {
   @Input() showKey: string;
   @Input() divisionKey: string;
 
-  $max;
+  max = 10000;
   min = 0;
   writePath;
   fundsKey;
@@ -51,13 +51,13 @@ export class FundraisingComponent {
             name: c.name
           })
         })
-      this.$max = this.db.list(`${citizenPath}/resources`)
+      this.db.list(`${citizenPath}/resources`)
         .valueChanges()
         .pipe(
-          map((resources: number[]) => {
-            return resources.reduce((acc, R) => acc + R, 0);
-          })
-        )
+          map((resources: number[]) => resources.reduce((acc, R) => acc + R, 0))
+        ).subscribe((x) =>{
+          this.max = x
+        })
     } else {
       this.fundsKey = 'reserve';
       this.writePath = `${this.divisionPath}/vote/funds/reserve/value`;
@@ -65,14 +65,10 @@ export class FundraisingComponent {
         key: 'reserve',
         name: 'Reserve'
       })
-      this.$max = this.db.list(`${this.divisionPath}/reserve`)
-        .valueChanges()
-        .pipe(
-          map((resources: number[]) => {
-            console.log("resources: ", resources)
-            return resources.reduce((acc, R) => acc + R, 0)
-          })
-        )
+      console.log('set max obs')
+      this.db.object(`${this.divisionPath}/reserve`).valueChanges().subscribe((x:number) => {
+        this.max = x;
+      });
     }
   }
 

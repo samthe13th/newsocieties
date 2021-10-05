@@ -103,13 +103,13 @@ export class CentralComponent implements OnInit, AfterViewInit {
       }
     })
     data.shift();
+
     return data;
   }
 
   parseSceneriosData(_data) {
     const data = _data.map(([title, _header, ...options]) => {
       const header = _header.split('|');
-      console.log({options})
 
       return {
         title,
@@ -125,6 +125,7 @@ export class CentralComponent implements OnInit, AfterViewInit {
       }
     });
     data.shift();
+
     return data;
   }
 
@@ -150,6 +151,7 @@ export class CentralComponent implements OnInit, AfterViewInit {
       }
     });
     data.shift();
+
     return data;
   }
 
@@ -181,7 +183,7 @@ export class CentralComponent implements OnInit, AfterViewInit {
 
   updateVoteData(type) {
     console.log('update vote data for ', type)
-    this.db.object(`shows/${this.showKey}/${type}`)
+    this.db.object(type)
       .set(this.voteData[type])
       .then(() => {
         this.showModal = false;
@@ -211,25 +213,21 @@ export class CentralComponent implements OnInit, AfterViewInit {
   }
 
   submitChat(division) {
-    console.log("SUBMIT: ", division, this.showKey, this.chatInput);
     if (!trim(this.chatInput)) return;
     
     this.db.list(`shows/${this.showKey}/feeds/${division}`)
       .push({ from: 'central', type: 'chat', value: this.chatInput })
       .then((res) => { 
-        console.log('callback: ', res)
         this.chatInput = "";
       })
   }
 
   sendEvent(division) {
-    console.log('sent event')
     this.db.list(`shows/${this.showKey}/feeds/${division}`)
       .push({ from: 'central', type: 'event', value: 'This is an event!' })
   }
 
   sendBroacastNotification(division) {
-    console.log("notification");
     this.db.list(`shows/${this.showKey}/feeds/${division}`)
       .push({ from: 'central', type: 'broadcast' })
   }

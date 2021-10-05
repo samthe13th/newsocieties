@@ -1,7 +1,8 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnDestroy } from '@angular/core';
 import { AngularFireDatabase } from '@angular/fire/database';
-import { take } from 'rxjs/operators';
-import { pipe } from 'rxjs'
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { toNumber  } from 'lodash';
 
 @Component({
   selector: 'app-number-change',
@@ -11,24 +12,24 @@ import { pipe } from 'rxjs'
     '[class.app-number-change]': 'true'
   }
 })
-export class NumberChangeComponent {
+export class NumberChangeComponent implements OnDestroy {
+  private destroy$ = new Subject<boolean>();
+
+  @Output() afterUpdate = new EventEmitter<number>();
+
   @Input() writePath: string;
   @Input() readPath: string;
-  @Input() updateButton: {
-    text: string,
-    update: () => void,
-  }
+  @Input() updateButtonText = 'Update';
   @Input() value = 0;
+  @Input() min;
 
   private _max;
   @Input() 
   get max() { return this._max }
   set max(value) {
-    this._max = value ?? 0;
-    console.log('set max: ', this._max)
+    this._max = toNumber(value) ?? 0;
+    this.value = Math.min(this._max, this.value);
   }
-
-  @Input() min;
 
   constructor(private db: AngularFireDatabase) {
   }
@@ -37,7 +38,9 @@ export class NumberChangeComponent {
     if (this.readPath) {
       this.db.object(this.readPath)
         .valueChanges()
-        .pipe(take(1))
+        .pipe(
+          takeUntil(this.destroy$)
+        )
         .subscribe((n: number) => {
           this.value = n;
         })
@@ -49,8 +52,13 @@ export class NumberChangeComponent {
   }
 
   write() {
-    console.log("write... ", this.writePath, this.value)
-    this.db.object(this.writePath).set(this.value);
-    this.value = 0;
+    this.db.object(this.writePath).set(this.value).then(() => {
+      this.afterUpdate.emit(this.value);
+    })
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next(true);
+    this.destroy$.unsubscribe();
   }
 }

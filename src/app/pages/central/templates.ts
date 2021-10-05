@@ -42,11 +42,11 @@ export const DIVISION_TEMPLATE = {
   messages: [],
   incomingAnnouncement: null,
   announcements: [],
-  reserve: [1, 2, 3, 2],
+  reserve: 0,
   reserveThresholds: {
     low: 7, 
     mid: 12,
-    hight: 17
+    high: 17
   },
   capacity: 18,
   extra: 8,

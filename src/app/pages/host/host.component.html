@@ -80,7 +80,7 @@
         [divisionId]="divisionId"
       ></app-vote>
       <app-fundraising
-        *ngIf="vote?.state === 'review' && voteType === 'resolution'"
+        *ngIf="vote?.state === 'review' && vote?.type === 'resolution'"
         [showKey]="showId"
         [divisionKey]="divisionId"
         [isCentral]="true"
@@ -116,6 +116,10 @@
       </div>
       <hr/>
       <div>
+        <strong>Reserve: </strong>{{ division.reserve }}
+        <button (click)="changeDivisionProperty('reserve')">Change</button>
+      </div>
+      <div>
         <strong>Land cost: </strong>{{ division.landCost }}
         <button (click)="changeDivisionProperty('landCost')">Change</button>
       </div>
@@ -144,16 +148,16 @@
     </div>
 
     <div class="tab-card">
-      <h2>Resolutions</h2>
-      <p *ngFor="let resolution of ($resolutions | async)">
-        {{ resolution.value }}
+      <h2>Principles</h2>
+      <p *ngFor="let principle of ($principles | async)">
+        {{ principle.value }}
       </p>
     </div>
 
     <div class="tab-card">
-      <h2>Principles</h2>
-      <p *ngFor="let principle of ($principles | async)">
-        {{ principle.value }}
+      <h2>Resolutions</h2>
+      <p *ngFor="let resolution of ($resolutions | async)">
+        {{ resolution.value }}
       </p>
     </div>
 
@@ -200,4 +204,16 @@
   </div>
   <br/>
   <textarea [style.font-size.px]="fontSize" class="host-notes">Type notes here!</textarea>
+</ng-template>
+
+<!-- UPDATE SHEET -->
+<ng-template #updateSheet>
+  <div class="action-sheet">
+    {{ changeAttribute?.name }}
+    <app-number-change
+      (afterUpdate)="onAttributeUpdate($event)"
+      [readPath]="changeAttribute?.dbPath"
+      [writePath]="changeAttribute?.dbPath">
+    </app-number-change>
+  </div>
 </ng-template>

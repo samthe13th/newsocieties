@@ -6,6 +6,7 @@ import { LandTile, LandCardValues } from 'src/app/interfaces';
 import { includes, range, difference, trim, differenceBy, toNumber, each } from 'lodash';
 import { take } from 'rxjs/operators'
 import { BankService } from 'src/app/services/bank.service';
+import { MatBottomSheet } from '@angular/material/bottom-sheet';
 
 @Component({
   selector: 'app-host',
@@ -18,7 +19,8 @@ import { BankService } from 'src/app/services/bank.service';
 export class HostComponent implements OnInit {
   @ViewChild('harvestTemplate') harvestTemplate: TemplateRef<any>;
   @ViewChild('voteTemplate') voteTemplate: TemplateRef<any>;
-
+  @ViewChild('updateSheet') updateSheet: TemplateRef<any>;
+  
   modalContent: TemplateRef<any>;
 
   showModal = false;
@@ -29,6 +31,8 @@ export class HostComponent implements OnInit {
   $principles;
   $scenerios;
 
+  changeAttribute;
+  actionSheet;
   voteResultFunds = 0;
   division;
   contamination;
@@ -61,6 +65,7 @@ export class HostComponent implements OnInit {
     private db: AngularFireDatabase,
     private route: ActivatedRoute,
     private bank: BankService,
+    private bottomSheet: MatBottomSheet,
   ) {}
 
   ngOnInit() {
@@ -88,8 +93,18 @@ export class HostComponent implements OnInit {
     this.getScenerios();
   }
 
+  onAttributeUpdate(value) {
+    this.actionSheet.dismiss();
+    console.log('on update: ', value)
+  }
+
   changeDivisionProperty(prop) {
     console.log("change: ", prop)
+    this.changeAttribute = {
+      name: prop,
+      dbPath: `${this.divisionPath}/${prop}`
+    }
+    this.actionSheet = this.bottomSheet.open(this.updateSheet);
   }
 
   percentHarvested(harvested, capacity) {
@@ -97,7 +112,7 @@ export class HostComponent implements OnInit {
   }
 
   getResolutions() {
-    this.db.list(`shows/${this.showId}/resolutions`)
+    this.db.list(`resolutions`)
       .valueChanges()
       .pipe(take(1))
       .subscribe((resolutions) => {
@@ -106,7 +121,7 @@ export class HostComponent implements OnInit {
   }
 
   getPrinciples() {
-    this.db.list(`shows/${this.showId}/principles`)
+    this.db.list(`principles`)
       .valueChanges()
       .pipe(take(1))
       .subscribe((principles) => {
@@ -116,7 +131,7 @@ export class HostComponent implements OnInit {
   }
 
   getScenerios() {
-    this.db.list(`shows/${this.showId}/scenerios`)
+    this.db.list(`scenerios`)
       .valueChanges()
       .pipe(take(1))
       .subscribe((scenerios) => {
@@ -170,7 +185,7 @@ export class HostComponent implements OnInit {
       const sourceKey = source.key.split('-')[0];
       if (sourceKey === 'reserve') {
         console.log("take from reserve");
-        this.bank.spendResources(`${this.divisionPath}/reserve`, source.value)
+        this.bank.removeFromReserve(this.divisionPath, source.value)
       }
     })
   };

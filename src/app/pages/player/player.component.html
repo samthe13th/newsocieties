@@ -75,7 +75,7 @@
           [showVotes]="vote?.state === 'review'"
           [allowSelection]="vote?.state === 'voting'"
           [showId]="showKey"
-          [hideLast]="vote?.type !== 'principles'"
+          hideOption="last"
           [divisionId]="division.code"
         ></app-vote>
         <button *ngIf="!hasVoted && vote?.state === 'voting'" (click)="castVote()">Vote</button>

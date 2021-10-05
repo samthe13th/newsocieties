@@ -1,12 +1,35 @@
 
 import { Injectable } from '@angular/core';
 import { AngularFireDatabase } from '@angular/fire/database';
-import { take } from 'rxjs/operators'
+import { take } from 'rxjs/operators';
+import { toNumber } from 'lodash';
 
 @Injectable({ providedIn: 'root' })
 export class BankService {
   constructor(private db: AngularFireDatabase) {
 
+  }
+
+  async removeFromReserve(divisionPath, amount) {
+    const reservePath = `${divisionPath}/reserve`;
+    const reserve = await this.db.object(reservePath).valueChanges()
+      .pipe(take(1))
+      .toPromise();
+
+    const difference = Math.max(0, toNumber(reserve) - amount)
+
+    console.log('remove from reserve');
+    this.db.object(reservePath).set(difference);
+  }
+
+  async addToReserve(divisionPath, amount) {
+    const reservePath = `${divisionPath}/reserve`;
+    const reserve = await this.db.object(reservePath).valueChanges()
+      .pipe(take(1))
+      .toPromise();
+
+    console.log('add to reserve');
+    this.db.object(reservePath).set(toNumber(reserve) + amount);
   }
 
   async spendResources(resourcePath, cost) {

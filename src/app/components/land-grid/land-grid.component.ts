@@ -3,6 +3,7 @@ import { range, chunk, isEqual, isEmpty } from 'lodash';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { LandCardValues, LandTile } from 'src/app/interfaces';
 
 const MAX_HARVEST = 49;
@@ -42,6 +43,7 @@ export class LandGridComponent implements OnInit {
   ngOnInit() {
     this.db.object(this.updatePath)
       .valueChanges()
+      .pipe(takeUntil(this.destroy$))
       .subscribe((tiles: any[]) => {
         if (!this.landTiles) {
           this.landTiles = tiles;
@@ -69,6 +71,7 @@ export class LandGridComponent implements OnInit {
 
   ngOnDestroy() {
     this.destroy$.next(true);
+    this.destroy$.unsubscribe();
   }
 
   cardUpdates(tiles) {

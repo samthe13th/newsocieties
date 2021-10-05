@@ -1,4 +1,3 @@
-
 <ng-container *ngIf="($funds | async) as funds">
   <div class="contributers">
     Funds contributed: {{ totalFunds }}
@@ -13,7 +12,12 @@
       </div>
     </ng-container>
   </div>
-  <div class="flex-row" *ngIf="!fundsAdded(funds)">
-    <app-number-change [writePath]="writePath" [min]="0" [max]="$max | async"></app-number-change>
+  <div class="flex-row" *ngIf="max && max > 0">
+    <app-number-change
+      updateButtonText="Contribute" 
+      [writePath]="writePath"
+      [min]="0"
+      [max]="max">
+    </app-number-change>
   </div>
 </ng-container>
