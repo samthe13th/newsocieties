@@ -18,7 +18,7 @@ export class BankService {
 
     const difference = Math.max(0, toNumber(reserve) - amount)
 
-    console.log('remove from reserve');
+    console.log('remove from reserve: ', reserve, amount);
     this.db.object(reservePath).set(difference);
   }
 

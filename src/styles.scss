@@ -70,6 +70,10 @@ button {
   }
 }
 
+.indented-list {
+  margin-left: 20px;
+}
+
 .app-tabs {
   height: 100%;
   width: 100%;
@@ -139,7 +143,7 @@ button {
  }
 
 .player-selected-tab {
-  background: #394D6B;
+  background: black;
   color: white;
 }
 

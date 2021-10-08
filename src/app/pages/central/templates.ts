@@ -1,24 +1,44 @@
 export const DIVISION_TEMPLATE = {
-  achievements: {
+  advancements: {
     safety: {
-     accomplishedBy: null,
-     reward: 'Exploring a contamination will not affect the harvest line.'
+      communal: 0,
+      individual: 0,
+      reward: {
+        name: 'SafeExplore',
+        text: 'Exploring a contamination will not affect the harvest line.'
+      }
     },
     health: {
-      accomplishedBy: null,
-      reward: 'Gathering a contamination will not affect your hand.'
+      communal: 0,
+      individual: 0,
+      reward: {
+        name: 'SafeGather',
+        text: 'Gathering a contamination will not affect your hand.'
+      }
     },
     arts: {
-      accomplishedBy: null,
-      reward: 'The effect is immeasurable.'
+      individual: 0,
+      communal: 0,
+      reward: {
+        name: 'None',
+        text: 'The effect is immeasurable.'
+      }
     },
     knowledge: {
-      accomplishedBy: null,
-      reward: 'Peek at one resource on the harvest line without exploring.'
+      individual: 0,
+      communal: 0,
+      reward: {
+        name: 'Peak',
+        text: 'Peek at one resource on the harvest line without exploring.'
+      }
     },
     infastructure: {
-      accomplishedBy: null,
-      reward: '+1 action.'
+      individual: 0,
+      communal: 0,
+      reward: {
+        name: 'ExtraAction',
+        text: '+1 action.'
+      }
     }
   },
   imports: {
@@ -26,6 +46,12 @@ export const DIVISION_TEMPLATE = {
     gla: [],
     resources: [],
     players: []
+  },
+  nextSeason: {
+    season: 1,
+    capacity: 18,
+    extra: 8,
+    harvest: 25
   },
   exports: {
     messages: [],
@@ -36,24 +62,14 @@ export const DIVISION_TEMPLATE = {
   landCost: 5,
   VP: 0,
   score: 'Low',
-  principles: [],
-  resolutions: [],
-  season: 1,
-  messages: [],
-  incomingAnnouncement: null,
-  announcements: [],
+  season: 0,
   reserve: 0,
   reserveThresholds: {
     low: 7, 
     mid: 12,
     high: 17
   },
-  capacity: 18,
-  extra: 8,
-  harvest: 25,
-  harvested: 20,
-  land: [],
-  citizens: []
+  harvested: 0,
 }
 
 export const SHOW_TEMPLATE = {
@@ -65,7 +81,6 @@ export const SHOW_TEMPLATE = {
     current: 5,
     formula: 'linear'
   },
-  newsFeed: [],
   content: {},
   global: {
     actual: 63,

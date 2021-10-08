@@ -241,6 +241,7 @@ export class CentralComponent implements OnInit, AfterViewInit {
   }
 
   generateDivisions() {
+    console.log('gen div: ', DIVISION_TEMPLATE)
     return DIVISIONS.reduce((acc, abv) => ({ 
       ...acc, 
       [abv]: { 

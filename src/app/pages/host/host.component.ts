@@ -98,10 +98,10 @@ export class HostComponent implements OnInit {
     console.log('on update: ', value)
   }
 
-  changeDivisionProperty(prop) {
+  changeDivisionProperty(prop, name=null) {
     console.log("change: ", prop)
     this.changeAttribute = {
-      name: prop,
+      name: name ?? prop,
       dbPath: `${this.divisionPath}/${prop}`
     }
     this.actionSheet = this.bottomSheet.open(this.updateSheet);
@@ -180,12 +180,16 @@ export class HostComponent implements OnInit {
   }
 
   collectFunds() {
-    console.log('collect', this.divisionVote.selection)
     each(this.divisionVote.vote.funds, (source) => {
       const sourceKey = source.key.split('-')[0];
+      if (!source?.value) { return }
       if (sourceKey === 'reserve') {
-        console.log("take from reserve");
+        console.log("take from reserve: ", source, this.divisionVote.vote);
         this.bank.removeFromReserve(this.divisionPath, source.value)
+      } else {
+        const path = `${this.divisionPath}/citizens/${sourceKey}/resources`;
+        console.log({path})
+        this.bank.spendResources(path, source.value)
       }
     })
   };
@@ -208,7 +212,6 @@ export class HostComponent implements OnInit {
   }
 
   implement() {
-    console.log('IMPLEMENT: ', this.divisionVote)
     let confirmed = false;
     if (this.divisionVote.vote.type === 'resolution') {
       const fundResolutionResult = this.fundResolution();
@@ -224,7 +227,6 @@ export class HostComponent implements OnInit {
         this.setResolution();
       }
     } else if (this.divisionVote.vote.type === 'principle') {
-      console.log('implement ', this.divisionVote.vote.type)
       this.setPrinciple();
     } else if (this.divisionVote.vote.type === 'scenerio') {
       this.setScenerio();

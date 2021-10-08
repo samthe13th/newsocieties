@@ -106,36 +106,87 @@
   <div class="stack" *ngIf="$division | async as division">
     <div class="tab-card">
       <h2>Division</h2>
+
       <div><strong>Score: </strong>{{ division.score }}</div>
-      <div><strong>Harvested: </strong>
-        {{ division.harvested }} ({{ percentHarvested(division.harvested, division.capacity) }}% of capacity)
-      </div>
+      <hr/>
       <div><strong>Season:</strong>
         {{ division.season }}
         <button (click)="newSeason()">New Season</button>
       </div>
-      <hr/>
-      <div>
-        <strong>Reserve: </strong>{{ division.reserve }}
-        <button (click)="changeDivisionProperty('reserve')">Change</button>
-      </div>
-      <div>
-        <strong>Land cost: </strong>{{ division.landCost }}
-        <button (click)="changeDivisionProperty('landCost')">Change</button>
+      <div><strong>Harvested: </strong>
+        {{ division.harvested }} <span *ngIf="division.harvested">({{ percentHarvested(division.harvested, division.capacity) }}% of capacity)</span>
       </div>
       <div>
         <strong>Capacity: </strong>
-        {{ division.capacity }}
-        <button (click)="changeDivisionProperty('capacity')">Change</button>
+        {{ division?.capacity }} -> {{ division.nextSeason.capacity }}
+        <button (click)="changeDivisionProperty('nextSeason/capacity', 'Next Season: capacity')">Change</button>
       </div>
       <div>
         <strong>Extra: </strong>
-        {{ division.extra }}
-        <button (click)="changeDivisionProperty('extra')">Change</button>
+        {{ division?.extra }} -> {{ division.nextSeason.extra }}
+        <button (click)="changeDivisionProperty('nextSeason/extra', 'Next Season: extra')">Change</button>
       </div>
       <div><strong>Harvest size:</strong>
-        {{ division.harvest }}
-        <button (click)="changeDivisionProperty('harvest')">Change</button>
+        {{ division?.harvest }} -> {{ division.nextSeason.harvest }}
+        <button (click)="changeDivisionProperty('nextSeason/harvest', 'Next Season: harvest')">Change</button>
+      </div>
+
+      <hr/>
+
+      <div>
+        <strong>Reserve: </strong>
+        {{ division.reserve }}
+        <button (click)="changeDivisionProperty('reserve')">Change</button>
+      </div>
+      <div>
+        <strong>Reserve thresholds</strong>
+        <div class="indented-list">
+          <div>
+            <strong>High: </strong>{{ division?.reserveThresholds.high }}
+            <button (click)="changeDivisionProperty('reserveThresholds/high', 'high')">Change</button>
+          </div>
+          <div>
+            <strong>Mid: </strong>{{ division?.reserveThresholds.mid }}
+            <button (click)="changeDivisionProperty('reserveThresholds/mid', 'mid')">Change</button>
+          </div>
+          <div>
+            <strong>Low: </strong>{{ division?.reserveThresholds.low }}
+            <button (click)="changeDivisionProperty('reserveThresholds/low', 'low')">Change</button>
+          </div>
+        </div>
+      </div>
+
+      <hr/>
+
+      <div>
+        <strong>Advancements</strong>
+        <div class="indented-list">
+          <div>
+            <strong>Arts: </strong>{{ division.advancements.arts.individual + division.advancements.arts.communal }} [{{ division.advancements.arts.communal }}]
+            <button (click)="changeDivisionProperty('advancements/arts/communal', 'communal arts')">Change</button>
+          </div>
+          <div>
+            <strong>Health: </strong>{{ division.advancements.health.individual + division.advancements.health.communal }} [{{ division.advancements.health.communal }}]
+            <button (click)="changeDivisionProperty('advancements/health/communal', 'communal health')">Change</button>
+          </div>
+          <div>
+            <strong>Safety: </strong>{{ division.advancements.safety.individual + division.advancements.safety.communal }} [{{ division.advancements.safety.communal }}]
+            <button (click)="changeDivisionProperty('advancements/safety/communal', 'communal safety')">Change</button>
+          </div>
+          <div>
+            <strong>Knowledge: </strong>{{ division.advancements.knowledge.individual + division.advancements.knowledge.communal }} [{{ division.advancements.knowledge.communal }}]
+            <button (click)="changeDivisionProperty('advancements/knowledge/communal', 'communal knowledge')">Change</button>
+          </div>
+          <div>
+            <strong>Infastructure: </strong>{{ division.advancements.infastructure.individual + division.advancements.infastructure.communal }} [{{ division.advancements.infastructure.communal }}]
+            <button (click)="changeDivisionProperty('advancements/infastructure/communal', 'communal infastructure')">Change</button>
+          </div>
+        </div>
+      </div>
+      <div>
+        <strong>Land cost: </strong>
+        {{ division.landCost }}
+        <button (click)="changeDivisionProperty('landCost')">Change</button>
       </div>
     </div>
 
@@ -143,7 +194,7 @@
       <h2>Citizens</h2>
       <div *ngFor="let citizen of division.citizens">
         <div><strong>{{citizen.id}}</strong>: <button>{{citizen.name}}</button></div>
-        <div><strong>Resources: </strong>{{ citizen.resources.length }}</div>
+        <div><strong>Resources: </strong>{{ citizen.resources?.length }}</div>
       </div>
     </div>
 
