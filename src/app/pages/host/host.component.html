@@ -111,7 +111,7 @@
       <hr/>
       <div><strong>Season:</strong>
         {{ division.season }}
-        <button (click)="newSeason()">New Season</button>
+        <button (click)="newSeason(division)">New Season</button>
       </div>
       <div><strong>Harvested: </strong>
         {{ division.harvested }} <span *ngIf="division.harvested">({{ percentHarvested(division.harvested, division.capacity) }}% of capacity)</span>

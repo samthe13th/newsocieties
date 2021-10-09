@@ -11,25 +11,16 @@
     <div class="player-folder__tab-division">
       {{ division?.code }}
     </div>
-    Season {{ division?.season }}
+    <h1>Season {{ division?.season }}: {{division?.focus}}</h1>
   </ng-template>
 
   <ng-template #global>Global</ng-template>
 
   <ng-template #divisionBody>
     <ng-container *ngIf="focus === 'harvest'">
-      <div class="player-hints">
-        It's your turn! Click on a harvest resource to explore or gather.
-      </div>
+      <div class="player-hints"></div>
       <div class="flex-row">
         <div class="player-folder__body-harvest">
-          <div class="player-folder__body-title">
-            <h1>Harvest</h1>
-            <div class="harvest-details">
-              <div>Capacity: {{division?.capacity}}+{{division?.extra}}</div>
-              <div>Harvested: {{division?.harvested}}</div>
-            </div>
-          </div>
           <app-land-grid 
             #landGrid
             [markCards]="false"
@@ -41,6 +32,27 @@
           ></app-land-grid>
         </div>
         <div class="player-folder__body-citizens space-between">
+          <div class="harvest-details">
+            <div class="flex-column stretch-h">
+              <div class="large">Reserve: {{division?.reserve}}</div>
+              <div class="flex-column stretch-h">
+                <div>Thresholds</div>
+                <div>
+                  {{division?.reserveThresholds.low}}
+                  | {{division?.reserveThresholds.mid}}
+                  | {{division?.reserveThresholds.high}}
+                </div>
+              </div>
+            </div>
+            <div class="flex-column stretch-h">
+              <div class="large">Harvested: {{division?.harvested}}</div>
+              <div class="flex-column stretch-h">
+                <div>Capacity</div>
+                <div>{{division?.capacity}}+{{division?.extra}}</div>
+              </div>
+            </div>
+          </div>
+           
           <app-player-deck 
             [id]="id" 
             [division]="division">
@@ -51,22 +63,22 @@
               class="citizen-summary flex-row space-between"
               *ngFor="let citizen of filterOutCitizen(division.citizens, id)">
               <div class="flex-row flex-center-v">
-                <span class="citizen-id">{{citizen.id}}</span>
                 <span>{{citizen.name}}</span>
               </div>
-              <div *ngIf="citizen">
+              <!-- <div *ngIf="citizen">
                 {{ addResources(citizen.resources) }}
-              </div>
+              </div> -->
             </div>
           </div>
     
-        <button (click)="buy({ cost: 2 })">Spend $2</button>
+          <!-- <button (click)="buy({ cost: 2 })">Spend $2</button>
           <button (click)="buy({ cost: 5 })">Spend $5</button>
-          <button (click)="buy({ cost: 6 })">Spend $6</button>
+          <button (click)="buy({ cost: 6 })">Spend $6</button> -->
         </div>
       </div>
     </ng-container>
     <ng-container *ngIf="focus === 'vote'">
+      <img class="tab-background blur" src="assets/voting-ph.jpeg"/>
       <h1>Resolution</h1>
       <div *ngIf="hasVoted && vote?.state === 'voting'">Thanks for voting! Waiting for polls to close...</div>
       <ng-container *ngIf="!(hasVoted && vote?.state === 'voting')">
@@ -86,6 +98,7 @@
           [playerId]="id">
         </app-fundraising>
       </ng-container>
+
     </ng-container>
   </ng-template>
 

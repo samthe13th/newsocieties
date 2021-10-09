@@ -33,7 +33,7 @@
 
 .player-folder__body-citizens {
   width: 100%;
-  padding-left: 20px;
+  padding-left: 10px;
   max-width: 400px;
   display: flex; 
   flex-direction: column;
@@ -42,8 +42,11 @@
   .citizen-list {
     display: flex; 
     flex-direction: column;
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 200;
+    padding: 10px;
+    border-radius: 10px;
+    border: solid 1px white;
 
     > .citizen-summary {
       margin: 5px 0;
@@ -52,27 +55,41 @@
 }
 
 .player-hints {
-  background: #2B394E;
+  background: #323232;
   padding: 20px;
-  margin-bottom: 30px;
+  margin-bottom: 10px;
+  height: 50px;
   color: white;
+  flex-shrink: 0;
   font-size: 18px;
+  border-radius: 10px;
+}
+
+.harvest-details {
+  display: flex;
+  flex-direction: row;
+  font-weight: 250;
+  font-size: 18px;
+  background: #8b4443;
+  border-radius: 10px; 
+  margin-bottom: 20px;
+
+  > * {
+    padding: 14px; 
+
+    &:last-child {
+      border-left: 1px solid white;
+    }
+  }
+
+  .large {
+    font-size: 20px; 
+    margin-bottom: 10px;
+  }
 }
 
 .player-folder__body-title {
   display: flex; 
   width: 100%;
   justify-content: space-between;
-
-  .harvest-details {
-    display: flex;
-    font-weight: 250;
-    padding-top: 10px;
-    justify-content: space-between;
-    font-size: 18px;
-
-    > :last-child {
-      margin-left: 30px;
-    }
-  }
 }

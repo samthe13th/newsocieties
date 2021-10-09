@@ -96,6 +96,13 @@ button {
   min-height: 0;
 }
 
+.app-player-deck {
+  height: 100%;
+  display: flex; 
+  flex-direction: column;
+  margin-bottom: 5px;
+}
+
 .app-player {
   @extend %app-page;
   padding-top: 5px;
@@ -140,6 +147,17 @@ button {
   button:not(:last-child) {
     margin-right: 5px;
   }
+ }
+
+ .tab-background {
+   border-radius: 10px;
+   position: absolute;
+   height: 100%; 
+   margin: 20px;
+
+   &.blur {
+     filter: blur(0.5)
+   }
  }
 
 .player-selected-tab {
@@ -289,8 +307,8 @@ button {
 }
 
 .card {
-  width: 70%;
-  height: 70%;
+  width: 75%;
+  height: 75%;
   position: absolute;
   top: 15%;
   left: 15%;
@@ -298,7 +316,7 @@ button {
   transition: opacity 1s;
   transition-delay: 0.5s;
   box-sizing: border-box;
-  border-radius: 13px;
+  border-radius: 10px;
   overflow: hidden;
   display: block;
 
@@ -388,6 +406,7 @@ button {
     background: #FDF4C5;
     padding: 12px;
     box-sizing: border-box;
+    border-radius: 10px;
 
     .tile {
       width: 100%;
@@ -456,16 +475,14 @@ button {
 }
 
 .citizen-id {
-  padding: 5px;
-  background: white;
   border-radius: 5px;
+  color: white;
   min-width: 20px;
   display: flex;
   justify-content: center;
   font-weight: 400;
   margin-right: 10px;
-  font-size: 14px;
-  color: black;
+  font-size: 16px;
 }
 
 .citizen-name {

@@ -1,23 +1,35 @@
 .player-hand {
-  align-content: flex-start;
-  display: flex; 
-  flex-wrap: wrap;
+  display: flex;
   width: 100%;
   height: 100%;
-  min-height: 140px;
-  border: solid 1px lightgrey;
-  background: white;
-  padding: 4px;
+  min-height: 50px;
+  border: solid 1px white;
+  border-radius: 10px;
   overflow: scroll;
 
+  .local-resources,
+  .gla-resources {
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    padding: 5px;
+  }
+
+  .gla-resources {
+    border-left: 1px solid white;
+  }
+
   .resource {
-    width: 30px;
-    height: 30px;
+    width: 20px;
+    height: 20px;
     font-size: 16px;
     margin: 1px;
     border-radius: 5px;
-    border: solid 1px lightgrey;
   }
+}
+
+.citizen-name {
+  font-size: 24px;
 }
 
 .player-deck__summary {

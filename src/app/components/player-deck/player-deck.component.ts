@@ -8,7 +8,7 @@ import { LandCardValues } from 'src/app/interfaces';
   templateUrl: './player-deck.component.html',
   styleUrls: ['./player-deck.component.scss'],
   host: {
-    '[class.player-deck]': 'true'
+    '[class.app-player-deck]': 'true'
   }
 })
 export class PlayerDeckComponent {

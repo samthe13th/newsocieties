@@ -53,7 +53,7 @@ export class PlayerComponent implements OnInit {
   actionSheet;
   selectedCard;
   voteSelection;
-  focus;
+  focus = 'harvest';
   hasVoted = false;
 
   // DB PATHS

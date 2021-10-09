@@ -42,7 +42,7 @@ export class HostComponent implements OnInit {
   divisionPath;
   landTilesPath;
   chatInput = "";
-  focus = 'vote';
+  focus = 'harvest';
   action = 'harvesting';
   divisionVote;
   voteNotes = "";
@@ -346,11 +346,24 @@ export class HostComponent implements OnInit {
     }
   }
 
-  newSeason() {
-    const { landTiles, harvest } = this.division;
-    this.harvest = this.generateHarvest(landTiles, harvest);
-    this.db.object(`${this.divisionPath}/landTiles`).set({ ...this.harvest })
-    console.log('NEW HARVEST: ', this.harvest)
+  newSeason(division) {
+    console.log('new season for div: ', division)
+    if (!division) return;
+    const { season, capacity, extra, harvest } = division.nextSeason;
+    this.harvest = this.generateHarvest(division.landTiles, division.nextSeason?.harvest);
+    console.log("harvest: ", this.harvest)
+    this.db.object(`${this.divisionPath}`).update({
+      season, 
+      capacity, 
+      harvest,
+      extra,
+      landTiles: this.harvest,
+      nextSeason: {
+        ...division.nextSeason,
+        season: season + 1
+      }
+    })
+    // console.log('NEW HARVEST: ', this.harvest)
   }
 
   private adjustContamination(level) {
