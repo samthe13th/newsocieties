@@ -3,20 +3,23 @@
   width: 100%;
   height: 100%;
   min-height: 50px;
-  border: solid 1px white;
-  border-radius: 10px;
   overflow: scroll;
 
   .local-resources,
   .gla-resources {
     display: flex;
+    border: solid 1px white;
     flex-wrap: wrap;
     align-content: flex-start;
+    border-radius: 10px;
+    width: 100%;
     padding: 5px;
+    overflow: auto;
+    max-height: 90px;
   }
 
   .gla-resources {
-    border-left: 1px solid white;
+    margin-left: 5px;
   }
 
   .resource {

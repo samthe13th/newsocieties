@@ -1,7 +1,11 @@
 import { Component, Input } from '@angular/core';
 import { slice } from 'lodash';
 import { Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
 import { LandCardValues } from 'src/app/interfaces';
+import { BankService } from 'src/app/services/bank.service';
+import { ActivatedRoute } from '@angular/router';
+import { AngularFireDatabase } from '@angular/fire/database';
 
 @Component({
   selector: 'app-player-deck',
@@ -12,13 +16,9 @@ import { LandCardValues } from 'src/app/interfaces';
   }
 })
 export class PlayerDeckComponent {
-  $GLAResources: Observable<any>;
+  $resources: Observable<any>;
+  $citizen: Observable<any>;
 
-  private _resources = [
-    { value: 1 }, { value: 3 }, { value: 2 },
-    { value: 1 }, { value: 3 }, { value: 2 },
-    { value: 1 }, { value: 3 }, { value: 2 },
-  ];
   private _achievements: {
     safety: [],
     health: [],
@@ -26,85 +26,64 @@ export class PlayerDeckComponent {
     knowledge: [],
     infastructure: []
   }
+
   wealth = 0;
 
   @Input() id;
   @Input() name = "Sam"
+  @Input() showKey: string;
   @Input() division;
 
-  ngOnInit() {
-    // this.resources = sortBy(this.resources, 'value');
-    this.calculateWealth()
+  constructor(
+    private route: ActivatedRoute,
+    private bank: BankService,
+    private db: AngularFireDatabase,
+  ) {
   }
 
-  get resources() { return this._resources }
-  set resources(value) {
-    this._resources = value;
+  ngOnInit() {
+    console.log('division: ', this.division)
+    // this.resources = sortBy(this.resources, 'value');
+    const { show, division, id } = this.route.snapshot.params;
+    console.log({show, division, id})
+    this.$citizen = this.db.object(`shows/${show}/divisions/${division}/citizens/${id}`)
+      .valueChanges()
+      .pipe(
+        tap((citizen) => {
+          if (!citizen) return;
+          this.wealth = citizen.resources 
+            ? citizen.resources.reduce((acc, R) => acc + R.value, 0)
+            : 0;
+          console.log("wealth: ", this.wealth)
+        })
+      )
   }
 
   public add(R) {
+    console.log({R})
     if (R.value === LandCardValues.CONTAM) {
       this.contaminateResources()
     } else {
-      this._resources.push(R);
-      this.wealth += R.value;
-      // this.resources = sortBy(this.resources, 'value')
+      console.log('make deposit')
+      this.bank.depositResources(this.showKey, this.division?.code, this.id, [{
+        ...R,
+        division: this.division?.code
+      }])
     }
-  }
-
-  public remove(id) {
-    console.log('remove resource: ', id)
-  }
-
-  public spend(cost) {
-    if (cost > this.wealth) {
-      window.alert("Sorry, you can't afford that :(")
-    } else {
-      const change = this.spendResources(cost)
-    }
-  }
-
-  private spendResources(cost) {
-    let spend = 0;
-    let transactions = 0;
-    const maxTransactions = this.resources.length;
-
-    while (spend < cost && transactions <= maxTransactions) {
-      spend += this.resources[0].value;
-      this.resources.shift();
-      transactions++;
-    }
-
-    if (cost > spend) {
-      alert('TRANSACTION DECLINED')
-    } else {
-      const change = spend - cost;
-
-      if (change > 0) {
-        this.resources.push({ value: change });
-      }
-  
-      this.calculateWealth();
-  
-      console.log('SPENT: ', spend, 'CHANGE: ', change)
-    }
-  }
-
-  private calculateWealth() {
-    this.wealth = this.resources.reduce((acc, R) => acc + R.value, 0);
   }
 
   private contaminateResources() {
-    const toDestroy = Math.ceil(this.resources.length / 2);
-    const destroyMsg = toDestroy > 0 
-      ? ` ${formatPlural(toDestroy, 'resource has', 'resources have')} been destroyed`
-      : ''
+    console.log('contam... ')
+  //   const toDestroy = Math.ceil(this.resources.length / 2);
+  //   const destroyMsg = toDestroy > 0 
+  //     ? ` ${formatPlural(toDestroy, 'resource has', 'resources have')} been destroyed`
+  //     : ''
 
-    this.resources = slice(this.resources, toDestroy)
-    this.calculateWealth();
+  //   this.resources = slice(this.resources, toDestroy)
+  //   this.calculateWealth();
 
-    window.alert(`You gathered a contaminant!${destroyMsg}`);
-  }
+  //   window.alert(`You gathered a contaminant!${destroyMsg}`);
+   }
 }
 
 function formatPlural(num, singular, plural) {

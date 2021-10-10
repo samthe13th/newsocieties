@@ -257,7 +257,6 @@ export class CentralComponent implements OnInit, AfterViewInit {
     const citizens = CITIZEN_NAMES.map((name, index) => ({
       name,
       id: index + 1,
-      resources: [3,2,1]
     }))
     console.log({citizens});
     return citizens;

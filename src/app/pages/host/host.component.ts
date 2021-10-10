@@ -361,7 +361,8 @@ export class HostComponent implements OnInit {
       nextSeason: {
         ...division.nextSeason,
         season: season + 1
-      }
+      },
+      harvested: 0,
     })
     // console.log('NEW HARVEST: ', this.harvest)
   }

@@ -148,6 +148,12 @@ export class PlayerComponent implements OnInit {
     this.selectedCard = card;
     this.actionSheet = this._bottomSheet.open(this.sheetTemplate);
     this.selectedResourceStatus = this.getResourceStatus(card);
+    this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}`).update({
+      selection: {
+        type: 'harvest-tile',
+        value: card?.index
+      }
+    })
     this.actionSheet.afterDismissed()
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => {
@@ -155,6 +161,11 @@ export class PlayerComponent implements OnInit {
           this.landGrid.clearSelection(this.selectedCard.index)
         }
       })
+  }
+
+  calculateWealth(resources) {
+    if (!resources) return 0;
+    return resources.reduce((acc, R) => acc + R.value, 0);
   }
 
   getResourceStatus(card) {
@@ -182,10 +193,6 @@ export class PlayerComponent implements OnInit {
     return {
       status: 'explored',
     }
-  }
-
-  buy(item) {
-    this.playerDeck.spend(item.cost);
   }
 
   explore() {

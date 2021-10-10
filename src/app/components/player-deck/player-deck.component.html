@@ -1,29 +1,24 @@
-<div class="player-deck__summary">
+<ng-container *ngIf="($citizen | async) as citizen">
+  <div class="player-deck__summary">
+    <div class="flex-row stretch-h">
+      <div class="citizen-name">{{citizen?.name}}</div>
+    </div>
+  </div>
   <div class="flex-row stretch-h">
-    <div class="citizen-name">{{name}}: {{wealth}}</div>
+    Resources:  {{ wealth }}
   </div>
-</div>
-<div class="flex-row stretch-h">
-  <div class="stretch-h">Local</div>
-  <div class="stretch-h">GLA</div>
-</div>
-<div class="player-hand">
-  <div class="local-resources">
-    <div 
-      class="resource" 
-      [class.one]="resource.value == 1"
-      [class.two]="resource.value == 2"
-      [class.three]="resource.value == 3"
-      *ngFor="let resource of resources">
+  <div class="player-hand">
+    <div class="local-resources">
+      <div 
+        class="resource" 
+        *ngFor="let resource of citizen?.resources"
+        [class.one]="resource.value == 1"
+        [class.two]="resource.value == 2"
+        [class.three]="resource.value == 3">
+        <span *ngIf="resource.division !== division?.code">
+          {{resource.division}}
+        </span>
+      </div>
     </div>
   </div>
-  <div class="gla-resources">
-    <div 
-      class="resource" 
-      [class.one]="resource.value == 1"
-      [class.two]="resource.value == 2"
-      [class.three]="resource.value == 3"
-      *ngFor="let resource of resources">
-    </div>
-  </div>
-</div>
+</ng-container>

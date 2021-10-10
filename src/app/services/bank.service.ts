@@ -3,10 +3,14 @@ import { Injectable } from '@angular/core';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { take } from 'rxjs/operators';
 import { toNumber } from 'lodash';
+import { ActivatedRoute } from '@angular/router';
 
 @Injectable({ providedIn: 'root' })
 export class BankService {
-  constructor(private db: AngularFireDatabase) {
+  constructor(
+    private db: AngularFireDatabase,
+    private route: ActivatedRoute
+    ) {
 
   }
 
@@ -32,21 +36,37 @@ export class BankService {
     this.db.object(reservePath).set(toNumber(reserve) + amount);
   }
 
+  $resources(showKey, divisionKey, id) {
+    console.log('get resources:', `shows/${showKey}/divisions/${divisionKey}/citizens/${id}/resources`)
+    return this.db.list(`shows/${showKey}/divisions/${divisionKey}/citizens/${id}/resources`).valueChanges();
+  }
+
+  async depositResources(showKey, divisionKey, id, newResources) {
+    const path = `shows/${showKey}/divisions/${divisionKey}/citizens/${id}/resources`;
+    console.log('deposit: ', path)
+    const resources: any[] = await this.db.list(path).valueChanges()
+      .pipe(take(1))
+      .toPromise();
+
+      console.log('resources: ', resources, newResources)
+
+    this.db.object(path).set([
+      ...resources,
+      ...newResources
+    ])
+  }
+
   async spendResources(resourcePath, cost) {
     let spend = 0;
     let transactions = 0;
     const resources: any[] = await this.db.list(resourcePath).valueChanges()
       .pipe(take(1))
       .toPromise();
-    console.log({resources})
     const maxTransactions = resources.length;
-
-    console.log("cost: ", cost)
 
     while (spend < cost && transactions <= maxTransactions) {
       spend += resources[0];
       resources.shift();
-      console.log("after shift: ", resources, 'spend: ', spend, 'cost: ', cost)
       transactions++;
     }
 
@@ -60,8 +80,6 @@ export class BankService {
       }
 
       this.db.object(resourcePath).set(resources);
-
-      console.log('SPENT: ', spend, 'CHANGE: ', change, 'RESOURCES: ', resources)
     }
   }
 }

@@ -1,9 +1,9 @@
 import { Output, Component, OnInit, Input, EventEmitter } from '@angular/core';
-import { range, chunk, isEqual, isEmpty } from 'lodash';
+import { range, chunk, isEqual, isEmpty, toNumber } from 'lodash';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil, take } from 'rxjs/operators';
 import { LandCardValues, LandTile } from 'src/app/interfaces';
 
 const MAX_HARVEST = 49;
@@ -34,6 +34,7 @@ export class LandGridComponent implements OnInit {
   @Input() updatePath;
   @Input() showId;
   @Input() playerId = 0;
+  @Input() divisionKey;
 
   constructor(
     private db: AngularFireDatabase,
@@ -45,6 +46,7 @@ export class LandGridComponent implements OnInit {
       .valueChanges()
       .pipe(takeUntil(this.destroy$))
       .subscribe((tiles: any[]) => {
+        console.log({tiles})
         if (!this.landTiles) {
           this.landTiles = tiles;
         }
@@ -123,7 +125,6 @@ export class LandGridComponent implements OnInit {
     console.log('explore: ', card);
     if (!card.harvested && card.value !== LandCardValues.EMPTY) {
       this.landTiles[card.index].harvested = true;
-      console.log('updates: ', this.landTiles);
       this.updateDB();
     }
     this.clearSelection(card.index);
@@ -133,11 +134,24 @@ export class LandGridComponent implements OnInit {
     console.log('do gather')
     this.gatherResource.emit({ value: card.value });
     this.landTiles[card.index].value = -1;
+    this.updateHarvestedCount();
     this.updateDB();
     this.clearSelection(card.index);
   }
 
+  async updateHarvestedCount() {
+    const path = `shows/${this.showId}/divisions/${this.divisionKey}/harvested`;
+    const harvested = await this.db.object(path).valueChanges()
+      .pipe(take(1))
+      .toPromise()
+
+    console.log({harvested})
+
+    this.db.object(path).set(toNumber(harvested) + 1)
+  }
+
   updateDB() {
+    console.log('update db: ', this.landTiles)
     this.db.object(this.updatePath).update(this.landTiles);
   }
 
