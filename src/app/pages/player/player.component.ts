@@ -5,7 +5,7 @@ import { ActivatedRoute } from '@angular/router';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { LandGridComponent } from 'src/app/components/land-grid/land-grid.component';
 import { takeUntil, take } from 'rxjs/operators';
-import { Subject } from 'rxjs';
+import { Subject, BehaviorSubject } from 'rxjs';
 import { LandCardValues } from 'src/app/interfaces';
 import { toArray, includes, findIndex, toNumber } from 'lodash';
 import { faEye, faShoppingBag } from '@fortawesome/free-solid-svg-icons';
@@ -44,10 +44,15 @@ export class PlayerComponent implements OnInit {
   }
 
   private destroy$ = new Subject<boolean>();
+
+  $turn = new BehaviorSubject<any>(undefined); 
+
+
   currentTab = 'Division';
   id;
   divisionKey = 'N';
   divisionData;
+  divisionPath;
   showKey;
   selectedResourceStatus;
   actionSheet;
@@ -73,19 +78,24 @@ export class PlayerComponent implements OnInit {
   ngOnInit() {
     const { show, division, id } = this.route.snapshot.params;
     const showPath = `shows/${show}`;
+    this.divisionPath = `${showPath}/divisions/${this.divisionKey}`
+
     this.showKey = show;
     this.divisionKey = division;
     this.id = id;
-    this.landTilesPath = `${showPath}/divisions/${division}/landTiles`;
-    this.votePath = `${showPath}/divisions/${division}/vote`;
+    this.landTilesPath = `${this.divisionPath}/landTiles`;
+    this.votePath = `${this.divisionPath}/vote`;
+
+    console.log('id: ', this.id)
+    console.log({showPath, landTilesPath: this.landTilesPath, votePath: this.votePath})
     
-    this.$division = this.db.object(`shows/${show}/divisions/${division}`).valueChanges();
-    this.$focus = this.db.object(`shows/${show}/divisions/${division}/focus`).valueChanges();
+    this.$division = this.db.object(this.divisionPath).valueChanges();
+    this.$focus = this.db.object(`${this.divisionPath}/focus`).valueChanges();
     this.$focus.subscribe((focus) => {
       console.log({focus});
       this.focus = focus;
       if (focus === 'vote') {
-        this.db.object(`shows/${show}/divisions/${division}/vote`)
+        this.db.object(`${this.divisionPath}/vote`)
           .valueChanges()
           .subscribe((vote: any) => {
             this.vote = { ...vote };
@@ -113,6 +123,11 @@ export class PlayerComponent implements OnInit {
     console.log("selection: ", this.voteSelection, this.vote);
   }
 
+  onTurnChange(turn) {
+    this.$turn.next(turn);
+    console.log('turn: ', turn)
+  }
+
   castVote() {
     if (this.voteSelection !== undefined) {
       console.log("vote: ", this.voteSelection, this.vote.options[this.voteSelection]);
@@ -120,7 +135,7 @@ export class PlayerComponent implements OnInit {
       const voted = JSON.parse(this.vote.voted)
       voted.push(this.id);
       console.log('push vote: ', this.vote, voted)
-      this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/vote`).set({
+      this.db.object(`${this.divisionPath}/vote`).set({
         ...this.vote,
         voted: JSON.stringify(voted)
       }).then(() => {
@@ -141,14 +156,14 @@ export class PlayerComponent implements OnInit {
   }
 
   filterOutCitizen(citizens, id) {
-    return citizens.filter((citizen) => citizen.id !== toNumber(id))
+    return citizens.filter((citizen) => citizen.id !== id)
   }
 
   onSelect(card) {
     this.selectedCard = card;
     this.actionSheet = this._bottomSheet.open(this.sheetTemplate);
     this.selectedResourceStatus = this.getResourceStatus(card);
-    this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}`).update({
+    this.db.object(this.divisionPath).update({
       selection: {
         type: 'harvest-tile',
         value: card?.index

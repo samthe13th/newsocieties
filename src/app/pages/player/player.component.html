@@ -1,4 +1,9 @@
 <ng-container *ngIf="($division | async) as division">
+  <div class="player-turn">
+    <app-player-turn 
+      (turnChange)="onTurnChange($event)"
+      [divisionPath]="divisionPath"></app-player-turn>
+  </div>
   <app-tabs
     selectedClass="player-selected-tab"
     [tabs]="[
@@ -24,6 +29,7 @@
           <app-land-grid 
             #landGrid
             [markCards]="false"
+            [turn]="$turn | async"
             [updatePath]="landTilesPath"
             [showId]="showKey"
             [divisionKey]="divisionKey"
@@ -62,6 +68,7 @@
            
           <app-player-deck
             [id]="id" 
+            [myTurn]="id == ($turn | async)?.playerId"
             [showKey]="showKey"
             [division]="division">
           </app-player-deck>
@@ -71,7 +78,7 @@
               class="citizen-summary flex-row space-between"
               *ngFor="let citizen of filterOutCitizen(division.citizens, id)">
               <div class="flex-row flex-center-v">
-                <span>{{citizen.name}}</span>
+                <span [class.player-turn-indicator]="citizen.id == ($turn | async)?.playerId">{{citizen.name}}</span>
                 <span>{{calculateWealth(citizen?.resources)}}</span>
               </div>
               <!-- <div *ngIf="citizen">

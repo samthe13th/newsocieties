@@ -19,10 +19,13 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NumberPickerModule } from 'ng-number-picker';
 import { FundraisingComponent } from './fundraising/fundraising.component';
 import { NumberChangeComponent } from './number-change/number-change.component';
+import { ButtonGroupComponent } from './button-group/button-group.component';
+import { PlayerTurnComponent } from './player-turn/player-turn.component';
  
 
 const components = [
   AnnouncementComponent,
+  ButtonGroupComponent,
   CardComponent,
   ChatComponent,
   DialogComponent,
@@ -31,6 +34,7 @@ const components = [
   NumberChangeComponent,
   PlayerHandsComponent,
   PlayerDeckComponent,
+  PlayerTurnComponent,
   ScorecardComponent,
   SocietyGridComponent,
   SocietySummaryComponent,

@@ -1,7 +1,8 @@
 import { Component, Input } from '@angular/core';
 import { slice } from 'lodash';
+import * as _ from 'lodash';
 import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { tap, find, take } from 'rxjs/operators';
 import { LandCardValues } from 'src/app/interfaces';
 import { BankService } from 'src/app/services/bank.service';
 import { ActivatedRoute } from '@angular/router';
@@ -28,11 +29,13 @@ export class PlayerDeckComponent {
   }
 
   wealth = 0;
+  playerIndex;
 
   @Input() id;
   @Input() name = "Sam"
   @Input() showKey: string;
   @Input() division;
+  @Input() myTurn: boolean;
 
   constructor(
     private route: ActivatedRoute,
@@ -45,11 +48,20 @@ export class PlayerDeckComponent {
     console.log('division: ', this.division)
     // this.resources = sortBy(this.resources, 'value');
     const { show, division, id } = this.route.snapshot.params;
-    console.log({show, division, id})
-    this.$citizen = this.db.object(`shows/${show}/divisions/${division}/citizens/${id}`)
+    this.subToCitizen(show, division, id);
+  }
+
+  async subToCitizen(showKey, divisionKey, id) {
+    const citizenPath = `shows/${showKey}/divisions/${divisionKey}/citizens`;
+    const citizens = await this.db.list(citizenPath).valueChanges().pipe(take(1)).toPromise();
+    this.playerIndex = _.findIndex(citizens, ['id', id]);
+
+    console.log({citizenPath, citizens})
+    this.$citizen = this.db.object(`${citizenPath}/${this.playerIndex}`)
       .valueChanges()
       .pipe(
         tap((citizen) => {
+          console.log({citizen})
           if (!citizen) return;
           this.wealth = citizen.resources 
             ? citizen.resources.reduce((acc, R) => acc + R.value, 0)
@@ -65,7 +77,7 @@ export class PlayerDeckComponent {
       this.contaminateResources()
     } else {
       console.log('make deposit')
-      this.bank.depositResources(this.showKey, this.division?.code, this.id, [{
+      this.bank.depositResources(this.showKey, this.division?.code, this.playerIndex, [{
         ...R,
         division: this.division?.code
       }])

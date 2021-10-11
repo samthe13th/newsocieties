@@ -3,10 +3,12 @@ import { ActivatedRoute } from '@angular/router';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { getRandomInt, pluckRandom } from 'src/app/utilties';
 import { LandTile, LandCardValues } from 'src/app/interfaces';
-import { includes, range, difference, trim, differenceBy, toNumber, each } from 'lodash';
-import { take } from 'rxjs/operators'
+import * as _ from 'lodash';
+import { includes, find, range, difference, trim, differenceBy, toNumber, each } from 'lodash';
+import { take, map } from 'rxjs/operators'
 import { BankService } from 'src/app/services/bank.service';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
+import { combineLatest } from 'rxjs';
 
 @Component({
   selector: 'app-host',
@@ -24,12 +26,20 @@ export class HostComponent implements OnInit {
   modalContent: TemplateRef<any>;
 
   showModal = false;
+  turnButtons = [
+    { id: 1, label: 1 },
+    { id: 2, label: 2 },
+    { id: 3, label: 3 },
+    { id: 4, label: 4 },
+    { id: 5, label: 5 },
+  ]
 
   $vote;
   $division;
   $resolutions;
   $principles;
   $scenerios;
+  $turn;
 
   changeAttribute;
   actionSheet;
@@ -37,7 +47,7 @@ export class HostComponent implements OnInit {
   division;
   contamination;
   harvest;
-  divisionId;
+  divisionKey;
   showId;
   divisionPath;
   landTilesPath;
@@ -69,9 +79,9 @@ export class HostComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.divisionId = this.route.snapshot.params.division;
+    this.divisionKey = this.route.snapshot.params.division;
     this.showId = this.route.snapshot.params.show;
-    this.divisionPath = `shows/${this.showId}/divisions/${this.divisionId}`;
+    this.divisionPath = `shows/${this.showId}/divisions/${this.divisionKey}`;
     console.log('division path: ', this.divisionPath)
     
     this.landTilesPath = `${this.divisionPath}/landTiles`
@@ -137,6 +147,12 @@ export class HostComponent implements OnInit {
       .subscribe((scenerios) => {
         this.globalScenerios = scenerios
       });
+  }
+
+  onTurnSelect(button) {
+    console.log("turn select: ", button)
+    this.db.object(`shows/${this.showId}/divisions/${this.divisionKey}/turn`)
+      .set({ index: button.label, actions: 2 })
   }
 
   startVote() {
@@ -239,7 +255,7 @@ export class HostComponent implements OnInit {
 
   setVoteDropdown(type) {
     console.log("set dropdown: ", type)
-    const divisionPath = `shows/${this.showId}/divisions/${this.divisionId}`;
+    const divisionPath = `shows/${this.showId}/divisions/${this.divisionKey}`;
     this.voteDropdown = null;
     this.voteDropdownSelect = null;
     
@@ -326,8 +342,8 @@ export class HostComponent implements OnInit {
     if (!trim(this.chatInput)) return;
 
     console.log("SUBMIT: ", division, this.showId, this.chatInput);
-    this.db.list(`shows/${this.showId}/feeds/${this.divisionId}`)
-      .push({ from: this.divisionId, type: 'chat', value: this.chatInput })
+    this.db.list(`shows/${this.showId}/feeds/${this.divisionKey}`)
+      .push({ from: this.divisionKey, type: 'chat', value: this.chatInput })
       .then((res) => { 
         console.log('callback: ', res)
         this.chatInput = "";
@@ -363,8 +379,25 @@ export class HostComponent implements OnInit {
         season: season + 1
       },
       harvested: 0,
+      selection: null
     })
+    this.resetCitizenActions();
     // console.log('NEW HARVEST: ', this.harvest)
+  }
+
+  private async resetCitizenActions() {
+    const citizens: any = await this.db.list(`${this.divisionPath}/citizens`)
+      .valueChanges()
+      .pipe(take(1))
+      .toPromise();
+
+    console.log("reset... ", citizens)
+    citizens.forEach((citizen, index) => {
+      console.log('reset: ', citizen);
+      this.db.object(`${this.divisionPath}/citizens/${index}`).update({
+        actions: 2
+      });
+    })
   }
 
   private adjustContamination(level) {
@@ -422,7 +455,6 @@ export class HostComponent implements OnInit {
       ...tile,
       value: -1,
       contaminated: false,
-      mark: null,
       harvested: false
     }))
   }

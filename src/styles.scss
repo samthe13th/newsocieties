@@ -45,17 +45,6 @@ button {
   border-radius: 5px;
 }
 
-.app-host {
-  @extend %app-page;
-  padding: 15px;
-  background: #394D6B;
-}
-
-.app-vote {
-  // display: flex; 
-  // justify-content: center;
-}
-
 .tab-card {
   background: white;
   padding: 10px; 
@@ -72,6 +61,28 @@ button {
 
 .indented-list {
   margin-left: 20px;
+}
+
+.app-host {
+  @extend %app-page;
+  padding: 15px;
+  background: #394D6B;
+}
+
+.app-vote {
+  // display: flex; 
+  // justify-content: center;
+}
+
+.app-player-turn {
+  display: inline-flex;
+  background: white;
+  flex-direction: column;
+  color: black;
+  border-radius: 10px;
+  padding: 5px;
+  align-items: center;
+  justify-content: center;
 }
 
 .app-tabs {
@@ -300,11 +311,18 @@ button {
   &.three {
     background: #a74578;
   }
-}
+}x
 
 /** COMPONENTS **/
 .announcement {
   display: flex;
+}
+
+.player-turn-indicator::before {
+  content: "";
+  border: solid 8px transparent;
+  border-left-color: #fcc107;
+  display: inline-block;
 }
 
 .card {

@@ -1,7 +1,7 @@
 <ng-container *ngIf="($citizen | async) as citizen">
   <div class="player-deck__summary">
     <div class="flex-row stretch-h">
-      <div class="citizen-name">{{citizen?.name}}</div>
+      <div class="citizen-name" [class.player-turn-indicator]="myTurn">{{citizen?.name}}</div>
     </div>
   </div>
   <div class="flex-row stretch-h">

@@ -52,6 +52,11 @@
   </div>
   <div *ngIf="focus === 'harvest'" class="harvest-wrapper">
     <h1>Harvest</h1>
+    <app-button-group
+     (select)="onTurnSelect($event)"
+     [buttons]="turnButtons">
+    </app-button-group>
+    <app-player-turn [divisionPath]="divisionPath"></app-player-turn>
     <div *ngIf="action !== 'harvesting'">
       <button (click)="startHarvest()" class="large-action-button">
         Start Harvest
@@ -61,6 +66,7 @@
       *ngIf="action === 'harvesting'"
       [markCards]="true"
       [showId]="showId"
+      [divisionKey]="divisionKey"
       [updatePath]="landTilesPath"> 
     </app-land-grid>
   </div>
@@ -77,12 +83,12 @@
         [showVotes]="true"
         [allowSelection]="vote?.state === 'review'"
         [showId]="showId"
-        [divisionId]="divisionId"
+        [divisionId]="divisionKey"
       ></app-vote>
       <app-fundraising
         *ngIf="vote?.state === 'review' && vote?.type === 'resolution'"
         [showKey]="showId"
-        [divisionKey]="divisionId"
+        [divisionKey]="divisionKey"
         [isCentral]="true"
         (fundsChange)="onFundsChange($event)"
         >
@@ -95,7 +101,7 @@
 </div>
 
 <!-- TABS-->
-<ng-template #division>{{divisionId}}</ng-template>
+<ng-template #division>{{divisionKey}}</ng-template>
 <ng-template #global>Global</ng-template>
 <ng-template #io>I/O</ng-template>
 <ng-template #central>Central</ng-template>
@@ -236,15 +242,15 @@
 
 <!-- CENTRAL -->
 <ng-template #centralBody>
-  <app-chat [sender]="divisionId" [feedName]="divisionId" [showKey]="showId"></app-chat>
+  <app-chat [sender]="divisionKey" [feedName]="divisionKey" [showKey]="showId"></app-chat>
   <textarea
-    (keydown.enter)="submitChat(divisionId)"
+    (keydown.enter)="submitChat(divisionKey)"
     class="host-chat-input"
     name="chatInput"
     type="text"
     [(ngModel)]="chatInput">
   </textarea>
-  <button class="host-chat-button" (click)="submitChat(divisionId)">SEND</button>
+  <button class="host-chat-button" (click)="submitChat(divisionKey)">SEND</button>
 </ng-template>
 
 <!-- NOTES -->

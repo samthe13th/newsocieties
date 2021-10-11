@@ -212,6 +212,10 @@ export class CentralComponent implements OnInit, AfterViewInit {
       .then((res) => { this.buildShow(res.key) })
   }
 
+  wipeShows() {
+    this.db.object('shows').remove();
+  }
+
   submitChat(division) {
     if (!trim(this.chatInput)) return;
     
@@ -248,15 +252,16 @@ export class CentralComponent implements OnInit, AfterViewInit {
         ...DIVISION_TEMPLATE,
         code: abv, 
         landTiles: this.generateLandTiles(),
-        citizens: this.generateCitizens(),
+        citizens: this.generateCitizens(abv),
       } 
     }), {});
   }
 
-  generateCitizens() {
+  generateCitizens(division) {
     const citizens = CITIZEN_NAMES.map((name, index) => ({
       name,
-      id: index + 1,
+      id: `${division}${index + 1}${name}`,
+      position: index + 1,
     }))
     console.log({citizens});
     return citizens;
