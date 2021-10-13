@@ -10,14 +10,16 @@
         <div
           *ngIf="!(hideLast && last)"
           class="vote-options-row">
-          <div *ngIf="allowSelection">
-            <input 
-              name="vote-options"
-              type="radio" 
-              [value]="option?.prompt"
-              [(ngModel)]="selectedOption"/>
-          </div>
-          <div class="vote-options-data">
+          <input 
+            name="vote-options"
+            type="radio" 
+            [value]="option?.prompt"
+            [(ngModel)]="selectedOption"/>
+          <div 
+            class="vote-options-data" 
+            [class.selected]="option.prompt === selectedOption"
+            [class.selectable]="allowSelection" 
+            (click)="selectVoteOption(i)">
             <div>{{ option?.prompt }}<strong *ngIf="option?.cost">({{option?.cost}})</strong></div>
           </div>
           <div class="vote-tally" *ngIf="showVotes">{{ option?.votes }}</div>

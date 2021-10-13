@@ -93,28 +93,32 @@
         </div>
       </div>
     </ng-container>
-    <ng-container *ngIf="focus === 'vote'">
-      <img class="tab-background blur" src="assets/voting-ph.jpeg"/>
-      <h1>Resolution</h1>
-      <div *ngIf="hasVoted && vote?.state === 'voting'">Thanks for voting! Waiting for polls to close...</div>
-      <ng-container *ngIf="!(hasVoted && vote?.state === 'voting')">
-        <app-vote
-          (selectionChange)="onSelectionChange($event)"
-          [showVotes]="vote?.state === 'review'"
-          [allowSelection]="vote?.state === 'voting'"
-          [showId]="showKey"
-          hideOption="last"
-          [divisionId]="division.code"
-        ></app-vote>
-        <button *ngIf="!hasVoted && vote?.state === 'voting'" (click)="castVote()">Vote</button>
-        <app-fundraising
-          *ngIf="vote?.state === 'review'"
-          [showKey]="showKey"
-          [divisionKey]="divisionKey"
-          [playerId]="id">
-        </app-fundraising>
-      </ng-container>
+    <ng-container *ngIf="focus === 'resolutions' || focus === 'principles'">
+      <div class="tab-background voting blur" >
+        <img src="assets/voting-ph.jpeg"/>
+      </div>
 
+      <div class="tab-foreground player-vote">
+        <div *ngIf="hasVoted && vote?.state === 'voting'">Thanks for voting! Waiting for polls to close...</div>
+        <ng-container *ngIf="!(hasVoted && vote?.state === 'voting')">
+          <app-vote
+            (selectionChange)="onSelectionChange($event)"
+            [showVotes]="vote?.state === 'review'"
+            [allowSelection]="vote?.state === 'voting'"
+            [showId]="showKey"
+            role="citizen"
+            hideOption="last"
+            [divisionId]="division.code"
+          ></app-vote>
+          <button *ngIf="!hasVoted && vote?.state === 'voting'" (click)="castVote()">Vote</button>
+          <app-fundraising
+            *ngIf="vote?.state === 'review'"
+            [showKey]="showKey"
+            [divisionKey]="divisionKey"
+            [playerId]="id">
+          </app-fundraising>
+        </ng-container>
+      </div>
     </ng-container>
   </ng-template>
 

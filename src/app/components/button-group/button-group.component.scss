@@ -2,6 +2,8 @@
   display: flex;
   margin-bottom: 10px; 
   height: 40px;
+  border: solid 1px black;
+  border-radius: 10px;
 }
 
 .button-group__button {
@@ -32,6 +34,6 @@
 }
 
 .button-selected {
-  background: lightgrey;
+  background: #6ec2dc;
   color: black;
 }

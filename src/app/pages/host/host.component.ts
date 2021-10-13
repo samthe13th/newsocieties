@@ -9,6 +9,7 @@ import { take, map } from 'rxjs/operators'
 import { BankService } from 'src/app/services/bank.service';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { combineLatest } from 'rxjs';
+import { ButtonGroupComponent } from 'src/app/components/button-group/button-group.component';
 
 @Component({
   selector: 'app-host',
@@ -20,7 +21,12 @@ import { combineLatest } from 'rxjs';
 })
 export class HostComponent implements OnInit {
   @ViewChild('harvestTemplate') harvestTemplate: TemplateRef<any>;
-  @ViewChild('voteTemplate') voteTemplate: TemplateRef<any>;
+  @ViewChild('principleTemplate') principleTemplate: TemplateRef<any>;
+  @ViewChild('resolutionTemplate') resolutionTemplate: TemplateRef<any>;
+  @ViewChild('scenerioTemplate') scenerioTemplate: TemplateRef<any>;
+  @ViewChild('miscTemplate') miscTemplate: TemplateRef<any>;
+
+  @ViewChild('focusButtonsComponent') focusButtonsComponent: ButtonGroupComponent;
   @ViewChild('updateSheet') updateSheet: TemplateRef<any>;
   
   modalContent: TemplateRef<any>;
@@ -33,6 +39,13 @@ export class HostComponent implements OnInit {
     { id: 4, label: 4 },
     { id: 5, label: 5 },
   ]
+  focusButtons = [
+    { id: 'harvest', label: 'Ha' },
+    { id: 'principles', label: 'Pr' },
+    { id: 'resolutions', label: 'Re' },
+    { id: 'scenerio', label: 'Sc' },
+    { id: 'misc', label: 'Mc' },
+  ]
 
   $vote;
   $division;
@@ -40,6 +53,7 @@ export class HostComponent implements OnInit {
   $principles;
   $scenerios;
   $turn;
+  $focus;
 
   changeAttribute;
   actionSheet;
@@ -48,11 +62,11 @@ export class HostComponent implements OnInit {
   contamination;
   harvest;
   divisionKey;
-  showId;
+  showKey;
   divisionPath;
   landTilesPath;
   chatInput = "";
-  focus = 'harvest';
+  focus;
   action = 'harvesting';
   divisionVote;
   voteNotes = "";
@@ -80,8 +94,8 @@ export class HostComponent implements OnInit {
 
   ngOnInit() {
     this.divisionKey = this.route.snapshot.params.division;
-    this.showId = this.route.snapshot.params.show;
-    this.divisionPath = `shows/${this.showId}/divisions/${this.divisionKey}`;
+    this.showKey = this.route.snapshot.params.show;
+    this.divisionPath = `shows/${this.showKey}/divisions/${this.divisionKey}`;
     console.log('division path: ', this.divisionPath)
     
     this.landTilesPath = `${this.divisionPath}/landTiles`
@@ -91,8 +105,15 @@ export class HostComponent implements OnInit {
     this.$resolutions = this.db.list(`${this.divisionPath}/resolutions`).valueChanges();
     this.$principles = this.db.list(`${this.divisionPath}/principles`).valueChanges();
     this.$scenerios = this.db.list(`${this.divisionPath}/scenerios`).valueChanges();
+    this.$focus = this.db.object(`${this.divisionPath}/focus`).valueChanges();
+    this.$turn = this.db.object(`${this.divisionPath}/turn`).valueChanges();
 
-    this.db.object(`shows/${this.showId}/contamination/current`)
+    this.$focus.subscribe((focus) => {
+      console.log({focus})
+      this.focus = focus;
+    })
+
+    this.db.object(`shows/${this.showKey}/contamination/current`)
       .valueChanges()
       .subscribe((level) => {
         this.adjustContamination(level);
@@ -151,11 +172,18 @@ export class HostComponent implements OnInit {
 
   onTurnSelect(button) {
     console.log("turn select: ", button)
-    this.db.object(`shows/${this.showId}/divisions/${this.divisionKey}/turn`)
+    this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/turn`)
       .set({ index: button.label, actions: 2 })
   }
 
-  startVote() {
+  onFocusSelect(button) {
+    console.log('focus select: ', button);
+    this.setFocus(button.id);
+  }
+
+  startVote(focus) {
+    this.db.object(`${this.divisionPath}/focus`).set(focus);
+    console.log('start vote')
     this.showModal = false;
     this.action = 'voting';
     
@@ -164,21 +192,29 @@ export class HostComponent implements OnInit {
       ...this.voteDropdownSelect,
       state: 'voting',
       voted: "[]"
-    }).then(() => {
-      this.db.object(`${this.divisionPath}/focus`).set('vote');
     })
   }
 
   setFocus(type) {
+    console.log('set ', type)
     this.showModal = true;
-    if (type === 'vote') {
-      this.modalContent = this.voteTemplate;
+    if (type === 'principles') {
+      this.setVoteDropdown('principles');
+      this.modalContent = this.principleTemplate;
+    } else if (type === 'resolutions') {
+      this.setVoteDropdown('resolutions');
+      this.modalContent = this.resolutionTemplate;
+    } else if (type === 'scenerio') {
+      this.modalContent = this.scenerioTemplate;
     } else if (type === 'harvest') {
       this.modalContent = this.harvestTemplate;
+    } else if (type === 'misc') {
+      this.modalContent = this.miscTemplate;
     }
   }
 
   startHarvest() {
+    this.showModal = false;
     this.action = 'harvesting';
     this.db.object(`${this.divisionPath}/focus`).set('harvest');
   }
@@ -193,6 +229,12 @@ export class HostComponent implements OnInit {
 
   onFundsChange(funds) {
     this.voteResultFunds = funds;
+  }
+
+  closeModal() {
+    this.showModal = false;
+    console.log("reset focus: ", focus);
+    this.focusButtonsComponent.reset();
   }
 
   collectFunds() {
@@ -255,7 +297,7 @@ export class HostComponent implements OnInit {
 
   setVoteDropdown(type) {
     console.log("set dropdown: ", type)
-    const divisionPath = `shows/${this.showId}/divisions/${this.divisionKey}`;
+    const divisionPath = `shows/${this.showKey}/divisions/${this.divisionKey}`;
     this.voteDropdown = null;
     this.voteDropdownSelect = null;
     
@@ -330,6 +372,15 @@ export class HostComponent implements OnInit {
       consequence, 
       cosequencesImplemented: false
     })
+
+    this.db.list(`${this.divisionPath}/notifications`).push({
+      header: "RESOLUTION",
+      value: resolution,
+      requiresAction: consequence,
+      resolved: false,
+      rejectable: false,
+      sender: null
+    })
   }
 
   clearVote() {
@@ -341,8 +392,8 @@ export class HostComponent implements OnInit {
   submitChat(division) {
     if (!trim(this.chatInput)) return;
 
-    console.log("SUBMIT: ", division, this.showId, this.chatInput);
-    this.db.list(`shows/${this.showId}/feeds/${this.divisionKey}`)
+    console.log("SUBMIT: ", division, this.showKey, this.chatInput);
+    this.db.list(`shows/${this.showKey}/feeds/${this.divisionKey}`)
       .push({ from: this.divisionKey, type: 'chat', value: this.chatInput })
       .then((res) => { 
         console.log('callback: ', res)

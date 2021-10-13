@@ -1,0 +1,67 @@
+.notification-feed {
+  border-radius: 10px;
+  border: 1px solid;
+  padding: 15px;
+  background: #cfcfcf;
+  overflow: auto;
+  height: 100%;
+}
+
+.notification-header {
+  font-weight: bold;
+  margin-top: 5px;
+  margin-bottom: 10px;
+}
+
+.resolved-action {
+  display: inline-flex; 
+  padding: 2px 6px;
+  border-radius: 10px; 
+  background: #12cb00;
+  padding-right: 10px;
+  color: white;
+  margin-top: 10px;
+
+  &::before {
+    content: '✓';
+    align-items: center; 
+    justify-content: center;
+    margin-right: 5px;
+  }
+}
+
+.notification-bubble {
+  padding: 10px;
+  font-size: 16px;
+  background: white;
+  font-family: sans-serif;
+  color: black;
+  box-sizing: content-box;
+  margin-bottom: 10px;
+  border-radius: 10px; 
+
+  &.event, 
+  &.resolution,
+  &.broadcast {
+    border-radius: 0;
+  }
+
+  &.incoming {
+    background: #6EC2DD;
+    margin-right: 40px;
+  }
+
+  &.outgoing {
+    border: solid 1px;
+    margin-left: 40px;
+  }
+
+  &.outgoing:not(.broadcast) {
+    background: white;
+  }
+
+  &.broadcast {
+    background: black;
+    color: white;
+  }
+}

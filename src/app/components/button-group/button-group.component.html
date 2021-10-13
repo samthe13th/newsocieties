@@ -1,7 +1,7 @@
 <div class="button-group__options">
   <div 
     *ngFor="let button of buttons; let i = index" 
-    class="button-group__button {{ button.id === currentButton.id ? selectedClass : unselectedClass }}"
+    class="button-group__button {{ button?.id === currentButton.id ? selectedClass : unselectedClass }}"
     (click)="selectButton(button)"
   >
     {{ button.label }}

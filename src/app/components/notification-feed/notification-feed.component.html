@@ -1,0 +1,21 @@
+<button (click)="showResolved = !showResolved">Show Resolved: {{showResolved}}</button>
+<div 
+  class="notification-feed"
+  #feedWrapper>
+  <ng-container *ngFor="let notification of ($notifications | async)">
+    <div
+      *ngIf="!(showResolved == false && notification?.resolved)"
+      class="notification-bubble">
+      <div class="notification-header" *ngIf="notification?.header">{{notification.header}}</div>
+      <div [innerHTML]="notification?.value"></div>
+      <ng-container *ngIf="notification?.requiresAction">
+        <hr/>
+        <strong>Requires action:</strong>
+        <div [innerHTML]="notification?.requiresAction"></div>
+        <button *ngIf="!notification?.resolved" (click)="markAsResolved(notification?.key)">Mark as Resolved</button>
+        <div *ngIf="notification?.resolved" class="resolved-action"><em>Resolved</em></div>
+      </ng-container>
+      <button *ngIf="notification?.rejectable" (click)="rejectRequest()">Reject</button>
+    </div>
+  </ng-container>
+</div>

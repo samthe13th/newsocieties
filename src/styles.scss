@@ -43,6 +43,14 @@ button {
   background: white;
   border: solid 1px;
   border-radius: 5px;
+  font-size: 14px; 
+  padding: 2px 4px;
+}
+
+select {
+  height: 30px;
+  font-size: 16px;
+  margin-bottom: 10px;
 }
 
 .tab-card {
@@ -63,6 +71,16 @@ button {
   margin-left: 20px;
 }
 
+.app-notification-feed {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  flex: 1 1 0;
+  min-height: 0;
+  max-width: 400px;
+  margin-left: 20px;
+}
+
 .app-host {
   @extend %app-page;
   padding: 15px;
@@ -70,8 +88,26 @@ button {
 }
 
 .app-vote {
-  // display: flex; 
-  // justify-content: center;
+  display: flex; 
+  width: 100%;
+  align-items: center;
+
+  &.central {
+    .vote-wrapper {
+      background: white;
+      border-radius: 15px;
+      color: black;
+    }
+  }
+
+  &.citizen {
+    justify-content: center;
+    
+    .vote-wrapper {
+      background: transparent;
+      color: white;
+    }
+  }
 }
 
 .app-player-turn {
@@ -160,14 +196,70 @@ button {
   }
  }
 
- .tab-background {
-   border-radius: 10px;
-   position: absolute;
-   height: 100%; 
-   margin: 20px;
+.app-button-group {
+  display: flex;
+}
 
-   &.blur {
-     filter: blur(0.5)
+.tab-background {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  overflow: hidden;
+  border-radius: 10px;
+  justify-content: center;
+  align-items: center;
+
+  &.blur {
+    animation-name: blur-image;
+    animation-timing-function: ease-out;
+    animation-delay: 1s;
+    animation-duration: 1s;
+    animation-fill-mode: forwards;
+  }
+
+  img {
+    height: 100%;
+    object-fit: fill;
+  }
+ }
+
+ @keyframes blur-image {
+   100% {
+     filter: brightness(0.5) blur(5px);
+   }
+ }
+
+ @keyframes fade-in {
+   0% {
+     opacity: 0;
+   }
+   100% {
+     opacity: 1;
+   }
+ }
+
+
+ .tab-foreground {
+   position: absolute;
+   top: 0;
+   left: 0;
+   width: 100%; 
+   height: 100%;
+   z-index: 1;
+
+   &.player-vote {
+    opacity: 0;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    animation-name: fade-in;
+    animation-timing-function: ease-out;
+    animation-delay: 2s;
+    animation-duration: 2s;
+    animation-fill-mode: forwards;
+    font-weight: 300;
+    font-size: 18px;
    }
  }
 
@@ -284,6 +376,7 @@ button {
   box-sizing: border-box;
 
   .modal {
+    position: relative;
     background: white;
     border-radius: 15px; 
     color: black; 
@@ -293,6 +386,22 @@ button {
     overflow: auto; 
     height: 100%; 
     width: 100%;
+    align-items: flex-start;
+
+    &.small {
+      width: unset;
+      height: unset;
+      min-width: 300px;
+    }
+  }
+
+  .cancel-button {
+    position: absolute;
+    top: 10px; 
+    right: 10px;
+    padding: 5px;
+    border: none;
+    background: white;
   }
 }
 

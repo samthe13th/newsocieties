@@ -94,11 +94,12 @@ export class PlayerComponent implements OnInit {
     this.$focus.subscribe((focus) => {
       console.log({focus});
       this.focus = focus;
-      if (focus === 'vote') {
+      if (focus === 'principles' || focus === 'resolutions' || focus === 'scenerio') {
         this.db.object(`${this.divisionPath}/vote`)
           .valueChanges()
           .subscribe((vote: any) => {
             this.vote = { ...vote };
+            console.log('vote: ', this.vote)
             if (includes(JSON.parse(this.vote?.voted), this.id)) {
               this.hasVoted = true;
             } else {

@@ -1,3 +1,14 @@
+<div *ngIf="showModal === true" class="modal-wrap">
+  <div class="modal small">
+    <button
+      class="cancel-button"
+      (click)="closeModal()">
+      Cancel
+    </button>
+    <ng-container *ngTemplateOutlet="modalContent"></ng-container>
+  </div>
+</div>
+
 <app-tabs 
   class="host-side-panel"
   selectedClass="host-selected-tab"
@@ -10,26 +21,78 @@
   ]">
 </app-tabs>
 
-<div *ngIf="showModal === true" class="modal-wrap">
-  <div class="modal">
-    <button (click)="showModal = false">Close</button>
-    <ng-container *ngTemplateOutlet="modalContent"></ng-container>
+<div class="host-main" *ngIf="focus">
+  <app-button-group
+    #focusButtonsComponent
+    (select)="onFocusSelect($event)"
+    [selectById]="focus"
+    [buttons]="focusButtons">
+  </app-button-group>
+  <!-- <div class="button-row">
+    <button (click)="setFocus('harvest')">Harvest</button>
+    <button (click)="setFocus('vote')">Vote</button>
+  </div> -->
+  <div *ngIf="focus === 'harvest'" class="harvest-wrapper">
+    <div class="turn-controls">
+      <app-button-group
+        *ngIf="$turn | async as turn"
+        (select)="onTurnSelect($event)"
+        [selectById]="turn?.index"
+        [buttons]="turnButtons">
+      </app-button-group>
+      <app-player-turn [divisionPath]="divisionPath"></app-player-turn>
+    </div>
+     <app-land-grid 
+      *ngIf="action === 'harvesting'"
+      [markCards]="true"
+      [showId]="showKey"
+      [divisionKey]="divisionKey"
+      [updatePath]="landTilesPath"> 
+    </app-land-grid>
+  </div>
+
+  <div *ngIf="focus === 'principles' || focus === 'resolutions' || focus === 'scenerio'" class="resolution-wrapper">
+    <!-- <ng-container *ngIf="action === 'funding'">
+      Resolution:  {{ divisionVote?.value }}
+      <button (click)="enactVoteResult()">Enact resolution</button>
+      <button (click)="clearVote()">Cancel resolution</button>
+    </ng-container> -->
+    <ng-container *ngIf="($vote | async) as vote">
+      <app-vote 
+        (selectionChange)="onSelectionChange($event)"
+        [showVotes]="true"
+        [allowSelection]="vote?.state === 'review'"
+        [showId]="showKey"
+        role="central"
+        [divisionId]="divisionKey"
+      ></app-vote>
+      <app-fundraising
+        *ngIf="vote?.state === 'review' && vote?.type === 'resolution'"
+        [showKey]="showKey"
+        [divisionKey]="divisionKey"
+        [isCentral]="true"
+        (fundsChange)="onFundsChange($event)"
+        >
+      </app-fundraising>
+      <button *ngIf="vote?.state === 'voting'" (click)="closePolls()">Close Polls</button>
+      <button *ngIf="vote?.state === 'review' && divisionVote" (click)="implement()">Implement</button>
+    </ng-container>
+
   </div>
 </div>
 
+<app-notification-feed
+  [showKey]="showKey"
+  [divisionKey]="divisionKey">
+</app-notification-feed>
+
 <ng-template #harvestTemplate>
-  Start harvest
-  <button>Start</button>
+  Go to harvest
+  <button (click)="startHarvest()">Start</button>
 </ng-template>
 
-<ng-template #voteTemplate>
-  Vote for: 
-  <div class="button-row">
-    <button (click)="setVoteDropdown('resolutions')">Resolution</button>
-    <button (click)="setVoteDropdown('principles')">Principle</button>
-    <button (click)="setVoteDropdown('scenerios')">Scenerio</button>
-  </div>
-
+<ng-template #principleTemplate>
+  <h1>Principle</h1>
   <select
     *ngIf="voteDropdown"
     [(ngModel)]="voteDropdownSelect"
@@ -42,63 +105,30 @@
     </option>
   </select>
 
-  <button *ngIf="voteDropdownSelect" (click)="startVote()">Vote</button>
+  <button *ngIf="voteDropdownSelect" (click)="startVote('principles')">Vote on Principle</button>
 </ng-template>
 
-<div class="host-main">
-  <div class="button-row">
-    <button (click)="setFocus('harvest')">Harvest</button>
-    <button (click)="setFocus('vote')">Vote</button>
-  </div>
-  <div *ngIf="focus === 'harvest'" class="harvest-wrapper">
-    <h1>Harvest</h1>
-    <app-button-group
-     (select)="onTurnSelect($event)"
-     [buttons]="turnButtons">
-    </app-button-group>
-    <app-player-turn [divisionPath]="divisionPath"></app-player-turn>
-    <div *ngIf="action !== 'harvesting'">
-      <button (click)="startHarvest()" class="large-action-button">
-        Start Harvest
-      </button>
-    </div>
-    <app-land-grid 
-      *ngIf="action === 'harvesting'"
-      [markCards]="true"
-      [showId]="showId"
-      [divisionKey]="divisionKey"
-      [updatePath]="landTilesPath"> 
-    </app-land-grid>
-  </div>
+<ng-template #resolutionTemplate>
+  Resolution
+  <select
+    *ngIf="voteDropdown"
+    [(ngModel)]="voteDropdownSelect"
+    name="vote-options"
+    id="vote-options">
+    <option
+      *ngFor="let option of voteDropdown"
+      [ngValue]="option">
+      {{option?.title}}
+    </option>
+  </select>
 
-  <div *ngIf="focus === 'vote'" class="resolution-wrapper">
-    <!-- <ng-container *ngIf="action === 'funding'">
-      Resolution:  {{ divisionVote?.value }}
-      <button (click)="enactVoteResult()">Enact resolution</button>
-      <button (click)="clearVote()">Cancel resolution</button>
-    </ng-container> -->
-    <ng-container *ngIf="($vote | async) as vote">
-      <app-vote 
-        (selectionChange)="onSelectionChange($event)"
-        [showVotes]="true"
-        [allowSelection]="vote?.state === 'review'"
-        [showId]="showId"
-        [divisionId]="divisionKey"
-      ></app-vote>
-      <app-fundraising
-        *ngIf="vote?.state === 'review' && vote?.type === 'resolution'"
-        [showKey]="showId"
-        [divisionKey]="divisionKey"
-        [isCentral]="true"
-        (fundsChange)="onFundsChange($event)"
-        >
-      </app-fundraising>
-      <button *ngIf="vote?.state === 'voting'" (click)="closePolls()">Close Polls</button>
-      <button *ngIf="vote?.state === 'review' && divisionVote" (click)="implement()">Implement</button>
-    </ng-container>
+  <button *ngIf="voteDropdownSelect" (click)="startVote('resolutions')">Vote on Resolution</button>
+</ng-template>
 
-  </div>
-</div>
+<ng-template #scenerioTemplate>
+  Scenerio
+  <button *ngIf="voteDropdownSelect" (click)="startVote('scenerio')">Vote on Scenerio</button>
+</ng-template>
 
 <!-- TABS-->
 <ng-template #division>{{divisionKey}}</ng-template>
@@ -242,7 +272,7 @@
 
 <!-- CENTRAL -->
 <ng-template #centralBody>
-  <app-chat [sender]="divisionKey" [feedName]="divisionKey" [showKey]="showId"></app-chat>
+  <app-chat [sender]="divisionKey" [feedName]="divisionKey" [showKey]="showKey"></app-chat>
   <textarea
     (keydown.enter)="submitChat(divisionKey)"
     class="host-chat-input"

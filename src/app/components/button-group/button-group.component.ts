@@ -1,4 +1,5 @@
 import { Component, Input, EventEmitter, Output } from '@angular/core';
+import { find } from 'lodash';
 
 @Component({
   selector: 'app-button-group',
@@ -19,13 +20,25 @@ export class ButtonGroupComponent {
     icon: string,
   }[]
 
+  @Input() selectById: string;
   @Input() unselectedClass: string = 'button-unselected'
   @Input() selectedClass: string = 'button-selected';
 
   ngOnInit() {
+    this.setButton();
+  }
+
+  reset() {
+    this.setButton();
+  }
+
+  setButton() {
     if (this.buttons) {
-      this.currentButton = this.buttons[0];
+      this.currentButton = this.selectById
+        ? find(this.buttons, ['id', this.selectById])
+        : this.buttons[0];
     }
+    console.log('set... ', this.buttons, this.selectById, this.currentButton)
   }
 
   selectButton(button) {

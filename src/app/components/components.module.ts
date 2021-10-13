@@ -21,6 +21,7 @@ import { FundraisingComponent } from './fundraising/fundraising.component';
 import { NumberChangeComponent } from './number-change/number-change.component';
 import { ButtonGroupComponent } from './button-group/button-group.component';
 import { PlayerTurnComponent } from './player-turn/player-turn.component';
+import { NotificationFeedComponent } from './notification-feed/notification-feed.component';
  
 
 const components = [
@@ -31,6 +32,7 @@ const components = [
   DialogComponent,
   FundraisingComponent,
   LandGridComponent,
+  NotificationFeedComponent,
   NumberChangeComponent,
   PlayerHandsComponent,
   PlayerDeckComponent,

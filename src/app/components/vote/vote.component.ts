@@ -1,7 +1,6 @@
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
 import { find } from 'lodash';
 
 
@@ -10,7 +9,9 @@ import { find } from 'lodash';
   templateUrl: './vote.component.html',
   styleUrls: ['./vote.component.scss'],
   host: {
-    '[class.app-vote]': 'true'
+    '[class.app-vote]': 'true',
+    '[class.central]': 'role === "central"',
+    '[class.citizen]': 'role === "citizen"'
   }
 })
 export class VoteComponent implements OnInit {
@@ -21,41 +22,43 @@ export class VoteComponent implements OnInit {
   @Input() divisionId: string;
   @Input() includeOtherOption = false;
   @Input() hideLast: boolean;
+  @Input() role: 'central' | 'citizen';
   @Input() 
   get allowSelection() { return this._allowSelection };
-  set allowSelection(value) { console.log({value}); this._allowSelection = value };
+  set allowSelection(value) { this._allowSelection = value };
 
   $vote: Observable<any>;
-  vote;
   other: string = "";
+  vote;
 
   private _selectedOption
   private _allowSelection = true;
 
-  get selectedOption() { return this._selectedOption };
+  get selectedOption() {
+    return this._selectedOption
+  };
   set selectedOption(value) {
     this._selectedOption = value;
     const selected = find(this.vote.options, ["prompt", value]);
     this.selectionChange.emit({ vote: this.vote, selection: selected });
   }
 
-  constructor(private db: AngularFireDatabase) {
-  }
+  constructor(private db: AngularFireDatabase) {}
 
   onKeyUp() {
-    console.log('keyup');
     this.selectionChange.emit({ ...this.vote })
   }
 
+  selectVoteOption(index) {
+    this.selectedOption = this.vote?.options[index].prompt ?? undefined;
+  }
+
   ngOnInit() {
-    this.$vote = this.db.object(`shows/${this.showId}/divisions/${this.divisionId}/vote`).valueChanges();
+    this.$vote = this.db.object(`shows/${this.showId}/divisions/${this.divisionId}/vote`)
+      .valueChanges();
     this.$vote.subscribe((vote) => {
-      console.log({vote})
       this.vote = { ...vote };
       this.voteChange.emit({ ...vote });
-      // if (this.hideOption === 'last') {
-      //   this.vote.options.pop();
-      // }
     });
   }
 }
