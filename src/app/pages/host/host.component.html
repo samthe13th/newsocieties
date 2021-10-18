@@ -58,6 +58,15 @@
       <button (click)="clearVote()">Cancel resolution</button>
     </ng-container> -->
     <ng-container *ngIf="($vote | async) as vote">
+      <app-fundraising
+        style="background: black"
+        *ngIf="vote?.state === 'review' && vote?.type === 'resolution'"
+        [showKey]="showKey"
+        [divisionKey]="divisionKey"
+        [isCentral]="true"
+        (fundsChange)="onFundsChange($event)"
+        >
+      </app-fundraising>
       <app-vote 
         (selectionChange)="onSelectionChange($event)"
         [showVotes]="true"
@@ -66,14 +75,6 @@
         role="central"
         [divisionId]="divisionKey"
       ></app-vote>
-      <app-fundraising
-        *ngIf="vote?.state === 'review' && vote?.type === 'resolution'"
-        [showKey]="showKey"
-        [divisionKey]="divisionKey"
-        [isCentral]="true"
-        (fundsChange)="onFundsChange($event)"
-        >
-      </app-fundraising>
       <button *ngIf="vote?.state === 'voting'" (click)="closePolls()">Close Polls</button>
       <button *ngIf="vote?.state === 'review' && divisionVote" (click)="implement()">Implement</button>
     </ng-container>

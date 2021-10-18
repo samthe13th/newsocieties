@@ -81,6 +81,15 @@ select {
   margin-left: 20px;
 }
 
+.app-fundraising {
+  display: flex; 
+  flex-direction: column; 
+  background: #642F2F;
+  border-radius: 10px; 
+  color: white;
+  margin-bottom: 10px;
+}
+
 .app-host {
   @extend %app-page;
   padding: 15px;
@@ -515,6 +524,10 @@ select {
       display: none;
     }
   }
+}
+
+.relative-position {
+  position: relative;
 }
 
 .grid-wrapper {

@@ -70,6 +70,11 @@ export const DIVISION_TEMPLATE = {
     high: 17
   },
   harvested: 0,
+  focus: "none",
+  turn: {
+    index: 1,
+    actions: 2
+  }
 }
 
 export const SHOW_TEMPLATE = {

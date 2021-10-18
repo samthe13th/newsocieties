@@ -1,7 +1,7 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { AngularFireDatabase } from '@angular/fire/database';
-import { map, take } from 'rxjs/operators';
-import { find } from 'lodash';
+import { map, take, tap } from 'rxjs/operators';
+import { find, findIndex } from 'lodash';
 
 @Component({
   selector: 'app-fundraising',
@@ -32,32 +32,16 @@ export class FundraisingComponent {
   }
 
   ngOnInit() {
-    console.log(this.showKey, this.divisionKey)
+    console.log('FUNDRAISING: ', this.showKey, this.divisionKey);
     this.divisionPath = `shows/${this.showKey}/divisions/${this.divisionKey}`;
     this.$funds = this.db.list(`${this.divisionPath}/vote/funds`).valueChanges();
     this.$funds.subscribe((funds) => {
+      console.log('funds: ', funds)
       this.totalFunds = this.addAllFunds(funds);
       this.fundsChange.emit(this.totalFunds);
     })
     if (!this.isCentral && this.playerId) {
-      const citizenPath = `${this.divisionPath}/citizens/${this.playerId}`;
-      this.db.object(citizenPath).valueChanges()
-        .pipe(take(1))
-        .subscribe((c: any) => {
-          this.writePath = `${this.divisionPath}/vote/funds/${this.playerId}/value`;
-          this.fundsKey = `${this.playerId}-${c.name}`;
-          this.db.object(`${this.divisionPath}/vote/funds/${this.playerId}`).update({ 
-            key: this.fundsKey,
-            name: c.name
-          })
-        })
-      this.db.list(`${citizenPath}/resources`)
-        .valueChanges()
-        .pipe(
-          map((resources: number[]) => resources.reduce((acc, R) => acc + R, 0))
-        ).subscribe((x) =>{
-          this.max = x
-        })
+      this.subscribeToPlayerResources();
     } else {
       this.fundsKey = 'reserve';
       this.writePath = `${this.divisionPath}/vote/funds/reserve/value`;
@@ -65,15 +49,42 @@ export class FundraisingComponent {
         key: 'reserve',
         name: 'Reserve'
       })
-      console.log('set max obs')
       this.db.object(`${this.divisionPath}/reserve`).valueChanges().subscribe((x:number) => {
         this.max = x;
       });
     }
   }
 
+  async subscribeToPlayerResources() {
+    const citizenPath = `${this.divisionPath}/citizens`;
+    const citizens = await this.db.list(citizenPath)
+      .valueChanges()
+      .pipe(take(1))
+      .toPromise();
+    const playerIndex = findIndex(citizens, ['id', this.playerId]);
+    console.log('!! ', citizens, this.playerId, `${citizenPath}/${playerIndex}`)
+    this.db.object(`${citizenPath}/${playerIndex}`).valueChanges()
+      .pipe(take(1))
+      .subscribe((c: any) => {
+        this.writePath = `${this.divisionPath}/vote/funds/${playerIndex}/value`;
+        this.fundsKey = `${this.playerId}-${c.name}`;
+        this.db.object(`${this.divisionPath}/vote/funds/${playerIndex}`).update({ 
+          key: this.fundsKey,
+          name: c.name
+        })
+      });
+
+    this.db.list(`${citizenPath}/${playerIndex}/resources`)
+      .valueChanges()
+      .pipe(
+        tap((x) => console.log({x})),
+        map((resources: number[]) => resources.reduce(
+          (acc, R: any) => R?.value ? acc + R.value : acc, 0)
+        )
+      ).subscribe((x) => { this.max = x;  console.log('max: ', this.max) })
+  }
+
   takeBack(amount) {
-    console.log('take back ', amount);
     if (this.isCentral) {
       this.db.object(`${this.divisionPath}/vote/funds/reserve/value`).set(0);
     } else {

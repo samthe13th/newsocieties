@@ -30,12 +30,14 @@ export class PlayerDeckComponent {
 
   wealth = 0;
   playerIndex;
+  divisionPath;
 
   @Input() id;
   @Input() name = "Sam"
   @Input() showKey: string;
   @Input() division;
   @Input() myTurn: boolean;
+  @Input() showLabel = true;
 
   constructor(
     private route: ActivatedRoute,
@@ -52,7 +54,8 @@ export class PlayerDeckComponent {
   }
 
   async subToCitizen(showKey, divisionKey, id) {
-    const citizenPath = `shows/${showKey}/divisions/${divisionKey}/citizens`;
+    this.divisionPath = `shows/${showKey}/divisions/${divisionKey}`;
+    const citizenPath = `${this.divisionPath}/citizens`;
     const citizens = await this.db.list(citizenPath).valueChanges().pipe(take(1)).toPromise();
     this.playerIndex = _.findIndex(citizens, ['id', id]);
 

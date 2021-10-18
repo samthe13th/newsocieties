@@ -25,6 +25,7 @@ export class PlayerTurnComponent implements OnInit {
   @Output() turnChange = new EventEmitter<PlayerTurn>();
 
   @Input() divisionPath: string;
+  @Input() showLabel = true;
 
   constructor(private db: AngularFireDatabase) {}
 

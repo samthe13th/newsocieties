@@ -1,18 +1,27 @@
 <ng-container *ngIf="($funds | async) as funds">
-  <div class="contributers">
-    Funds contributed: {{ totalFunds }}
+  <div class="fundraising__header">
+    Fundraising <span class="fundraising__total-funds">{{ totalFunds }}</span>
+    <span *ngIf="isCentral">
+      <ng-container *ngFor="let fund of funds">
+        <span *ngIf="fund?.value && fund?.name">
+          ({{fund.name}}: {{fund.value}})
+        </span>
+      </ng-container>
+    </span>
+  </div>
+  <div class="fundraising__contributions" *ngIf="!isCentral">
     <ng-container *ngFor="let fund of funds">
       <div *ngIf="fund?.value && fund?.name">
         {{fund.name}}: {{fund.value}}
-        <button 
+        <!-- <button 
           (click)="takeBack(fund.value)"
           *ngIf="fundsAdded(funds) && fund.key == fundsKey">
           Take back
-        </button>
+        </button> -->
       </div>
     </ng-container>
   </div>
-  <div class="flex-row" *ngIf="max && max > 0">
+  <div class="fundraising__footer" *ngIf="max && max > 0">
     <app-number-change
       updateButtonText="Contribute" 
       [writePath]="writePath"

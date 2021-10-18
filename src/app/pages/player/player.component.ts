@@ -26,6 +26,8 @@ const KEY_CODE = {
 export class PlayerComponent implements OnInit {
   $division;
   $focus; 
+  $turn = new BehaviorSubject<any>(undefined); 
+
   vote;
 
   divisionSummaries;
@@ -44,9 +46,6 @@ export class PlayerComponent implements OnInit {
   }
 
   private destroy$ = new Subject<boolean>();
-
-  $turn = new BehaviorSubject<any>(undefined); 
-
 
   currentTab = 'Division';
   id;
