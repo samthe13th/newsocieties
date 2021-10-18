@@ -8,8 +8,8 @@ import { includes, find, range, difference, trim, differenceBy, toNumber, each }
 import { take, map } from 'rxjs/operators'
 import { BankService } from 'src/app/services/bank.service';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
-import { combineLatest } from 'rxjs';
 import { ButtonGroupComponent } from 'src/app/components/button-group/button-group.component';
+import { DivisionService } from 'src/app/services/division-service.service';
 
 @Component({
   selector: 'app-host',
@@ -25,6 +25,7 @@ export class HostComponent implements OnInit {
   @ViewChild('resolutionTemplate') resolutionTemplate: TemplateRef<any>;
   @ViewChild('scenerioTemplate') scenerioTemplate: TemplateRef<any>;
   @ViewChild('miscTemplate') miscTemplate: TemplateRef<any>;
+  @ViewChild('newSeasonTemplate') newSeasonModal: TemplateRef<any>;
 
   @ViewChild('focusButtonsComponent') focusButtonsComponent: ButtonGroupComponent;
   @ViewChild('updateSheet') updateSheet: TemplateRef<any>;
@@ -90,6 +91,7 @@ export class HostComponent implements OnInit {
     private route: ActivatedRoute,
     private bank: BankService,
     private bottomSheet: MatBottomSheet,
+    private divisionService: DivisionService
   ) {}
 
   ngOnInit() {
@@ -112,6 +114,8 @@ export class HostComponent implements OnInit {
       console.log({focus})
       this.focus = focus;
     })
+
+    this.divisionService.calculateDivisionScore$(this.showKey, this.divisionKey).subscribe();
 
     this.db.object(`shows/${this.showKey}/contamination/current`)
       .valueChanges()
@@ -413,27 +417,33 @@ export class HostComponent implements OnInit {
     }
   }
 
-  newSeason(division) {
-    console.log('new season for div: ', division)
-    if (!division) return;
-    const { season, capacity, extra, harvest } = division.nextSeason;
-    this.harvest = this.generateHarvest(division.landTiles, division.nextSeason?.harvest);
-    console.log("harvest: ", this.harvest)
+  startSeason(division, newSeason) {
+    this.harvest = this.generateHarvest(division.landTiles, newSeason?.harvest);
+
     this.db.object(`${this.divisionPath}`).update({
-      season, 
-      capacity, 
-      harvest,
-      extra,
-      landTiles: this.harvest,
-      nextSeason: {
-        ...division.nextSeason,
-        season: season + 1
+      season: newSeason.season,
+      capacity: newSeason.capacity,
+      harvest: newSeason.harvest,
+      reserveThresholds: {
+        low: newSeason.thresholds[0],
+        mid: newSeason.thresholds[1],
+        high: newSeason.thresholds[2]
       },
+      landCost: newSeason.landCost,
+      landTiles: this.harvest,
       harvested: 0,
       selection: null
     })
     this.resetCitizenActions();
-    // console.log('NEW HARVEST: ', this.harvest)
+    this.showModal = false;
+    console.log('NEW HARVEST: ', this.harvest)
+  }
+
+  newSeason(division) {
+    if (!division) return;
+    this.divisionService.newSeason(this.showKey, this.divisionKey);
+    this.modalContent = this.newSeasonModal;
+    this.showModal = true;
   }
 
   private async resetCitizenActions() {

@@ -37,7 +37,7 @@ export class PlayerDeckComponent {
   @Input() showKey: string;
   @Input() division;
   @Input() myTurn: boolean;
-  @Input() showLabel = true;
+
 
   constructor(
     private route: ActivatedRoute,

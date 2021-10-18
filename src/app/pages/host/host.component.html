@@ -145,50 +145,38 @@
       <h2>Division</h2>
 
       <div><strong>Score: </strong>{{ division.score }}</div>
-      <hr/>
       <div><strong>Season:</strong>
         {{ division.season }}
         <button (click)="newSeason(division)">New Season</button>
+      </div>
+
+      <hr/>
+      <div>
+        <strong>Land cost: </strong>
+        {{ division.landCost }}
       </div>
       <div><strong>Harvested: </strong>
         {{ division.harvested }} <span *ngIf="division.harvested">({{ percentHarvested(division.harvested, division.capacity) }}% of capacity)</span>
       </div>
       <div>
         <strong>Capacity: </strong>
-        {{ division?.capacity }} -> {{ division.nextSeason.capacity }}
-        <button (click)="changeDivisionProperty('nextSeason/capacity', 'Next Season: capacity')">Change</button>
+        {{ division?.capacity }}
       </div>
-      <div>
-        <strong>Extra: </strong>
-        {{ division?.extra }} -> {{ division.nextSeason.extra }}
-        <button (click)="changeDivisionProperty('nextSeason/extra', 'Next Season: extra')">Change</button>
-      </div>
-      <div><strong>Harvest size:</strong>
-        {{ division?.harvest }} -> {{ division.nextSeason.harvest }}
-        <button (click)="changeDivisionProperty('nextSeason/harvest', 'Next Season: harvest')">Change</button>
+      <div><strong>Harvest:</strong>
+        {{ division?.harvest }}
       </div>
 
-      <hr/>
-
-      <div>
-        <strong>Reserve: </strong>
-        {{ division.reserve }}
-        <button (click)="changeDivisionProperty('reserve')">Change</button>
-      </div>
       <div>
         <strong>Reserve thresholds</strong>
         <div class="indented-list">
           <div>
             <strong>High: </strong>{{ division?.reserveThresholds.high }}
-            <button (click)="changeDivisionProperty('reserveThresholds/high', 'high')">Change</button>
           </div>
           <div>
             <strong>Mid: </strong>{{ division?.reserveThresholds.mid }}
-            <button (click)="changeDivisionProperty('reserveThresholds/mid', 'mid')">Change</button>
           </div>
           <div>
             <strong>Low: </strong>{{ division?.reserveThresholds.low }}
-            <button (click)="changeDivisionProperty('reserveThresholds/low', 'low')">Change</button>
           </div>
         </div>
       </div>
@@ -196,6 +184,11 @@
       <hr/>
 
       <div>
+        <div>
+          <strong>Reserve: </strong>
+          {{ division.reserve }}
+          <button (click)="changeDivisionProperty('reserve')">Change</button>
+        </div>
         <strong>Advancements</strong>
         <div class="indented-list">
           <div>
@@ -219,11 +212,6 @@
             <button (click)="changeDivisionProperty('advancements/infastructure/communal', 'communal infastructure')">Change</button>
           </div>
         </div>
-      </div>
-      <div>
-        <strong>Land cost: </strong>
-        {{ division.landCost }}
-        <button (click)="changeDivisionProperty('landCost')">Change</button>
       </div>
     </div>
 
@@ -255,6 +243,20 @@
         {{ scenerio.value }}
       </p>
     </div>
+
+    <ng-template #newSeasonTemplate>
+      <div *ngIf="division.nextSeason as next">
+        <h1>New Season: <span class="new-value">{{ next?.season }}</span></h1>
+        <div>Capacity: {{ division.capacity }} &#8594; <span class="new-value">{{ next?.capacity }}</span></div>
+        <div>Harvest: {{ division.harvest }} &#8594; <span class="new-value">{{ next?.harvest }}</span></div>
+        <div>Thresholds:
+          ({{ division.reserveThresholds.low }}, {{ division.reserveThresholds.mid }}, {{ division.reserveThresholds.high }})
+          &#8594; <span class="new-value">({{ next?.thresholds[0] }}, {{ next?.thresholds[1] }}, {{ next?.thresholds[2] }})</span>
+        </div>
+        <div>Land Cost: {{ division.landCost }} &#8594; <span class="new-value">{{ next?.landCost }}</span></div>
+        <button (click)="startSeason(division, next)">Start Season</button>
+      </div>
+    </ng-template>
   </div>
 
 </ng-template>
