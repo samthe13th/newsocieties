@@ -15,77 +15,86 @@
   [tabs]="[
     { id: 'division', tabTemplate: division, bodyTemplate: divisionBody },
     { id: 'global', tabTemplate: global, bodyTemplate: globalBody },
-    { id: 'io', tabTemplate: io, bodyTemplate: ioBody },
+    { id: 'exports', tabTemplate: exports, bodyTemplate: exportsBody },
     { id: 'central', tabTemplate: central, bodyTemplate: centralBody },
     { id: 'notes', tabTemplate: notes, bodyTemplate: notesBody }
   ]">
 </app-tabs>
 
-<div class="host-main" *ngIf="focus">
-  <app-button-group
-    #focusButtonsComponent
-    (select)="onFocusSelect($event)"
-    [selectById]="focus"
-    [buttons]="focusButtons">
-  </app-button-group>
-  <!-- <div class="button-row">
-    <button (click)="setFocus('harvest')">Harvest</button>
-    <button (click)="setFocus('vote')">Vote</button>
-  </div> -->
-  <div *ngIf="focus === 'harvest'" class="harvest-wrapper">
-    <div class="turn-controls">
-      <app-button-group
-        *ngIf="$turn | async as turn"
-        (select)="onTurnSelect($event)"
-        [selectById]="turn?.index"
-        [buttons]="turnButtons">
-      </app-button-group>
-      <app-player-turn [divisionPath]="divisionPath"></app-player-turn>
+<app-tabs 
+  class="host-side-panel"
+  selectedClass="host-selected-tab"
+  [tabs]="[
+    { id: 'focus', tabTemplate: focusTab, bodyTemplate: focusBody },
+    { id: 'notifications', tabTemplate: notifications, bodyTemplate: notificationsBody }
+  ]">
+</app-tabs>
+
+<ng-template #notifications>Inbox</ng-template>
+<ng-template #focusTab>Focus</ng-template>
+
+<ng-template #notificationsBody>
+  <app-notification-feed
+    [showKey]="showKey"
+    [divisionKey]="divisionKey">
+  </app-notification-feed>
+</ng-template>
+
+<ng-template #focusBody>
+  <div class="host-main" *ngIf="focus">
+    <app-button-group
+      #focusButtonsComponent
+      (select)="onFocusSelect($event)"
+      [selectById]="focus"
+      [buttons]="focusButtons">
+    </app-button-group>
+    <div *ngIf="focus === 'misc'" class="misc-wrapper">
+      Pending GLA requests
     </div>
-     <app-land-grid 
-      *ngIf="action === 'harvesting'"
-      [markCards]="true"
-      [showId]="showKey"
-      [divisionKey]="divisionKey"
-      [updatePath]="landTilesPath"> 
-    </app-land-grid>
-  </div>
-
-  <div *ngIf="focus === 'principles' || focus === 'resolutions' || focus === 'scenerio'" class="resolution-wrapper">
-    <!-- <ng-container *ngIf="action === 'funding'">
-      Resolution:  {{ divisionVote?.value }}
-      <button (click)="enactVoteResult()">Enact resolution</button>
-      <button (click)="clearVote()">Cancel resolution</button>
-    </ng-container> -->
-    <ng-container *ngIf="($vote | async) as vote">
-      <app-fundraising
-        style="background: black"
-        *ngIf="vote?.state === 'review' && vote?.type === 'resolution'"
-        [showKey]="showKey"
-        [divisionKey]="divisionKey"
-        [isCentral]="true"
-        (fundsChange)="onFundsChange($event)"
-        >
-      </app-fundraising>
-      <app-vote 
-        (selectionChange)="onSelectionChange($event)"
-        [showVotes]="true"
-        [allowSelection]="vote?.state === 'review'"
+    <div *ngIf="focus === 'harvest'" class="harvest-wrapper">
+      <div class="turn-controls">
+        <app-button-group
+          *ngIf="$turn | async as turn"
+          (select)="onTurnSelect($event)"
+          [selectById]="turn?.index"
+          [buttons]="turnButtons">
+        </app-button-group>
+        <app-player-turn [divisionPath]="divisionPath"></app-player-turn>
+      </div>
+       <app-land-grid 
+        *ngIf="action === 'harvesting'"
+        [markCards]="true"
         [showId]="showKey"
-        role="central"
-        [divisionId]="divisionKey"
-      ></app-vote>
-      <button *ngIf="vote?.state === 'voting'" (click)="closePolls()">Close Polls</button>
-      <button *ngIf="vote?.state === 'review' && divisionVote" (click)="implement()">Implement</button>
-    </ng-container>
-
-  </div>
-</div>
-
-<app-notification-feed
-  [showKey]="showKey"
-  [divisionKey]="divisionKey">
-</app-notification-feed>
+        [divisionKey]="divisionKey"
+        [updatePath]="landTilesPath"> 
+      </app-land-grid>
+    </div>
+    <div *ngIf="focus === 'principles' || focus === 'resolutions' || focus === 'scenerio'" class="resolution-wrapper">
+      <ng-container *ngIf="($vote | async) as vote">
+        <app-fundraising
+          style="background: black"
+          *ngIf="vote?.state === 'review' && vote?.type === 'resolution'"
+          [showKey]="showKey"
+          [divisionKey]="divisionKey"
+          [isCentral]="true"
+          (fundsChange)="onFundsChange($event)"
+          >
+        </app-fundraising>
+        <app-vote 
+          (selectionChange)="onSelectionChange($event)"
+          [showVotes]="true"
+          [allowSelection]="vote?.state === 'review'"
+          [showId]="showKey"
+          role="central"
+          [divisionId]="divisionKey"
+        ></app-vote>
+        <button *ngIf="vote?.state === 'voting'" (click)="closePolls()">Close Polls</button>
+        <button *ngIf="vote?.state === 'review' && divisionVote" (click)="implement()">Implement</button>
+      </ng-container>
+  
+    </div>
+  </div>  
+</ng-template>
 
 <ng-template #harvestTemplate>
   Go to harvest
@@ -110,7 +119,7 @@
 </ng-template>
 
 <ng-template #resolutionTemplate>
-  Resolution
+  <h1>Resolution</h1>
   <select
     *ngIf="voteDropdown"
     [(ngModel)]="voteDropdownSelect"
@@ -127,14 +136,31 @@
 </ng-template>
 
 <ng-template #scenerioTemplate>
-  Scenerio
+  <h1>Scenerio</h1>
+  <select
+    *ngIf="voteDropdown"
+    [(ngModel)]="voteDropdownSelect"
+    name="vote-options"
+    id="vote-options">
+    <option
+      *ngFor="let option of voteDropdown"
+      [ngValue]="option">
+      {{option?.title}}
+    </option>
+  </select>
+
   <button *ngIf="voteDropdownSelect" (click)="startVote('scenerio')">Vote on Scenerio</button>
+</ng-template>
+
+<ng-template #miscTemplate>
+  Misc
+  <button (click)="startMisc()">Start</button>
 </ng-template>
 
 <!-- TABS-->
 <ng-template #division>{{divisionKey}}</ng-template>
 <ng-template #global>Global</ng-template>
-<ng-template #io>I/O</ng-template>
+<ng-template #exports>Exports</ng-template>
 <ng-template #central>Central</ng-template>
 <ng-template #notes>Notes</ng-template>
 
@@ -152,6 +178,10 @@
 
       <hr/>
       <div>
+        <strong>VP: </strong>
+        {{ division.VP }}
+      </div>
+      <div>
         <strong>Land cost: </strong>
         {{ division.landCost }}
       </div>
@@ -167,18 +197,31 @@
       </div>
 
       <div>
-        <strong>Reserve thresholds</strong>
-        <div class="indented-list">
-          <div>
-            <strong>High: </strong>{{ division?.reserveThresholds.high }}
-          </div>
-          <div>
-            <strong>Mid: </strong>{{ division?.reserveThresholds.mid }}
-          </div>
-          <div>
-            <strong>Low: </strong>{{ division?.reserveThresholds.low }}
-          </div>
-        </div>
+        <strong>Thresholds:</strong>
+        {{ division?.reserveThresholds.low }} / {{ division?.reserveThresholds.mid }} / {{ division?.reserveThresholds.high }}
+      </div>
+
+      <div>
+        <strong>High Thresholds Met: </strong>
+        {{ division.highThresholdsMet }}
+      </div>
+
+      <div>
+        <strong>Safety: </strong>
+        {{ division.advancements.safety.individual + division.advancements.safety.communal }}
+      </div>
+      <div>
+        <strong>Health: </strong>
+        {{ division.advancements.health.individual + division.advancements.health.communal }}
+      </div>
+      <div>
+        <strong>Arts: </strong>{{ division.advancements.arts.individual + division.advancements.arts.communal }}
+      </div>
+      <div>
+        <strong>Knowledge: </strong>{{ division.advancements.knowledge.individual + division.advancements.knowledge.communal }}
+      </div>
+      <div>
+        <strong>Infastructure: </strong>{{ division.advancements.infastructure.individual + division.advancements.infastructure.communal }}
       </div>
 
       <hr/>
@@ -187,39 +230,86 @@
         <div>
           <strong>Reserve: </strong>
           {{ division.reserve }}
-          <button (click)="changeDivisionProperty('reserve')">Change</button>
+          <button (click)="changeDivisionProperty('reserve')">
+            <fa-icon size="sm" [icon]="faPen"></fa-icon>
+          </button>
         </div>
-        <strong>Advancements</strong>
-        <div class="indented-list">
-          <div>
-            <strong>Arts: </strong>{{ division.advancements.arts.individual + division.advancements.arts.communal }} [{{ division.advancements.arts.communal }}]
-            <button (click)="changeDivisionProperty('advancements/arts/communal', 'communal arts')">Change</button>
-          </div>
-          <div>
-            <strong>Health: </strong>{{ division.advancements.health.individual + division.advancements.health.communal }} [{{ division.advancements.health.communal }}]
-            <button (click)="changeDivisionProperty('advancements/health/communal', 'communal health')">Change</button>
-          </div>
-          <div>
-            <strong>Safety: </strong>{{ division.advancements.safety.individual + division.advancements.safety.communal }} [{{ division.advancements.safety.communal }}]
-            <button (click)="changeDivisionProperty('advancements/safety/communal', 'communal safety')">Change</button>
-          </div>
-          <div>
-            <strong>Knowledge: </strong>{{ division.advancements.knowledge.individual + division.advancements.knowledge.communal }} [{{ division.advancements.knowledge.communal }}]
-            <button (click)="changeDivisionProperty('advancements/knowledge/communal', 'communal knowledge')">Change</button>
-          </div>
-          <div>
-            <strong>Infastructure: </strong>{{ division.advancements.infastructure.individual + division.advancements.infastructure.communal }} [{{ division.advancements.infastructure.communal }}]
-            <button (click)="changeDivisionProperty('advancements/infastructure/communal', 'communal infastructure')">Change</button>
-          </div>
+        <div>
+          <strong>Communal Safety: </strong>{{ division.advancements.safety.communal }}
+          <button (click)="changeDivisionProperty('advancements/safety/communal', 'communal safety')">
+            <fa-icon size="sm" [icon]="faPen"></fa-icon>
+          </button>
+        </div>
+        <div>
+          <strong>Communal Health: </strong>{{ division.advancements.health.communal }}
+          <button (click)="changeDivisionProperty('advancements/health/communal', 'communal health')">
+            <fa-icon size="sm" [icon]="faPen"></fa-icon>
+          </button>
+        </div>
+        <div>
+          <strong>Communal Arts: </strong>{{ division.advancements.arts.communal }}
+          <button (click)="changeDivisionProperty('advancements/arts/communal', 'communal arts')">
+            <fa-icon size="sm" [icon]="faPen"></fa-icon>
+          </button>
+        </div>
+        <div>
+          <strong>Communal Knowledge: </strong>{{ division.advancements.knowledge.communal }}
+          <button (click)="changeDivisionProperty('advancements/knowledge/communal', 'communal knowledge')">
+            <fa-icon size="sm" [icon]="faPen"></fa-icon>
+          </button>
+        </div>
+        <div>
+          <strong>Communal Infastructure: </strong>{{ division.advancements.infastructure.communal }}
+          <button (click)="changeDivisionProperty('advancements/infastructure/communal', 'communal infastructure')">
+            <fa-icon size="sm" [icon]="faPen"></fa-icon>
+          </button>
         </div>
       </div>
     </div>
 
     <div class="tab-card">
       <h2>Citizens</h2>
-      <div *ngFor="let citizen of division.citizens">
-        <div><strong>{{citizen.id}}</strong>: <button>{{citizen.name}}</button></div>
-        <div><strong>Resources: </strong>{{ citizen.resources?.length }}</div>
+      <div *ngFor="let citizen of division.citizens" style="margin-bottom: 10px">
+        <hr/>
+        <div><strong>{{citizen.name}}</strong></div>
+        <div>Actions: {{ citizen.actions }}
+          <button (click)="changeCitizenProperty(citizen, 'actions', 'basic')">
+            <fa-icon size="sm" [icon]="faPen"></fa-icon>
+          </button>
+        </div>
+        <div>Resources: {{ calculateWealth(citizen?.resources) }}</div>
+        <button (click)="addCitizenResources(citizen)">Add</button>
+        <button (click)="removeCitizenResources(citizen)">Remove</button>
+        <div>
+          Safety: {{ citizen?.advancements.safety }}
+          <button (click)="changeCitizenProperty(citizen, 'advancements/safety', 'advancement', 'safety')">
+            <fa-icon size="sm" [icon]="faPen"></fa-icon>
+          </button>
+        </div>
+        <div>
+          Health: {{ citizen?.advancements.health }}
+          <button (click)="changeCitizenProperty(citizen, 'advancements/health', 'advancement', 'health')">
+            <fa-icon size="sm" [icon]="faPen"></fa-icon>
+          </button>
+        </div>
+        <div>
+          Arts: {{ citizen?.advancements.arts }}
+          <button (click)="changeCitizenProperty(citizen, 'advancements/arts', 'advancement', 'arts')">
+            <fa-icon size="sm" [icon]="faPen"></fa-icon>
+          </button>
+        </div>
+        <div>
+          Knowledge: {{ citizen?.advancements.knowledge }}
+          <button (click)="changeCitizenProperty(citizen, 'advancements/knowledge', 'advancement', 'knowledge')">
+            <fa-icon size="sm" [icon]="faPen"></fa-icon>
+          </button>
+        </div>
+        <div>
+          Infastructure: {{ citizen?.advancements.infastructure }}
+          <button (click)="changeCitizenProperty(citizen, 'advancements/infastructure', 'advancement', 'infastructure')">
+            <fa-icon size="sm" [icon]="faPen"></fa-icon>
+          </button>
+        </div>
       </div>
     </div>
 
@@ -247,13 +337,51 @@
     <ng-template #newSeasonTemplate>
       <div *ngIf="division.nextSeason as next">
         <h1>New Season: <span class="new-value">{{ next?.season }}</span></h1>
-        <div>Capacity: {{ division.capacity }} &#8594; <span class="new-value">{{ next?.capacity }}</span></div>
-        <div>Harvest: {{ division.harvest }} &#8594; <span class="new-value">{{ next?.harvest }}</span></div>
-        <div>Thresholds:
-          ({{ division.reserveThresholds.low }}, {{ division.reserveThresholds.mid }}, {{ division.reserveThresholds.high }})
-          &#8594; <span class="new-value">({{ next?.thresholds[0] }}, {{ next?.thresholds[1] }}, {{ next?.thresholds[2] }})</span>
+        <div>
+          Capacity: {{ division.capacity }} &#8594; <span class="new-value">{{ next?.capacity }}</span>
+          <button (click)="changeDivisionProperty('nextSeason/capacity')">
+            <fa-icon size="sm" [icon]="faPen"></fa-icon>
+          </button>
         </div>
-        <div>Land Cost: {{ division.landCost }} &#8594; <span class="new-value">{{ next?.landCost }}</span></div>
+        <div>
+          Harvest: {{ division.harvest }} &#8594; <span class="new-value">{{ next?.harvest }}</span>
+          <button (click)="changeDivisionProperty('nextSeason/harvest')">
+            <fa-icon size="sm" [icon]="faPen"></fa-icon>
+          </button>
+        </div>
+        <div>
+          Land Cost: {{ division.landCost }} &#8594; <span class="new-value">{{ next?.landCost }}</span>
+          <button (click)="changeDivisionProperty('nextSeason/landCost')">
+            <fa-icon size="sm" [icon]="faPen"></fa-icon>
+          </button>
+        </div>
+        <div *ngIf="next?.thresholds">
+          Thresholds
+          <ul style="margin: 0">
+            <li>
+              Low: {{ division.reserveThresholds.low }}
+              &#8594; <span class="new-value">{{ next?.thresholds[0] }}</span>
+              <button (click)="changeDivisionProperty('nextSeason/thresholds/0', 'Low')">
+                <fa-icon size="sm" [icon]="faPen"></fa-icon>
+              </button>
+            </li>
+            <li>
+              Mid: {{ division.reserveThresholds.mid }}
+              &#8594; <span class="new-value">{{ next?.thresholds[1] }}</span>
+              <button (click)="changeDivisionProperty('nextSeason/thresholds/1', 'Low')">
+                <fa-icon size="sm" [icon]="faPen"></fa-icon>
+              </button>
+            </li>
+            <li>
+              High: {{ division.reserveThresholds.high }}
+              &#8594; <span class="new-value">{{ next?.thresholds[2] }}</span>
+              <button (click)="changeDivisionProperty('nextSeason/thresholds/2', 'High')">
+                <fa-icon size="sm" [icon]="faPen"></fa-icon>
+              </button>
+            </li>
+          </ul>
+        </div>
+        <hr/>
         <button (click)="startSeason(division, next)">Start Season</button>
       </div>
     </ng-template>
@@ -263,14 +391,26 @@
 
 <!-- GLOBAL -->
 <ng-template #globalBody>
-  <span *ngIf="contamination !== undefined">
+  <div
+    *ngIf="contamination !== undefined"
+    class="tab-card"
+  >
     Contamination Level: {{contamination}}%
-  </span>
+    <div *ngFor="let div of divisions">
+      <hr/>
+      <app-society-summary
+        *ngIf="(div.listener | async) as division"
+        class="division-summary"
+        details="full"
+        [division]="division">
+      </app-society-summary>
+    </div>
+  </div>
 </ng-template>
 
-<!-- I/O -->
-<ng-template #ioBody>
-  I/O
+<!-- EXPORTS -->
+<ng-template #exportsBody>
+
 </ng-template>
 
 <!-- CENTRAL -->
@@ -305,5 +445,51 @@
       [readPath]="changeAttribute?.dbPath"
       [writePath]="changeAttribute?.dbPath">
     </app-number-change>
+  </div>
+</ng-template>
+
+<ng-template #changeAdvancementSheet>
+  <div class="action-sheet">
+    {{ changeAttribute?.name }}
+    <app-number-change
+      (afterUpdate)="onAdvancementUpdate($event, changeAttribute?.name)"
+      [readPath]="changeAttribute?.dbPath"
+      [writePath]="changeAttribute?.dbPath">
+    </app-number-change>
+  </div>
+</ng-template>
+
+<ng-template #removeResourcesSheet>
+  <div class="action-sheet flex-column">
+    <div>Remove Resources</div>
+    <ng-number-picker
+      #removeResourcePicker
+      class="number-picker"
+      [arrowKeys]="true"
+      [min]="0">
+    </ng-number-picker>
+    <button (click)="removeResources(removeResourcePicker.value)">
+      Confirm
+    </button>
+  </div>
+</ng-template>
+
+<ng-template #addResourcesSheet>
+  <div class="action-sheet flex-column">
+    <div>Add Resources</div>
+    <app-button-group
+      (select)="onResourceTypeSelect($event)"
+      [buttons]="resourceTypes">
+    </app-button-group>
+    <ng-number-picker
+      #addResourcePicker
+      class="number-picker"
+      [arrowKeys]="true"
+      [min]="0">
+    </ng-number-picker>
+    Total = {{ addResourcePicker.value * this.resourceType }}
+    <button (click)="addResources(this.resourceType, addResourcePicker.value)">
+      Confirm
+    </button>
   </div>
 </ng-template>

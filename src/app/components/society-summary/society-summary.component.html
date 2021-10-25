@@ -4,9 +4,9 @@
   <div><strong>Score:</strong>{{ division.score }}</div>
   <div><strong>Land cost:</strong>{{ division.landCost }}</div>
   <ng-container *ngIf="details === 'full'">
-    <div><strong>Reserve:</strong>{{ calculateReserve(division.reserve) }}</div>
+    <div><strong>Reserve:</strong>{{ division.reserve }}</div>
     <div><strong>Harvested (actual):</strong>{{ division.harvested }}</div>
-    <div><strong>Capacity:</strong>{{ division.capacity }}+{{ division.extra }}</div>
+    <div><strong>Capacity:</strong>{{ division.capacity }}</div>
     <div><strong>Harvest:</strong>{{ division.harvest }}</div>
   </ng-container>
 </ng-container>

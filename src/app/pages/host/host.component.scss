@@ -12,9 +12,20 @@
   }
 }
 
+.misc-wrapper {
+  width: 100%;
+  background: white;
+  border-radius: 10px;
+  padding-bottom: 20px;
+  color: black;
+  padding: 10px; 
+}
+
 .host-side-panel {
   max-width: 400px;
-  margin-right: 20px;
+  &:not(:last-child) {
+    margin-right: 20px;
+  }
 }
 
 .host-tab {

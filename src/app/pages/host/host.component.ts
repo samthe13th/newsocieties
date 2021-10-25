@@ -4,12 +4,16 @@ import { AngularFireDatabase } from '@angular/fire/database';
 import { getRandomInt, pluckRandom } from 'src/app/utilties';
 import { LandTile, LandCardValues } from 'src/app/interfaces';
 import * as _ from 'lodash';
-import { includes, find, range, difference, trim, differenceBy, toNumber, each } from 'lodash';
+import { includes, range, difference, trim, differenceBy, toNumber, each } from 'lodash';
 import { take, map } from 'rxjs/operators'
 import { BankService } from 'src/app/services/bank.service';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { ButtonGroupComponent } from 'src/app/components/button-group/button-group.component';
 import { DivisionService } from 'src/app/services/division-service.service';
+import { faPen } from '@fortawesome/free-solid-svg-icons';
+import { combineLatest } from 'rxjs';
+
+const DIVISIONS = ["N", "NE", "W", "NW", "E", "SW", "S", "SE"];
 
 @Component({
   selector: 'app-host',
@@ -29,8 +33,14 @@ export class HostComponent implements OnInit {
 
   @ViewChild('focusButtonsComponent') focusButtonsComponent: ButtonGroupComponent;
   @ViewChild('updateSheet') updateSheet: TemplateRef<any>;
+  @ViewChild('addResourcesSheet') addResourcesSheet: TemplateRef<any>;
+  @ViewChild('removeResourcesSheet') removeResourcesSheet: TemplateRef<any>;
+  @ViewChild('changeAdvancementSheet') changeAdvancementSheet: TemplateRef<any>;
   
   modalContent: TemplateRef<any>;
+
+  // ICONS
+  faPen = faPen;
 
   showModal = false;
   turnButtons = [
@@ -48,6 +58,13 @@ export class HostComponent implements OnInit {
     { id: 'misc', label: 'Mc' },
   ]
 
+  resourceType = 1;
+  resourceTypes = [
+    { id: '1', label: '1'},
+    { id: '2', label: '2' },
+    { id: '3', label: '3' }
+  ]
+
   $vote;
   $division;
   $resolutions;
@@ -56,7 +73,11 @@ export class HostComponent implements OnInit {
   $turn;
   $focus;
 
+  selectedCitizen;
   changeAttribute;
+  changeListAttribute;
+
+  divisions;
   actionSheet;
   voteResultFunds = 0;
   division;
@@ -86,12 +107,15 @@ export class HostComponent implements OnInit {
   voteDropdown;
   voteDropdownSelect;
 
+  $citizenAdvancements;
+
   constructor(
     private db: AngularFireDatabase,
     private route: ActivatedRoute,
     private bank: BankService,
     private bottomSheet: MatBottomSheet,
-    private divisionService: DivisionService
+    private divisionService: DivisionService,
+    private bankService: BankService
   ) {}
 
   ngOnInit() {
@@ -115,6 +139,14 @@ export class HostComponent implements OnInit {
       this.focus = focus;
     })
 
+    this.db.object(`shows/${this.showKey}`)
+    .valueChanges()
+    .pipe(take(1))
+    .subscribe((show) => {
+      this.divisions = this.getDivisionObservables(show);
+      console.log("DIVISIONS: ", this.divisions)
+    })
+
     this.divisionService.calculateDivisionScore$(this.showKey, this.divisionKey).subscribe();
 
     this.db.object(`shows/${this.showKey}/contamination/current`)
@@ -133,8 +165,13 @@ export class HostComponent implements OnInit {
     console.log('on update: ', value)
   }
 
+  calculateWealth(resources) {
+    if (!resources) return 0;
+    return resources.reduce((acc, R) => acc + R.value, 0);
+  }
+
   changeDivisionProperty(prop, name=null) {
-    console.log("change: ", prop)
+    console.log("change: ", prop);
     this.changeAttribute = {
       name: name ?? prop,
       dbPath: `${this.divisionPath}/${prop}`
@@ -142,8 +179,35 @@ export class HostComponent implements OnInit {
     this.actionSheet = this.bottomSheet.open(this.updateSheet);
   }
 
+  changeCitizenProperty(citizen, prop, type, name=null) {
+    console.log('change: ', citizen, prop, type, name)
+    this.selectedCitizen = citizen;
+    this.changeAttribute = {
+      name: name ?? prop,
+      dbPath: `${this.divisionPath}/citizens/${citizen.position - 1}/${prop}`
+    }
+    this.actionSheet = (type === 'advancement') 
+      ? this.bottomSheet.open(this.changeAdvancementSheet)
+      : this.bottomSheet.open(this.updateSheet)
+  }
+
   percentHarvested(harvested, capacity) {
     return Math.round((toNumber(harvested)/toNumber(capacity)) * 100)
+  }
+
+  async onAdvancementUpdate(newVal, prop) {
+    const individualPath = `${this.divisionPath}/advancements/${prop}/individual`;
+    const oldVal = this.selectedCitizen.advancements[prop];
+    const individual: any = await this.db.object(individualPath)
+      .valueChanges()
+      .pipe(take(1))
+      .toPromise()
+    const update: number = individual + (newVal - oldVal);
+
+    this.db.object(individualPath).set(update);
+    this.db.object(this.changeAttribute.dbPath).set(newVal);
+    this.actionSheet.dismiss();
+    console.log(update, prop, individual)
   }
 
   getResolutions() {
@@ -200,7 +264,6 @@ export class HostComponent implements OnInit {
   }
 
   setFocus(type) {
-    console.log('set ', type)
     this.showModal = true;
     if (type === 'principles') {
       this.setVoteDropdown('principles');
@@ -209,6 +272,7 @@ export class HostComponent implements OnInit {
       this.setVoteDropdown('resolutions');
       this.modalContent = this.resolutionTemplate;
     } else if (type === 'scenerio') {
+      this.setVoteDropdown('scenerios');
       this.modalContent = this.scenerioTemplate;
     } else if (type === 'harvest') {
       this.modalContent = this.harvestTemplate;
@@ -221,6 +285,11 @@ export class HostComponent implements OnInit {
     this.showModal = false;
     this.action = 'harvesting';
     this.db.object(`${this.divisionPath}/focus`).set('harvest');
+  }
+
+  startMisc() {
+    this.showModal = false;
+    this.db.object(`${this.divisionPath}/focus`).set('misc');
   }
 
   onSelectionChange(selection) {
@@ -251,7 +320,7 @@ export class HostComponent implements OnInit {
       } else {
         const path = `${this.divisionPath}/citizens/${sourceKey}/resources`;
         console.log({path})
-        this.bank.spendResources(path, source.value)
+        this.bank.spendResources(this.showKey, this.divisionKey, sourceKey, source.value)
       }
     })
   };
@@ -297,6 +366,18 @@ export class HostComponent implements OnInit {
 
   get voteReady() {
     return this.divisionVote !== undefined
+  }
+
+  removeCitizenResources(citizen) {
+    console.log("remove resources: ", citizen);
+    this.selectedCitizen = citizen;
+    this.actionSheet = this.bottomSheet.open(this.removeResourcesSheet);
+  }
+
+  addCitizenResources(citizen) {
+    console.log("add resources: ", citizen);
+    this.selectedCitizen = citizen;
+    this.actionSheet = this.bottomSheet.open(this.addResourcesSheet);
   }
 
   setVoteDropdown(type) {
@@ -417,6 +498,37 @@ export class HostComponent implements OnInit {
     }
   }
 
+  removeResources(amount) {
+    this.bankService.spendResources(
+      this.showKey,
+      this.divisionKey,
+      this.selectedCitizen.position - 1,
+      amount
+    ).then(() => {
+      this.actionSheet.dismiss();
+    })
+  }
+
+  addResources(type, amount) {
+    this.bankService.depositResources(
+      this.showKey,
+      this.divisionKey,
+      this.selectedCitizen.position - 1,
+      range(amount).map(() => ({
+        division: this.divisionKey,
+        value: toNumber(type)
+      }))
+    ).then(() => {
+      this.actionSheet.dismiss();
+    })
+  }
+
+  onResourceTypeSelect(x) {
+    console.log({x})
+    this.resourceType = toNumber(x?.id);
+    console.log(this.resourceType, typeof this.resourceType)
+  }
+
   startSeason(division, newSeason) {
     this.harvest = this.generateHarvest(division.landTiles, newSeason?.harvest);
 
@@ -444,6 +556,29 @@ export class HostComponent implements OnInit {
     this.divisionService.newSeason(this.showKey, this.divisionKey);
     this.modalContent = this.newSeasonModal;
     this.showModal = true;
+  }
+
+  getDivisionObservables(show) {
+    if (show?.divisions) {
+      const divisions = Object.keys(show.divisions).reduce((acc, code) => ({ 
+        ...acc,
+        [code]: this.db.object(`shows/${this.showKey}/divisions/${code}`).valueChanges()
+      }), {});
+
+      const listeners = {
+        C: this.db.object(`shows/${this.showKey}/global`).valueChanges(),
+        ...divisions,
+      }
+
+      console.log({listeners})
+
+      return DIVISIONS.map((code) => listeners[code]
+        ? { code, listener: listeners[code] }
+        : { code }
+      );
+    }
+
+    return []
   }
 
   private async resetCitizenActions() {

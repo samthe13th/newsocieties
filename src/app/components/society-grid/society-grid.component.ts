@@ -1,7 +1,8 @@
 import { Component, Input } from '@angular/core';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { take } from 'rxjs/operators';
-import { toArray, range, each, find } from 'lodash';
+
+const DIVISIONS = ["NW", "N", "NE", "W", "C", "E", "SW", "S", "SE"];
 
 @Component({
   selector: 'app-society-grid',
@@ -12,35 +13,40 @@ import { toArray, range, each, find } from 'lodash';
   }
 })
 export class SocietyGridComponent {
-  private showKey: string;
-  grid = ["NW", "N", "NE", "W", "C", "E", "SW", "S", "SE"].map((code) => ({ code }))
+  divisions;
 
   constructor(private db: AngularFireDatabase) {}
 
+  @Input() showKey;
+
   ngOnInit() {
-    this.db.list('shows', ref => ref.limitToLast(1))
-      .snapshotChanges()
+    this.db.object(`shows/${this.showKey}`)
+      .valueChanges()
       .pipe(take(1))
-      .subscribe(([snapshot]) => {
-        this.showKey = snapshot.key
-        this.initListeners(snapshot.payload.val())
+      .subscribe((show) => {
+        this.divisions = this.getDivisionObservables(show);
       })
   }
 
-  initListeners(show) {
+  getDivisionObservables(show) {
     if (show?.divisions) {
+      const divisions = Object.keys(show.divisions).reduce((acc, code) => ({ 
+        ...acc,
+        [code]: this.db.object(`shows/${this.showKey}/divisions/${code}`).valueChanges()
+      }), {});
+
       const listeners = {
         C: this.db.object(`shows/${this.showKey}/global`).valueChanges(),
-        ...Object.keys(show.divisions).reduce((acc, code) => (
-          { ...acc, [code]: this.db.object(`shows/${this.showKey}/divisions/${code}`).valueChanges() }
-        ), {}),
+        ...divisions,
       }
 
-      this.grid = this.grid.map((slot) => {
-        return listeners[slot.code] ? { ...slot, listener: listeners[slot.code] } : slot;
-      });
+      console.log({listeners})
 
-      console.log('grid: ', this.grid)
+      return DIVISIONS.map((code) => listeners[code]
+        ? { code, listener: listeners[code] }
+        : { code }
+      );
     }
+    return []
   }
 }

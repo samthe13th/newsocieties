@@ -41,6 +41,7 @@ export const DIVISION_TEMPLATE = {
       }
     }
   },
+  highThresholdsMet: 0,
   imports: {
     messages: [],
     gla: [],

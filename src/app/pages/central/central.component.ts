@@ -5,9 +5,10 @@ import { trim, range, capitalize } from 'lodash';
 import * as Papa from 'papaparse';
 import { DIVISION_TEMPLATE, SHOW_TEMPLATE } from './templates';
 
-const DIVISIONS = ['N', 'S', 'E', 'W', 'NE', 'SE', 'SW', 'NW']
+const DIVISIONS = ['N', 'S', 'E', 'W', 'NE', 'SE', 'SW', 'NW'];
 const MAX_HARVEST = 49;
-const CITIZEN_NAMES = ['Sam', 'Mark', 'Mandy', 'Sarah', 'Kimmy', 'Zed']
+const CITIZEN_NAMES = ['Sam', 'Mark', 'Mandy', 'Sarah', 'Kimmy', 'Zed'];
+const ADVANCEMENTS = ["safety", "health", "arts", "knowledge", "infastructure"];
 
 
 @Component({
@@ -260,8 +261,13 @@ export class CentralComponent implements OnInit, AfterViewInit {
   generateCitizens(division) {
     const citizens = CITIZEN_NAMES.map((name, index) => ({
       name,
+      actions: 2,
       id: `${division}${index + 1}${name}`,
       position: index + 1,
+      advancements: ADVANCEMENTS.reduce((acc, type) => ({
+        ...acc,
+        [type]: 0
+      }), {})
     }))
     console.log({citizens});
     return citizens;

@@ -133,7 +133,7 @@
 </ng-template>
 
 <ng-template #summaryBody>
-  <app-society-grid></app-society-grid>
+  <app-society-grid *ngIf="showKey" [showKey]="showKey"></app-society-grid>
 </ng-template>
 
 <ng-container *ngFor="let div of divisions">

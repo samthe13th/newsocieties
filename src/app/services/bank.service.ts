@@ -11,7 +11,6 @@ export class BankService {
     private db: AngularFireDatabase,
     private route: ActivatedRoute
     ) {
-
   }
 
   async removeFromReserve(divisionPath, amount) {
@@ -41,45 +40,57 @@ export class BankService {
     return this.db.list(`shows/${showKey}/divisions/${divisionKey}/citizens/${id}/resources`).valueChanges();
   }
 
-  async depositResources(showKey, divisionKey, id, newResources) {
+  async depositResources(showKey, divisionKey, id, newResources): Promise<boolean> {
     const path = `shows/${showKey}/divisions/${divisionKey}/citizens/${id}/resources`;
     console.log('deposit: ', path)
     const resources: any[] = await this.db.list(path).valueChanges()
       .pipe(take(1))
       .toPromise();
 
-      console.log('resources: ', resources, newResources)
-
-    this.db.object(path).set([
-      ...resources,
-      ...newResources
-    ])
+    return new Promise((resolve) => {
+      this.db.object(path).set([
+        ...resources,
+        ...newResources
+      ]).then(() => {
+        resolve(true)
+      })
+    })
   }
 
-  async spendResources(resourcePath, cost) {
+  async spendResources(showKey, divisionKey, id, cost): Promise<boolean> {
+    console.log("SPEND: ", showKey, divisionKey, id, cost)
     let spend = 0;
     let transactions = 0;
-    const resources: any[] = await this.db.list(resourcePath).valueChanges()
+    const resourcePath = `shows/${showKey}/divisions/${divisionKey}/citizens/${id}/resources`
+    const resources: any[] = await this.db.list(resourcePath)
+      .valueChanges()
       .pipe(take(1))
       .toPromise();
+
+    console.log({resources})
     const maxTransactions = resources.length;
 
     while (spend < cost && transactions <= maxTransactions) {
-      spend += resources[0];
+      spend += resources[0]?.value;
       resources.shift();
       transactions++;
     }
 
-    if (cost > spend) {
-      alert('TRANSACTION DECLINED')
-    } else {
-      const change = spend - cost;
-
-      if (change > 0) {
-        resources.push(change);
+    return new Promise((resolve, reject) => {
+      if (cost > spend) {
+        alert('TRANSACTION DECLINED')
+        reject(false)
+      } else {
+        const change = spend - cost;
+  
+        if (change > 0) {
+          resources.push({ division: divisionKey, value: change });
+        }
+  
+        this.db.object(resourcePath).set(resources).then(() => {
+          resolve(true)
+        })
       }
-
-      this.db.object(resourcePath).set(resources);
-    }
+    })
   }
 }

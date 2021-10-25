@@ -1,12 +1,12 @@
-<ng-container *ngFor="let slot of grid">
+<ng-container *ngFor="let slot of divisions">
   <ng-container *ngIf="slot.code !== 'C'">
     <app-society-summary
       *ngIf="(slot.listener | async) as division"
       class="division-summary"
       details="full"
       [division]="division">
-    </app-society-summary> 
-    <div *ngIf="!slot.listener">Blank</div>
+    </app-society-summary>
+    <div *ngIf="!slot.listener"></div>
   </ng-container>
   <ng-container *ngIf="slot.code == 'C'">
     <div *ngIf="(slot.listener | async) as summary">
