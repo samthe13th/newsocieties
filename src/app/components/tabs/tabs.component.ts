@@ -1,4 +1,4 @@
-import { Component, Input, TemplateRef } from '@angular/core';
+import { Component, Input, TemplateRef, EventEmitter, Output } from '@angular/core';
 
 @Component({
   selector: 'app-tabs',
@@ -10,6 +10,7 @@ import { Component, Input, TemplateRef } from '@angular/core';
 })
 export class TabsComponent {
   currentTab;
+  @Output() tabChange = new EventEmitter<any>();
   
   @Input() tabs: {
     id: string,
@@ -28,5 +29,6 @@ export class TabsComponent {
 
   selectTab(tab) {
     this.currentTab = tab;
+    this.tabChange.emit(this.currentTab);
   }
 }

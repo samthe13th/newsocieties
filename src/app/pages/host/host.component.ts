@@ -11,7 +11,7 @@ import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { ButtonGroupComponent } from 'src/app/components/button-group/button-group.component';
 import { DivisionService } from 'src/app/services/division-service.service';
 import { faPen } from '@fortawesome/free-solid-svg-icons';
-import { combineLatest } from 'rxjs';
+
 
 const DIVISIONS = ["N", "NE", "W", "NW", "E", "SW", "S", "SE"];
 
@@ -58,11 +58,11 @@ export class HostComponent implements OnInit {
     { id: 'misc', label: 'Mc' },
   ]
 
-  resourceType = 1;
+  resourceType = 3;
   resourceTypes = [
-    { id: '1', label: '1'},
+    { id: '3', label: '3' },
     { id: '2', label: '2' },
-    { id: '3', label: '3' }
+    { id: '1', label: '1'}
   ]
 
   $vote;
@@ -72,6 +72,8 @@ export class HostComponent implements OnInit {
   $scenerios;
   $turn;
   $focus;
+  $unseenNotifications;
+  $citizenAdvancements;
 
   selectedCitizen;
   changeAttribute;
@@ -107,7 +109,8 @@ export class HostComponent implements OnInit {
   voteDropdown;
   voteDropdownSelect;
 
-  $citizenAdvancements;
+  rightTab;
+
 
   constructor(
     private db: AngularFireDatabase,
@@ -133,6 +136,7 @@ export class HostComponent implements OnInit {
     this.$scenerios = this.db.list(`${this.divisionPath}/scenerios`).valueChanges();
     this.$focus = this.db.object(`${this.divisionPath}/focus`).valueChanges();
     this.$turn = this.db.object(`${this.divisionPath}/turn`).valueChanges();
+    this.$unseenNotifications = this.db.list(`${this.divisionPath}/unseenNotifications`).valueChanges();
 
     this.$focus.subscribe((focus) => {
       console.log({focus})
@@ -168,6 +172,11 @@ export class HostComponent implements OnInit {
   calculateWealth(resources) {
     if (!resources) return 0;
     return resources.reduce((acc, R) => acc + R.value, 0);
+  }
+
+  onRightTabChange(tab) {
+    this.rightTab = tab.id;
+    this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/unseenNotifications`).remove();
   }
 
   changeDivisionProperty(prop, name=null) {
@@ -251,7 +260,7 @@ export class HostComponent implements OnInit {
 
   startVote(focus) {
     this.db.object(`${this.divisionPath}/focus`).set(focus);
-    console.log('start vote')
+    console.log('start vote: ', this.voteDropdownSelect)
     this.showModal = false;
     this.action = 'voting';
     

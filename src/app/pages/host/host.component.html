@@ -16,21 +16,28 @@
     { id: 'division', tabTemplate: division, bodyTemplate: divisionBody },
     { id: 'global', tabTemplate: global, bodyTemplate: globalBody },
     { id: 'exports', tabTemplate: exports, bodyTemplate: exportsBody },
-    { id: 'central', tabTemplate: central, bodyTemplate: centralBody },
-    { id: 'notes', tabTemplate: notes, bodyTemplate: notesBody }
+    { id: 'central', tabTemplate: central, bodyTemplate: centralBody }
   ]">
 </app-tabs>
 
 <app-tabs 
   class="host-side-panel"
   selectedClass="host-selected-tab"
+  (tabChange)="onRightTabChange($event)"
   [tabs]="[
     { id: 'focus', tabTemplate: focusTab, bodyTemplate: focusBody },
     { id: 'notifications', tabTemplate: notifications, bodyTemplate: notificationsBody }
   ]">
 </app-tabs>
 
-<ng-template #notifications>Inbox</ng-template>
+<ng-template #notifications>
+  Inbox 
+  <span *ngIf="($unseenNotifications | async) as list">
+    <ng-container *ngIf="list.length > 0 && rightTab !== 'notifications'">
+      ({{ list?.length }})
+    </ng-container>
+  </span>
+</ng-template>
 <ng-template #focusTab>Focus</ng-template>
 
 <ng-template #notificationsBody>
@@ -158,7 +165,7 @@
 </ng-template>
 
 <!-- TABS-->
-<ng-template #division>{{divisionKey}}</ng-template>
+<ng-template #division>{{divisionKey}} Division</ng-template>
 <ng-template #global>Global</ng-template>
 <ng-template #exports>Exports</ng-template>
 <ng-template #central>Central</ng-template>
@@ -410,7 +417,12 @@
 
 <!-- EXPORTS -->
 <ng-template #exportsBody>
-
+  <div class="tab-card">
+    <app-exports
+     [showKey]="showKey"
+     [divisionKey]="divisionKey">
+    </app-exports>
+  </div>
 </ng-template>
 
 <!-- CENTRAL -->

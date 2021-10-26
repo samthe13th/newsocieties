@@ -22,7 +22,9 @@ import { NumberChangeComponent } from './number-change/number-change.component';
 import { ButtonGroupComponent } from './button-group/button-group.component';
 import { PlayerTurnComponent } from './player-turn/player-turn.component';
 import { NotificationFeedComponent } from './notification-feed/notification-feed.component';
- 
+import { ExportsComponent } from './exports/exports.component';
+import { NgMultiSelectDropDownModule } from 'ng-multiselect-dropdown';
+
 
 const components = [
   AnnouncementComponent,
@@ -30,6 +32,7 @@ const components = [
   CardComponent,
   ChatComponent,
   DialogComponent,
+  ExportsComponent,
   FundraisingComponent,
   LandGridComponent,
   NotificationFeedComponent,
@@ -59,6 +62,7 @@ const ngMaterial = [
     CommonModule,
     FontAwesomeModule,
     NumberPickerModule,
+    NgMultiSelectDropDownModule.forRoot(),
     ...ngMaterial
   ],
   declarations: [

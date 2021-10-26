@@ -22,7 +22,7 @@ const pages = [
     CommonModule,
     FormsModule,
     NumberPickerModule,
-    ReactiveFormsModule,
+    ReactiveFormsModule
   ],
   declarations: [
     ...pages

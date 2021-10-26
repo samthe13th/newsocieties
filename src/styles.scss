@@ -59,6 +59,7 @@ select {
   border-radius: 10px;
   line-height: 24px;
   font-size: 16px;
+  color: black;
 }
 
 .stack {
@@ -99,6 +100,7 @@ select {
 .app-host {
   @extend %app-page;
   padding: 15px;
+  padding-bottom: 0;
   background: #394D6B;
 }
 
@@ -285,8 +287,8 @@ select {
 }
 
 .host-selected-tab {
-  background: #6EC2DD;
-  color: black;
+  background: black;
+  color: white;
 }
 
 .central-selected-tab {
@@ -563,6 +565,20 @@ select {
   }
 }
 
+.validation-errors {
+  background: #ff9c8a;
+  padding: 10px;
+
+  .citizen-name {
+    background: white;
+    padding: 5px;
+    margin: 2px;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 5px;
+  }
+}
+
 @keyframes flip-away {
   99% {
     transform: rotateY(90deg);
@@ -635,6 +651,12 @@ select {
 .citizen-name {
   font-size: 18px;
   font-weight: 200;
+}
+
+.ns-multiselect {
+  .dropdown-btn {
+    box-sizing: border-box;
+  }
 }
 
 html, body { height: 100%; }

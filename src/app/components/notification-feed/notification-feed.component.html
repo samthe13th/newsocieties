@@ -8,6 +8,7 @@
       class="notification-bubble">
       <div class="notification-header" *ngIf="notification?.header">{{notification.header}}</div>
       <div [innerHTML]="notification?.value"></div>
+
       <ng-container *ngIf="notification?.requiresAction">
         <hr/>
         <strong>Requires action:</strong>
@@ -15,7 +16,22 @@
         <button *ngIf="!notification?.resolved" (click)="markAsResolved(notification?.key)">Mark as Resolved</button>
         <div *ngIf="notification?.resolved" class="resolved-action"><em>Resolved</em></div>
       </ng-container>
-      <button *ngIf="notification?.rejectable" (click)="rejectRequest()">Reject</button>
+
+      <ng-container *ngIf="notification?.rejectable || notification?.acceptable">
+        <hr/>
+        <button *ngIf="notification?.acceptable" (click)="rejectRequest()">Accept</button>
+        <button *ngIf="notification?.rejectable" (click)="acceptRequest()">Reject</button>
+      </ng-container>
+
+      <ng-container *ngIf="!notification?.requiresAction && !notification?.rejectable && !notification?.acceptable">
+        <hr/>
+        <button
+          *ngIf="!notification?.resolved"
+          (click)="markAsResolved(notification?.key)"
+          >Mark as seen
+        </button>
+        <div *ngIf="notification?.resolved" class="mark-as-seen"><em>Seen</em></div>
+      </ng-container>
     </div>
   </ng-container>
 </div>

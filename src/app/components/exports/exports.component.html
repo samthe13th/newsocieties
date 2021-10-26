@@ -1,0 +1,77 @@
+Send:
+<select
+  [(ngModel)]="selectedExportType"
+  name="vote-options"
+  id="vote-options">
+  <option
+    *ngFor="let option of exportTypeOptions"
+    [ngValue]="option">
+    {{option?.name}}
+  </option>
+</select>
+
+<ng-container *ngIf="selectedExportType">
+  <ng-container *ngIf="selectedExportType.type === 'multi'">
+    <br/>
+    From:
+    <ng-multiselect-dropdown
+      class="ns-multiselect"
+      [(ngModel)]="selectedFrom"
+      [settings]="multiSelectSettings"
+      [data]="$citizens | async"
+      (onSelect)="onFromSelect($event)"
+    >
+    </ng-multiselect-dropdown>
+  </ng-container>
+
+  <ng-container *ngIf="selectedExportType.name === 'Resources'">
+    <br/>
+    Send from reserve ({{ $reserve | async }}):
+
+    <br/>
+
+    <ng-number-picker
+      #resourcePicker
+      class="number-picker"
+      [arrowKeys]="true"
+      [min]="0"
+      [max]="$reserve | async"
+      >
+    </ng-number-picker>
+  </ng-container>
+
+  <br/>
+  To:
+  <select
+    *ngIf="$divisions | async as divisions"
+    [(ngModel)]="selectedDivision"
+    (change)="onDivisionSelect()"
+    name="vote-options"
+    id="vote-options">
+    <option
+      *ngFor="let option of divisions"
+      [ngValue]="option">
+      {{option?.select_text}}
+    </option>
+  </select>
+</ng-container>
+
+<ng-container *ngIf="selectedExportType">
+  <br/>
+  Message:
+  <textarea
+    style="width: 100%"
+    [(ngModel)]="messageInput"
+    type="text">
+  </textarea>
+</ng-container>
+
+<div class="validation-errors" *ngIf="failedValidations.length > 0">
+  ERROR: Not enough funds for following citizens:
+  <span class="citizen-name" *ngFor="let citizenName of failedValidations">
+    {{ citizenName }}
+  </span>
+</div>
+
+<hr/>
+<button (click)="send()">EXPORT</button>

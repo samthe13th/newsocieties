@@ -9,11 +9,10 @@
   margin-bottom: 10px;
 }
 
-.resolved-action {
+%resolved {
   display: inline-flex; 
   padding: 2px 6px;
   border-radius: 10px; 
-  background: #12cb00;
   padding-right: 10px;
   color: white;
   margin-top: 10px;
@@ -24,6 +23,16 @@
     justify-content: center;
     margin-right: 5px;
   }
+}
+
+.mark-as-seen {
+  @extend %resolved;
+  background: #008bcb;
+}
+
+.resolved-action {
+  @extend %resolved;
+  background: #01a352;
 }
 
 .notification-bubble {

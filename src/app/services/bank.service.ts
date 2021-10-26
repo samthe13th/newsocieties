@@ -22,7 +22,10 @@ export class BankService {
     const difference = Math.max(0, toNumber(reserve) - amount)
 
     console.log('remove from reserve: ', reserve, amount);
-    this.db.object(reservePath).set(difference);
+
+    return new Promise((resolve) => {
+      this.db.object(reservePath).set(difference).then(() => resolve(true));
+    })
   }
 
   async addToReserve(divisionPath, amount) {
@@ -32,7 +35,9 @@ export class BankService {
       .toPromise();
 
     console.log('add to reserve');
-    this.db.object(reservePath).set(toNumber(reserve) + amount);
+    return new Promise((resolve) => {
+      this.db.object(reservePath).set(toNumber(reserve) + amount).then(() => resolve(true));
+    })
   }
 
   $resources(showKey, divisionKey, id) {

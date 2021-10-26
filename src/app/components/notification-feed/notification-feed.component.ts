@@ -65,6 +65,10 @@ export class NotificationFeedComponent implements AfterViewInit {
     console.log('reject request')
   }
 
+  acceptRequest() {
+    console.log("accepst request")
+  }
+
   rejectWithMessage() {
     console.log("reject with message")
   }
