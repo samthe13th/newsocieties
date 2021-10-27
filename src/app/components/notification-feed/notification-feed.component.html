@@ -19,8 +19,14 @@
 
       <ng-container *ngIf="notification?.rejectable || notification?.acceptable">
         <hr/>
-        <button *ngIf="notification?.acceptable" (click)="rejectRequest()">Accept</button>
-        <button *ngIf="notification?.rejectable" (click)="acceptRequest()">Reject</button>
+        <ng-container *ngIf="notification?.acceptable" >
+          <button *ngIf="!notification?.resolved" (click)="rejectRequest(notification)">Reject</button>
+          <div *ngIf="notification?.rejected" class="resolved-action"><em>Rejected</em></div>
+        </ng-container>
+        <ng-container *ngIf="notification?.rejectable" >
+          <button *ngIf="!notification?.resolved" (click)="acceptRequest(notification)">Accept</button>
+          <div *ngIf="notification?.accepted" class="resolved-action"><em>Accepted</em></div>
+        </ng-container>
       </ng-container>
 
       <ng-container *ngIf="!notification?.requiresAction && !notification?.rejectable && !notification?.acceptable">

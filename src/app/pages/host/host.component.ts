@@ -4,13 +4,14 @@ import { AngularFireDatabase } from '@angular/fire/database';
 import { getRandomInt, pluckRandom } from 'src/app/utilties';
 import { LandTile, LandCardValues } from 'src/app/interfaces';
 import * as _ from 'lodash';
-import { includes, range, difference, trim, differenceBy, toNumber, each } from 'lodash';
-import { take, map } from 'rxjs/operators'
+import { includes, range, difference, trim, differenceBy, toNumber, each, partition } from 'lodash';
+import { take } from 'rxjs/operators'
 import { BankService } from 'src/app/services/bank.service';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { ButtonGroupComponent } from 'src/app/components/button-group/button-group.component';
 import { DivisionService } from 'src/app/services/division-service.service';
 import { faPen } from '@fortawesome/free-solid-svg-icons';
+import { NotificationType } from 'src/app/shared/types';
 
 
 const DIVISIONS = ["N", "NE", "W", "NW", "E", "SW", "S", "SE"];
@@ -43,6 +44,7 @@ export class HostComponent implements OnInit {
   faPen = faPen;
 
   showModal = false;
+
   turnButtons = [
     { id: 1, label: 1 },
     { id: 2, label: 2 },
@@ -50,6 +52,7 @@ export class HostComponent implements OnInit {
     { id: 4, label: 4 },
     { id: 5, label: 5 },
   ]
+
   focusButtons = [
     { id: 'harvest', label: 'Ha' },
     { id: 'principles', label: 'Pr' },
@@ -67,6 +70,7 @@ export class HostComponent implements OnInit {
 
   $vote;
   $division;
+  $citizens;
   $resolutions;
   $principles;
   $scenerios;
@@ -74,6 +78,9 @@ export class HostComponent implements OnInit {
   $focus;
   $unseenNotifications;
   $citizenAdvancements;
+  $pendingGLA;
+  $localLand;
+  $globalLand;
 
   selectedCitizen;
   changeAttribute;
@@ -131,11 +138,15 @@ export class HostComponent implements OnInit {
 
     this.$vote = this.db.object(`${this.divisionPath}/vote`).valueChanges();
     this.$division = this.db.object(this.divisionPath).valueChanges();
+    this.$citizens = this.db.list(`${this.divisionPath}/citizens`).valueChanges();
     this.$resolutions = this.db.list(`${this.divisionPath}/resolutions`).valueChanges();
     this.$principles = this.db.list(`${this.divisionPath}/principles`).valueChanges();
     this.$scenerios = this.db.list(`${this.divisionPath}/scenerios`).valueChanges();
     this.$focus = this.db.object(`${this.divisionPath}/focus`).valueChanges();
     this.$turn = this.db.object(`${this.divisionPath}/turn`).valueChanges();
+    this.$pendingGLA = this.db.list(`${this.divisionPath}/pendingGLA`).valueChanges();
+    this.$localLand = this.db.list(`${this.divisionPath}/localLand`).valueChanges();
+    this.$globalLand = this.db.list(`${this.divisionPath}/globalLand`).valueChanges();
     this.$unseenNotifications = this.db.list(`${this.divisionPath}/unseenNotifications`).valueChanges();
 
     this.$focus.subscribe((focus) => {
@@ -306,6 +317,7 @@ export class HostComponent implements OnInit {
   }
 
   closePolls() {
+    this.divisionVote = undefined;
     this.db.object(`${this.divisionPath}/vote/state`).set('review');
   }
 
@@ -468,6 +480,7 @@ export class HostComponent implements OnInit {
     })
 
     this.db.list(`${this.divisionPath}/notifications`).push({
+      type: NotificationType.resolution,
       header: "RESOLUTION",
       value: resolution,
       requiresAction: consequence,
@@ -538,8 +551,9 @@ export class HostComponent implements OnInit {
     console.log(this.resourceType, typeof this.resourceType)
   }
 
-  startSeason(division, newSeason) {
-    this.harvest = this.generateHarvest(division.landTiles, newSeason?.harvest);
+  async startSeason(division, newSeason) {
+    const landTiles = await this.divisionService.setLandTiles(this.showKey, this.divisionKey)
+    this.harvest = this.generateHarvest(landTiles, newSeason?.harvest);
 
     this.db.object(`${this.divisionPath}`).update({
       season: newSeason.season,
@@ -596,9 +610,7 @@ export class HostComponent implements OnInit {
       .pipe(take(1))
       .toPromise();
 
-    console.log("reset... ", citizens)
     citizens.forEach((citizen, index) => {
-      console.log('reset: ', citizen);
       this.db.object(`${this.divisionPath}/citizens/${index}`).update({
         actions: 2
       });
@@ -644,11 +656,16 @@ export class HostComponent implements OnInit {
 
   private generateHarvest(landTiles, harvestableCards): Array<LandTile> {
     const tiles: LandTile[] = [ ...this.resetLandTiles(landTiles) ];
-    const harvest: number[] = pluckRandom(range(tiles.length), harvestableCards);
+    const [owned, open]: LandTile[][] = partition(tiles, (tile) => tile.owner !== undefined);
+    const harvestableCount = harvestableCards - owned.length;
+    const harvestIndexes = [
+      ...owned.map((tile: any) => tile.index),
+      ...pluckRandom(open.map((tile: any) => tile.index), harvestableCount > 0 ? harvestableCount : 0)
+    ]
     const contaminantsCount = Math.ceil((this.contamination / 100) * harvestableCards);
-    const contaminants: number[] = pluckRandom(harvest, contaminantsCount);
+    const contaminants: number[] = pluckRandom(harvestIndexes, contaminantsCount);
 
-    harvest.forEach((i) => {
+    harvestIndexes.forEach((i) => {
       tiles[i].value = includes(contaminants, i) ? 0 : getRandomInt(1,3)
     })
 

@@ -5,6 +5,8 @@ import { map, tap, take, find } from 'rxjs/operators';
 import * as _ from 'lodash';
 import { BankService } from 'src/app/services/bank.service';
 import { NumberPickerComponent } from 'ng-number-picker';
+import { NotificationType } from 'src/app/shared/types';
+import { DivisionService } from 'src/app/services/division-service.service';
 
 
 const DROPDOWN_SETTINGS = {
@@ -25,7 +27,10 @@ const DROPDOWN_SETTINGS = {
 export class ExportsComponent implements OnInit {
   @ViewChild('resourcePicker') resourcePicker: NumberPickerComponent;
 
-  constructor(private db: AngularFireDatabase, private bankService: BankService) {}
+  constructor(
+    private db: AngularFireDatabase, 
+    private divisionService: DivisionService,
+    private bankService: BankService) {}
 
   $citizens: Observable<any>;
   $divisions: Observable<any>;
@@ -75,7 +80,7 @@ export class ExportsComponent implements OnInit {
               : 0
             return {
               resources,
-              select_id: citizen.id,
+              select_id: _.toNumber(citizen.position) - 1,
               select_text: `${index}: ${citizen.name} | ${resources}`,
             }
           })
@@ -90,7 +95,7 @@ export class ExportsComponent implements OnInit {
             landCost: division.landCost,
             select_id: division.code,
             select_text: `${division.code} (Land cost: ${division.landCost} Reserve: ${division.reserve})`
-          })), (division) => { console.log('filter: ', division); return division.select_id !== this.divisionKey })
+          })), (division) => { return division.select_id !== this.divisionKey })
         })
       )
 
@@ -122,6 +127,7 @@ export class ExportsComponent implements OnInit {
     console.log("send: ", this.resourcePicker.value);
     this.bankService.removeFromReserve(`shows/${this.showKey}/divisions/${this.divisionKey}`, this.resourcePicker.value).then(() => {
       this.db.list(`shows/${this.showKey}/divisions/${this.selectedDivision.select_id}/notifications`).push({
+        type: NotificationType.resourceGift,
         header: `The ${this.divisionKey} Division has sent you resouces: ${this.resourcePicker.value}`,
         value: this.messageInput ?? '',
         resolved: false,
@@ -138,6 +144,7 @@ export class ExportsComponent implements OnInit {
 
   sendMessage() {
     this.db.list(`shows/${this.showKey}/divisions/${this.selectedDivision.select_id}/notifications`).push({
+      type: NotificationType.message,
       header: `Message from ${this.divisionKey} Division:`,
       value: this.messageInput,
       resolved: false,
@@ -148,13 +155,23 @@ export class ExportsComponent implements OnInit {
     })
   }
 
-  makeGLAForcedAquisition() {
+  async makeGLAForcedAquisition() {
+    const data = this.selectedFrom.map((selection) => ({
+      id: selection.select_id,
+      name: this.divisionKey,
+      division: this.divisionKey,
+      cost: this.selectedDivision.landCost
+    }))
+
+    await this.divisionService.acquireLand(this.showKey, this.selectedDivision.select_id, data)
+
     this.db.list(`shows/${this.showKey}/divisions/${this.selectedDivision.select_id}/notifications`).push({
+      type: NotificationType.glaHostile,
       header: `The ${this.divisionKey} division has taken land plots by force: ${this.selectedFrom.length}`,
       value: this.messageInput ?? '',
       resolved: false,
       sender: this.divisionKey, 
-      data: this.selectedFrom.length
+      data
     }).then(() => {
       this.db.list(`shows/${this.showKey}/divisions/${this.selectedDivision.select_id}/unseenNotifications`).push(this.divisionKey)
       this.clearAll();
@@ -164,27 +181,34 @@ export class ExportsComponent implements OnInit {
   async makeGLARequest() {
     this.failedValidations  = await this.validateGLARequest(this.selectedDivision.landCost, this.selectedFrom);
     if (this.failedValidations.length === 0) {
-      this.selectedFrom.forEach((citizen) => {
+      this.selectedFrom.forEach(async (citizen) => {
         const index = citizen.select_text.split(':')[0].trim();
-        this.bankService.spendResources(
+        await this.bankService.spendResources(
           this.showKey,
           this.divisionKey,
           index, 
           this.selectedDivision.landCost
-        ).then(() => {
-          this.db.list(`shows/${this.showKey}/divisions/${this.selectedDivision.select_id}/notifications`).push({
-            header: `The ${this.divisionKey} division would like to purchase land plots: ${this.selectedFrom.length}`,
-            value: this.messageInput ?? '',
-            resolved: false,
-            rejectable: true,
-            acceptable: true,
-            sender: this.divisionKey,
-            data: this.selectedFrom.length
-          }).then(() => {
-            this.db.list(`shows/${this.showKey}/divisions/${this.selectedDivision.select_id}/unseenNotifications`).push(this.divisionKey)
-            this.clearAll();
-          })
-        })
+        );
+      })
+
+      console.log('selected division: ', this.selectedDivision);
+      this.db.list(`shows/${this.showKey}/divisions/${this.selectedDivision.select_id}/notifications`).push({
+        type: NotificationType.glaRequest,
+        header: `The ${this.divisionKey} division would like to purchase land plots: ${this.selectedFrom.length}`,
+        value: this.messageInput ?? '',
+        resolved: false,
+        rejectable: true,
+        acceptable: true,
+        sender: this.divisionKey,
+        data: this.selectedFrom.map((selection) => ({
+          id: selection.select_id,
+          name: this.divisionKey,
+          division: this.divisionKey,
+          cost: this.selectedDivision.landCost
+        }))
+      }).then(() => {
+        this.db.list(`shows/${this.showKey}/divisions/${this.selectedDivision.select_id}/unseenNotifications`).push(this.divisionKey)
+        this.clearAll();
       })
     }
   }

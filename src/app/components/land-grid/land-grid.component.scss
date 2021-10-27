@@ -90,19 +90,10 @@
       border-radius: 5px;
       box-shadow: -2px 2px;
       font-weight: 900;
-      top: -10px;
-      right: -10px;
       z-index: 10;
-    }
-    &[data-division=NE] {
-      &::after {
-        background: #adf1ad;
-      }
-    }
-    &[data-division=W] {
-      &::after {
-        background: #9ec8e2;
-      }
+      top: -5px;
+      right: -5px;
+      background: black;
     }
   }
 }

@@ -2,7 +2,7 @@
 import { Injectable } from '@angular/core';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { take } from 'rxjs/operators';
-import { toNumber } from 'lodash';
+import { toNumber, map, range } from 'lodash';
 import { ActivatedRoute } from '@angular/router';
 
 @Injectable({ providedIn: 'root' })
@@ -52,6 +52,8 @@ export class BankService {
       .pipe(take(1))
       .toPromise();
 
+    console.log("deposit: ", divisionKey, id, newResources);
+
     return new Promise((resolve) => {
       this.db.object(path).set([
         ...resources,
@@ -60,6 +62,17 @@ export class BankService {
         resolve(true)
       })
     })
+  }
+
+  quickConvert(division, amount) {
+    const change = amount % 3;
+    const resources = map(
+      range(Math.floor(amount / 3)), () => ({ value: 3, division })
+    )
+
+    return (change > 0)
+      ? [ ...resources, { value: change, division } ]
+      : resources;
   }
 
   async spendResources(showKey, divisionKey, id, cost): Promise<boolean> {

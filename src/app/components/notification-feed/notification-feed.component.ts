@@ -2,6 +2,10 @@ import { Component, AfterViewInit, ViewChild, ElementRef, Input } from '@angular
 import { Observable, Subscription } from 'rxjs';
 import { tap, map } from 'rxjs/operators';
 import { AngularFireDatabase } from '@angular/fire/database';
+import { DivisionService } from 'src/app/services/division-service.service';
+import { BankService } from 'src/app/services/bank.service';
+import { NotificationService } from 'src/app/services/notification-service.service';
+import { NotificationType } from 'src/app/shared/types';
 
 @Component({
   selector: 'app-notification-feed',
@@ -18,12 +22,16 @@ export class NotificationFeedComponent implements AfterViewInit {
   @Input() divisionKey: string;
 
   $notifications: Observable<any>;
+  showResolved = true;
 
   private subscriptions: Subscription[] = [];
 
-  constructor(private db: AngularFireDatabase) {}
-
-  showResolved = true;
+  constructor(
+    private db: AngularFireDatabase,
+    private divisionService: DivisionService,
+    private bankService: BankService,
+    private notificationService: NotificationService,
+  ) {}
 
   ngOnInit() {
     this.$notifications = this.db.list(
@@ -31,7 +39,8 @@ export class NotificationFeedComponent implements AfterViewInit {
     ).snapshotChanges().pipe(
       map((notifications) => (
         notifications.map((n: any) => ({
-          key: n.key, ...n.payload.val()
+          key: n.key,
+          ...n.payload.val()
         }))
       )
     ));
@@ -55,18 +64,40 @@ export class NotificationFeedComponent implements AfterViewInit {
   }
 
   markAsResolved(key) {
-    console.log('mark as resolved: ', key);
     this.db.object(
       `shows/${this.showKey}/divisions/${this.divisionKey}/notifications/${key}`
     ).update({ resolved: true })
   }
 
-  rejectRequest() {
-    console.log('reject request')
+  markAsAccepted(key) {
+    this.db.object(
+      `shows/${this.showKey}/divisions/${this.divisionKey}/notifications/${key}`
+    ).update({ resolved: true, accepted: true })
   }
 
-  acceptRequest() {
-    console.log("accepst request")
+  markAsRejected(key) {
+    this.db.object(
+      `shows/${this.showKey}/divisions/${this.divisionKey}/notifications/${key}`
+    ).update({ resolved: true, rejected: true })
+  }
+
+  async rejectRequest(notification) {
+    console.log('REJECT: ', notification);
+    if (notification.type === NotificationType.glaRequest) {
+      await this.notificationService.rejectGLA(this.showKey, notification.data);
+    } else if (notification.type === NotificationType.resourceGift) {
+      await this.notificationService.rejectResources(this.showKey, notification.sender, notification.data)
+    }
+    this.markAsRejected(notification.key)
+  }
+
+  async acceptRequest(notification) {
+    if (notification.type === NotificationType.glaRequest) {
+      await this.notificationService.acceptGLA(this.showKey, this.divisionKey, notification.data);
+    } else if (notification.type === NotificationType.resourceGift) {
+      await this.notificationService.acceptResources(this.showKey, this.divisionKey, notification.data);
+    }
+    this.markAsAccepted(notification.key);
   }
 
   rejectWithMessage() {

@@ -175,62 +175,11 @@
 <ng-template #divisionBody>
   <div class="stack" *ngIf="$division | async as division">
     <div class="tab-card">
-      <h2>Division</h2>
-
-      <div><strong>Score: </strong>{{ division.score }}</div>
+      <div><strong>Score: </strong>{{ division.score }} ({{ division.VP }})</div>
       <div><strong>Season:</strong>
         {{ division.season }}
         <button (click)="newSeason(division)">New Season</button>
       </div>
-
-      <hr/>
-      <div>
-        <strong>VP: </strong>
-        {{ division.VP }}
-      </div>
-      <div>
-        <strong>Land cost: </strong>
-        {{ division.landCost }}
-      </div>
-      <div><strong>Harvested: </strong>
-        {{ division.harvested }} <span *ngIf="division.harvested">({{ percentHarvested(division.harvested, division.capacity) }}% of capacity)</span>
-      </div>
-      <div>
-        <strong>Capacity: </strong>
-        {{ division?.capacity }}
-      </div>
-      <div><strong>Harvest:</strong>
-        {{ division?.harvest }}
-      </div>
-
-      <div>
-        <strong>Thresholds:</strong>
-        {{ division?.reserveThresholds.low }} / {{ division?.reserveThresholds.mid }} / {{ division?.reserveThresholds.high }}
-      </div>
-
-      <div>
-        <strong>High Thresholds Met: </strong>
-        {{ division.highThresholdsMet }}
-      </div>
-
-      <div>
-        <strong>Safety: </strong>
-        {{ division.advancements.safety.individual + division.advancements.safety.communal }}
-      </div>
-      <div>
-        <strong>Health: </strong>
-        {{ division.advancements.health.individual + division.advancements.health.communal }}
-      </div>
-      <div>
-        <strong>Arts: </strong>{{ division.advancements.arts.individual + division.advancements.arts.communal }}
-      </div>
-      <div>
-        <strong>Knowledge: </strong>{{ division.advancements.knowledge.individual + division.advancements.knowledge.communal }}
-      </div>
-      <div>
-        <strong>Infastructure: </strong>{{ division.advancements.infastructure.individual + division.advancements.infastructure.communal }}
-      </div>
-
       <hr/>
 
       <div>
@@ -272,11 +221,67 @@
           </button>
         </div>
       </div>
+
+      <hr/>
+      <div>
+        <strong>Land cost: </strong>
+        {{ division.landCost }}
+      </div>
+      <div>
+        <strong>Local land: </strong>
+        {{ ($localLand | async)?.length }}
+      </div>
+      <div>
+        <strong>Global land: </strong>
+        {{ ($globalLand | async)?.length }}
+      </div>
+      <div><strong>Harvested: </strong>
+        {{ division.harvested }} <span *ngIf="division.harvested">({{ percentHarvested(division.harvested, division.capacity) }}% of capacity)</span>
+      </div>
+      <div>
+        <strong>Capacity: </strong>
+        {{ division?.capacity }}
+      </div>
+      <div><strong>Harvest:</strong>
+        {{ division?.harvest }}
+      </div>
+
+      <div>
+        <strong>Thresholds:</strong>
+        {{ division?.reserveThresholds.low }} / {{ division?.reserveThresholds.mid }} / {{ division?.reserveThresholds.high }}
+      </div>
+
+      <div>
+        <strong>High Thresholds Met: </strong>
+        {{ division.highThresholdsMet }}
+      </div>
+
+      <hr/>
+
+      <div>
+        <strong>Safety: </strong>
+        {{ division.advancements.safety.individual + division.advancements.safety.communal }}
+      </div>
+      <div>
+        <strong>Health: </strong>
+        {{ division.advancements.health.individual + division.advancements.health.communal }}
+      </div>
+      <div>
+        <strong>Arts: </strong>{{ division.advancements.arts.individual + division.advancements.arts.communal }}
+      </div>
+      <div>
+        <strong>Knowledge: </strong>{{ division.advancements.knowledge.individual + division.advancements.knowledge.communal }}
+      </div>
+      <div>
+        <strong>Infastructure: </strong>{{ division.advancements.infastructure.individual + division.advancements.infastructure.communal }}
+      </div>
+
+
     </div>
 
     <div class="tab-card">
       <h2>Citizens</h2>
-      <div *ngFor="let citizen of division.citizens" style="margin-bottom: 10px">
+      <div *ngFor="let citizen of ($citizens | async)" style="margin-bottom: 10px">
         <hr/>
         <div><strong>{{citizen.name}}</strong></div>
         <div>Actions: {{ citizen.actions }}
@@ -284,7 +289,9 @@
             <fa-icon size="sm" [icon]="faPen"></fa-icon>
           </button>
         </div>
-        <div>Resources: {{ calculateWealth(citizen?.resources) }}</div>
+        <div>
+          Resources: {{ calculateWealth(citizen?.resources) }}
+        </div>
         <button (click)="addCitizenResources(citizen)">Add</button>
         <button (click)="removeCitizenResources(citizen)">Remove</button>
         <div>
@@ -322,7 +329,7 @@
 
     <div class="tab-card">
       <h2>Principles</h2>
-      <p *ngFor="let principle of ($principles | async)">
+      <p *ngFor="let principle of $principles | async">
         {{ principle.value }}
       </p>
     </div>
@@ -344,6 +351,10 @@
     <ng-template #newSeasonTemplate>
       <div *ngIf="division.nextSeason as next">
         <h1>New Season: <span class="new-value">{{ next?.season }}</span></h1>
+        <div>
+          New GLAs:
+          <span class="new-value" *ngFor="let gla of ($pendingGLA | async)">{{ gla.division }}</span>
+        </div>
         <div>
           Capacity: {{ division.capacity }} &#8594; <span class="new-value">{{ next?.capacity }}</span>
           <button (click)="changeDivisionProperty('nextSeason/capacity')">
