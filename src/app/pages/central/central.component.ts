@@ -253,24 +253,27 @@ export class CentralComponent implements OnInit, AfterViewInit {
         ...DIVISION_TEMPLATE,
         code: abv, 
         landTiles: this.generateLandTiles(),
-        citizens: this.generateCitizens(abv),
+        citizens: this.generateCitizens(abv)
       } 
     }), {});
   }
 
   generateCitizens(division) {
-    const citizens = CITIZEN_NAMES.map((name, index) => ({
-      name,
-      actions: 2,
-      id: `${division}${index + 1}${name}`,
-      position: index + 1,
-      advancements: ADVANCEMENTS.reduce((acc, type) => ({
-        ...acc,
-        [type]: 0
-      }), {})
-    }))
-    console.log({citizens});
-    return citizens;
+    const users = CITIZEN_NAMES.reduce((acc, name, index) => ({
+      ...acc,
+      [`${division}${index + 1}${name}`]: {
+        name,
+        actions: 2,
+        id: `${division}${index + 1}${name}`,
+        position: index + 1,
+        advancements: ADVANCEMENTS.reduce((acc, type) => ({
+          ...acc,
+          [type]: 0
+        }), {})
+      }
+    }), {})
+    console.log({users});
+    return users;
   }
 
   generateLandTiles() {

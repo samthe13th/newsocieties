@@ -45,6 +45,16 @@ export class BankService {
     return this.db.list(`shows/${showKey}/divisions/${divisionKey}/citizens/${id}/resources`).valueChanges();
   }
 
+  async depositResource(showKey, divisionKey, id, newResource): Promise<boolean> {
+    const path = `shows/${showKey}/divisions/${divisionKey}/citizens/${id}/resources`;
+
+    return new Promise((resolve) => {
+      this.db.list(path).push(newResource).then(() => {
+        resolve(true)
+      })
+    })
+  }
+
   async depositResources(showKey, divisionKey, id, newResources): Promise<boolean> {
     const path = `shows/${showKey}/divisions/${divisionKey}/citizens/${id}/resources`;
     console.log('deposit: ', path)
@@ -52,7 +62,7 @@ export class BankService {
       .pipe(take(1))
       .toPromise();
 
-    console.log("deposit: ", divisionKey, id, newResources);
+    console.log("deposit: ", divisionKey, id, newResources)
 
     return new Promise((resolve) => {
       this.db.object(path).set([

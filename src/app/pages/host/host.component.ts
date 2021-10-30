@@ -4,14 +4,15 @@ import { AngularFireDatabase } from '@angular/fire/database';
 import { getRandomInt, pluckRandom } from 'src/app/utilties';
 import { LandTile, LandCardValues } from 'src/app/interfaces';
 import * as _ from 'lodash';
-import { includes, range, difference, trim, differenceBy, toNumber, each, partition } from 'lodash';
-import { take } from 'rxjs/operators'
+import { includes, range, difference, trim, differenceBy, toNumber, each, partition, toArray } from 'lodash';
+import { take, map, tap } from 'rxjs/operators'
 import { BankService } from 'src/app/services/bank.service';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { ButtonGroupComponent } from 'src/app/components/button-group/button-group.component';
 import { DivisionService } from 'src/app/services/division-service.service';
 import { faPen } from '@fortawesome/free-solid-svg-icons';
 import { NotificationType } from 'src/app/shared/types';
+import { LandGridComponent } from 'src/app/components/land-grid/land-grid.component';
 
 
 const DIVISIONS = ["N", "NE", "W", "NW", "E", "SW", "S", "SE"];
@@ -31,7 +32,8 @@ export class HostComponent implements OnInit {
   @ViewChild('scenerioTemplate') scenerioTemplate: TemplateRef<any>;
   @ViewChild('miscTemplate') miscTemplate: TemplateRef<any>;
   @ViewChild('newSeasonTemplate') newSeasonModal: TemplateRef<any>;
-
+  
+  @ViewChild('landGrid') landGrid: LandGridComponent;
   @ViewChild('focusButtonsComponent') focusButtonsComponent: ButtonGroupComponent;
   @ViewChild('updateSheet') updateSheet: TemplateRef<any>;
   @ViewChild('addResourcesSheet') addResourcesSheet: TemplateRef<any>;
@@ -44,14 +46,6 @@ export class HostComponent implements OnInit {
   faPen = faPen;
 
   showModal = false;
-
-  turnButtons = [
-    { id: 1, label: 1 },
-    { id: 2, label: 2 },
-    { id: 3, label: 3 },
-    { id: 4, label: 4 },
-    { id: 5, label: 5 },
-  ]
 
   focusButtons = [
     { id: 'harvest', label: 'Ha' },
@@ -81,6 +75,7 @@ export class HostComponent implements OnInit {
   $pendingGLA;
   $localLand;
   $globalLand;
+  $turnButtons;
 
   selectedCitizen;
   changeAttribute;
@@ -138,7 +133,7 @@ export class HostComponent implements OnInit {
 
     this.$vote = this.db.object(`${this.divisionPath}/vote`).valueChanges();
     this.$division = this.db.object(this.divisionPath).valueChanges();
-    this.$citizens = this.db.list(`${this.divisionPath}/citizens`).valueChanges();
+    this.$citizens = this.db.list(`${this.divisionPath}/citizens`).valueChanges()
     this.$resolutions = this.db.list(`${this.divisionPath}/resolutions`).valueChanges();
     this.$principles = this.db.list(`${this.divisionPath}/principles`).valueChanges();
     this.$scenerios = this.db.list(`${this.divisionPath}/scenerios`).valueChanges();
@@ -148,6 +143,12 @@ export class HostComponent implements OnInit {
     this.$localLand = this.db.list(`${this.divisionPath}/localLand`).valueChanges();
     this.$globalLand = this.db.list(`${this.divisionPath}/globalLand`).valueChanges();
     this.$unseenNotifications = this.db.list(`${this.divisionPath}/unseenNotifications`).valueChanges();
+    this.$turnButtons = this.db.list(`${this.divisionPath}/citizens`)
+      .valueChanges()
+      .pipe(
+        map((citizens: any) => citizens.map(c => ({ id: c.id, label: c.position }))),
+        tap((x) => console.log("turn buttons tap: ", x))
+      )
 
     this.$focus.subscribe((focus) => {
       console.log({focus})
@@ -185,9 +186,51 @@ export class HostComponent implements OnInit {
     return resources.reduce((acc, R) => acc + R.value, 0);
   }
 
+  exploreOwnedLand(landGrid) {
+    landGrid.exploreOwnedLand();
+  }
+
+  gatherOwnedLand(landGrid) {
+    landGrid.gatherOwnedLand();
+  }
+
   onRightTabChange(tab) {
     this.rightTab = tab.id;
     this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/unseenNotifications`).remove();
+  }
+
+  purchaseItem(item, division, citizen) {
+    if (item === 'localLand' && this.calculateWealth(citizen.resources) >= division.landCost) {
+      this.bankService.spendResources(
+        this.showKey,
+        this.divisionKey,
+        citizen.id,
+        division.landCost
+      ).then(() => {
+        this.divisionService.acquireLand(this.showKey, this.divisionKey, [{
+          division: this.divisionKey,
+          id: citizen.id,
+          name: citizen.position
+        }]);
+      })
+    }
+    console.log('purchase: ', item, citizen)
+  }
+
+  async onGather(tile) {
+    console.log("ON GATHER: ", tile)
+    if (tile.value > 0) {
+      console.log("deposit...")
+      this.bank.depositResources(
+        this.showKey,
+        tile.owner.division,
+        tile.owner.id, [{
+        value: tile.value,
+        division: tile.owner.division
+      }]).then(() => {
+        console.log('deposited')
+      })
+    }
   }
 
   changeDivisionProperty(prop, name=null) {
@@ -204,7 +247,7 @@ export class HostComponent implements OnInit {
     this.selectedCitizen = citizen;
     this.changeAttribute = {
       name: name ?? prop,
-      dbPath: `${this.divisionPath}/citizens/${citizen.position - 1}/${prop}`
+      dbPath: `${this.divisionPath}/citizens/${citizen.id}/${prop}`
     }
     this.actionSheet = (type === 'advancement') 
       ? this.bottomSheet.open(this.changeAdvancementSheet)
@@ -261,7 +304,7 @@ export class HostComponent implements OnInit {
   onTurnSelect(button) {
     console.log("turn select: ", button)
     this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/turn`)
-      .set({ index: button.label, actions: 2 })
+      .set({ id: button.id })
   }
 
   onFocusSelect(button) {
@@ -524,7 +567,7 @@ export class HostComponent implements OnInit {
     this.bankService.spendResources(
       this.showKey,
       this.divisionKey,
-      this.selectedCitizen.position - 1,
+      this.selectedCitizen.id,
       amount
     ).then(() => {
       this.actionSheet.dismiss();
@@ -535,7 +578,7 @@ export class HostComponent implements OnInit {
     this.bankService.depositResources(
       this.showKey,
       this.divisionKey,
-      this.selectedCitizen.position - 1,
+      this.selectedCitizen.id,
       range(amount).map(() => ({
         division: this.divisionKey,
         value: toNumber(type)
@@ -610,10 +653,14 @@ export class HostComponent implements OnInit {
       .pipe(take(1))
       .toPromise();
 
-    citizens.forEach((citizen, index) => {
-      this.db.object(`${this.divisionPath}/citizens/${index}`).update({
+    citizens.forEach((citizen) => {
+      this.db.object(`${this.divisionPath}/citizens/${citizen.id}`).update({
         actions: 2
       });
+    })
+
+    this.db.object(`${this.divisionPath}/turn`).set({
+      id: citizens[0].id
     })
   }
 

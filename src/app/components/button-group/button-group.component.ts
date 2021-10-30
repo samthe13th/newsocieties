@@ -1,4 +1,4 @@
-import { Component, Input, EventEmitter, Output } from '@angular/core';
+import { Component, Input, EventEmitter, Output, OnInit } from '@angular/core';
 import { find } from 'lodash';
 
 @Component({
@@ -9,7 +9,7 @@ import { find } from 'lodash';
     '[class.app-button-group]': 'true'
   }
 })
-export class ButtonGroupComponent {
+export class ButtonGroupComponent implements OnInit {
   currentButton;
 
   @Output() select = new EventEmitter<any>()
@@ -20,19 +20,27 @@ export class ButtonGroupComponent {
     icon: string,
   }[]
 
-  @Input() selectById: string;
+  private _selectById: string
+  @Input()
+  get selectById() { return this._selectById }
+  set selectById(value) {
+    this._selectById = value;
+    this.setButton();
+  }
   @Input() unselectedClass: string = 'button-unselected'
   @Input() selectedClass: string = 'button-selected';
 
   ngOnInit() {
+    console.log('buttons init: ', this.buttons, this.selectById)
     this.setButton();
   }
-
+  
   reset() {
     this.setButton();
   }
 
   setButton() {
+    console.log("select by id: ", this.selectById, this.buttons)
     if (this.buttons) {
       this.currentButton = this.selectById
         ? find(this.buttons, ['id', this.selectById])

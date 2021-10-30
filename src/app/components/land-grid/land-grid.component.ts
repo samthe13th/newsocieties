@@ -1,10 +1,11 @@
 import { Output, Component, OnInit, Input, EventEmitter } from '@angular/core';
-import { range, chunk, isEqual, isEmpty, toNumber } from 'lodash';
+import { range, chunk, isEqual, each, toNumber } from 'lodash';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
-import { Subject, combineLatest, BehaviorSubject } from 'rxjs';
+import { Subject, combineLatest } from 'rxjs';
 import { takeUntil, tap, take } from 'rxjs/operators';
 import { LandCardValues, LandTile } from 'src/app/interfaces';
+import { BankService } from 'src/app/services/bank.service';
 
 const MAX_HARVEST = 49;
 const HARVEST_ROW_LENGTH = 7;
@@ -26,7 +27,6 @@ export class LandGridComponent implements OnInit {
   selectedResourceStatus;
   selectedCardIndex;
 
-  private actions;
   private _turn;
   private destroy$ = new Subject<boolean>();
 
@@ -36,19 +36,17 @@ export class LandGridComponent implements OnInit {
   @Input() markCards: boolean;
   @Input() updatePath;
   @Input() showId;
-  @Input() playerId;
+  @Input() player;
   @Input() divisionKey;
   @Input() 
   get turn() { return this._turn };
   set turn(value) {
     this._turn = value;
-    this.actions = (this._turn?.playerId === this.playerId)
-      ? this._turn?.actions
-      : 0
   }
 
   constructor(
     private db: AngularFireDatabase,
+    private bankService: BankService,
     private _bottomSheet: MatBottomSheet
   ) {}
 
@@ -112,22 +110,72 @@ export class LandGridComponent implements OnInit {
     return this.landTiles?.[this.selectedCardIndex] ?? null;
   }
 
-  gatherOwnedLand() {
-    this.landTiles.forEach((card, i) => {
-      if (card.owner) {
-        card.harvested = false;
-        this.process(i);
+  // gatherOwnedLand() {
+  //   this.landTiles.forEach((card, i) => {
+  //     if (card.owner) {
+  //       card.harvested = false;
+  //       this.process(i);
+  //     }
+  //   })
+  // }
+
+  exploreOwnedLand() {
+    console.log("harvest owned land")
+    this.landTiles.forEach((tile) => {
+      if (tile.owner) {
+        console.log("FLIP: ", tile);
+        this.explore(tile);
       }
     })
   }
 
+  gatherOwnedLand() {
+    const toGather = {};
+    this.landTiles.forEach((tile) => {
+      if (tile.owner && tile.value !== -1) {
+        if (!toGather[tile.owner.id]) {
+          toGather[tile.owner.id] = [];
+        }
+        toGather[tile.owner.id].push({
+          value: tile.owner.division != this.divisionKey 
+            ? 3 : tile.value,
+          division: tile.owner.division
+        })
+        this.landTiles[tile.index].value = -1;
+      }
+    })
+    this.bulkGatherResources(toGather);
+    console.log("to gather: ", toGather)
+  }
+
+  bulkGatherResources(toGather) {
+    let harvestCount = 0;
+    each(toGather, async (resources, id) => {
+      const { division } = resources[0];
+      console.log("bulk deposit... ", id, division)
+      harvestCount += resources.length;
+      this.bankService.depositResources(
+        this.showId,
+        division,
+        id,
+        resources
+      ).then(() => {
+        console.log('up harvest count: ', resources.length)
+        console.log('deposited')
+      })
+    })
+
+    this.updateHarvestedCount(harvestCount);
+    this.updateDB();
+  }
+
   selectTile(card) {
-    if (this.turn?.playerId !== this.playerId || this.turn?.actions < 1) {
-      console.log('cannot make move', this.turn, this.turn?.playerId !== this.playerId, this.turn?.actions < 1, this.playerId)
+    console.log('select: ', this.player)
+    if (this.turn?.id !== this.player?.id || this.player?.actions < 1) {
+      console.log('cannot make move', this.turn, this.turn?.id !== this.player?.id, this.player?.actions < 1, this.player?.id)
       return
     }
     this.select.emit(card);
-    console.log('select: ', card, isEmpty(card.mark))
   }
 
   clearSelection(index) {
@@ -146,42 +194,41 @@ export class LandGridComponent implements OnInit {
   //   this.updateDB();
   // }
 
-  explore(card) {
+  explore(card, takeAction=false) {
     console.log('explore: ', card);
     if (!card.harvested && card.value !== LandCardValues.EMPTY) {
       this.landTiles[card.index].harvested = true;
       this.updateDB();
     }
     this.clearSelection(card.index);
-    this.takeAction();
+    if (takeAction) {
+      this.takeAction();
+    }
   }
 
   takeAction() {
-    this.actions--;
-    console.log('action: ', this.turn, this.actions)
-    this.db.object(`shows/${this.showId}/divisions/${this.divisionKey}/citizens/${this.turn?.playerPosition - 1}`)
-      .update({ actions: this.actions })
+    console.log('take action... ', this.player?.id)
+    this.db.object(`shows/${this.showId}/divisions/${this.divisionKey}/citizens/${this.player?.id}/actions`)
+      .query.ref.transaction(actions => actions ? --actions : 0
+    );
   }
 
-  gather(card) {
+  gather(card, takeAction=false) {
     console.log('do gather')
-    this.gatherResource.emit({ value: card.value });
+    this.gatherResource.emit(card);
     this.landTiles[card.index].value = -1;
-    this.updateHarvestedCount();
+    this.updateHarvestedCount(1);
     this.updateDB();
     this.clearSelection(card.index);
-    this.takeAction();
+    if (takeAction) {
+      this.takeAction();
+    }
   }
 
-  async updateHarvestedCount() {
+  async updateHarvestedCount(n) {
     const path = `shows/${this.showId}/divisions/${this.divisionKey}/harvested`;
-    const harvested = await this.db.object(path).valueChanges()
-      .pipe(take(1))
-      .toPromise()
-
-    console.log({harvested})
-
-    this.db.object(path).set(toNumber(harvested) + 1)
+    console.log('update harvested count: ', path, n)
+    this.db.object(path).query.ref.transaction(harvested => harvested ? ++n : n)
   }
 
   updateDB() {

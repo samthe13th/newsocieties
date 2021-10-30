@@ -36,7 +36,7 @@ export class PlayerTurnComponent implements OnInit {
     ).pipe(
       map(([turn, citizens]: any) => {
         console.log({turn, citizens})
-        const player = find(citizens, ['position', turn.index]);
+        const player = find(citizens, ['id', turn.id]);
         return {
           player: player?.name,
           playerId: player?.id,

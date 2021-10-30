@@ -4,7 +4,7 @@
     class="land-tile"
     [class.contaminated]="card.contaminated == true"
     [attr.data-badge]="card.owner ? card.owner.name : null"
-    [attr.data-division]="card.owner ? card.owner.division : null"
+    [attr.data-local]="card.owner && card.owner.division == divisionKey"
     [class.empty]="card.value === -1"
     [class.owned]="card.owner !== null"
   >
@@ -13,13 +13,13 @@
       [side]="card.harvested ? 'front' : 'back'"
       [class.owned]="true"
       [mark]="selectionIndex === card.index ? selectionIndex : null"
-      [playerId]="playerId"
+      [playerId]="player?.id"
       [class.disabled]="card.value == -1 || card.contaminated == true"
       (sideChange)="process(i)">
       <div front class="harvest-card">
         <div 
           *ngIf="card.value > 0"
-          class="resource" 
+          class="resource"
           [class.one]="card.value === 1"
           [class.two]="card.value === 2"
           [class.three]="card.value === 3">

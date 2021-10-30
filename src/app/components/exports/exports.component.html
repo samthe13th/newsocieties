@@ -56,7 +56,7 @@ Send:
   </select>
 </ng-container>
 
-<ng-container *ngIf="selectedExportType">
+<ng-container *ngIf="selectedExportType?.name === 'Message'">
   <br/>
   Message:
   <textarea

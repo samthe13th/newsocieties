@@ -57,6 +57,7 @@ export class DivisionService {
         await this.db.list(`shows/${showKey}/divisions/${request.division}/${landList}`).push(request);
         await this.db.list(`shows/${showKey}/divisions/${divisionKey}/pendingGLA`).push(request);
       })
+      console.log('aquire: ', data)
       resolve(true);
     })
   }

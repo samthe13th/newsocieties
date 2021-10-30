@@ -1,6 +1,3 @@
 <ng-container *ngIf="$turn | async as turn">
-  <ng-container *ngIf="showLabel">
-    <div>Turn: <strong>{{ turn.player }}</strong></div>
-  </ng-container>
-  <div class="turn-actions">Actions: {{ turn.actions }}/{{turn.actionsAvailable}}</div>
+  <div>Turn: <strong>{{ turn.player }}({{ turn.actions }}/{{turn.actionsAvailable}})</strong></div>
 </ng-container>

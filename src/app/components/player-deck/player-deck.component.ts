@@ -57,10 +57,9 @@ export class PlayerDeckComponent {
     this.divisionPath = `shows/${showKey}/divisions/${divisionKey}`;
     const citizenPath = `${this.divisionPath}/citizens`;
     const citizens = await this.db.list(citizenPath).valueChanges().pipe(take(1)).toPromise();
-    this.playerIndex = _.findIndex(citizens, ['id', id]);
 
     console.log({citizenPath, citizens})
-    this.$citizen = this.db.object(`${citizenPath}/${this.playerIndex}`)
+    this.$citizen = this.db.object(`${citizenPath}/${id}`)
       .valueChanges()
       .pipe(
         tap((citizen) => {
@@ -80,7 +79,7 @@ export class PlayerDeckComponent {
       this.contaminateResources()
     } else {
       console.log('make deposit')
-      this.bank.depositResources(this.showKey, this.division?.code, this.playerIndex, [{
+      this.bank.depositResources(this.showKey, this.division?.code, this.id, [{
         ...R,
         division: this.division?.code
       }])

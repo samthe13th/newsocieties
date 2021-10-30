@@ -4,10 +4,10 @@ import { PlayerDeckComponent } from 'src/app/components/player-deck/player-deck.
 import { ActivatedRoute } from '@angular/router';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { LandGridComponent } from 'src/app/components/land-grid/land-grid.component';
-import { takeUntil, take } from 'rxjs/operators';
+import { takeUntil, take, map } from 'rxjs/operators';
 import { Subject, BehaviorSubject } from 'rxjs';
 import { LandCardValues } from 'src/app/interfaces';
-import { toArray, includes, findIndex, toNumber } from 'lodash';
+import { toArray, includes, findIndex, filter } from 'lodash';
 import { faEye, faShoppingBag } from '@fortawesome/free-solid-svg-icons';
 
 const KEY_CODE = {
@@ -26,11 +26,9 @@ const KEY_CODE = {
 export class PlayerComponent implements OnInit {
   $division;
   $focus; 
-  $turn = new BehaviorSubject<any>(undefined); 
-
-  vote;
-
-  divisionSummaries;
+  $turn;
+  $citizens;
+  $player;
 
   @ViewChild(PlayerDeckComponent, { static: false }) playerDeck: PlayerDeckComponent;
   @ViewChild(LandGridComponent, { static: false }) landGrid: LandGridComponent;
@@ -47,10 +45,11 @@ export class PlayerComponent implements OnInit {
 
   private destroy$ = new Subject<boolean>();
 
+  vote;
+  divisionSummaries;
   currentTab = 'Division';
   id;
-  divisionKey = 'N';
-  divisionData;
+  divisionKey;
   divisionPath;
   showKey;
   selectedResourceStatus;
@@ -76,35 +75,35 @@ export class PlayerComponent implements OnInit {
 
   ngOnInit() {
     const { show, division, id } = this.route.snapshot.params;
-    const showPath = `shows/${show}`;
-    this.divisionPath = `${showPath}/divisions/${this.divisionKey}`
-
     this.showKey = show;
     this.divisionKey = division;
     this.id = id;
+
+    const showPath = `shows/${this.showKey}`;
+    this.divisionPath = `${showPath}/divisions/${this.divisionKey}`;
     this.landTilesPath = `${this.divisionPath}/landTiles`;
     this.votePath = `${this.divisionPath}/vote`;
 
-    console.log('id: ', this.id)
-    console.log({showPath, landTilesPath: this.landTilesPath, votePath: this.votePath})
-    
+    this.$player = this.db.object(`${this.divisionPath}/citizens/${this.id}`).valueChanges();
+    this.$turn = this.db.object(`${this.divisionPath}/turn`).valueChanges();
     this.$division = this.db.object(this.divisionPath).valueChanges();
+    this.$citizens = this.db.list(`${this.divisionPath}/citizens`).valueChanges()
+      .pipe(
+        map((citizens) => filter(citizens, c => c.id !== this.id))
+      );
     this.$focus = this.db.object(`${this.divisionPath}/focus`).valueChanges();
     this.$focus.subscribe((focus) => {
-      console.log({focus});
       this.focus = focus;
       if (focus === 'principles' || focus === 'resolutions' || focus === 'scenerio') {
         this.db.object(`${this.divisionPath}/vote`)
           .valueChanges()
           .subscribe((vote: any) => {
             this.vote = { ...vote };
-            console.log('vote: ', this.vote)
             if (includes(JSON.parse(this.vote?.voted), this.id)) {
               this.hasVoted = true;
             } else {
               this.hasVoted = false;
             }
-            console.log('player: this.vote... ', this.vote)
           })
       }
     })
@@ -120,21 +119,13 @@ export class PlayerComponent implements OnInit {
   onSelectionChange({ vote, selection }) {
     this.vote = vote;
     this.voteSelection = findIndex(this.vote.options, ["prompt", selection.prompt]);
-    console.log("selection: ", this.voteSelection, this.vote);
-  }
-
-  onTurnChange(turn) {
-    this.$turn.next(turn);
-    console.log('turn: ', turn)
   }
 
   castVote() {
     if (this.voteSelection !== undefined) {
-      console.log("vote: ", this.voteSelection, this.vote.options[this.voteSelection]);
       this.vote.options[this.voteSelection].votes += 1;
       const voted = JSON.parse(this.vote.voted)
       voted.push(this.id);
-      console.log('push vote: ', this.vote, voted)
       this.db.object(`${this.divisionPath}/vote`).set({
         ...this.vote,
         voted: JSON.stringify(voted)
@@ -212,14 +203,14 @@ export class PlayerComponent implements OnInit {
 
   explore() {
     console.log('explore');
-    this.landGrid.explore(this.selectedCard);
+    this.landGrid.explore(this.selectedCard, true);
     this.actionSheet.dismiss();
   }
 
   gather() {
     const status = this.selectedResourceStatus?.status;
     if (status === 'explorable' || status === 'explored') {
-      this.landGrid.gather(this.selectedCard)
+      this.landGrid.gather(this.selectedCard, true)
     }
     this.actionSheet.dismiss();
   }

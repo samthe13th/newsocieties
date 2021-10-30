@@ -80,7 +80,7 @@ export class ExportsComponent implements OnInit {
               : 0
             return {
               resources,
-              select_id: _.toNumber(citizen.position) - 1,
+              select_id: citizen.id,
               select_text: `${index}: ${citizen.name} | ${resources}`,
             }
           })
@@ -182,11 +182,10 @@ export class ExportsComponent implements OnInit {
     this.failedValidations  = await this.validateGLARequest(this.selectedDivision.landCost, this.selectedFrom);
     if (this.failedValidations.length === 0) {
       this.selectedFrom.forEach(async (citizen) => {
-        const index = citizen.select_text.split(':')[0].trim();
         await this.bankService.spendResources(
           this.showKey,
           this.divisionKey,
-          index, 
+          citizen.select_id,
           this.selectedDivision.landCost
         );
       })

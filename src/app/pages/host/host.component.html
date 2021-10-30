@@ -59,22 +59,29 @@
       Pending GLA requests
     </div>
     <div *ngIf="focus === 'harvest'" class="harvest-wrapper">
-      <div class="turn-controls">
-        <app-button-group
-          *ngIf="$turn | async as turn"
-          (select)="onTurnSelect($event)"
-          [selectById]="turn?.index"
-          [buttons]="turnButtons">
-        </app-button-group>
-        <app-player-turn [divisionPath]="divisionPath"></app-player-turn>
-      </div>
-       <app-land-grid 
+      <app-land-grid
+        #landGrid
         *ngIf="action === 'harvesting'"
+        (gatherResource)="onGather($event)"
         [markCards]="true"
         [showId]="showKey"
         [divisionKey]="divisionKey"
         [updatePath]="landTilesPath"> 
       </app-land-grid>
+      <div class="button-row">
+        <button (click)="exploreOwnedLand(landGrid)">Flip owned</button>
+        <button (click)="gatherOwnedLand(landGrid)">Gather owned</button>
+      </div>
+      <div class="turn-controls" *ngIf="($turn | async) as turn">
+        <ng-container *ngIf="$turnButtons | async as buttons">
+          <app-button-group
+            (select)="onTurnSelect($event)"
+            [selectById]="turn?.id"
+            [buttons]="buttons">
+          </app-button-group>
+        </ng-container>
+        <app-player-turn [divisionPath]="divisionPath"></app-player-turn>
+      </div>
     </div>
     <div *ngIf="focus === 'principles' || focus === 'resolutions' || focus === 'scenerio'" class="resolution-wrapper">
       <ng-container *ngIf="($vote | async) as vote">
@@ -289,11 +296,18 @@
             <fa-icon size="sm" [icon]="faPen"></fa-icon>
           </button>
         </div>
+
         <div>
           Resources: {{ calculateWealth(citizen?.resources) }}
+          <button (click)="addCitizenResources(citizen)">Add</button>
+          <button (click)="removeCitizenResources(citizen)">Remove</button>
         </div>
-        <button (click)="addCitizenResources(citizen)">Add</button>
-        <button (click)="removeCitizenResources(citizen)">Remove</button>
+
+        <div>
+          Local Land: {{ citizen?.localLand }}
+          <button (click)="purchaseItem('localLand', division, citizen)">Buy</button>
+        </div>
+
         <div>
           Safety: {{ citizen?.advancements.safety }}
           <button (click)="changeCitizenProperty(citizen, 'advancements/safety', 'advancement', 'safety')">

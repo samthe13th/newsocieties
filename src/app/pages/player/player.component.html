@@ -1,8 +1,8 @@
 <ng-container *ngIf="($division | async) as division">
   <div class="player-turn">
     <app-player-turn 
-      (turnChange)="onTurnChange($event)"
-      [divisionPath]="divisionPath"></app-player-turn>
+      [divisionPath]="divisionPath">
+    </app-player-turn>
   </div>
   <app-tabs
     selectedClass="player-selected-tab"
@@ -29,11 +29,11 @@
           <app-land-grid 
             #landGrid
             [markCards]="false"
-            [turn]="$turn | async"
+            [turn]="division?.turn"
             [updatePath]="landTilesPath"
             [showId]="showKey"
+            [player]="$player | async"
             [divisionKey]="divisionKey"
-            [playerId]="id"
             (gatherResource)="onGather($event)"
             (select)="onSelect($event)"
           ></app-land-grid>
@@ -41,7 +41,9 @@
         <div class="player-folder__body-citizens space-between">
           <div class="harvest-details">
             <div class="flex-column stretch-h">
-              <div class="large">Reserve: <span class="harvest-details__number">{{division?.reserve}}</span></div>
+              <div class="large">Reserve:
+                <span class="harvest-details__number">{{division?.reserve}}</span>
+              </div>
               <div class="flex-column stretch-h">
                 <div>Thresholds</div>
                 <div>
@@ -59,16 +61,16 @@
                 <div>Capacity</div>
                 <div>
                   <span class="harvest-details__number">
-                    {{division?.capacity}}<span style="font-size: 16px">+{{division?.extra}}</span>
+                    {{division?.capacity}}
                   </span>
                 </div>
               </div>
             </div>
           </div>
-           
+
           <app-player-deck
             [id]="id" 
-            [myTurn]="id == ($turn | async)?.playerId"
+            [myTurn]="id == ($turn | async)?.id"
             [showKey]="showKey"
             [division]="division">
           </app-player-deck>
@@ -76,24 +78,17 @@
           <div class="citizen-list">
             <div 
               class="citizen-summary flex-row space-between"
-              *ngFor="let citizen of filterOutCitizen(division.citizens, id)">
+              *ngFor="let citizen of ($citizens | async)">
               <div class="flex-row flex-center-v">
-                <span [class.player-turn-indicator]="citizen.id == ($turn | async)?.playerId">{{citizen.name}}</span>
+                <span [class.player-turn-indicator]="citizen.id == ($turn | async)?.id">{{citizen.name}}</span>
                 <span>{{calculateWealth(citizen?.resources)}}</span>
                 <!-- <app-player-turn 
                   [showLabel]="false"
                   [divisionPath]="divisionPath">
                 </app-player-turn> -->
               </div>
-              <!-- <div *ngIf="citizen">
-                {{ addResources(citizen.resources) }}
-              </div> -->
             </div>
           </div>
-    
-          <!-- <button (click)="buy({ cost: 2 })">Spend $2</button>
-          <button (click)="buy({ cost: 5 })">Spend $5</button>
-          <button (click)="buy({ cost: 6 })">Spend $6</button> -->
         </div>
       </div>
     </ng-container>

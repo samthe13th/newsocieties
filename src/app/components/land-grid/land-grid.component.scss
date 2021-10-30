@@ -95,5 +95,11 @@
       right: -5px;
       background: black;
     }
+    &[data-local="true"] {
+      &::after {
+        background: white;
+        color: black;
+      }
+    }
   }
 }
