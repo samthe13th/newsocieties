@@ -36,9 +36,12 @@ export class HostComponent implements OnInit {
   @ViewChild('landGrid') landGrid: LandGridComponent;
   @ViewChild('focusButtonsComponent') focusButtonsComponent: ButtonGroupComponent;
   @ViewChild('updateSheet') updateSheet: TemplateRef<any>;
+  @ViewChild('transferResourcesSheet') transferResourcesSheet: TemplateRef<any>;
   @ViewChild('addResourcesSheet') addResourcesSheet: TemplateRef<any>;
   @ViewChild('removeResourcesSheet') removeResourcesSheet: TemplateRef<any>;
   @ViewChild('changeAdvancementSheet') changeAdvancementSheet: TemplateRef<any>;
+  @ViewChild('advancementSheet') advancementSheet: TemplateRef<any>;
+  @ViewChild('localLandSheet') localLandSheet: TemplateRef<any>;
   
   modalContent: TemplateRef<any>;
 
@@ -160,10 +163,10 @@ export class HostComponent implements OnInit {
     .pipe(take(1))
     .subscribe((show) => {
       this.divisions = this.getDivisionObservables(show);
-      console.log("DIVISIONS: ", this.divisions)
     })
 
     this.divisionService.calculateDivisionScore$(this.showKey, this.divisionKey).subscribe();
+    this.divisionService.thresholdListener$(this.showKey, this.divisionKey).subscribe();
 
     this.db.object(`shows/${this.showKey}/contamination/current`)
       .valueChanges()
@@ -199,28 +202,68 @@ export class HostComponent implements OnInit {
     this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/unseenNotifications`).remove();
   }
 
-  purchaseItem(item, division, citizen) {
-    if (item === 'localLand' && this.calculateWealth(citizen.resources) >= division.landCost) {
-      this.bankService.spendResources(
-        this.showKey,
-        this.divisionKey,
-        citizen.id,
-        division.landCost
-      ).then(() => {
-        this.divisionService.acquireLand(this.showKey, this.divisionKey, [{
-          division: this.divisionKey,
-          id: citizen.id,
-          name: citizen.position
-        }]);
-      })
+  updateCitizenLand(citizen, landCost) {
+    this.selectedCitizen = citizen;
+    this.changeAttribute = {
+      name: 'Land',
+      data: {
+        wealth: this.calculateWealth(citizen.resources),
+        cost: landCost
+      },
+      dbPath: `${this.divisionPath}/citizens/${citizen.id}/localLand`
+    };
+    this.actionSheet = this.bottomSheet.open(this.localLandSheet);
+  }
+
+  updateAdvancement(adv, citizen, advancementCosts) {
+    this.selectedCitizen = citizen;
+    this.changeAttribute = {
+      name: adv,
+      data: {
+        wealth: this.calculateWealth(citizen.resources),
+        cost: advancementCosts[Math.min(citizen.advancements[adv], 2)]
+      },
+      dbPath: `${this.divisionPath}/citizens/${citizen.id}/advancements/${adv}`
     }
-    console.log('purchase: ', item, citizen)
+    console.log('change attr: ', this.changeAttribute)
+    this.actionSheet = this.bottomSheet.open(this.advancementSheet);
+  }
+
+  buyAdvancement(advancement, price, updatePath) {
+    console.log({advancement, price, updatePath})
+    if (advancement > 3 || !this.selectedCitizen?.id) return;
+    const wealth = this.calculateWealth(this.selectedCitizen.resources);
+    console.log({wealth, price})
+    if (wealth >= price) {
+      this.db.object(updatePath)
+        .query.ref.transaction(adv => ++adv ?? 1)
+      this.bankService.spendResources(this.showKey, this.divisionKey, this.selectedCitizen?.id, price);
+      console.log('buy advancement: ', advancement, this.selectedCitizen, price, wealth);
+    }
+
+    this.actionSheet.dismiss();
+  }
+
+  buyLocalLand(price, updatePath) {
+    console.log('buy local land: ', this.selectedCitizen, price)
+    this.bankService.spendResources(
+      this.showKey,
+      this.divisionKey,
+      this.selectedCitizen.id,
+      price
+    ).then(() => {
+      this.divisionService.acquireLand(this.showKey, this.divisionKey, [{
+        division: this.divisionKey,
+        id: this.selectedCitizen.id,
+        name: this.selectedCitizen.position
+      }]);
+      this.db.object(updatePath).query.ref.transaction(land => ++land ?? 0);
+      this.actionSheet.dismiss();
+    })
   }
 
   async onGather(tile) {
-    console.log("ON GATHER: ", tile)
     if (tile.value > 0) {
-      console.log("deposit...")
       this.bank.depositResources(
         this.showKey,
         tile.owner.division,
@@ -234,7 +277,6 @@ export class HostComponent implements OnInit {
   }
 
   changeDivisionProperty(prop, name=null) {
-    console.log("change: ", prop);
     this.changeAttribute = {
       name: name ?? prop,
       dbPath: `${this.divisionPath}/${prop}`
@@ -444,6 +486,22 @@ export class HostComponent implements OnInit {
     this.actionSheet = this.bottomSheet.open(this.addResourcesSheet);
   }
 
+  transferCitizenResources(citizen) {
+    console.log('transfer ', citizen);
+    this.selectedCitizen = citizen;
+    this.actionSheet = this.bottomSheet.open(this.transferResourcesSheet);
+  }
+
+  transferResources(to, amount) {
+    if (to === 'reserve') {
+      this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/reserve`)
+        .query.ref.transaction(reserve => reserve + amount ?? amount)
+    }
+    this.bankService.spendResources(this.showKey, this.divisionKey, this.selectedCitizen?.id, amount).then(() => {
+      this.actionSheet.dismiss();
+    })
+  }
+
   setVoteDropdown(type) {
     console.log("set dropdown: ", type)
     const divisionPath = `shows/${this.showKey}/divisions/${this.divisionKey}`;
@@ -574,15 +632,12 @@ export class HostComponent implements OnInit {
     })
   }
 
-  addResources(type, amount) {
+  addResources(amount) {
     this.bankService.depositResources(
       this.showKey,
       this.divisionKey,
       this.selectedCitizen.id,
-      range(amount).map(() => ({
-        division: this.divisionKey,
-        value: toNumber(type)
-      }))
+      this.bankService.quickConvert(this.divisionKey, amount)
     ).then(() => {
       this.actionSheet.dismiss();
     })
@@ -602,6 +657,7 @@ export class HostComponent implements OnInit {
       season: newSeason.season,
       capacity: newSeason.capacity,
       harvest: newSeason.harvest,
+      highThresholdMet: false,
       reserveThresholds: {
         low: newSeason.thresholds[0],
         mid: newSeason.thresholds[1],

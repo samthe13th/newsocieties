@@ -1,14 +1,14 @@
 import { Component, OnInit, AfterViewInit, ViewChild, ViewChildren, TemplateRef, ContentChildren, ElementRef, QueryList } from '@angular/core';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { take } from 'rxjs/operators';
-import { trim, range, capitalize } from 'lodash';
+import { trim, range, capitalize, toNumber } from 'lodash';
 import * as Papa from 'papaparse';
 import { DIVISION_TEMPLATE, SHOW_TEMPLATE } from './templates';
 
 const DIVISIONS = ['N', 'S', 'E', 'W', 'NE', 'SE', 'SW', 'NW'];
 const MAX_HARVEST = 49;
 const CITIZEN_NAMES = ['Sam', 'Mark', 'Mandy', 'Sarah', 'Kimmy', 'Zed'];
-const ADVANCEMENTS = ["safety", "health", "arts", "knowledge", "infastructure"];
+const ADVANCEMENTS = ["safety", "health", "arts", "knowledge", "infrastructure"];
 
 
 @Component({
@@ -28,6 +28,7 @@ export class CentralComponent implements OnInit, AfterViewInit {
   @ViewChild('resolutionsPreview') resolutionsPreview: TemplateRef<any>;
   @ViewChild('principlesPreview') principlesPreview: TemplateRef<any>;
   @ViewChild('sceneriosPreview') sceneriosPreview: TemplateRef<any>;
+  @ViewChild('eventsPreview') eventsPreview: TemplateRef<any>;
 
   @ViewChildren('division') bodyTemplates: QueryList<TemplateRef<any>>;
   @ViewChildren('tab') tabTemplates: QueryList<TemplateRef<any>>;
@@ -38,15 +39,19 @@ export class CentralComponent implements OnInit, AfterViewInit {
   divisions = DIVISIONS;
   chatInput = "";
   tabs;
-  voteFileValues = {
+  csvFileData = {
     resolutions: '', 
     principles: '',
-    scenerios: ''
+    scenerios: '',
+    events: '', 
+    users: '',
   }
-  voteData = {
+  csvData = {
     resolutions: undefined,
     principles: undefined,
     scenerios: undefined,
+    events: undefined, 
+    users: undefined,
   }
   showModal = false; 
 
@@ -77,16 +82,19 @@ export class CentralComponent implements OnInit, AfterViewInit {
   }
 
   uploadSceneriosData(e) {
-    console.log({e})
-    this.parseVoteData(e, 'scenerios');
+    this.parseCsvData(e, 'scenerios');
   }
 
   uploadPrinciplesData(e) {
-    this.parseVoteData(e, 'principles');
+    this.parseCsvData(e, 'principles');
   }
 
   uploadResolutionsData(e) {
-    this.parseVoteData(e, 'resolutions');
+    this.parseCsvData(e, 'resolutions');
+  }
+
+  uploadEventsData(e) {
+    this.parseCsvData(e, 'events')
   }
 
   parsePrinciplesData(_data) {
@@ -130,6 +138,35 @@ export class CentralComponent implements OnInit, AfterViewInit {
     return data;
   }
 
+  parseEventsData(_data) {
+    const data = _data.map(([_title, _event, _level, _variables]) => {
+      const selectVariableNames = new RegExp(/[^{\}]+(?=})/, 'g');
+      const variableNames = _event.match(selectVariableNames);
+      const variables = [];
+
+      let content = `<div>${_event}</div>`;
+
+      if (variableNames !== null) {
+        const values = _variables.split('|') ?? [];
+        variableNames.forEach((name, i) => {
+          variables.push({
+            id: name,
+            value: toNumber(values[i])
+          })
+        })
+      }
+
+      return {
+        title: _title,
+        content,
+        level: toNumber(_level),
+        variables
+      }
+    })
+    data.shift();
+    return data;
+  }
+
   parseResolutionsData(_data) {
     const data = _data.map(([title, _header, _costs, _consequences, ...options]) => {
       const header = _header.split('|');
@@ -156,10 +193,10 @@ export class CentralComponent implements OnInit, AfterViewInit {
     return data;
   }
 
-  parseVoteData(e, type) {
+  parseCsvData(e, type) {
     Papa.parse(e.target.files[0], {
       transform: function(value) {
-        return value === '' ? null : value
+        return value ?? null;
       },
       complete: (results) => {
         let data;
@@ -169,9 +206,11 @@ export class CentralComponent implements OnInit, AfterViewInit {
           data = this.parsePrinciplesData(results.data);
         } else if (type === 'scenerios') {
           data = this.parseSceneriosData(results.data);
+        } else if (type === 'events') {
+          data = this.parseEventsData(results.data);
         }
         console.log("parsed data: ", data)
-        this.voteData[type] = data;
+        this.csvData[type] = data;
         this.previewVoteData(type);
       }
     });
@@ -179,16 +218,16 @@ export class CentralComponent implements OnInit, AfterViewInit {
 
   cancelUpdate(type) {
     this.showModal = false;
-    this.voteFileValues[type] = '';
+    this.csvFileData[type] = '';
   }
 
-  updateVoteData(type) {
+  updateCsvData(type) {
     console.log('update vote data for ', type)
     this.db.object(type)
-      .set(this.voteData[type])
+      .set(this.csvData[type])
       .then(() => {
         this.showModal = false;
-        this.voteFileValues[type] = '';
+        this.csvFileData[type] = '';
         alert(`Update successful for ${type} file`)
       })
   }
@@ -202,6 +241,9 @@ export class CentralComponent implements OnInit, AfterViewInit {
       this.showModal = true;
     } else if (type === 'scenerios') {
       this.modalContent = this.sceneriosPreview;
+      this.showModal = true;
+    } else if (type === 'events') {
+      this.modalContent = this.eventsPreview;
       this.showModal = true;
     }
   }

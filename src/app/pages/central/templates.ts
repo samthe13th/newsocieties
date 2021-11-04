@@ -32,7 +32,7 @@ export const DIVISION_TEMPLATE = {
         text: 'Peek at one resource on the harvest line without exploring.'
       }
     },
-    infastructure: {
+    infrastructure: {
       individual: 0,
       communal: 0,
       reward: {
@@ -41,6 +41,7 @@ export const DIVISION_TEMPLATE = {
       }
     }
   },
+  advancementCosts: [2,4,6],
   highThresholdsMet: 0,
   imports: {
     messages: [],

@@ -62,14 +62,38 @@ export class DivisionService {
     })
   }
 
+  thresholdListener$(showKey, divisionKey) {
+    const divisionPath = `shows/${showKey}/divisions/${divisionKey}`;
+
+    return combineLatest(
+      this.db.object(`${divisionPath}/reserve`).valueChanges(),
+      this.db.object(`${divisionPath}/reserveThresholds`).valueChanges(),
+      this.db.object(`${divisionPath}/highThresholdMet`).valueChanges()
+    ).pipe(
+      map(([
+        reserve,
+        reserveThresholds,
+        highThresholdMet
+      ]: [number,any, boolean]) => {
+        console.log({reserve, reserveThresholds, highThresholdMet})
+        if (!highThresholdMet && reserveThresholds.high <= reserve) {
+          console.log('update: ', reserve, reserveThresholds, highThresholdMet)
+          this.db.object(`${divisionPath}/highThresholdMet`).set(true);
+          this.db.object(`${divisionPath}/highThresholdsMet`)
+            .query.ref.transaction(met => ++met ?? 1);
+        }
+      })
+    )
+  }
+
   calculateDivisionScore$(showKey, divisionKey) {
     const divisionPath = `shows/${showKey}/divisions/${divisionKey}`;
     
     return combineLatest(
       this.db.list(`${divisionPath}/globalLand`).valueChanges(),
       this.db.list(`${divisionPath}/localLand`).valueChanges(),
-      this.db.object(`${divisionPath}/highthresholdsMet`).valueChanges(),
-      this.db.object(`${divisionPath}/advancements`).valueChanges(),
+      this.db.object(`${divisionPath}/highThresholdsMet`).valueChanges(),
+      this.db.object(`${divisionPath}/advancements`).valueChanges()
     ).pipe(
       map(([
         globalLand,
@@ -84,7 +108,7 @@ export class DivisionService {
           + highthresholdsMet
           + (0.35 * reduce(advancements, (acc, A) => A.individual + A.communal + acc, 0))
         );
-        return { VP, score: this.getScore(VP) }
+        return { VP: round(VP), score: this.getScore(VP) }
       }),
       tap((updates) => {
         console.log({updates})
@@ -151,4 +175,8 @@ export class DivisionService {
         })
       })
   }
+}
+
+function round(number) {
+  return Math.round(number * 100) / 100;
 }

@@ -25,7 +25,7 @@ export class PlayerDeckComponent {
     health: [],
     arts: [],
     knowledge: [],
-    infastructure: []
+    infrastructure: []
   }
 
   wealth = 0;

@@ -222,8 +222,8 @@
           </button>
         </div>
         <div>
-          <strong>Communal Infastructure: </strong>{{ division.advancements.infastructure.communal }}
-          <button (click)="changeDivisionProperty('advancements/infastructure/communal', 'communal infastructure')">
+          <strong>Communal Infrastructure: </strong>{{ division.advancements.infrastructure.communal }}
+          <button (click)="changeDivisionProperty('advancements/infrastructure/communal', 'communal infrastructure')">
             <fa-icon size="sm" [icon]="faPen"></fa-icon>
           </button>
         </div>
@@ -280,7 +280,7 @@
         <strong>Knowledge: </strong>{{ division.advancements.knowledge.individual + division.advancements.knowledge.communal }}
       </div>
       <div>
-        <strong>Infastructure: </strong>{{ division.advancements.infastructure.individual + division.advancements.infastructure.communal }}
+        <strong>Infrastructure: </strong>{{ division.advancements.infrastructure.individual + division.advancements.infrastructure.communal }}
       </div>
 
 
@@ -299,13 +299,14 @@
 
         <div>
           Resources: {{ calculateWealth(citizen?.resources) }}
-          <button (click)="addCitizenResources(citizen)">Add</button>
-          <button (click)="removeCitizenResources(citizen)">Remove</button>
+          <button (click)="removeCitizenResources(citizen)">-</button>
+          <button (click)="addCitizenResources(citizen)">+</button>
+          <button (click)="transferCitizenResources(citizen)">transfer</button>
         </div>
 
         <div>
           Local Land: {{ citizen?.localLand }}
-          <button (click)="purchaseItem('localLand', division, citizen)">Buy</button>
+          <button (click)="updateCitizenLand(citizen, division?.landCost)">Buy</button>
         </div>
 
         <div>
@@ -313,30 +314,35 @@
           <button (click)="changeCitizenProperty(citizen, 'advancements/safety', 'advancement', 'safety')">
             <fa-icon size="sm" [icon]="faPen"></fa-icon>
           </button>
+          <button (click)="updateAdvancement('safety', citizen, division?.advancementCosts)">Buy</button>
         </div>
         <div>
           Health: {{ citizen?.advancements.health }}
           <button (click)="changeCitizenProperty(citizen, 'advancements/health', 'advancement', 'health')">
             <fa-icon size="sm" [icon]="faPen"></fa-icon>
           </button>
+          <button (click)="updateAdvancement('health', citizen, division?.advancementCosts)">Buy</button>
         </div>
         <div>
           Arts: {{ citizen?.advancements.arts }}
           <button (click)="changeCitizenProperty(citizen, 'advancements/arts', 'advancement', 'arts')">
             <fa-icon size="sm" [icon]="faPen"></fa-icon>
           </button>
+          <button (click)="updateAdvancement('arts', citizen, division?.advancementCosts)">Buy</button>
         </div>
         <div>
           Knowledge: {{ citizen?.advancements.knowledge }}
           <button (click)="changeCitizenProperty(citizen, 'advancements/knowledge', 'advancement', 'knowledge')">
             <fa-icon size="sm" [icon]="faPen"></fa-icon>
           </button>
+          <button (click)="updateAdvancement('knowledge', citizen, division?.advancementCosts)">Buy</button>
         </div>
         <div>
-          Infastructure: {{ citizen?.advancements.infastructure }}
-          <button (click)="changeCitizenProperty(citizen, 'advancements/infastructure', 'advancement', 'infastructure')">
+          Infrastructure: {{ citizen?.advancements.infrastructure }}
+          <button (click)="changeCitizenProperty(citizen, 'advancements/infrastructure', 'advancement', 'infrastructure')">
             <fa-icon size="sm" [icon]="faPen"></fa-icon>
           </button>
+          <button (click)="updateAdvancement('infrastructure', citizen, division?.advancementCosts)">Buy</button>
         </div>
       </div>
     </div>
@@ -514,19 +520,65 @@
 <ng-template #addResourcesSheet>
   <div class="action-sheet flex-column">
     <div>Add Resources</div>
-    <app-button-group
-      (select)="onResourceTypeSelect($event)"
-      [buttons]="resourceTypes">
-    </app-button-group>
     <ng-number-picker
       #addResourcePicker
       class="number-picker"
       [arrowKeys]="true"
       [min]="0">
     </ng-number-picker>
-    Total = {{ addResourcePicker.value * this.resourceType }}
-    <button (click)="addResources(this.resourceType, addResourcePicker.value)">
+    <button (click)="addResources(addResourcePicker.value)">
       Confirm
     </button>
+  </div>
+</ng-template>
+
+<ng-template #transferResourcesSheet>
+  <div class="action-sheet flex-column" *ngIf="calculateWealth(selectedCitizen.resources) as wealth">
+    <div>Transfer to Reserve</div>
+    <ng-number-picker
+      #transferResourcePicker
+      class="number-picker"
+      [arrowKeys]="true"
+      [min]="0"
+      [max]="wealth"
+    >
+    </ng-number-picker>
+    <button (click)="transferResources('reserve', transferResourcePicker.value)">
+      Confirm
+    </button>
+  </div>
+</ng-template>
+
+<ng-template #advancementSheet>
+  <div class="action-sheet flex-column">
+    <div>{{changeAttribute.name}} (cost: {{ changeAttribute?.data.cost }})</div>
+
+    <ng-container
+      *ngIf="changeAttribute?.data.wealth < changeAttribute?.data.cost">
+      <p>Not enough resources to buy advancement</p>
+      <button (click)="actionSheet.dismiss()">Ok</button>
+    </ng-container>
+
+    <button 
+      *ngIf="changeAttribute?.data.wealth >= changeAttribute?.data.cost"
+      (click)="buyAdvancement(changeAttribute.name, changeAttribute.data.cost, changeAttribute.dbPath)">
+      Buy
+    </button>
+  </div>
+</ng-template>
+
+<ng-template #localLandSheet>
+  <div class="action-sheet flex-column">
+    <ng-container *ngIf="changeAttribute?.data.wealth >= changeAttribute?.data.cost; else noMoney">
+      <div>Purchase new land plot for citizen? (cost: {{changeAttribute.data.cost}})</div>
+      <button 
+        (click)="buyLocalLand(changeAttribute.data.cost, changeAttribute.dbPath)">
+        Confirm
+      </button>
+    </ng-container>
+
+    <ng-template #noMoney>
+      Not enough resources to purchase land
+    </ng-template>
   </div>
 </ng-template>

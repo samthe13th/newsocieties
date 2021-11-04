@@ -13,14 +13,14 @@
 <ng-template #sceneriosPreview>
   <div class="button-row">
     <button (click)="cancelUpdate('scenerios')">Cancel</button>
-    <button (click)="updateVoteData('scenerios')">Update</button>
+    <button (click)="updateCsvData('scenerios')">Update</button>
   </div>
-  <table *ngIf="voteData?.scenerios" style="width: 100%">
+  <table *ngIf="csvData?.scenerios" style="width: 100%">
     <tr>
       <th>Pre-vote</th>
       <th>Post-vote</th>
     </tr>
-    <tr *ngFor="let scenerio of voteData.scenerios">
+    <tr *ngFor="let scenerio of csvData.scenerios">
       <td>
         <div><strong>{{ scenerio.title }}</strong></div>
         <div>{{ scenerio.prompt }}</div>
@@ -52,10 +52,10 @@
 <ng-template #principlesPreview>
   <div class="button-row">
     <button (click)="cancelUpdate('principles')">Cancel</button>
-    <button (click)="updateVoteData('principles')">Update</button>
+    <button (click)="updateCsvData('principles')">Update</button>
   </div>
-  <div *ngIf="voteData?.principles" class="flex-column">
-    <ng-container *ngFor="let principle of voteData.principles">
+  <div *ngIf="csvData?.principles" class="flex-column">
+    <ng-container *ngFor="let principle of csvData.principles">
       <strong>{{principle.title}}</strong>
       <div>{{principle.prompt}}</div>
       <ul style="margin-top: 0">
@@ -70,14 +70,14 @@
 <ng-template #resolutionsPreview>
   <div class="button-row">
     <button (click)="cancelUpdate('resolutions')">Cancel</button>
-    <button (click)="updateVoteData('resolutions')">Update</button>
+    <button (click)="updateCsvData('resolutions')">Update</button>
   </div>
-  <table *ngIf="voteData?.resolutions" style="width: 100%">
+  <table *ngIf="csvData?.resolutions" style="width: 100%">
     <tr>
       <th>Pre-vote</th>
       <th>Post-vote</th>
     </tr>
-    <tr *ngFor="let resolution of voteData.resolutions">
+    <tr *ngFor="let resolution of csvData.resolutions">
 
       <td>
         <strong>{{ resolution.title }}</strong>
@@ -107,6 +107,25 @@
   </table>
 </ng-template>
 
+<ng-template #eventsPreview>
+  <div class="button-row">
+    <button (click)="cancelUpdate('events')">Cancel</button>
+    <button (click)="updateCsvData('events')">Update</button>
+  </div>
+  <div *ngIf="csvData?.events" class="flex-column">
+    <ng-container *ngFor="let event of csvData.events">
+      <strong>{{event.title}} (level: {{event.level}})</strong>
+      <div [innerHtml]="event.content"></div>
+      <ng-container *ngIf="event.variables?.length > 0">
+        <strong>Variables</strong>
+        <div class="flex-row" style="align-items: center" *ngFor="let variable of event.variables">
+          <strong>{{variable.id}}: </strong> {{variable.value}}
+        </div>
+      </ng-container>
+    </ng-container>
+  </div>
+</ng-template>
+
 <ng-template #show>Show</ng-template>
 <ng-template #summary>Summary</ng-template>
 
@@ -117,18 +136,24 @@
 
   <div class="vote-data">
     Principles
-    <input [(ngModel)]="voteFileValues.principles" (change)="uploadPrinciplesData($event)" type="file" #fileUpload/>
+    <input [(ngModel)]="csvFileData.principles" (change)="uploadPrinciplesData($event)" type="file" #fileUpload/>
   </div>
 
   <div class="vote-data">
     Resolutions
-    <input [(ngModel)]="voteFileValues.resolutions" (change)="uploadResolutionsData($event)" type="file" #fileUpload/>
+    <input [(ngModel)]="csvFileData.resolutions" (change)="uploadResolutionsData($event)" type="file" #fileUpload/>
   </div>
 
   <div class="vote-data">
     Scenerios
-    <input [(ngModel)]="voteFileValues.scenerios" (change)="uploadSceneriosData($event)" type="file" #fileUpload/>
+    <input [(ngModel)]="csvFileData.scenerios" (change)="uploadSceneriosData($event)" type="file" #fileUpload/>
   </div>
+
+  <div class="vote-data">
+    Events
+    <input [(ngModel)]="csvFileData.events" (change)="uploadEventsData($event)" type="file" #fileUpload/>
+  </div>
+
 
 </ng-template>
 
