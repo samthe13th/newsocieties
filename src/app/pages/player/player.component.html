@@ -23,7 +23,7 @@
 
   <ng-template #divisionBody>
     <ng-container *ngIf="focus === 'harvest'">
-      <div class="player-hints"></div>
+      <app-flash-news [showKey]="showKey" [divisionKey]="divisionKey"></app-flash-news>
       <div class="flex-row">
         <div class="player-folder__body-harvest">
           <app-land-grid 

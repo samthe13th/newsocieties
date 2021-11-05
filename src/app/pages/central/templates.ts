@@ -1,4 +1,10 @@
 export const DIVISION_TEMPLATE = {
+  events: [
+    {
+      header: 'MESSAGE BOARD',
+      value: 'Greetings division, any pressing information about your society will show up here, stay tuned for news!'
+    }
+  ],
   advancements: {
     safety: {
       communal: 0,

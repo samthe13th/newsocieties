@@ -24,6 +24,7 @@ import { PlayerTurnComponent } from './player-turn/player-turn.component';
 import { NotificationFeedComponent } from './notification-feed/notification-feed.component';
 import { ExportsComponent } from './exports/exports.component';
 import { NgMultiSelectDropDownModule } from 'ng-multiselect-dropdown';
+import { FlashNewsComponent } from './flash-news/flash-news.component';
 
 
 const components = [
@@ -33,6 +34,7 @@ const components = [
   ChatComponent,
   DialogComponent,
   ExportsComponent,
+  FlashNewsComponent,
   FundraisingComponent,
   LandGridComponent,
   NotificationFeedComponent,

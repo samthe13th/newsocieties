@@ -95,6 +95,22 @@ select {
   margin-left: 20px;
 }
 
+.app-flash-news {
+  display: flex; 
+  flex-direction: column;
+  width: 100%;
+  padding: 15px;
+  background: #154f6c;
+  color: white;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  height: 150px;
+  font-weight: 200;
+  font-size: 18px;
+}
+
 .app-notification-feed {
   display: flex;
   flex-direction: column;
