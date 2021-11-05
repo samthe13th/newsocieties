@@ -511,6 +511,7 @@ export class HostComponent implements OnInit {
     if (type === 'resolutions') {
       this.db.list(`${divisionPath}/resolutions`)
         .valueChanges()
+        .pipe(take(1))
         .subscribe((resolutions) => {
           this.voteType = 'resolution';
           this.voteDropdown = differenceBy(this.globalResolutions, resolutions, 'title');
@@ -519,6 +520,7 @@ export class HostComponent implements OnInit {
     } else if (type === 'principles') {
       this.db.list(`${divisionPath}/principles`)
         .valueChanges()
+        .pipe(take(1))
         .subscribe((principles) => {
           console.log('principles: ', principles)
           this.voteType = 'principle';
@@ -528,6 +530,7 @@ export class HostComponent implements OnInit {
     } else if (type === 'scenerios') {
       this.db.list(`${divisionPath}/scenerios`)
         .valueChanges()
+        .pipe(take(1))
         .subscribe((scenerios) => {
           this.voteType = 'scenerio';
           this.voteDropdown = differenceBy(this.globalScenerios, scenerios, 'title');

@@ -4,7 +4,7 @@
   [tabs]="tabs">
 </app-tabs>
 
-<div *ngIf="showModal === true" class="modal-wrap">
+<div *ngIf="showModal === true" class="modal-wrap small">
   <div class="modal">
     <ng-container *ngTemplateOutlet="modalContent"></ng-container>
   </div>
@@ -115,13 +115,12 @@
   <div *ngIf="csvData?.events" class="flex-column">
     <ng-container *ngFor="let event of csvData.events">
       <strong>{{event.title}} (level: {{event.level}})</strong>
-      <div [innerHtml]="event.content"></div>
-      <ng-container *ngIf="event.variables?.length > 0">
-        <strong>Variables</strong>
-        <div class="flex-row" style="align-items: center" *ngFor="let variable of event.variables">
-          <strong>{{variable.id}}: </strong> {{variable.value}}
-        </div>
-      </ng-container>
+      <div>
+        <ng-container *ngFor="let block of event?.content; let i = index">
+          <span [innerHtml]="block"></span>
+          <strong>{{ event.variables[i]?.value }}</strong>
+        </ng-container>
+      </div>
     </ng-container>
   </div>
 </ng-template>
@@ -131,7 +130,9 @@
 
 <ng-template #showBody>
   <button (click)="wipeShows()">Wipe Shows</button>
-  <button (click)="newShow()">New Show</button>
+  <button (click)="newShow('main')">New Show</button>
+  <button (click)="newShow('test')">New Test Show</button>
+  
   localhost:4200/{{showKey}}
 
   <div class="vote-data">
@@ -187,15 +188,14 @@
           <div class="central__division-chat-buttons">
             <div class="button-row">
               <button 
-                (click)="sendEvent(div)"
-                class="central__division-chat-button icon">
-                E
+                (click)="getEvent(div)">
+                EVENT
               </button>
-              <button
+              <!-- <button
                 (click)="sendBroacastNotification(div)"
                 class="central__division-chat-button icon">
                 B
-              </button>
+              </button> -->
             </div>
             <button 
               class="central__division-chat-button primary"
@@ -211,3 +211,36 @@
     </div>
   </ng-template>
 </ng-container>
+
+<ng-template #eventTemplate>
+  <button (click)="showModal = false">Close</button>
+  <h1>New Event</h1>
+  <select
+    #divisionOption
+    *ngIf="divisionDropdownOptions"
+    (change)="onDivisionOptionChange('event')"
+    [(ngModel)]="divisionDropdownValue"
+    name="event-options"
+    id="event-options">
+    <option
+      *ngFor="let option of divisionDropdownOptions"
+      [ngValue]="option?.title">
+      <strong>{{option?.level}}:</strong> {{option?.title}} 
+    </option>
+  </select>
+
+  <ng-container *ngIf="divisionDropdownSelect">
+    <div>
+      <ng-container *ngFor="let block of divisionDropdownSelect?.content; let i = index">
+        <span [innerHtml]="block"></span>
+        <input
+          style="width: 30px"
+          *ngIf="divisionEventVariables[i]?.value"
+          type="number"
+          [(ngModel)]="divisionEventVariables[i].value"/>
+      </ng-container>
+    </div>
+    <br/>
+    <button (click)="setOption('event')">Send Event</button>
+  </ng-container>
+</ng-template>

@@ -1,7 +1,7 @@
 import { Component, OnInit, AfterViewInit, ViewChild, ViewChildren, TemplateRef, ContentChildren, ElementRef, QueryList } from '@angular/core';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { take } from 'rxjs/operators';
-import { trim, range, capitalize, toNumber } from 'lodash';
+import { trim, range, capitalize, toNumber, find, differenceWith, sortBy } from 'lodash';
 import * as Papa from 'papaparse';
 import { DIVISION_TEMPLATE, SHOW_TEMPLATE } from './templates';
 
@@ -29,6 +29,7 @@ export class CentralComponent implements OnInit, AfterViewInit {
   @ViewChild('principlesPreview') principlesPreview: TemplateRef<any>;
   @ViewChild('sceneriosPreview') sceneriosPreview: TemplateRef<any>;
   @ViewChild('eventsPreview') eventsPreview: TemplateRef<any>;
+  @ViewChild('eventTemplate') eventTemplate: TemplateRef<any>;
 
   @ViewChildren('division') bodyTemplates: QueryList<TemplateRef<any>>;
   @ViewChildren('tab') tabTemplates: QueryList<TemplateRef<any>>;
@@ -54,16 +55,28 @@ export class CentralComponent implements OnInit, AfterViewInit {
     users: undefined,
   }
   showModal = false; 
+  globalEvents;
+
+  selectedDivision;
+  divisionDropdownOptions;
+  divisionDropdownValue;
+  divisionDropdownSelect;
+  divisionEventVariables;
 
   constructor(private db: AngularFireDatabase) {}
 
   ngOnInit() {
-    this.db.list('shows', ref => ref.limitToLast(1))
-      .snapshotChanges()
-      .pipe(take(1))
-      .subscribe(([snapshot]) => {
-        this.showKey = snapshot.key
-      })
+    this.showKey = 'main';
+    this.db.object(`events`).valueChanges().pipe(take(1)).subscribe((events) => {
+      this.globalEvents = events;
+      console.log({events})
+    })
+    // this.db.list('shows', ref => ref.limitToLast(1))
+    //   .snapshotChanges()
+    //   .pipe(take(1))
+    //   .subscribe(([snapshot]) => {
+    //     this.showKey = snapshot.key
+    //   })
   }
 
   ngAfterViewInit() {
@@ -144,11 +157,16 @@ export class CentralComponent implements OnInit, AfterViewInit {
       const variableNames = _event.match(selectVariableNames);
       const variables = [];
 
-      let content = `<div>${_event}</div>`;
+      let content = [_event];
+      //content.push(_event);
 
       if (variableNames !== null) {
         const values = _variables.split('|') ?? [];
         variableNames.forEach((name, i) => {
+          const [ tail, ...head ] = content.reverse();
+          const newContent = tail.split(`{${name}}`);
+          content = [...head, ...newContent]
+          console.log('content: ', content)
           variables.push({
             id: name,
             value: toNumber(values[i])
@@ -248,11 +266,16 @@ export class CentralComponent implements OnInit, AfterViewInit {
     }
   }
 
-  newShow() {
+
+
+  newShow(name) {
     const divisions = this.generateDivisions();
-    this.db.list('shows')
-      .push({ divisions, ...SHOW_TEMPLATE })
-      .then((res) => { this.buildShow(res.key) })
+    this.db.object(`shows/${name}`).set({ divisions, ...SHOW_TEMPLATE }).then((res) => {
+      this.buildShow(name)
+    })
+    // this.db.list('shows')
+    //   .push({ divisions, ...SHOW_TEMPLATE })
+    //   .then((res) => { this.buildShow(res.key) })
   }
 
   wipeShows() {
@@ -269,14 +292,49 @@ export class CentralComponent implements OnInit, AfterViewInit {
       })
   }
 
-  sendEvent(division) {
-    this.db.list(`shows/${this.showKey}/feeds/${division}`)
-      .push({ from: 'central', type: 'event', value: 'This is an event!' })
+  onDivisionOptionChange(type) {
+    this.divisionDropdownSelect = find(this.divisionDropdownOptions, (div) => div.title === this.divisionDropdownValue);
+    if (type === 'event') {
+      this.divisionEventVariables = this.divisionDropdownSelect?.variables;
+    }
+  }
+
+  getEvent(division) {
+    this.showModal = true;
+    this.selectedDivision = division;
+    this.db.list(`shows/${this.showKey}/divisions/${division}/events`).valueChanges().pipe(take(1)).subscribe((events) => {
+      console.log('build dat list: ', this.globalEvents, events)
+      this.divisionDropdownOptions = differenceWith(
+        this.globalEvents,
+        events,
+        (g, e) => g.title === e.header
+      );
+      this.divisionDropdownOptions = sortBy(this.divisionDropdownOptions, ['level']);
+      console.log('options: ', this.divisionDropdownOptions)
+    })
+    this.modalContent = this.eventTemplate;
+  }
+
+  setOption(type) {
+    this.sendEvent(this.selectedDivision, this.divisionDropdownSelect);
+    this.showModal = false;
+  }
+
+  sendEvent(division, event) {
+    console.log('event: ', division, event)
+    const value = event.content.map((block, index) => this.divisionEventVariables?.[index]?.value
+      ? `${block} <strong>${this.divisionEventVariables[index]?.value}</strong>`
+      : block
+    ).join('');
+    const news = { from: 'central', header: event?.title, type: 'event', value };
+    this.db.list(`shows/${this.showKey}/feeds/${division}`).push(news);
+    this.db.list(`shows/${this.showKey}/divisions/${division}/events`).push(news);
   }
 
   sendBroacastNotification(division) {
-    this.db.list(`shows/${this.showKey}/feeds/${division}`)
-      .push({ from: 'central', type: 'broadcast' })
+    const news = { from: 'central', type: 'broadcast' };
+    this.db.list(`shows/${this.showKey}/feeds/${division}`).push(news);
+    this.db.list(`shows/${this.showKey}/divisions/${division}/events`).push(news);
   }
 
   buildShow(key) {
