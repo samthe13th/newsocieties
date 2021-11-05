@@ -1,6 +1,7 @@
-import { Component, OnInit, AfterViewInit, ViewChild, ViewChildren, TemplateRef, ContentChildren, ElementRef, QueryList } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild, ViewChildren, TemplateRef, ElementRef, QueryList } from '@angular/core';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { take } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 import { trim, keyBy, range, capitalize, toNumber, find, differenceWith, sortBy } from 'lodash';
 import * as Papa from 'papaparse';
 import { DIVISION_TEMPLATE, SHOW_TEMPLATE } from './templates';
@@ -31,14 +32,16 @@ export class CentralComponent implements OnInit, AfterViewInit {
   @ViewChild('sceneriosPreview') sceneriosPreview: TemplateRef<any>;
   @ViewChild('eventsPreview') eventsPreview: TemplateRef<any>;
   @ViewChild('usersPreview') usersPreview: TemplateRef<any>;
+  @ViewChild('timelinePreview') timelinePreview: TemplateRef<any>;
 
   @ViewChild('eventTemplate') eventTemplate: TemplateRef<any>;
 
   @ViewChildren('division') bodyTemplates: QueryList<TemplateRef<any>>;
   @ViewChildren('tab') tabTemplates: QueryList<TemplateRef<any>>;
 
-  modalContent: TemplateRef<any>;
+  $timeline: Observable<any>;
 
+  modalContent: TemplateRef<any>;
   showKey: string;
   divisions = DIVISIONS;
   chatInput = "";
@@ -49,6 +52,7 @@ export class CentralComponent implements OnInit, AfterViewInit {
     scenerios: '',
     events: '', 
     users: '',
+    timeline: '',
   }
   csvData = {
     resolutions: undefined,
@@ -56,6 +60,7 @@ export class CentralComponent implements OnInit, AfterViewInit {
     scenerios: undefined,
     events: undefined, 
     users: undefined,
+    timeline: undefined,
   }
   showModal = false; 
   globalEvents;
@@ -74,6 +79,7 @@ export class CentralComponent implements OnInit, AfterViewInit {
       this.globalEvents = events;
       console.log({events})
     })
+    this.$timeline = this.db.list('timeline').valueChanges();
     // this.db.list('shows', ref => ref.limitToLast(1))
     //   .snapshotChanges()
     //   .pipe(take(1))
@@ -117,6 +123,10 @@ export class CentralComponent implements OnInit, AfterViewInit {
     this.parseCsvData(e, 'users');
   }
 
+  uploadTimelineData(e) {
+    this.parseCsvData(e, 'timeline');
+  }
+
   parsePrinciplesData(_data) {
     const data = _data.map(([title, principle, ...options]) => {
       console.log({options})
@@ -158,13 +168,25 @@ export class CentralComponent implements OnInit, AfterViewInit {
     return data;
   }
 
+  parseTimelineData(_data) {
+    const data = _data.map(([time, action, action2, notes]) => {
+      return {
+        time, 
+        action, 
+        action2,
+        notes
+      }
+    });
+    data.shift();
+    return data;
+  }
+
   parseUsersData(_data) {
     const data = _data.map(([code, email, phone]) => {
       return {
         code, 
         email, 
-        phone,
-        division: null
+        phone
       }
     })
     data.shift();
@@ -247,6 +269,8 @@ export class CentralComponent implements OnInit, AfterViewInit {
           data = this.parseEventsData(results.data);
         } else if (type === 'users') {
           data = this.parseUsersData(results.data);
+        } else if (type === 'timeline') {
+          data = this.parseTimelineData(results.data);
         }
         console.log("parsed data: ", data)
         this.csvData[type] = data;
@@ -277,20 +301,18 @@ export class CentralComponent implements OnInit, AfterViewInit {
   previewCsvData(type) {
     if (type === 'resolutions') {
       this.modalContent = this.resolutionsPreview;
-      this.showModal = true;
     } else if (type === 'principles') {
       this.modalContent = this.principlesPreview;
-      this.showModal = true;
     } else if (type === 'scenerios') {
       this.modalContent = this.sceneriosPreview;
-      this.showModal = true;
     } else if (type === 'events') {
       this.modalContent = this.eventsPreview;
-      this.showModal = true;
     } else if (type === 'users') {
       this.modalContent = this.usersPreview;
-      this.showModal = true;
+    } else if (type === 'timeline') {
+      this.modalContent = this.timelinePreview;
     }
+    this.showModal = true;
   }
 
 

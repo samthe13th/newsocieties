@@ -9,6 +9,24 @@
   flex: 3;
 }
 
+.timeline {
+  display: flex;
+  overflow: auto;
+  background: white;
+  padding: 10px;
+  margin-left: 10px;
+  height: 100%;
+  flex-direction: column;
+}
+
+.timeline-row {
+  display: flex;
+
+  .cell {
+    padding: 5px;
+  }
+}
+
 .central__division-chat {
   flex: 1;
   min-width: 400px;

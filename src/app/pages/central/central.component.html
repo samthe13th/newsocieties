@@ -107,6 +107,21 @@
   </table>
 </ng-template>
 
+<ng-template #timelinePreview>
+  <div class="button-row">
+    <button (click)="cancelUpdate('timeline')">Cancel</button>
+    <button (click)="updateCsvData('timeline')">Update</button>
+  </div>
+  <div *ngIf="csvData?.timeline" class="flex-column">
+    <div class="flex-column" *ngFor="let row of csvData?.timeline">
+      <div class="flex-row">
+        <div>{{ row.time }}</div>
+        <div>{{ row.action }}</div>
+      </div>
+    </div>
+  </div>
+</ng-template>
+
 <ng-template #usersPreview>
   <div class="button-row">
     <button (click)="cancelUpdate('users')">Cancel</button>
@@ -141,39 +156,51 @@
 <ng-template #summary>Summary</ng-template>
 
 <ng-template #showBody>
-  <button (click)="wipeShows()">Wipe Shows</button>
-  <button (click)="newShow('main')">New Show</button>
-  <button (click)="newShow('test')">New Test Show</button>
-  
-  localhost:4200/{{showKey}}
-
-  <div class="vote-data">
-    Principles
-    <input [(ngModel)]="csvFileData.principles" (change)="uploadPrinciplesData($event)" type="file" #fileUpload/>
+  <div class="flex-row" style="overflow: hidden">
+    <div class="flex-column">
+      <button (click)="wipeShows()">Wipe Shows</button>
+      <button (click)="newShow('main')">New Show</button>
+      <button (click)="newShow('test')">New Test Show</button>
+      
+      localhost:4200/{{showKey}}
+    
+      <div class="vote-data">
+        Principles
+        <input [(ngModel)]="csvFileData.principles" (change)="uploadPrinciplesData($event)" type="file" #fileUpload/>
+      </div>
+    
+      <div class="vote-data">
+        Resolutions
+        <input [(ngModel)]="csvFileData.resolutions" (change)="uploadResolutionsData($event)" type="file" #fileUpload/>
+      </div>
+    
+      <div class="vote-data">
+        Scenerios
+        <input [(ngModel)]="csvFileData.scenerios" (change)="uploadSceneriosData($event)" type="file" #fileUpload/>
+      </div>
+    
+      <div class="vote-data">
+        Events
+        <input [(ngModel)]="csvFileData.events" (change)="uploadEventsData($event)" type="file" #fileUpload/>
+      </div>
+    
+      <div class="vote-data">
+        Users
+        <input [(ngModel)]="csvFileData.users" (change)="uploadUsersData($event)" type="file" #fileUpload/>
+      </div>
+    
+      <div class="vote-data">
+        Timeline
+        <input [(ngModel)]="csvFileData.timeline" (change)="uploadTimelineData($event)" type="file" #fileUpload/>
+      </div>
+    </div>
+    <div class="timeline">
+      <div class="timeline-row" *ngFor="let row of ($timeline | async)">
+        <div class="cell">{{ row.time }}</div>
+        <div class="cell">{{ row.action }}</div>
+      </div>
+    </div>
   </div>
-
-  <div class="vote-data">
-    Resolutions
-    <input [(ngModel)]="csvFileData.resolutions" (change)="uploadResolutionsData($event)" type="file" #fileUpload/>
-  </div>
-
-  <div class="vote-data">
-    Scenerios
-    <input [(ngModel)]="csvFileData.scenerios" (change)="uploadSceneriosData($event)" type="file" #fileUpload/>
-  </div>
-
-  <div class="vote-data">
-    Events
-    <input [(ngModel)]="csvFileData.events" (change)="uploadEventsData($event)" type="file" #fileUpload/>
-  </div>
-
-  <div class="vote-data">
-    Users
-    <input [(ngModel)]="csvFileData.users" (change)="uploadUsersData($event)" type="file" #fileUpload/>
-  </div>
-
-
-
 </ng-template>
 
 <ng-template #summaryBody>
