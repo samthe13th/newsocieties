@@ -1,16 +1,123 @@
 <ng-container *ngIf="($division | async) as division">
+<!-- 
   <div class="player-turn">
     <app-player-turn 
       [divisionPath]="divisionPath">
     </app-player-turn>
-  </div>
-  <app-tabs
+  </div> -->
+
+  <ng-container *ngIf="focus === 'harvest'">
+    <app-flash-news [showKey]="showKey" [divisionKey]="divisionKey"></app-flash-news>
+    <div class="flex-row">
+      <div class="player-folder__body-harvest">
+        <app-land-grid 
+          #landGrid
+          [markCards]="false"
+          [turn]="division?.turn"
+          [updatePath]="landTilesPath"
+          [showId]="showKey"
+          [player]="$player | async"
+          [divisionKey]="divisionKey"
+          (gatherResource)="onGather($event)"
+          (select)="onSelect($event)"
+        ></app-land-grid>
+      </div>
+      <div class="player-folder__body-citizens space-between">
+        <div class="harvest-details">
+          <div class="flex-column stretch-h">
+            <div class="large">Reserve:
+              <span class="harvest-details__number">{{division?.reserve}}</span>
+            </div>
+            <div class="flex-column stretch-h">
+              <div>Thresholds</div>
+              <div>
+                <span class="harvest-details__number">
+                  {{division?.reserveThresholds.low}}
+                  | {{division?.reserveThresholds.mid}}
+                  | {{division?.reserveThresholds.high}}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="flex-column stretch-h">
+            <div class="large">Harvested: <span class="harvest-details__number">{{division?.harvested}}</span></div>
+            <div class="flex-column stretch-h">
+              <div>Capacity</div>
+              <div>
+                <span class="harvest-details__number">
+                  {{division?.capacity}}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <app-player-deck
+          [id]="id" 
+          [myTurn]="id == ($turn | async)?.id"
+          [showKey]="showKey"
+          [division]="division">
+        </app-player-deck>
+
+        <div class="citizen-list">
+          <div 
+            class="citizen-summary flex-row space-between"
+            *ngFor="let citizen of ($citizens | async)">
+            <div class="flex-row flex-center-v">
+              <span [class.player-turn-indicator]="citizen.id == ($turn | async)?.id">{{citizen.name}}</span>
+              <span>{{calculateWealth(citizen?.resources)}}</span>
+              <!-- <app-player-turn 
+                [showLabel]="false"
+                [divisionPath]="divisionPath">
+              </app-player-turn> -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+  
+  <ng-container *ngIf="focus === 'resolutions' || focus === 'principles'">
+    <div class="flex-row">
+      <div class="relative-position">
+        <div class="tab-background voting blur" >
+          <img src="assets/voting-ph.jpeg"/>
+        </div>
+  
+        <div class="tab-foreground player-vote">
+          <div *ngIf="hasVoted && vote?.state === 'voting'">Thanks for voting! Waiting for polls to close...</div>
+          <ng-container *ngIf="!(hasVoted && vote?.state === 'voting')">
+            <app-vote
+              (selectionChange)="onSelectionChange($event)"
+              [showVotes]="vote?.state === 'review'"
+              [allowSelection]="vote?.state === 'voting'"
+              [showId]="showKey"
+              role="citizen"
+              hideOption="last"
+              [divisionId]="division.code"
+            ></app-vote>
+            <button *ngIf="!hasVoted && vote?.state === 'voting'" (click)="castVote()">Vote</button>
+          </ng-container>
+        </div>
+      </div>
+      <div>
+        <app-fundraising
+          *ngIf="vote?.state === 'review'"
+          [showKey]="showKey"
+          [divisionKey]="divisionKey"
+          [playerId]="id">
+        </app-fundraising>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- <app-tabs
     selectedClass="player-selected-tab"
     [tabs]="[
       { id: 'division', tabTemplate: divisionTab, bodyTemplate: divisionBody },
       { id: 'global', tabTemplate: global, bodyTemplate: globalBody }
     ]"
-  ></app-tabs>
+  ></app-tabs> -->
 
   <ng-template #divisionTab>
     <div class="player-folder__tab-division">
@@ -20,112 +127,6 @@
   </ng-template>
 
   <ng-template #global>Global</ng-template>
-
-  <ng-template #divisionBody>
-    <ng-container *ngIf="focus === 'harvest'">
-      <app-flash-news [showKey]="showKey" [divisionKey]="divisionKey"></app-flash-news>
-      <div class="flex-row">
-        <div class="player-folder__body-harvest">
-          <app-land-grid 
-            #landGrid
-            [markCards]="false"
-            [turn]="division?.turn"
-            [updatePath]="landTilesPath"
-            [showId]="showKey"
-            [player]="$player | async"
-            [divisionKey]="divisionKey"
-            (gatherResource)="onGather($event)"
-            (select)="onSelect($event)"
-          ></app-land-grid>
-        </div>
-        <div class="player-folder__body-citizens space-between">
-          <div class="harvest-details">
-            <div class="flex-column stretch-h">
-              <div class="large">Reserve:
-                <span class="harvest-details__number">{{division?.reserve}}</span>
-              </div>
-              <div class="flex-column stretch-h">
-                <div>Thresholds</div>
-                <div>
-                  <span class="harvest-details__number">
-                    {{division?.reserveThresholds.low}}
-                    | {{division?.reserveThresholds.mid}}
-                    | {{division?.reserveThresholds.high}}
-                  </span>
-                </div>
-              </div>
-            </div>
-            <div class="flex-column stretch-h">
-              <div class="large">Harvested: <span class="harvest-details__number">{{division?.harvested}}</span></div>
-              <div class="flex-column stretch-h">
-                <div>Capacity</div>
-                <div>
-                  <span class="harvest-details__number">
-                    {{division?.capacity}}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <app-player-deck
-            [id]="id" 
-            [myTurn]="id == ($turn | async)?.id"
-            [showKey]="showKey"
-            [division]="division">
-          </app-player-deck>
-
-          <div class="citizen-list">
-            <div 
-              class="citizen-summary flex-row space-between"
-              *ngFor="let citizen of ($citizens | async)">
-              <div class="flex-row flex-center-v">
-                <span [class.player-turn-indicator]="citizen.id == ($turn | async)?.id">{{citizen.name}}</span>
-                <span>{{calculateWealth(citizen?.resources)}}</span>
-                <!-- <app-player-turn 
-                  [showLabel]="false"
-                  [divisionPath]="divisionPath">
-                </app-player-turn> -->
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </ng-container>
-    <ng-container *ngIf="focus === 'resolutions' || focus === 'principles'">
-      <div class="flex-row">
-        <div class="relative-position">
-          <div class="tab-background voting blur" >
-            <img src="assets/voting-ph.jpeg"/>
-          </div>
-    
-          <div class="tab-foreground player-vote">
-            <div *ngIf="hasVoted && vote?.state === 'voting'">Thanks for voting! Waiting for polls to close...</div>
-            <ng-container *ngIf="!(hasVoted && vote?.state === 'voting')">
-              <app-vote
-                (selectionChange)="onSelectionChange($event)"
-                [showVotes]="vote?.state === 'review'"
-                [allowSelection]="vote?.state === 'voting'"
-                [showId]="showKey"
-                role="citizen"
-                hideOption="last"
-                [divisionId]="division.code"
-              ></app-vote>
-              <button *ngIf="!hasVoted && vote?.state === 'voting'" (click)="castVote()">Vote</button>
-            </ng-container>
-          </div>
-        </div>
-        <div>
-          <app-fundraising
-            *ngIf="vote?.state === 'review'"
-            [showKey]="showKey"
-            [divisionKey]="divisionKey"
-            [playerId]="id">
-          </app-fundraising>
-        </div>
-      </div>
-    </ng-container>
-  </ng-template>
 
   <ng-template #globalBody>
     <app-society-grid></app-society-grid>

@@ -201,8 +201,15 @@ select {
 
 .app-player {
   @extend %app-page;
-  padding-top: 5px;
-  background: lightgrey;
+  display: flex;
+  color: white;
+  flex-direction: column;
+  box-sizing: border-box;
+  background: black;
+  width: 100%;
+  padding: 10px;
+  max-width: 800px;
+  height: 100vh;
 }
 
 .number-picker {

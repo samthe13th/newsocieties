@@ -1,7 +1,7 @@
 import { Component, OnInit, AfterViewInit, ViewChild, ViewChildren, TemplateRef, ContentChildren, ElementRef, QueryList } from '@angular/core';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { take } from 'rxjs/operators';
-import { trim, range, capitalize, toNumber, find, differenceWith, sortBy } from 'lodash';
+import { trim, keyBy, range, capitalize, toNumber, find, differenceWith, sortBy } from 'lodash';
 import * as Papa from 'papaparse';
 import { DIVISION_TEMPLATE, SHOW_TEMPLATE } from './templates';
 
@@ -25,10 +25,13 @@ export class CentralComponent implements OnInit, AfterViewInit {
   @ViewChild('showBody') showBody: TemplateRef<any>;
   @ViewChild('summaryBody') summaryBody: TemplateRef<any>;
   @ViewChild('fileUpload') fileUpload: ElementRef;
+
   @ViewChild('resolutionsPreview') resolutionsPreview: TemplateRef<any>;
   @ViewChild('principlesPreview') principlesPreview: TemplateRef<any>;
   @ViewChild('sceneriosPreview') sceneriosPreview: TemplateRef<any>;
   @ViewChild('eventsPreview') eventsPreview: TemplateRef<any>;
+  @ViewChild('usersPreview') usersPreview: TemplateRef<any>;
+
   @ViewChild('eventTemplate') eventTemplate: TemplateRef<any>;
 
   @ViewChildren('division') bodyTemplates: QueryList<TemplateRef<any>>;
@@ -107,7 +110,11 @@ export class CentralComponent implements OnInit, AfterViewInit {
   }
 
   uploadEventsData(e) {
-    this.parseCsvData(e, 'events')
+    this.parseCsvData(e, 'events');
+  }
+
+  uploadUsersData(e) {
+    this.parseCsvData(e, 'users');
   }
 
   parsePrinciplesData(_data) {
@@ -151,6 +158,19 @@ export class CentralComponent implements OnInit, AfterViewInit {
     return data;
   }
 
+  parseUsersData(_data) {
+    const data = _data.map(([code, email, phone]) => {
+      return {
+        code, 
+        email, 
+        phone,
+        division: null
+      }
+    })
+    data.shift();
+    return data;
+  }
+
   parseEventsData(_data) {
     const data = _data.map(([_title, _event, _level, _variables]) => {
       const selectVariableNames = new RegExp(/[^{\}]+(?=})/, 'g');
@@ -158,7 +178,6 @@ export class CentralComponent implements OnInit, AfterViewInit {
       const variables = [];
 
       let content = [_event];
-      //content.push(_event);
 
       if (variableNames !== null) {
         const values = _variables.split('|') ?? [];
@@ -226,10 +245,12 @@ export class CentralComponent implements OnInit, AfterViewInit {
           data = this.parseSceneriosData(results.data);
         } else if (type === 'events') {
           data = this.parseEventsData(results.data);
+        } else if (type === 'users') {
+          data = this.parseUsersData(results.data);
         }
         console.log("parsed data: ", data)
         this.csvData[type] = data;
-        this.previewVoteData(type);
+        this.previewCsvData(type);
       }
     });
   }
@@ -240,9 +261,12 @@ export class CentralComponent implements OnInit, AfterViewInit {
   }
 
   updateCsvData(type) {
+    const data = type === 'users' 
+      ? keyBy(this.csvData.users, 'code')
+      : this.csvData[type];
     console.log('update vote data for ', type)
     this.db.object(type)
-      .set(this.csvData[type])
+      .set(data)
       .then(() => {
         this.showModal = false;
         this.csvFileData[type] = '';
@@ -250,7 +274,7 @@ export class CentralComponent implements OnInit, AfterViewInit {
       })
   }
 
-  previewVoteData(type) {
+  previewCsvData(type) {
     if (type === 'resolutions') {
       this.modalContent = this.resolutionsPreview;
       this.showModal = true;
@@ -262,6 +286,9 @@ export class CentralComponent implements OnInit, AfterViewInit {
       this.showModal = true;
     } else if (type === 'events') {
       this.modalContent = this.eventsPreview;
+      this.showModal = true;
+    } else if (type === 'users') {
+      this.modalContent = this.usersPreview;
       this.showModal = true;
     }
   }
@@ -372,7 +399,6 @@ export class CentralComponent implements OnInit, AfterViewInit {
         }), {})
       }
     }), {})
-    console.log({users});
     return users;
   }
 

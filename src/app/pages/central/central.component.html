@@ -107,6 +107,18 @@
   </table>
 </ng-template>
 
+<ng-template #usersPreview>
+  <div class="button-row">
+    <button (click)="cancelUpdate('users')">Cancel</button>
+    <button (click)="updateCsvData('users')">Update</button>
+  </div>
+  <div *ngIf="csvData?.users" class="flex-column">
+    <ng-container *ngFor="let user of csvData.users">
+      <strong>{{user.code}}</strong>
+    </ng-container>
+  </div>
+</ng-template>
+
 <ng-template #eventsPreview>
   <div class="button-row">
     <button (click)="cancelUpdate('events')">Cancel</button>
@@ -154,6 +166,12 @@
     Events
     <input [(ngModel)]="csvFileData.events" (change)="uploadEventsData($event)" type="file" #fileUpload/>
   </div>
+
+  <div class="vote-data">
+    Users
+    <input [(ngModel)]="csvFileData.users" (change)="uploadUsersData($event)" type="file" #fileUpload/>
+  </div>
+
 
 
 </ng-template>
