@@ -4,8 +4,8 @@
   [tabs]="tabs">
 </app-tabs>
 
-<div *ngIf="showModal === true" class="modal-wrap small">
-  <div class="modal">
+<div *ngIf="showModal === true" class="modal-wrap">
+  <div class="modal small">
     <ng-container *ngTemplateOutlet="modalContent"></ng-container>
   </div>
 </div>
@@ -154,15 +154,12 @@
 
 <ng-template #show>Show</ng-template>
 <ng-template #summary>Summary</ng-template>
+<ng-template #users>Users</ng-template>
 
 <ng-template #showBody>
   <div class="flex-row" style="overflow: hidden">
-    <div class="flex-column">
-      <button (click)="wipeShows()">Wipe Shows</button>
-      <button (click)="newShow('main')">New Show</button>
-      <button (click)="newShow('test')">New Test Show</button>
-      
-      localhost:4200/{{showKey}}
+    <div class="flex-column" style="align-items: flex-start">
+      <button (click)="resetShow()">Reset Show</button>
     
       <div class="vote-data">
         Principles
@@ -185,19 +182,42 @@
       </div>
     
       <div class="vote-data">
-        Users
-        <input [(ngModel)]="csvFileData.users" (change)="uploadUsersData($event)" type="file" #fileUpload/>
-      </div>
-    
-      <div class="vote-data">
         Timeline
         <input [(ngModel)]="csvFileData.timeline" (change)="uploadTimelineData($event)" type="file" #fileUpload/>
       </div>
+
+      <hr/>
+
+      <ng-container *ngIf="$contamination | async as contam">
+        Global Contamination Level (%):
+        <ng-number-picker
+         class="number-picker"
+         (valueChange)="onContaminationChange($event)" 
+         [min]="0"
+         [max]="100"
+         [value]="contam?.current">
+        </ng-number-picker>
+      </ng-container>
     </div>
     <div class="timeline">
-      <div class="timeline-row" *ngFor="let row of ($timeline | async)">
-        <div class="cell">{{ row.time }}</div>
-        <div class="cell">{{ row.action }}</div>
+      <div>
+        <button (click)="startClock()">Start</button>
+        <ng-container *ngIf="$time | async as timer">
+          <ng-container *ngIf="timer.live">
+            <button (click)="stopClock()">Stop</button>
+            <div>START: {{ timer.start | date: 'hh:mm:ss a' }}</div>
+            <div>TIME: {{ timer.clock | date: 'hh:mm:ss a' }}</div>
+            <div>MINUTE: {{ timer.time }} </div>
+          </ng-container>
+          <hr/>
+          <div 
+            class="timeline-row" *ngFor="let row of ($timeline | async); let index = index"
+            [class.time-highlight]="timer.live && timer.time > index"
+            >
+            <div class="cell">{{ row.time }}</div>
+            <div class="cell">{{ row.action }}</div>
+          </div>
+        </ng-container>
       </div>
     </div>
   </div>
@@ -205,6 +225,16 @@
 
 <ng-template #summaryBody>
   <app-society-grid *ngIf="showKey" [showKey]="showKey"></app-society-grid>
+</ng-template>
+
+<ng-template #usersBody>
+  <div class="vote-data">
+    Users
+    <input [(ngModel)]="csvFileData.users" (change)="uploadUsersData($event)" type="file" #fileUpload/>
+    <button (click)="newUserCode()">Add User Code</button>
+  </div>
+  <br/>
+  <app-users-grid *ngIf="showKey" [showKey]="showKey"></app-users-grid>
 </ng-template>
 
 <ng-container *ngFor="let div of divisions">
@@ -256,6 +286,15 @@
     </div>
   </ng-template>
 </ng-container>
+
+<ng-template #addUserCodeTemplate>
+  <button (click)="showModal = false">Close</button>
+  <div class="modal-form-content">
+    <h2>New User Code</h2>
+    <input type="text" #newCode>
+    <button (click)="addUserCode(newCode.value)">Add</button>
+  </div>
+</ng-template>
 
 <ng-template #eventTemplate>
   <button (click)="showModal = false">Close</button>

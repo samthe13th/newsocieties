@@ -30,6 +30,23 @@ table, th, td {
   border:1px solid black;
 }
 
+table {
+  background: white;
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+td, th {
+  border: 1px solid #868686;
+  text-align: left;
+  padding: 8px;
+}
+
+tr:nth-child(even) {
+  background-color: #dddddd;
+}
+
 %app-page {
   display: flex; 
   flex-direction: row;
@@ -444,10 +461,25 @@ select {
     width: 100%;
     align-items: flex-start;
 
+    .modal-form-content {
+      display: flex; 
+      flex-direction: column;
+      width: 100%;
+      align-items: center;
+      > input {
+        margin-bottom: 10px;
+      }
+    }
+
     &.small {
       width: unset;
       height: unset;
       min-width: 300px;
+    }
+
+    &.center {
+      justify-content: center;
+      align-items: center;
     }
   }
 

@@ -17,6 +17,11 @@
   margin-left: 10px;
   height: 100%;
   flex-direction: column;
+  box-sizing: border-box;
+
+  .time-highlight {
+    background: lightgreen;
+  }
 }
 
 .timeline-row {

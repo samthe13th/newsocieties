@@ -1,16 +1,18 @@
 import { Component, OnInit, AfterViewInit, ViewChild, ViewChildren, TemplateRef, ElementRef, QueryList } from '@angular/core';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { take } from 'rxjs/operators';
-import { Observable } from 'rxjs';
+import { timer, combineLatest, Observable } from 'rxjs';
 import { trim, keyBy, range, capitalize, toNumber, find, differenceWith, sortBy } from 'lodash';
 import * as Papa from 'papaparse';
 import { DIVISION_TEMPLATE, SHOW_TEMPLATE } from './templates';
+import { map } from 'rxjs/operators';
+import * as moment from 'moment';
+import { ActivatedRoute } from '@angular/router';
 
 const DIVISIONS = ['N', 'S', 'E', 'W', 'NE', 'SE', 'SW', 'NW'];
 const MAX_HARVEST = 49;
 const CITIZEN_NAMES = ['Sam', 'Mark', 'Mandy', 'Sarah', 'Kimmy', 'Zed'];
 const ADVANCEMENTS = ["safety", "health", "arts", "knowledge", "infrastructure"];
-
 
 @Component({
   selector: 'app-central',
@@ -23,8 +25,11 @@ const ADVANCEMENTS = ["safety", "health", "arts", "knowledge", "infrastructure"]
 export class CentralComponent implements OnInit, AfterViewInit {
   @ViewChild('show') showTab: TemplateRef<any>;
   @ViewChild('summary') summaryTab: TemplateRef<any>;
+  @ViewChild('users') usersTab: TemplateRef<any>;
   @ViewChild('showBody') showBody: TemplateRef<any>;
   @ViewChild('summaryBody') summaryBody: TemplateRef<any>;
+  @ViewChild('usersBody') usersBody: TemplateRef<any>;
+
   @ViewChild('fileUpload') fileUpload: ElementRef;
 
   @ViewChild('resolutionsPreview') resolutionsPreview: TemplateRef<any>;
@@ -33,13 +38,15 @@ export class CentralComponent implements OnInit, AfterViewInit {
   @ViewChild('eventsPreview') eventsPreview: TemplateRef<any>;
   @ViewChild('usersPreview') usersPreview: TemplateRef<any>;
   @ViewChild('timelinePreview') timelinePreview: TemplateRef<any>;
-
   @ViewChild('eventTemplate') eventTemplate: TemplateRef<any>;
+  @ViewChild('addUserCodeTemplate') addUserCodeTemplate: TemplateRef<any>;
 
   @ViewChildren('division') bodyTemplates: QueryList<TemplateRef<any>>;
   @ViewChildren('tab') tabTemplates: QueryList<TemplateRef<any>>;
 
   $timeline: Observable<any>;
+  $time: Observable<any>;
+  $contamination: Observable<any>;
 
   modalContent: TemplateRef<any>;
   showKey: string;
@@ -71,21 +78,33 @@ export class CentralComponent implements OnInit, AfterViewInit {
   divisionDropdownSelect;
   divisionEventVariables;
 
-  constructor(private db: AngularFireDatabase) {}
+  constructor(
+    private db: AngularFireDatabase,
+    private route: ActivatedRoute,
+  ) {}
 
   ngOnInit() {
-    this.showKey = 'main';
-    this.db.object(`events`).valueChanges().pipe(take(1)).subscribe((events) => {
-      this.globalEvents = events;
-      console.log({events})
-    })
+    this.showKey = this.route.snapshot.params.show;
+    this.db.object(`events`)
+      .valueChanges()
+      .pipe(take(1))
+      .subscribe((events) => {
+        this.globalEvents = events;
+      })
+    this.$contamination = this.db.object(`shows/${this.showKey}/contamination`).valueChanges();
     this.$timeline = this.db.list('timeline').valueChanges();
-    // this.db.list('shows', ref => ref.limitToLast(1))
-    //   .snapshotChanges()
-    //   .pipe(take(1))
-    //   .subscribe(([snapshot]) => {
-    //     this.showKey = snapshot.key
-    //   })
+    this.$time = combineLatest(
+      this.db.object(`shows/${this.showKey}/startTime`).valueChanges(),
+      timer(0, 1000).pipe(map(() => new Date())),
+      this.db.object(`shows/${this.showKey}/live`).valueChanges()
+    ).pipe(
+      map(([start, clock, live]) => {
+        const a = moment(start);
+        const b = moment(clock.getTime());
+        const time = Math.floor(moment.duration(b.diff(a)).asMinutes());
+        return { start, clock, time, live }
+      })
+    )
   }
 
   ngAfterViewInit() {
@@ -95,12 +114,31 @@ export class CentralComponent implements OnInit, AfterViewInit {
     setTimeout(() => {
       this.tabs = [
         { id: 'show', tabTemplate: this.showTab, bodyTemplate: this.showBody },
+        { id: 'users', tabTemplate: this.usersTab, bodyTemplate: this.usersBody },
         { id: 'summary', tabTemplate: this.summaryTab, bodyTemplate: this.summaryBody },
         ...this.divisions.map((div, i) => {
           return { id: div, tabTemplate: tabTemplates[i], bodyTemplate: bodyTemplates[i] }
         })
       ]
     })
+  }
+
+  stopClock() {
+    this.db.object(`shows/${this.showKey}/live`).set(false);
+  }
+
+  startClock() {
+    const date = new Date();
+    console.log('start clock: ', date)
+
+    this.db.object(`shows/${this.showKey}`).update({
+      live: true,
+      startTime: date.getTime(),
+    });
+  }
+
+  onContaminationChange(amount) {
+    this.db.object(`shows/${this.showKey}/contamination/current`).set(amount);
   }
 
   uploadSceneriosData(e) {
@@ -285,11 +323,14 @@ export class CentralComponent implements OnInit, AfterViewInit {
   }
 
   updateCsvData(type) {
-    const data = type === 'users' 
-      ? keyBy(this.csvData.users, 'code')
-      : this.csvData[type];
+    let data = this.csvData[type];
+    let updatePath = type;
+    if (type === 'users') {
+      data = keyBy(this.csvData.users, 'code');
+      updatePath = `shows/${this.showKey}/users`;
+    }
     console.log('update vote data for ', type)
-    this.db.object(type)
+    this.db.object(updatePath)
       .set(data)
       .then(() => {
         this.showModal = false;
@@ -315,16 +356,14 @@ export class CentralComponent implements OnInit, AfterViewInit {
     this.showModal = true;
   }
 
-
-
-  newShow(name) {
+  resetShow() {
     const divisions = this.generateDivisions();
-    this.db.object(`shows/${name}`).set({ divisions, ...SHOW_TEMPLATE }).then((res) => {
-      this.buildShow(name)
+    this.db.object(`shows/${this.showKey}`).set({
+      divisions,
+      ...SHOW_TEMPLATE
+    }).then((res) => {
+      this.buildShow(this.showKey)
     })
-    // this.db.list('shows')
-    //   .push({ divisions, ...SHOW_TEMPLATE })
-    //   .then((res) => { this.buildShow(res.key) })
   }
 
   wipeShows() {
@@ -402,9 +441,21 @@ export class CentralComponent implements OnInit, AfterViewInit {
         ...DIVISION_TEMPLATE,
         code: abv, 
         landTiles: this.generateLandTiles(),
-        citizens: this.generateCitizens(abv)
+        // citizens: this.generateCitizens(abv)
       } 
     }), {});
+  }
+
+
+  newUserCode() {
+    this.modalContent = this.addUserCodeTemplate;
+    this.showModal = true;
+  }
+
+  addUserCode(code) {
+    this.db.object(`shows/${this.showKey}/users/${code}`).set({
+      code
+    }).then(() => this.showModal = false )
   }
 
   generateCitizens(division) {

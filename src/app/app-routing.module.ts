@@ -5,9 +5,10 @@ import { CentralComponent } from './pages/central/central.component';
 import { HostComponent } from './pages/host/host.component';
 
 const routes: Routes = [
-  { path: ':show/:division/:id', component: PlayerComponent },
-  { path: ':show/:division', component: HostComponent },
-  { path: '', component: CentralComponent }
+  { path: ':show/player/:division', component: PlayerComponent },
+  { path: ':show/player/:division/:id', component: PlayerComponent },
+  { path: ':show/host/:division', component: HostComponent },
+  { path: ':show/central', component: CentralComponent }
 ];
 
 @NgModule({

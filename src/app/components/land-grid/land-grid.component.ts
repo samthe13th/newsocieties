@@ -1,11 +1,12 @@
 import { Output, Component, OnInit, Input, EventEmitter } from '@angular/core';
-import { range, chunk, isEqual, each, toNumber } from 'lodash';
+import { range, chunk, isEqual, each, toNumber, difference } from 'lodash';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { Subject, combineLatest } from 'rxjs';
 import { takeUntil, tap, take } from 'rxjs/operators';
 import { LandCardValues, LandTile } from 'src/app/interfaces';
 import { BankService } from 'src/app/services/bank.service';
+import { pluckRandom, getRandomInt } from 'src/app/utilties';
 
 const MAX_HARVEST = 49;
 const HARVEST_ROW_LENGTH = 7;
@@ -26,6 +27,8 @@ export class LandGridComponent implements OnInit {
   landSelectSheet;
   selectedResourceStatus;
   selectedCardIndex;
+  positions;
+  contamination;
 
   private _turn;
   private destroy$ = new Subject<boolean>();
@@ -50,8 +53,15 @@ export class LandGridComponent implements OnInit {
     private _bottomSheet: MatBottomSheet
   ) {}
 
+  getPosition(id) {
+    return this.positions.indexOf(id) + 1 ?? '';
+  }
+
   ngOnInit() {
     console.log('selection path: ', `shows/${this.showId}/divisions/${this.divisionKey}/selection`)
+    this.db.object(`shows/${this.showId}/divisions/${this.divisionKey}/positions`).valueChanges().subscribe((positions) => {
+      this.positions = positions;
+    })
     combineLatest(
       this.db.object(this.updatePath)
         .valueChanges()
@@ -84,9 +94,46 @@ export class LandGridComponent implements OnInit {
       .valueChanges()
       .subscribe((level) => {
         console.log('adjust contam: ', level)
-        //this.adjustContamination(level);
+        this.adjustContamination(level);
       })
   }
+
+  private adjustContamination(level) {
+    console.log('adjust contam')
+    this.contamination = level;
+    if (this.landTiles) {
+      const cardIndexes = this.landTiles
+        .map((tile, index) => tile.value == LandCardValues.EMPTY ? -1 : index)
+        .filter(value => value !== -1);
+      const contaminantsCount = Math.ceil((this.contamination / 100) * cardIndexes.length)
+      const currentContaminantIndexes = this.landTiles
+        .map((tile, index) => tile.value === LandCardValues.CONTAM ? index : -1)
+        .filter(value => value !== -1);
+      const adjustment = contaminantsCount - currentContaminantIndexes.length;
+
+      console.log({cardIndexes, contaminantsCount, current: currentContaminantIndexes.length, adjustment })
+      if (adjustment > 0) {
+        const contaminate = pluckRandom(
+          difference(cardIndexes, currentContaminantIndexes),
+          Math.min(adjustment, cardIndexes.length)
+        );
+        console.log('add contams: ', contaminate)
+        contaminate.forEach((i) => {
+          if (!this.landTiles[i].harvested) {
+            this.landTiles[i].value = LandCardValues.CONTAM;
+          }
+        })
+      } else if (adjustment < 0) {
+        const uncontaminate = pluckRandom(currentContaminantIndexes, Math.min(Math.abs(adjustment), currentContaminantIndexes.length));
+        console.log('Remove contams: ', uncontaminate)
+        uncontaminate.forEach((i) => {
+          if (!this.landTiles[i].harvested) {
+            this.landTiles[i].value = getRandomInt(1,3);
+          }
+        })
+      }
+    }
+  } 
 
   ngOnDestroy() {
     this.destroy$.next(true);

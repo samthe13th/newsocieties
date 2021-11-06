@@ -1,14 +1,15 @@
 import { Component, ViewChild, OnInit, TemplateRef, HostListener } from '@angular/core';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { PlayerDeckComponent } from 'src/app/components/player-deck/player-deck.component';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { LandGridComponent } from 'src/app/components/land-grid/land-grid.component';
 import { takeUntil, take, map } from 'rxjs/operators';
-import { Subject, BehaviorSubject } from 'rxjs';
+import { Subject } from 'rxjs';
 import { LandCardValues } from 'src/app/interfaces';
 import { toArray, includes, findIndex, filter } from 'lodash';
 import { faEye, faShoppingBag } from '@fortawesome/free-solid-svg-icons';
+import { DivisionService } from 'src/app/services/division-service.service';
 
 const KEY_CODE = {
   e: 69,
@@ -36,6 +37,7 @@ export class PlayerComponent implements OnInit {
   
   @HostListener('window:keyup', ['$event'])
   keyEvent(event: KeyboardEvent) {
+    if (!this.signedIn) return;
     if(event.keyCode === KEY_CODE.e){
       this.explore();
     } else if (event.keyCode === KEY_CODE.g) {
@@ -45,6 +47,9 @@ export class PlayerComponent implements OnInit {
 
   private destroy$ = new Subject<boolean>();
 
+  user;
+  loginValidations = [];
+  signedIn = false;
   vote;
   divisionSummaries;
   currentTab = 'Division';
@@ -69,15 +74,22 @@ export class PlayerComponent implements OnInit {
   
   constructor(
     private db: AngularFireDatabase,
+    private route: ActivatedRoute,
+    private divisionService: DivisionService,
+    private router: Router,
     private _bottomSheet: MatBottomSheet,
-    private route: ActivatedRoute
   ) {}
 
   ngOnInit() {
     const { show, division, id } = this.route.snapshot.params;
     this.showKey = show;
     this.divisionKey = division;
-    this.id = id;
+    console.log("ID: ", id)
+    if (id) {
+      console.log('SIGNED IN')
+      this.id = id;
+      this.signedIn = true;
+    }
 
     const showPath = `shows/${this.showKey}`;
     this.divisionPath = `${showPath}/divisions/${this.divisionKey}`;
@@ -114,6 +126,70 @@ export class PlayerComponent implements OnInit {
       .subscribe((divisions) => {
         this.createDivisionListeners(divisions)
       })
+  }
+
+  signIn(code) {
+    this.loginValidations = [];
+    if (code === 'ns-host') {
+      this.router.navigate([this.showKey, 'host', this.divisionKey]);
+    } else {
+      this.db.object(`shows/${this.showKey}/users`).valueChanges().pipe(take(1)).subscribe((users) => {
+        this.user = users[code];
+  
+        if (!this.user) {
+          this.loginValidations.push("Sorry, this code is not correct");
+        }
+        if (this.loginValidations.length === 0) {
+          this.db.object(`shows/${this.showKey}/users/${code}`).update(
+            { division: this.divisionKey }
+          ).then((x) => {
+            const name = users[code]?.name;
+            if (name) {
+              this.continueToDivision(code, name);
+            } else {
+              this.id = code;
+              console.log("set: ", this.id, this.divisionKey);
+            }
+          })
+        }
+      })
+    }
+  }
+
+  setName(name) {
+    this.loginValidations = [];
+    if (!name) {
+      this.loginValidations.push("Please include a name for yourself!");
+    }
+    if (this.loginValidations.length === 0) {
+      this.continueToDivision(this.id, name);
+    }
+  }
+
+  continueToDivision(code, name) {
+    console.log("continue... ", code, name, this.user.division, this.divisionKey)
+    if (this.user.division && (this.user.division !== this.divisionKey)) {
+      console.log('transfer from division: ', this.user.division, ' to: ', this.divisionKey)
+      this.transferFromDivision(this.user.division, code);
+    } else {
+      console.log('join division: ', this.divisionKey)
+      this.joinDivision(code, name);
+    }
+  }
+
+  async transferFromDivision(division, code) {
+    await this.divisionService.transferCitizen(this.showKey, division, this.divisionKey, code);
+    this.navigateToPlayerPage(code);
+  }
+  
+  async joinDivision(code, name) {
+    await this.db.object(`shows/${this.showKey}/users/${code}/name`).set(name);
+    await this.divisionService.addCitizen(this.showKey, this.divisionKey, code, name);
+    this.navigateToPlayerPage(code);
+  }
+
+  navigateToPlayerPage(code) {
+    this.router.navigate([this.showKey, 'player', this.divisionKey, code]);
   }
 
   onSelectionChange({ vote, selection }) {

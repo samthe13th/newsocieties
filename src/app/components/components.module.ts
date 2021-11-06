@@ -25,6 +25,7 @@ import { NotificationFeedComponent } from './notification-feed/notification-feed
 import { ExportsComponent } from './exports/exports.component';
 import { NgMultiSelectDropDownModule } from 'ng-multiselect-dropdown';
 import { FlashNewsComponent } from './flash-news/flash-news.component';
+import { UsersGridComponent } from './users-grid/users-grid.component';
 
 
 const components = [
@@ -46,6 +47,7 @@ const components = [
   SocietyGridComponent,
   SocietySummaryComponent,
   TabsComponent,
+  UsersGridComponent,
   VoteComponent
 ]
 

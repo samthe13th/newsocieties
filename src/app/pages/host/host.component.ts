@@ -4,7 +4,7 @@ import { AngularFireDatabase } from '@angular/fire/database';
 import { getRandomInt, pluckRandom } from 'src/app/utilties';
 import { LandTile, LandCardValues } from 'src/app/interfaces';
 import * as _ from 'lodash';
-import { includes, range, difference, trim, differenceBy, toNumber, each, partition, toArray } from 'lodash';
+import { includes, difference, trim, differenceBy, toNumber, each, partition, toArray } from 'lodash';
 import { take, map, tap } from 'rxjs/operators'
 import { BankService } from 'src/app/services/bank.service';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
@@ -113,8 +113,9 @@ export class HostComponent implements OnInit {
   globalScenerios;
   voteDropdown;
   voteDropdownSelect;
-
   rightTab;
+  citizenCount = 0;
+  positions;
 
 
   constructor(
@@ -132,11 +133,17 @@ export class HostComponent implements OnInit {
     this.divisionPath = `shows/${this.showKey}/divisions/${this.divisionKey}`;
     console.log('division path: ', this.divisionPath)
     
-    this.landTilesPath = `${this.divisionPath}/landTiles`
+    this.landTilesPath = `${this.divisionPath}/landTiles`;
 
     this.$vote = this.db.object(`${this.divisionPath}/vote`).valueChanges();
     this.$division = this.db.object(this.divisionPath).valueChanges();
-    this.$citizens = this.db.list(`${this.divisionPath}/citizens`).valueChanges()
+    this.$citizens = this.db.list(`${this.divisionPath}/citizens`).valueChanges().pipe(tap((citizens) => {
+      console.log('$$$:', this.citizenCount, citizens.length);
+      if (this.citizenCount !== citizens.length) {
+        this.updatePositions();
+      }
+      this.citizenCount = citizens.length;
+    }))
     this.$resolutions = this.db.list(`${this.divisionPath}/resolutions`).valueChanges();
     this.$principles = this.db.list(`${this.divisionPath}/principles`).valueChanges();
     this.$scenerios = this.db.list(`${this.divisionPath}/scenerios`).valueChanges();
@@ -149,8 +156,7 @@ export class HostComponent implements OnInit {
     this.$turnButtons = this.db.list(`${this.divisionPath}/citizens`)
       .valueChanges()
       .pipe(
-        map((citizens: any) => citizens.map(c => ({ id: c.id, label: c.position }))),
-        tap((x) => console.log("turn buttons tap: ", x))
+        map((citizens: any) => citizens.map((c, index) => ({ id: c.id, label: index + 1 })))
       )
 
     this.$focus.subscribe((focus) => {
@@ -177,6 +183,16 @@ export class HostComponent implements OnInit {
     this.getResolutions();
     this.getPrinciples();
     this.getScenerios();
+  }
+
+  async updatePositions() {
+    const divisionPath = `shows/${this.showKey}/divisions/${this.divisionKey}`;
+    const citizens = await this.db.list(`${divisionPath}/citizens`).valueChanges().pipe(
+      take(1)
+    ).toPromise();
+    console.log('UPDATE POSITIONS: ', {citizens});
+    this.positions = citizens.map((c: any) => c?.id);
+    this.db.object(`${divisionPath}/positions`).set(this.positions);
   }
 
   onAttributeUpdate(value) {
@@ -235,8 +251,7 @@ export class HostComponent implements OnInit {
     const wealth = this.calculateWealth(this.selectedCitizen.resources);
     console.log({wealth, price})
     if (wealth >= price) {
-      this.db.object(updatePath)
-        .query.ref.transaction(adv => ++adv ?? 1)
+      this.db.object(updatePath).query.ref.transaction(adv => ++adv ?? 1)
       this.bankService.spendResources(this.showKey, this.divisionKey, this.selectedCitizen?.id, price);
       console.log('buy advancement: ', advancement, this.selectedCitizen, price, wealth);
     }
@@ -255,7 +270,7 @@ export class HostComponent implements OnInit {
       this.divisionService.acquireLand(this.showKey, this.divisionKey, [{
         division: this.divisionKey,
         id: this.selectedCitizen.id,
-        name: this.selectedCitizen.position
+        name: this.positions.indexOf(this.selectedCitizen.id) + 1
       }]);
       this.db.object(updatePath).query.ref.transaction(land => ++land ?? 0);
       this.actionSheet.dismiss();

@@ -4,6 +4,7 @@ import { combineLatest } from 'rxjs';
 import { map, tap, take } from 'rxjs/operators';
 import { reduce, filter } from 'lodash';
 import { pluckRandom } from '../utilties';
+const ADVANCEMENTS = ["safety", "health", "arts", "knowledge", "infrastructure"];
 
 const SCORE = {
   low:  {
@@ -49,6 +50,40 @@ export class DivisionService {
   constructor(
     private db: AngularFireDatabase,
   ) {}
+
+  addCitizen(showKey, divisionKey, id, name) {
+    console.log('add citizen', showKey, divisionKey, id, name);
+    return new Promise((resolve) => {
+      this.db.object(`shows/${showKey}/divisions/${divisionKey}/citizens/${id}`).set({
+        name,
+        actions: 2,
+        id,
+        advancements: {
+          safety: 0, 
+          health: 0,
+          arts: 0,
+          knowledge: 0,
+          infrastructure: 0
+        }
+      }).then(() => resolve())
+    })
+  }
+
+  async transferCitizen(showKey, oldDivisionKey, newDivisionKey, code) {
+    const path = `shows/${showKey}/divisions/${oldDivisionKey}/citizens/${code}`;
+    const citizen: any = await this.db.object(path).valueChanges().pipe(take(1)).toPromise();
+    await this.db.object(path).remove();
+    console.log("TRANSFER: ", path, citizen)
+    return new Promise((resolve) => {
+      this.db.object(`shows/${showKey}/divisions/${newDivisionKey}/citizens/${code}`).set(
+        { ...citizen, actions: 2 }
+      ).then(() => resolve())
+    })
+  }
+
+  expelCitizen(showKey, divisionKey, code, ban=false) {
+
+  }
 
   acquireLand(showKey, divisionKey, data) {
     return new Promise((resolve) => {
