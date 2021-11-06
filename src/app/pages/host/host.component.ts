@@ -39,6 +39,7 @@ export class HostComponent implements OnInit {
   @ViewChild('transferResourcesSheet') transferResourcesSheet: TemplateRef<any>;
   @ViewChild('addResourcesSheet') addResourcesSheet: TemplateRef<any>;
   @ViewChild('removeResourcesSheet') removeResourcesSheet: TemplateRef<any>;
+  @ViewChild('changeResourcesSheet') changeResourcesSheet: TemplateRef<any>;
   @ViewChild('changeAdvancementSheet') changeAdvancementSheet: TemplateRef<any>;
   @ViewChild('advancementSheet') advancementSheet: TemplateRef<any>;
   @ViewChild('localLandSheet') localLandSheet: TemplateRef<any>;
@@ -245,7 +246,7 @@ export class HostComponent implements OnInit {
     this.actionSheet = this.bottomSheet.open(this.advancementSheet);
   }
 
-  buyAdvancement(advancement, price, updatePath) {
+  async buyAdvancement(advancement, price, updatePath) {
     console.log({advancement, price, updatePath})
     if (advancement > 3 || !this.selectedCitizen?.id) return;
     const wealth = this.calculateWealth(this.selectedCitizen.resources);
@@ -255,6 +256,8 @@ export class HostComponent implements OnInit {
       this.bankService.spendResources(this.showKey, this.divisionKey, this.selectedCitizen?.id, price);
       console.log('buy advancement: ', advancement, this.selectedCitizen, price, wealth);
     }
+    const individualPath = `${this.divisionPath}/advancements/${advancement}/individual`;
+    await this.db.object(individualPath).query.ref.transaction((ind) => ind ? ind + 1 : 1)
 
     this.actionSheet.dismiss();
   }
@@ -317,17 +320,10 @@ export class HostComponent implements OnInit {
 
   async onAdvancementUpdate(newVal, prop) {
     const individualPath = `${this.divisionPath}/advancements/${prop}/individual`;
-    const oldVal = this.selectedCitizen.advancements[prop];
-    const individual: any = await this.db.object(individualPath)
-      .valueChanges()
-      .pipe(take(1))
-      .toPromise()
-    const update: number = individual + (newVal - oldVal);
-
-    this.db.object(individualPath).set(update);
+    const value = newVal - this.selectedCitizen.advancements[prop];
+    await this.db.object(individualPath).query.ref.transaction((ind) => ind ? ind + value : value)
     this.db.object(this.changeAttribute.dbPath).set(newVal);
     this.actionSheet.dismiss();
-    console.log(update, prop, individual)
   }
 
   getResolutions() {
@@ -495,6 +491,10 @@ export class HostComponent implements OnInit {
     this.actionSheet = this.bottomSheet.open(this.removeResourcesSheet);
   }
 
+  changeCitizenResources(citizen) {
+    console.log("change resources: ", citizen)
+  }
+
   addCitizenResources(citizen) {
     console.log("add resources: ", citizen);
     this.selectedCitizen = citizen;
@@ -648,6 +648,10 @@ export class HostComponent implements OnInit {
     ).then(() => {
       this.actionSheet.dismiss();
     })
+  }
+
+  changeResources(wealth, value) {
+    console.log('change R: ', wealth, value)
   }
 
   addResources(amount) {

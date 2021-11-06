@@ -31,7 +31,6 @@
 }
 
 .host-side-panel {
-  max-width: 400px;
   &:not(:last-child) {
     margin-right: 20px;
   }
@@ -48,7 +47,6 @@
 .host-main {
   color: white;
   width: 100%;
-  max-width: 400px;
 
   > .app-button-group {
     margin-bottom: 10px;

@@ -3,8 +3,8 @@
     *ngFor="let card of landTiles; let i = index"
     class="land-tile"
     [class.contaminated]="card.contaminated == true"
-    [attr.data-badge]="card.owner ? getPosition(card.owner.id) : null"
-    [attr.data-local]="card.owner && card.owner.division == divisionKey"
+    [attr.data-badge]="(card.owner && card.owner?.division == divisionKey) ? getPosition(card.owner.id) : card.owner?.division"
+    [attr.data-local]="card.owner && card.owner?.division == divisionKey"
     [class.empty]="card.value === -1"
     [class.owned]="card.owner !== null"
   >

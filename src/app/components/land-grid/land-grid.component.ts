@@ -3,7 +3,7 @@ import { range, chunk, isEqual, each, toNumber, difference } from 'lodash';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { Subject, combineLatest } from 'rxjs';
-import { takeUntil, tap, take } from 'rxjs/operators';
+import { takeUntil, tap, take, isEmpty } from 'rxjs/operators';
 import { LandCardValues, LandTile } from 'src/app/interfaces';
 import { BankService } from 'src/app/services/bank.service';
 import { pluckRandom, getRandomInt } from 'src/app/utilties';
@@ -54,7 +54,10 @@ export class LandGridComponent implements OnInit {
   ) {}
 
   getPosition(id) {
-    return this.positions.indexOf(id) + 1 ?? '';
+    if (this.positions?.indexOf(id)) {
+      return this.positions?.indexOf(id) + 1
+    }
+    return 'X';
   }
 
   ngOnInit() {
@@ -191,8 +194,10 @@ export class LandGridComponent implements OnInit {
         this.landTiles[tile.index].value = -1;
       }
     })
-    this.bulkGatherResources(toGather);
-    console.log("to gather: ", toGather)
+    if (Object.keys(toGather).length !== 0) {
+      console.log("to gather: ", toGather)
+      this.bulkGatherResources(toGather);
+    }
   }
 
   bulkGatherResources(toGather) {
