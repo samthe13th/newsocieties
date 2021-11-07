@@ -51,4 +51,9 @@
   overflow: auto;
   padding: 20px;
   box-sizing: border-box;
+  align-items: flex-start;
+
+  button {
+    margin-bottom: 10px;
+  }
 }

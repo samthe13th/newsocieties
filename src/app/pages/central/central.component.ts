@@ -2,7 +2,7 @@ import { Component, OnInit, AfterViewInit, ViewChild, ViewChildren, TemplateRef,
 import { AngularFireDatabase } from '@angular/fire/database';
 import { take } from 'rxjs/operators';
 import { timer, combineLatest, Observable } from 'rxjs';
-import { trim, keyBy, range, capitalize, toNumber, find, differenceWith, sortBy } from 'lodash';
+import { trim, keyBy, range, capitalize, toNumber, find, differenceWith, sortBy, includes } from 'lodash';
 import * as Papa from 'papaparse';
 import { DIVISION_TEMPLATE, SHOW_TEMPLATE } from './templates';
 import { map } from 'rxjs/operators';
@@ -57,7 +57,9 @@ export class CentralComponent implements OnInit, AfterViewInit {
   $timeline: Observable<any>;
   $time: Observable<any>;
   $contamination: Observable<any>;
+  $unseenMessages: Observable<any>;
 
+  currentTab;
   modalContent: TemplateRef<any>;
   showKey: string;
   divisions;
@@ -103,6 +105,7 @@ export class CentralComponent implements OnInit, AfterViewInit {
       })
     this.$contamination = this.db.object(`shows/${this.showKey}/contamination`).valueChanges();
     this.$timeline = this.db.list('timeline').valueChanges();
+    this.$unseenMessages = this.db.object(`shows/${this.showKey}/centralUnseen`).valueChanges();
     this.$time = combineLatest(
       this.db.object(`shows/${this.showKey}/startTime`).valueChanges(),
       timer(0, 1000).pipe(map(() => new Date())),
@@ -132,6 +135,17 @@ export class CentralComponent implements OnInit, AfterViewInit {
         })
       ]
     })
+  }
+
+  onTabChange(tab) {
+    console.log("tab change; ", tab)
+    if (includes(DIVISIONS, tab.id)) {
+      this.db.object(`shows/${this.showKey}/centralUnseen/${tab.id}`).set(0)
+    }
+    if (tab.id !== this.currentTab && includes(DIVISIONS, this.currentTab)) {
+      this.db.object(`shows/${this.showKey}/centralUnseen/${this.currentTab}`).set(0)
+    }
+    this.currentTab = tab.id;
   }
 
   stopClock() {
@@ -406,6 +420,8 @@ export class CentralComponent implements OnInit, AfterViewInit {
       .then((res) => { 
         this.chatInput = "";
       })
+    this.db.object(`shows/${this.showKey}/divisions/${division}/unseenChat`)
+      .query.ref.transaction((unseen) => unseen ? ++unseen : 1)
   }
 
   onDivisionOptionChange(type) {
@@ -431,6 +447,11 @@ export class CentralComponent implements OnInit, AfterViewInit {
     this.modalContent = this.eventTemplate;
   }
 
+  onClickNewEvent(div) {
+    console.log('on click: ', div)
+    this.getEvent(div);
+  }
+
   setOption(type) {
     this.sendEvent(this.selectedDivision, this.divisionDropdownSelect);
     this.showModal = false;
@@ -442,8 +463,16 @@ export class CentralComponent implements OnInit, AfterViewInit {
       ? `${block} <strong>${this.divisionEventVariables[index]?.value}</strong>`
       : block
     ).join('');
-    const news = { from: 'central', header: event?.title, type: 'event', value };
-    this.db.list(`shows/${this.showKey}/feeds/${division}`).push(news);
+    const news = { 
+      from: 'central', 
+      header: event?.title,
+      resolved: false,
+      requiresAction: true,
+      type: 'event', 
+      value
+    };
+    this.db.list(`shows/${this.showKey}/divisions/${division}/notifications`).push(news);
+    this.db.list(`shows/${this.showKey}/divisions/${division}/unseenNotifications`).push('event');
     this.db.list(`shows/${this.showKey}/divisions/${division}/events`).push(news);
   }
 

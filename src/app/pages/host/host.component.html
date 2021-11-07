@@ -12,6 +12,7 @@
 <app-tabs 
   class="host-side-panel"
   selectedClass="host-selected-tab"
+  (tabChange)="onLeftTabChange($event)"
   [tabs]="[
     { id: 'division', tabTemplate: division, bodyTemplate: divisionBody },
     { id: 'global', tabTemplate: global, bodyTemplate: globalBody },
@@ -195,7 +196,12 @@
 <ng-template #division>{{divisionKey}} Division</ng-template>
 <ng-template #global>Global</ng-template>
 <ng-template #exports>Exports</ng-template>
-<ng-template #central>Central</ng-template>
+<ng-template #central>
+  Central
+  <ng-container *ngIf="($unseenChat | async) as unseenChat">
+    <span *ngIf="leftTab !== 'central' && unseenChat > 0">({{unseenChat}})</span>
+  </ng-container>
+</ng-template>
 <ng-template #notes>Notes</ng-template>
 
 <!-- DIVISION -->

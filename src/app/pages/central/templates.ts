@@ -96,7 +96,7 @@ export const SHOW_TEMPLATE = {
   },
   content: {},
   global: {
-    actual: 63,
-    capacity: 50
+    actual: 0,
+    capacity: 0
   }
 }

@@ -1,5 +1,6 @@
 <app-tabs 
   *ngIf="tabs"
+  (tabChange)="onTabChange($event)"
   selectedClass="central-selected-tab"
   [tabs]="tabs">
 </app-tabs>
@@ -237,7 +238,14 @@
 </ng-template>
 
 <ng-container *ngFor="let div of divisions">
-  <ng-template #tab>{{ div }}</ng-template>
+  <ng-template #tab>
+    {{ div }}
+    <ng-container *ngIf="$unseenMessages | async as unseen">
+      <span *ngIf="unseen[div] > 0 && currentTab !== div">
+        ({{ unseen[div] }})
+      </span>
+    </ng-container>
+  </ng-template>
   <ng-template #division>
     <div class="central__division">
       <div class="central__division-chat">
@@ -261,10 +269,6 @@
           </div>
           <div class="central__division-chat-buttons">
             <div class="button-row">
-              <button 
-                (click)="getEvent(div)">
-                EVENT
-              </button>
               <!-- <button
                 (click)="sendBroacastNotification(div)"
                 class="central__division-chat-button icon">
@@ -280,7 +284,7 @@
         </div>
       </div>
       <div class="central__division-main">
-        <app-division-full [showKey]="showKey" [division]="div"></app-division-full>
+        <app-division-full (clickNewEvent)="onClickNewEvent($event)" [showKey]="showKey" [division]="div"></app-division-full>
       </div>
     </div>
   </ng-template>

@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { Observable } from 'rxjs';
 import { faGavel, faLandmark, faGlobe, faLeaf, faCartPlus } from '@fortawesome/free-solid-svg-icons';
@@ -24,12 +24,18 @@ export class DivisionFullComponent {
 
   @Input() showKey;
   @Input() division;
+  @Output() clickNewEvent = new EventEmitter<any>();
 
   divisionDecisionsButtons = [
     { id: 'principles', label: 'Principles', faIcon: faLandmark },
     { id: 'resolutions', label: 'Resolutions', faIcon: faGavel },
     { id: 'events', label: 'Events', faIcon: faGlobe },
   ]
+
+  clickNewEventBtn() {
+    console.log('click: ')
+    this.clickNewEvent.emit(this.division);
+  }
 
   ngOnInit() {
     const divisionPath = `shows/${this.showKey}/divisions/${this.division}`;

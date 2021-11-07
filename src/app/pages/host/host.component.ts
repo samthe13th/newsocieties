@@ -77,6 +77,7 @@ export class HostComponent implements OnInit {
   $turn;
   $focus;
   $unseenNotifications;
+  $unseenChat;
   $citizenAdvancements;
   $pendingGLA;
   $localLand;
@@ -118,6 +119,7 @@ export class HostComponent implements OnInit {
   voteDropdown;
   voteDropdownSelect;
   rightTab;
+  leftTab;
   citizenCount = 0;
   positions;
 
@@ -160,6 +162,7 @@ export class HostComponent implements OnInit {
     this.$localLand = this.db.list(`${this.divisionPath}/localLand`).valueChanges();
     this.$globalLand = this.db.list(`${this.divisionPath}/globalLand`).valueChanges();
     this.$unseenNotifications = this.db.list(`${this.divisionPath}/unseenNotifications`).valueChanges();
+    this.$unseenChat = this.db.object(`${this.divisionPath}/unseenChat`).valueChanges();
     this.$turnButtons = this.db.list(`${this.divisionPath}/citizens`)
       .valueChanges()
       .pipe(
@@ -220,8 +223,20 @@ export class HostComponent implements OnInit {
   }
 
   onRightTabChange(tab) {
+    console.log("tab: ", tab)
     this.rightTab = tab.id;
-    this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/unseenNotifications`).remove();
+    if (this.rightTab === 'notifications' || tab.id === 'notifications') {
+      this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/unseenNotifications`).remove();
+    }
+  }
+
+  async onLeftTabChange(tab) {
+    console.log('tab: ', tab, this.leftTab, this.leftTab === 'central' || tab?.id === 'central')
+    if (this.leftTab === 'central' || tab.id === 'central') {
+      console.log('CLEAR THIS')
+      await this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/unseenChat`).set(0)
+    }
+    this.leftTab = tab.id;
   }
 
   updateCitizenLand(citizen, landCost) {
@@ -652,6 +667,9 @@ export class HostComponent implements OnInit {
         console.log('callback: ', res)
         this.chatInput = "";
       })
+    this.db.object(`shows/${this.showKey}/centralUnseen/${division}`).query.ref.transaction(
+      (unseen) => unseen ? ++unseen : 1
+    )
   }
 
   fontSizeUp() {

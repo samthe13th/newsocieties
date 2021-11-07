@@ -32,6 +32,10 @@
           </div>
         </ng-container>
         <ng-container *ngIf="showDecisions === 'events'">
+          <button 
+            (click)="clickNewEventBtn()">
+            NEW EVENT
+          </button>
           <div *ngFor="let event of ($events | async)">
             <h3 style="margin: 0"><strong>{{ event.header }}</strong></h3>
             <div [innerHtml]="event.value"></div>
