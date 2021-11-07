@@ -7,6 +7,7 @@ import { LandCardValues } from 'src/app/interfaces';
 import { BankService } from 'src/app/services/bank.service';
 import { ActivatedRoute } from '@angular/router';
 import { AngularFireDatabase } from '@angular/fire/database';
+import { faLeaf, faFlag } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-player-deck',
@@ -31,6 +32,10 @@ export class PlayerDeckComponent {
   wealth = 0;
   playerIndex;
   divisionPath;
+
+  // ICONS
+  resourceIcon = faLeaf;
+  landIcon = faFlag;
 
   @Input() id;
   @Input() name = "Sam"

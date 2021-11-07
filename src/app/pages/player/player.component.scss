@@ -66,6 +66,7 @@
 .player-vote-wrap {
   display: flex;
   width: 100%;
+  margin: 5px 0;
   background: #031137;
   border-radius: 10px;
 }
@@ -101,20 +102,61 @@
   justify-content: center;
 }
 
-.harvest-details__number {
+.division-details__number {
   background: rgba(black, 0.5);
   padding: 4px 8px; 
   border-radius: 5px; 
+  margin-left: 5px;
+  white-space: nowrap;
+}
+
+.division-details {
+  display: flex;
+  width: 100%;
+  font-size: 16px;
+  padding: 10px;
+  box-sizing: border-box;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  justify-content: space-between;
+
+  &.reserve {
+    background: #398739;
+  }
+  &.advancements {
+    background: #4f7663;
+    margin-bottom: 20px;
+    align-items: center;
+    font-size: 18px;
+  }
+}
+
+.harvest-header {
+  padding: 0 20px;
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  width: 100%;
+  border: #fdf4c5 solid 1px;
+  justify-content: space-between;
+  box-sizing: border-box;
+  align-items: center;
+
+  h1 {
+    font-size: 30px;
+    margin: 0;
+    padding: 0;
+  }
 }
 
 .player-folder__body-harvest {
   width: 100%;
   margin: 5px 0;
   min-width: 400px;
-  background: #ddd7a5;
-  border-radius: 10px;
+  background: #0f2631;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  justify-content: flex-end;
 }
 
 .player-folder__body-citizens {
@@ -122,7 +164,7 @@
   padding-left: 10px;
   margin-top: 5px;
   max-width: 400px;
-  min-width: 300px;
+  min-width: 320px;
   display: flex; 
   flex-direction: column;
   flex: 1;
@@ -159,16 +201,15 @@
   flex-direction: row;
   font-weight: 250;
   font-size: 18px;
-  background: #996955;
+  background: #1f4d62;
   border-radius: 10px; 
-  margin-bottom: 20px;
   line-height: 25px;
 
   > * {
     padding: 14px; 
 
     &:last-child {
-      border-left: 1px solid black;
+      border-left: solid #0f2631;
     }
   }
 

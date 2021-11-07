@@ -1,16 +1,24 @@
 <ng-container *ngIf="($citizen | async) as citizen">
   <div class="player-deck__summary">
-    <div class="flex-row stretch-h">
-      <div class="citizen-name" [class.player-turn-indicator]="myTurn">{{citizen?.name}}
+    <div class="citizen-header">
+      <div class="citizen-name" [class.player-turn-indicator]="myTurn">
+        {{citizen?.name}}
         <!-- <app-player-turn 
           [showLabel]="false"
           [divisionPath]="divisionPath">
         </app-player-turn> -->
+       
+      </div>
+      <div class="citizen-stats">
+        <fa-icon size="sm" [icon]="resourceIcon"></fa-icon>
+        {{ wealth }}
+        <fa-icon size="sm" [icon]="landIcon"></fa-icon>
+        {{ citizen?.land ? citizen?.land : 0 }}
       </div>
     </div>
   </div>
   <div class="flex-row stretch-h">
-    Resources:  {{ wealth }}
+   
   </div>
   <div class="player-hand">
     <div class="local-resources">

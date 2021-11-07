@@ -8,7 +8,7 @@ import { takeUntil, take, map } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { LandCardValues } from 'src/app/interfaces';
 import { toArray, includes, findIndex, filter } from 'lodash';
-import { faEye, faShoppingBag } from '@fortawesome/free-solid-svg-icons';
+import { faLeaf, faFlag, faEye, faArchway, faBriefcaseMedical, faShieldAlt, faShoppingBag, faBrain, faTheaterMasks, faBuilding } from '@fortawesome/free-solid-svg-icons';
 import { DivisionService } from 'src/app/services/division-service.service';
 
 const KEY_CODE = {
@@ -71,6 +71,14 @@ export class PlayerComponent implements OnInit {
   // ICONS
   exploreIcon = faEye;
   gatherIcon = faShoppingBag;
+  kIcon = faBrain;
+  aIcon = faTheaterMasks;
+  iIcon = faArchway;
+  sIcon = faShieldAlt;
+  hIcon = faBriefcaseMedical;
+  landIcon = faFlag;
+  resourceIcon = faLeaf;
+
   
   constructor(
     private db: AngularFireDatabase,

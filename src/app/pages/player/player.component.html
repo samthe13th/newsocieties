@@ -23,6 +23,15 @@
       <ng-container *ngIf="focus === 'harvest'">
         <div class="flex-row" style="width: 100%">
           <div class="player-folder__body-harvest">
+            <div class="harvest-header">
+              <div>
+                <h1>Harvest</h1>
+              </div>
+              <div class="harvest-details">
+                <div>Capacity: {{ division?.capacity }}</div>
+                <div>Harvested: {{ division?.harvested }}</div>
+              </div>
+            </div>
             <app-land-grid 
               #landGrid
               [markCards]="false"
@@ -82,33 +91,60 @@
   
       <!-- PLAYER CONTROLS -->
       <div class="player-folder__body-citizens space-between">
-        <div class="harvest-details">
-          <div class="flex-column stretch-h">
-            <div class="large">Reserve:
-              <span class="harvest-details__number">{{division?.reserve}}</span>
-            </div>
-            <div class="flex-column stretch-h">
-              <div>Thresholds</div>
-              <div>
-                <span class="harvest-details__number">
-                  {{division?.reserveThresholds.low}}
-                  | {{division?.reserveThresholds.mid}}
-                  | {{division?.reserveThresholds.high}}
-                </span>
-              </div>
-            </div>
+
+        <!--RESERVE-->
+        <h3 style="margin-bottom: 0">Resources</h3>
+        <div class="division-details reserve">
+          <div class="flex-row stretch-h flex-center-v">
+            Reserve
+            <span class="division-details__number">
+              <fa-icon size="sm" [icon]="resourceIcon"></fa-icon>
+              {{division?.reserve}}
+            </span>
           </div>
-          <div class="flex-column stretch-h">
-            <div class="large">Harvested: <span class="harvest-details__number">{{division?.harvested}}</span></div>
-            <div class="flex-column stretch-h">
-              <div>Capacity</div>
-              <div>
-                <span class="harvest-details__number">
-                  {{division?.capacity}}
-                </span>
-              </div>
-            </div>
+          <div class="flex-row flex-center-v">
+            Thresholds
+            <span class="division-details__number">
+              {{division?.reserveThresholds.low}}
+              | {{division?.reserveThresholds.mid}}
+              | {{division?.reserveThresholds.high}}
+            </span>
           </div>
+        </div>
+
+        <!-- ADVANCEMENTS -->
+        <h3 style="margin-bottom: 0">Advancements</h3>
+        <div class="division-details advancements">
+          <ng-container *ngIf="division?.advancements?.safety as safety">
+            <span class="division-details__number">
+              <fa-icon size="sm" [icon]="sIcon"></fa-icon>
+              {{safety.communal + safety.individual}}
+            </span>
+          </ng-container>
+          <ng-container *ngIf="division?.advancements?.health as health">
+            <span class="division-details__number">
+              <fa-icon size="sm" [icon]="hIcon"></fa-icon>
+              {{health.communal + health.individual}}
+            </span>
+          </ng-container>
+          <ng-container *ngIf="division?.advancements?.arts as arts">
+            <span class="division-details__number">
+              <fa-icon size="sm" [icon]="aIcon"></fa-icon>
+              {{arts.communal + arts.individual}}
+            </span>
+          </ng-container>
+          <ng-container *ngIf="division?.advancements?.knowledge as knowledge">
+            <span class="division-details__number">
+              <fa-icon size="sm" [icon]="kIcon"></fa-icon>
+              {{knowledge.communal + knowledge.individual}}
+            </span>
+          </ng-container>
+          <ng-container *ngIf="division?.advancements?.infrastructure as inf">
+            <span class="division-details__number">
+              <fa-icon size="sm" [icon]="iIcon"></fa-icon>
+              {{inf.communal + inf.individual}}
+            </span>
+          </ng-container>
         </div>
   
         <app-player-deck
@@ -122,14 +158,21 @@
           <div 
             class="citizen-summary flex-row space-between"
             *ngFor="let citizen of ($citizens | async)">
-            <div class="flex-row flex-center-v">
               <span [class.player-turn-indicator]="citizen.id == ($turn | async)?.id">{{citizen.name}}</span>
-              <span>({{calculateWealth(citizen?.resources)}})</span>
+              <div>
+                <span style="margin-right: 5px">
+                  <fa-icon size="sm" [icon]="resourceIcon"></fa-icon>
+                  {{calculateWealth(citizen?.resources)}}
+                </span>
+                <span>
+                  <fa-icon size="sm" [icon]="landIcon"></fa-icon>
+                  {{ citizen?.land ? citizen?.land : 0 }}
+                </span>
+              </div>
               <!-- <app-player-turn 
                 [showLabel]="false"
                 [divisionPath]="divisionPath">
               </app-player-turn> -->
-            </div>
           </div>
         </div>
       </div>
