@@ -1,7 +1,4 @@
 <ng-container *ngIf="($division | async) as division">
-  <h1 class="division-full__header">{{division?.code}} Division
-    <!-- <span class="score">{{div?.score}}</span> -->
-  </h1>
   <div class="division-full__body">
     <div class="division-stats">
       <h2>STATS</h2>
@@ -13,13 +10,14 @@
       <p>Land cost: {{ division?.landCost }}</p>
     </div>
     <div class="division-decisions-wrap">
-      <app-button-group
-        #divisionDecision
-        (select)="onDivisionDecisionSelect($event)"
-        selectById="principles"
-        [buttons]="divisionDecisionsButtons">
-      </app-button-group>
-      <hr/>
+      <div class="division-decisions__button-group-wrap">
+        <app-button-group
+          #divisionDecision
+          (select)="onDivisionDecisionSelect($event)"
+          selectById="principles"
+          [buttons]="divisionDecisionsButtons">
+        </app-button-group>
+      </div>
       <div class="division-decisions">
         <ng-container *ngIf="showDecisions === 'principles'">
           <div *ngFor="let principle of ($principles | async)">
