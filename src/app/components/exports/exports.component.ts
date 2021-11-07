@@ -163,7 +163,7 @@ export class ExportsComponent implements OnInit {
       cost: this.selectedDivision.landCost
     }))
 
-    await this.divisionService.acquireLand(this.showKey, this.selectedDivision.select_id, data)
+    await this.divisionService.acquireLand(this.showKey, this.selectedDivision.select_id, data);
 
     this.db.list(`shows/${this.showKey}/divisions/${this.selectedDivision.select_id}/notifications`).push({
       type: NotificationType.glaHostile,
@@ -173,7 +173,7 @@ export class ExportsComponent implements OnInit {
       sender: this.divisionKey, 
       data
     }).then(() => {
-      this.db.list(`shows/${this.showKey}/divisions/${this.selectedDivision.select_id}/unseenNotifications`).push(this.divisionKey)
+      this.db.list(`shows/${this.showKey}/divisions/${this.selectedDivision.select_id}/unseenNotifications`).push(this.divisionKey);
       this.clearAll();
     })
   }

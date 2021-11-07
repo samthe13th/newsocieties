@@ -88,11 +88,14 @@ export class DivisionService {
   acquireLand(showKey, divisionKey, data) {
     return new Promise((resolve) => {
       data.forEach(async (request) => {
+        console.log({request})
         const landList = (divisionKey === request.division) ? 'localLand' : 'globalLand';
+        await this.db.object(`shows/${showKey}/divisions/${request.division}/citizens/${request.id}/land`)
+          .query.ref.transaction((land) => land ? ++land : 1)
         await this.db.list(`shows/${showKey}/divisions/${request.division}/${landList}`).push(request);
         await this.db.list(`shows/${showKey}/divisions/${divisionKey}/pendingGLA`).push(request);
       })
-      console.log('aquire: ', data)
+      console.log('acquire: ', data)
       resolve(true);
     })
   }

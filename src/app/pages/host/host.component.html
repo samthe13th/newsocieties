@@ -56,7 +56,7 @@
       [buttons]="focusButtons">
     </app-button-group>
     <div *ngIf="focus === 'misc'" class="misc-wrapper">
-      <app-society-grid [showKey]="showKey" details="brief"></app-society-grid>>
+      <app-society-grid [showKey]="showKey" details="brief"></app-society-grid>
     </div>
     <div *ngIf="focus === 'harvest'" class="harvest-wrapper">
       <app-land-grid
@@ -107,6 +107,17 @@
       </ng-container>
   
     </div>
+    <div *ngIf="focus === 'resolutionReview'">
+      <h1>Last Resolution</h1>
+    
+      <div class="review-card" *ngIf="($lastResolution | async) as resolution">
+        <h2>{{ resolution?.title }}</h2>
+        <p>{{ resolution?.value }}</p>
+        <hr/>
+        <p><strong>Consequences: </strong>{{ resolution?.consequence }}</p>
+      </div>
+      <button (click)="newResolution()">New Resolution</button>
+    </div>
   </div>  
 </ng-template>
 
@@ -132,6 +143,11 @@
   <button *ngIf="voteDropdownSelect" (click)="startVote('principles')">Vote on Principle</button>
 </ng-template>
 
+<ng-template #resolutionReviewTemplate>
+  Show results of last resolution
+  <button (click)="reviewLastResolution()">Continue</button>
+</ng-template>
+
 <ng-template #resolutionTemplate>
   <h1>Resolution</h1>
   <select
@@ -146,7 +162,11 @@
     </option>
   </select>
 
-  <button *ngIf="voteDropdownSelect" (click)="startVote('resolutions')">Vote on Resolution</button>
+  <button
+    *ngIf="voteDropdownSelect"
+    (click)="startVote('resolutions')">
+    Vote on Resolution
+  </button>
 </ng-template>
 
 <ng-template #scenerioTemplate>
@@ -190,75 +210,75 @@
       <hr/>
 
       <div>
-        <div>
+        <div class="editable-item">
           <button (click)="changeDivisionProperty('reserve')">
-            <fa-icon size="sm" [icon]="faPen"></fa-icon>
+            <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
           </button>
           <strong>Reserve: </strong>
           {{ division.reserve }}
         </div>
-        <div>
+        <div class="editable-item">
           <button (click)="changeDivisionProperty('advancements/safety/communal', 'communal safety')">
-            <fa-icon size="sm" [icon]="faPen"></fa-icon>
+            <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
           </button>
           <strong>Communal Safety: </strong>{{ division.advancements.safety.communal }}
         </div>
-        <div>
+        <div class="editable-item">
           <button (click)="changeDivisionProperty('advancements/health/communal', 'communal health')">
-            <fa-icon size="sm" [icon]="faPen"></fa-icon>
+            <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
           </button>
           <strong>Communal Health: </strong>{{ division.advancements.health.communal }}
         </div>
-        <div>
+        <div class="editable-item">
           <button (click)="changeDivisionProperty('advancements/arts/communal', 'communal arts')">
-            <fa-icon size="sm" [icon]="faPen"></fa-icon>
+            <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
           </button>
           <strong>Communal Arts: </strong>{{ division.advancements.arts.communal }}
         </div>
-        <div>
+        <div class="editable-item">
           <button (click)="changeDivisionProperty('advancements/knowledge/communal', 'communal knowledge')">
-            <fa-icon size="sm" [icon]="faPen"></fa-icon>
+            <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
           </button>
           <strong>Communal Knowledge: </strong>{{ division.advancements.knowledge.communal }}
         </div>
-        <div>
+        <div class="editable-item">
           <button (click)="changeDivisionProperty('advancements/infrastructure/communal', 'communal infrastructure')">
-            <fa-icon size="sm" [icon]="faPen"></fa-icon>
+            <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
           </button>
           <strong>Communal Infrastructure: </strong>{{ division.advancements.infrastructure.communal }}
         </div>
       </div>
 
       <hr/>
-      <div>
+      <div class="editable-item">
         <strong>Land cost: </strong>
         {{ division.landCost }}
       </div>
-      <div>
+      <div class="editable-item">
         <strong>Local land: </strong>
         {{ ($localLand | async)?.length }}
       </div>
-      <div>
+      <div class="editable-item">
         <strong>Global land: </strong>
         {{ ($globalLand | async)?.length }}
       </div>
-      <div><strong>Harvested: </strong>
+      <div class="editable-item"><strong>Harvested: </strong>
         {{ division.harvested }} <span *ngIf="division.harvested">({{ percentHarvested(division.harvested, division.capacity) }}% of capacity)</span>
       </div>
-      <div>
+      <div class="editable-item">
         <strong>Capacity: </strong>
         {{ division?.capacity }}
       </div>
-      <div><strong>Harvest:</strong>
+      <div class="editable-item"><strong>Harvest:</strong>
         {{ division?.harvest }}
       </div>
 
-      <div>
+      <div class="editable-item">
         <strong>Thresholds:</strong>
         {{ division?.reserveThresholds.low }} / {{ division?.reserveThresholds.mid }} / {{ division?.reserveThresholds.high }}
       </div>
 
-      <div>
+      <div class="editable-item">
         <strong>High Thresholds Met: </strong>
         {{ division.highThresholdsMet }}
       </div>
@@ -291,16 +311,16 @@
       <div *ngFor="let citizen of ($citizens | async); let index = index" style="margin-bottom: 10px">
         <hr/>
         <div><strong>{{index + 1}}: {{citizen.name}} ({{citizen.id}})</strong></div>
-        <div>
+        <div class="editable-item">
           <button (click)="changeCitizenProperty(citizen, 'actions', 'basic')">
-            <fa-icon size="sm" [icon]="faPen"></fa-icon>
+            <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
           </button>
           Actions: {{ citizen.actions }}
         </div>
 
-        <div>
+        <div class="editable-item">
           <button (click)="changeCitizenResources(citizen)">
-            <fa-icon size="sm" [icon]="faPen"></fa-icon>
+            <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
           </button>
           <button (click)="transferCitizenResources(citizen)">Donate</button>
           Resources: {{ bankService?.calculateWealth(citizen?.resources) }}
@@ -308,42 +328,42 @@
           <button (click)="addCitizenResources(citizen)">+</button> -->
         </div>
 
-        <div>
-          <button (click)="updateCitizenLand(citizen, division?.landCost)">Buy</button>
-          Local Land: {{ citizen?.localLand }}
+        <div class="editable-item">
+          <button (click)="updateCitizenLand(citizen, division?.landCost)">Buy local</button>
+          Land: {{ citizen?.land }}
         </div>
 
-        <div>
+        <div class="editable-item">
           <button (click)="changeCitizenProperty(citizen, 'advancements/safety', 'advancement', 'safety')">
-            <fa-icon size="sm" [icon]="faPen"></fa-icon>
+            <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
           </button>
           <button (click)="updateAdvancement('safety', citizen, division?.advancementCosts)">Buy</button>
           Safety: {{ citizen?.advancements?.safety }}
         </div>
-        <div>
+        <div class="editable-item">
           <button (click)="changeCitizenProperty(citizen, 'advancements/health', 'advancement', 'health')">
-            <fa-icon size="sm" [icon]="faPen"></fa-icon>
+            <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
           </button>
           <button (click)="updateAdvancement('health', citizen, division?.advancementCosts)">Buy</button>
           Health: {{ citizen?.advancements?.health }}
         </div>
-        <div>
+        <div class="editable-item">
           <button (click)="changeCitizenProperty(citizen, 'advancements/arts', 'advancement', 'arts')">
-            <fa-icon size="sm" [icon]="faPen"></fa-icon>
+            <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
           </button>
           <button (click)="updateAdvancement('arts', citizen, division?.advancementCosts)">Buy</button>
           Arts: {{ citizen?.advancements?.arts }}
         </div>
-        <div>
+        <div class="editable-item">
           <button (click)="changeCitizenProperty(citizen, 'advancements/knowledge', 'advancement', 'knowledge')">
-            <fa-icon size="sm" [icon]="faPen"></fa-icon>
+            <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
           </button>
           <button (click)="updateAdvancement('knowledge', citizen, division?.advancementCosts)">Buy</button>
           Knowledge: {{ citizen?.advancements?.knowledge }}
         </div>
-        <div>
+        <div class="editable-item">
           <button (click)="changeCitizenProperty(citizen, 'advancements/infrastructure', 'advancement', 'infrastructure')">
-            <fa-icon size="sm" [icon]="faPen"></fa-icon>
+            <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
           </button>
           <button (click)="updateAdvancement('infrastructure', citizen, division?.advancementCosts)">Buy</button>
           Infrastructure: {{ citizen?.advancements?.infrastructure }}
@@ -381,21 +401,21 @@
         </div>
         <div>
           <!-- <button (click)="changeDivisionProperty('nextSeason/capacity')">
-            <fa-icon size="sm" [icon]="faPen"></fa-icon>
+            <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
           </button>
           Capacity: {{ division.capacity }} &#8594;  -->
           Capacity: <span class="new-value">{{ next?.capacity }}</span>
         </div>
         <div>
           <!-- <button (click)="changeDivisionProperty('nextSeason/harvest')">
-            <fa-icon size="sm" [icon]="faPen"></fa-icon>
+            <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
           </button>
           Harvest: {{ division.harvest }} &#8594;  -->
           Harvest: <span class="new-value">{{ next?.harvest }}</span>
         </div>
         <div>
           <!-- <button (click)="changeDivisionProperty('nextSeason/landCost')">
-            <fa-icon size="sm" [icon]="faPen"></fa-icon>
+            <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
           </button>
           Land Cost: {{ division.landCost }} &#8594;  -->
           Land Cost: <span class="new-value">{{ next?.landCost }}</span>
@@ -405,7 +425,7 @@
           <ul style="margin: 0">
             <li>
               <!-- <button (click)="changeDivisionProperty('nextSeason/thresholds/0', 'Low')">
-                <fa-icon size="sm" [icon]="faPen"></fa-icon>
+                <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
               </button>
               Low: {{ division.reserveThresholds.low }}
               &#8594;  -->
@@ -413,7 +433,7 @@
             </li>
             <li>
               <!-- <button (click)="changeDivisionProperty('nextSeason/thresholds/1', 'Low')">
-                <fa-icon size="sm" [icon]="faPen"></fa-icon>
+                <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
               </button>
               Mid: {{ division.reserveThresholds.mid }}
               &#8594;  -->
@@ -421,7 +441,7 @@
             </li>
             <li>
               <!-- <button (click)="changeDivisionProperty('nextSeason/thresholds/2', 'High')">
-                <fa-icon size="sm" [icon]="faPen"></fa-icon>
+                <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
               </button>
               High: {{ division.reserveThresholds.high }}
               &#8594;  -->

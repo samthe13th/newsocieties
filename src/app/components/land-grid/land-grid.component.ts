@@ -54,10 +54,10 @@ export class LandGridComponent implements OnInit {
   ) {}
 
   getPosition(id) {
-    if (this.positions?.indexOf(id)) {
+    if (this.positions?.indexOf(id) !== -1) {
       return this.positions?.indexOf(id) + 1
     }
-    return 'X';
+    return '';
   }
 
   ngOnInit() {

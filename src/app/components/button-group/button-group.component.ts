@@ -1,5 +1,6 @@
 import { Component, Input, EventEmitter, Output, OnInit } from '@angular/core';
 import { find } from 'lodash';
+import * as fa from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-button-group',
@@ -11,6 +12,7 @@ import { find } from 'lodash';
 })
 export class ButtonGroupComponent implements OnInit {
   currentButton;
+  fa = fa;
 
   @Output() select = new EventEmitter<any>()
   

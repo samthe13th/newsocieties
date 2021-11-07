@@ -10,10 +10,10 @@ import { BankService } from 'src/app/services/bank.service';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { ButtonGroupComponent } from 'src/app/components/button-group/button-group.component';
 import { DivisionService } from 'src/app/services/division-service.service';
-import { faPen } from '@fortawesome/free-solid-svg-icons';
+import { faPen, faGavel, faLandmark, faGlobe, faLeaf, faCartPlus } from '@fortawesome/free-solid-svg-icons';
 import { NotificationType } from 'src/app/shared/types';
 import { LandGridComponent } from 'src/app/components/land-grid/land-grid.component';
-
+import * as fa from '@fortawesome/free-solid-svg-icons';
 
 const DIVISIONS = ["N", "NE", "W", "NW", "E", "SW", "S", "SE"];
 
@@ -29,6 +29,7 @@ export class HostComponent implements OnInit {
   @ViewChild('harvestTemplate') harvestTemplate: TemplateRef<any>;
   @ViewChild('principleTemplate') principleTemplate: TemplateRef<any>;
   @ViewChild('resolutionTemplate') resolutionTemplate: TemplateRef<any>;
+  @ViewChild('resolutionReviewTemplate') resolutionReviewTemplate: TemplateRef<any>;
   @ViewChild('scenerioTemplate') scenerioTemplate: TemplateRef<any>;
   @ViewChild('miscTemplate') miscTemplate: TemplateRef<any>;
   @ViewChild('newSeasonTemplate') newSeasonModal: TemplateRef<any>;
@@ -48,15 +49,16 @@ export class HostComponent implements OnInit {
 
   // ICONS
   faPen = faPen;
+  fa = fa;
 
   showModal = false;
 
   focusButtons = [
-    { id: 'harvest', label: 'Ha' },
-    { id: 'principles', label: 'Pr' },
-    { id: 'resolutions', label: 'Re' },
-    { id: 'scenerio', label: 'Sc' },
-    { id: 'misc', label: 'Mc' },
+    { id: 'harvest', label: 'Harvest', faIcon: faLeaf },
+    { id: 'principles', label: 'Principle', faIcon: faLandmark },
+    { id: 'resolutions', label: 'Resolution', faIcon: faGavel },
+    { id: 'scenerio', label: 'Scenerio', faIcon: faGlobe },
+    { id: 'misc', label: 'Market', faIcon: faCartPlus },
   ]
 
   resourceType = 3;
@@ -80,6 +82,7 @@ export class HostComponent implements OnInit {
   $localLand;
   $globalLand;
   $turnButtons;
+  $lastResolution;
 
   selectedCitizen;
   changeAttribute;
@@ -138,13 +141,16 @@ export class HostComponent implements OnInit {
 
     this.$vote = this.db.object(`${this.divisionPath}/vote`).valueChanges();
     this.$division = this.db.object(this.divisionPath).valueChanges();
-    this.$citizens = this.db.list(`${this.divisionPath}/citizens`).valueChanges().pipe(tap((citizens) => {
-      console.log('$$$:', this.citizenCount, citizens.length);
-      if (this.citizenCount !== citizens.length) {
-        this.updatePositions();
-      }
-      this.citizenCount = citizens.length;
-    }))
+    this.$citizens = this.db.list(`${this.divisionPath}/citizens`).valueChanges()
+      .pipe(
+        tap((citizens) => {
+          if (this.citizenCount !== citizens.length) {
+            this.updatePositions();
+          }
+          this.citizenCount = citizens.length;
+      })
+    )
+    this.$lastResolution = this.db.object(`${this.divisionPath}/lastResolution`).valueChanges()
     this.$resolutions = this.db.list(`${this.divisionPath}/resolutions`).valueChanges();
     this.$principles = this.db.list(`${this.divisionPath}/principles`).valueChanges();
     this.$scenerios = this.db.list(`${this.divisionPath}/scenerios`).valueChanges();
@@ -159,7 +165,6 @@ export class HostComponent implements OnInit {
       .pipe(
         map((citizens: any) => citizens.map((c, index) => ({ id: c.id, label: index + 1 })))
       )
-
     this.$focus.subscribe((focus) => {
       console.log({focus})
       this.focus = focus;
@@ -227,7 +232,7 @@ export class HostComponent implements OnInit {
         wealth: this.bankService.calculateWealth(citizen.resources),
         cost: landCost
       },
-      dbPath: `${this.divisionPath}/citizens/${citizen.id}/localLand`
+      dbPath: `${this.divisionPath}/citizens/${citizen.id}/land`
     };
     this.actionSheet = this.bottomSheet.open(this.localLandSheet);
   }
@@ -275,7 +280,6 @@ export class HostComponent implements OnInit {
         id: this.selectedCitizen.id,
         name: this.positions.indexOf(this.selectedCitizen.id) + 1
       }]);
-      this.db.object(updatePath).query.ref.transaction(land => ++land ?? 0);
       this.actionSheet.dismiss();
     })
   }
@@ -379,14 +383,28 @@ export class HostComponent implements OnInit {
     })
   }
 
-  setFocus(type) {
+  newResolution() {
+    this.setVoteDropdown('resolutions');
+    this.modalContent = this.resolutionTemplate;
     this.showModal = true;
+  }
+
+  async setFocus(type) {
+    const lastResolution = await this.db.object(`${this.divisionPath}/lastResolution`)
+      .valueChanges()
+      .pipe(take(1))
+      .toPromise();
+
     if (type === 'principles') {
       this.setVoteDropdown('principles');
       this.modalContent = this.principleTemplate;
     } else if (type === 'resolutions') {
-      this.setVoteDropdown('resolutions');
-      this.modalContent = this.resolutionTemplate;
+      if (lastResolution) {
+        this.modalContent = this.resolutionReviewTemplate;
+      } else {
+        this.setVoteDropdown('resolutions');
+        this.modalContent = this.resolutionTemplate;
+      }
     } else if (type === 'scenerio') {
       this.setVoteDropdown('scenerios');
       this.modalContent = this.scenerioTemplate;
@@ -395,6 +413,7 @@ export class HostComponent implements OnInit {
     } else if (type === 'misc') {
       this.modalContent = this.miscTemplate;
     }
+    this.showModal = true;
   }
 
   startHarvest() {
@@ -480,6 +499,11 @@ export class HostComponent implements OnInit {
     } else if (this.divisionVote.vote.type === 'scenerio') {
       this.setScenerio();
     }
+  }
+
+  reviewLastResolution() {
+    this.db.object(`${this.divisionPath}/focus`).set('resolutionReview');
+    this.showModal = false;
   }
 
   get voteReady() {
@@ -594,7 +618,7 @@ export class HostComponent implements OnInit {
       selected: this.divisionVote.selection
     })
 
-    this.db.list(`${this.divisionPath}/resolutions`).push({
+    this.db.object(`${this.divisionPath}/lastResolution`).set({
       title: this.divisionVote.vote.title,
       value: resolution,
       consequence, 

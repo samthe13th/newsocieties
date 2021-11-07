@@ -6,6 +6,7 @@
   flex-direction: column;
   background: white;
   border-radius: 10px;
+  overflow: hidden;
 
   .turn-controls {
     display: flex;
@@ -18,6 +19,14 @@
   button {
     margin: 10px;
   }
+}
+
+.review-card {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  color: black;
+  margin-bottom: 20px;
 }
 
 .misc-wrapper {

@@ -1,6 +1,5 @@
 .button-group__options {
   display: flex;
-  height: 40px;
   border: solid 1px black;
   border-radius: 10px;
 }
@@ -11,6 +10,9 @@
   padding: 10px;
   padding-bottom: 10px;
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   font-size: 18px;
   cursor: pointer;
 
