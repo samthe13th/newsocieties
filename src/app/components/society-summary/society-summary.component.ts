@@ -6,7 +6,8 @@ import { Component, Input } from '@angular/core';
   styleUrls: ['./society-summary.component.scss'],
   host: {
     '[class.society-summary]': 'true',
-    '[class.flex-column]': 'true'
+    '[class.flex-column]': 'true',
+    '[style.background]': 'division?.color'
   }
 })
 export class SocietySummaryComponent {

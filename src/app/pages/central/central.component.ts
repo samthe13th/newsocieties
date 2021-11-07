@@ -10,6 +10,16 @@ import * as moment from 'moment';
 import { ActivatedRoute } from '@angular/router';
 
 const DIVISIONS = ['N', 'S', 'E', 'W', 'NE', 'SE', 'SW', 'NW'];
+const COLORS = {
+  E: '#4286f4',
+  N: '#000000',
+  NE: '#660300',
+  NW: '#34a853',
+  S: '#bf7221',
+  SE: '#a296c0',
+  SW: '#42b3bd',
+  W: '#eeb303'
+}
 const MAX_HARVEST = 49;
 const CITIZEN_NAMES = ['Sam', 'Mark', 'Mandy', 'Sarah', 'Kimmy', 'Zed'];
 const ADVANCEMENTS = ["safety", "health", "arts", "knowledge", "infrastructure"];
@@ -456,6 +466,7 @@ export class CentralComponent implements OnInit, AfterViewInit {
       ...acc, 
       [abv]: { 
         ...DIVISION_TEMPLATE,
+        color: COLORS[abv],
         code: abv, 
         landTiles: this.generateLandTiles(),
         // citizens: this.generateCitizens(abv)
