@@ -13,6 +13,11 @@ export class BankService {
     ) {
   }
 
+  calculateWealth(resources) {
+    if (!resources) return 0;
+    return resources.reduce((acc, R) => acc + R.value, 0);
+  }
+
   async removeFromReserve(divisionPath, amount) {
     const reservePath = `${divisionPath}/reserve`;
     const reserve = await this.db.object(reservePath).valueChanges()

@@ -113,17 +113,19 @@ select {
 }
 
 .app-flash-news {
+  text-align: center;
+  justify-content: center;
   display: flex; 
   flex-direction: column;
   width: 100%;
-  padding: 15px;
-  background: #154f6c;
+  padding: 10px 40px;
+  background: #1f4d62;
   color: white;
   border-radius: 10px;
   margin-bottom: 10px;
   box-sizing: border-box;
   flex-shrink: 0;
-  height: 150px;
+  height: 140px;
   font-weight: 200;
   font-size: 18px;
 }
@@ -140,7 +142,7 @@ select {
 .app-fundraising {
   display: flex; 
   flex-direction: column; 
-  background: #642F2F;
+  background: black;
   border-radius: 10px; 
   color: white;
   margin-bottom: 10px;
@@ -150,7 +152,7 @@ select {
   @extend %app-page;
   padding: 15px;
   padding-bottom: 0;
-  background: #744e2c;
+  background: black;
 }
 
 .app-vote {
@@ -168,9 +170,15 @@ select {
 
   &.citizen {
     justify-content: center;
+
+    button {
+      padding: 10px;
+      font-size: 20px;
+    }
     
     .vote-wrapper {
-      background: transparent;
+      display: flex;
+      width: 100%;
       color: white;
     }
   }
@@ -211,6 +219,7 @@ select {
 
 .app-player-deck {
   height: 100%;
+  font-size: 16px;
   display: flex; 
   flex-direction: column;
   margin-bottom: 5px;
@@ -281,6 +290,7 @@ select {
   border-radius: 10px;
   justify-content: center;
   align-items: center;
+  border-radius: 20px;
 
   &.blur {
     animation-name: blur-image;
@@ -291,8 +301,7 @@ select {
   }
 
   img {
-    height: 100%;
-    object-fit: fill;
+    width: 100%;
   }
  }
 
@@ -343,7 +352,7 @@ select {
 }
 
 .host-selected-tab {
-  background: black;
+  background: #255876;
   color: white;
 }
 
@@ -475,6 +484,7 @@ select {
       width: unset;
       height: unset;
       min-width: 300px;
+      max-height: 100%;
     }
 
     &.center {
@@ -626,7 +636,6 @@ select {
     background: #FDF4C5;
     padding: 12px;
     box-sizing: border-box;
-    border-radius: 10px;
 
     .tile {
       width: 100%;
@@ -694,6 +703,13 @@ select {
 
 .society-summary {
   display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 5px;
+  background: #1f5772;
+  font-size: 16px;
+  font-weight: 100;
+  border-radius: 10px;
 }
 
 .society-grid {

@@ -356,11 +356,28 @@ export class CentralComponent implements OnInit, AfterViewInit {
     this.showModal = true;
   }
 
-  resetShow() {
+  async resetShow() {
+    if (!confirm("This will reset all show data. Are you sure you want to do this?")) {
+      return
+    }
+    let users = await this.db.object(`shows/${this.showKey}/users`)
+      .valueChanges()
+      .pipe(take(1))
+      .toPromise()
+
+    console.log({users})
+
     const divisions = this.generateDivisions();
     this.db.object(`shows/${this.showKey}`).set({
       divisions,
-      ...SHOW_TEMPLATE
+      ...SHOW_TEMPLATE,
+      users: Object.keys(users).reduce((acc, key) => {
+        return { ...acc, [key]: {
+          ...users[key],
+          division: null,
+          name: null
+        }}
+      }, {})
     }).then((res) => {
       this.buildShow(this.showKey)
     })

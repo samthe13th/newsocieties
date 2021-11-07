@@ -125,7 +125,7 @@ export class HostComponent implements OnInit {
     private bank: BankService,
     private bottomSheet: MatBottomSheet,
     private divisionService: DivisionService,
-    private bankService: BankService
+    public bankService: BankService
   ) {}
 
   ngOnInit() {
@@ -224,7 +224,7 @@ export class HostComponent implements OnInit {
     this.changeAttribute = {
       name: 'Land',
       data: {
-        wealth: this.calculateWealth(citizen.resources),
+        wealth: this.bankService.calculateWealth(citizen.resources),
         cost: landCost
       },
       dbPath: `${this.divisionPath}/citizens/${citizen.id}/localLand`
@@ -237,7 +237,7 @@ export class HostComponent implements OnInit {
     this.changeAttribute = {
       name: adv,
       data: {
-        wealth: this.calculateWealth(citizen.resources),
+        wealth: this.bankService.calculateWealth(citizen.resources),
         cost: advancementCosts[Math.min(citizen.advancements[adv], 2)]
       },
       dbPath: `${this.divisionPath}/citizens/${citizen.id}/advancements/${adv}`
@@ -249,7 +249,7 @@ export class HostComponent implements OnInit {
   async buyAdvancement(advancement, price, updatePath) {
     console.log({advancement, price, updatePath})
     if (advancement > 3 || !this.selectedCitizen?.id) return;
-    const wealth = this.calculateWealth(this.selectedCitizen.resources);
+    const wealth = this.bankService.calculateWealth(this.selectedCitizen.resources);
     console.log({wealth, price})
     if (wealth >= price) {
       this.db.object(updatePath).query.ref.transaction(adv => ++adv ?? 1)
@@ -462,18 +462,19 @@ export class HostComponent implements OnInit {
   implement() {
     let confirmed = false;
     if (this.divisionVote.vote.type === 'resolution') {
-      const fundResolutionResult = this.fundResolution();
-      if (!fundResolutionResult.canEnact) {
-        alert(fundResolutionResult.warning);
-      } else if (fundResolutionResult.warning) {
-        confirmed = confirm(fundResolutionResult.warning);
-      } else {
-        confirmed = true;
-      }
-      if (confirmed) {
-        this.collectFunds();
-        this.setResolution();
-      }
+      this.setResolution();
+      // const fundResolutionResult = this.fundResolution();
+      // if (!fundResolutionResult.canEnact) {
+      //   alert(fundResolutionResult.warning);
+      // } else if (fundResolutionResult.warning) {
+      //   confirmed = confirm(fundResolutionResult.warning);
+      // } else {
+      //   confirmed = true;
+      // }
+      // if (confirmed) {
+      //   this.collectFunds();
+      //   this.setResolution();
+      // }
     } else if (this.divisionVote.vote.type === 'principle') {
       this.setPrinciple();
     } else if (this.divisionVote.vote.type === 'scenerio') {
@@ -485,14 +486,16 @@ export class HostComponent implements OnInit {
     return this.divisionVote !== undefined
   }
 
+  changeCitizenResources(citizen) {
+    console.log("change resources: ", citizen);
+    this.selectedCitizen = citizen;
+    this.actionSheet = this.bottomSheet.open(this.changeResourcesSheet);
+  }
+
   removeCitizenResources(citizen) {
     console.log("remove resources: ", citizen);
     this.selectedCitizen = citizen;
     this.actionSheet = this.bottomSheet.open(this.removeResourcesSheet);
-  }
-
-  changeCitizenResources(citizen) {
-    console.log("change resources: ", citizen)
   }
 
   addCitizenResources(citizen) {
@@ -650,8 +653,16 @@ export class HostComponent implements OnInit {
     })
   }
 
-  changeResources(wealth, value) {
-    console.log('change R: ', wealth, value)
+  changeResources(value) {
+    const wealth = this.bankService.calculateWealth(this.selectedCitizen.resources);
+    console.log('change R: ', wealth, value);
+    if (value > wealth) {
+      this.addResources(value - wealth);
+    } else if (value < wealth) {
+      this.removeResources(wealth - value);
+    } else {
+      this.actionSheet.dismiss();
+    }
   }
 
   addResources(amount) {

@@ -1,3 +1,9 @@
+.vote-recap {
+  line-height: 40px;
+  font-size: 24px;
+  font-weight: lighter;
+}
+
 .vote-wrapper {
   padding: 30px;
   font-size: 18px;
@@ -15,8 +21,9 @@
   .vote-prompt {
     font-size: 20px;
     line-height: 20px;
-    align-self: flex-start;
+    align-self: center;
     margin-bottom: 20px;
+    max-width: 300px
   }
 
   .vote-header {
@@ -82,7 +89,7 @@
 
   .vote-tally {
     margin-left: 10px; 
-    background: #327e90;
+    background: black;
     color: white;
     border-radius: 100%;
     width: 22px;

@@ -18,6 +18,7 @@ export class SocietyGridComponent {
   constructor(private db: AngularFireDatabase) {}
 
   @Input() showKey;
+  @Input() details = 'full';
 
   ngOnInit() {
     this.db.object(`shows/${this.showKey}`)

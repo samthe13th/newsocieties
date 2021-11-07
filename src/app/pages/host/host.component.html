@@ -56,7 +56,7 @@
       [buttons]="focusButtons">
     </app-button-group>
     <div *ngIf="focus === 'misc'" class="misc-wrapper">
-      Pending GLA requests
+      <app-society-grid [showKey]="showKey" details="brief"></app-society-grid>>
     </div>
     <div *ngIf="focus === 'harvest'" class="harvest-wrapper">
       <app-land-grid
@@ -85,7 +85,7 @@
     </div>
     <div *ngIf="focus === 'principles' || focus === 'resolutions' || focus === 'scenerio'" class="resolution-wrapper">
       <ng-container *ngIf="($vote | async) as vote">
-        <app-fundraising
+        <!-- <app-fundraising
           style="background: black"
           *ngIf="vote?.state === 'review' && vote?.type === 'resolution'"
           [showKey]="showKey"
@@ -93,7 +93,7 @@
           [isCentral]="true"
           (fundsChange)="onFundsChange($event)"
           >
-        </app-fundraising>
+        </app-fundraising> -->
         <app-vote 
           (selectionChange)="onSelectionChange($event)"
           [showVotes]="true"
@@ -303,7 +303,7 @@
             <fa-icon size="sm" [icon]="faPen"></fa-icon>
           </button>
           <button (click)="transferCitizenResources(citizen)">Donate</button>
-          Resources: {{ calculateWealth(citizen?.resources) }}
+          Resources: {{ bankService?.calculateWealth(citizen?.resources) }}
           <!-- <button (click)="removeCitizenResources(citizen)">-</button>
           <button (click)="addCitizenResources(citizen)">+</button> -->
         </div>
@@ -534,9 +534,10 @@
       #changeResourcePicker
       class="number-picker"
       [arrowKeys]="true"
+      [value]="bankService?.calculateWealth(this.selectedCitizen.resources)"
       [min]="0">
     </ng-number-picker>
-    <button (click)="changeResources(0, changeResourcePicker.value)">
+    <button (click)="changeResources(changeResourcePicker.value)">
       Confirm
     </button>
   </div>
@@ -558,7 +559,7 @@
 </ng-template>
 
 <ng-template #transferResourcesSheet>
-  <div class="action-sheet flex-column" *ngIf="calculateWealth(selectedCitizen.resources) as wealth">
+  <div class="action-sheet flex-column" *ngIf="bankService?.calculateWealth(selectedCitizen.resources) as wealth">
     <div>Transfer to Reserve</div>
     <ng-number-picker
       #transferResourcePicker

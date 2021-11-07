@@ -3,15 +3,16 @@
     <app-society-summary
       *ngIf="(slot.listener | async) as division"
       class="division-summary"
-      details="full"
+      [details]="details"
       [division]="division">
     </app-society-summary>
     <div *ngIf="!slot.listener"></div>
   </ng-container>
   <ng-container *ngIf="slot.code == 'C'">
-    <div *ngIf="(slot.listener | async) as summary">
-      <div>Capacity {{ summary.actual }} / {{ summary.capacity }}</div>
-      <div>Exceeded {{ (summary.actual / summary.capacity) * 100 }}%</div>
+    <div class="grid-center" *ngIf="(slot.listener | async) as summary">
+      <img src="/assets/globe.jpeg"/>
+      <!-- <div>Capacity {{ summary.actual }} / {{ summary.capacity }}</div>
+      <div>Exceeded {{ (summary.actual / summary.capacity) * 100 }}%</div> -->
     </div>
   </ng-container>
 </ng-container>

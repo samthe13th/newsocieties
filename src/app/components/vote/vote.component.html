@@ -1,6 +1,6 @@
 <ng-container *ngIf="vote">
   <div class="vote-wrapper">
-    <div *ngIf="vote?.selected">
+    <div *ngIf="vote?.selected" class="vote-recap">
       {{ vote?.result }} {{ vote?.selected?.result }}
     </div>
 
