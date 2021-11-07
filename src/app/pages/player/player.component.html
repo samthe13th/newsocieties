@@ -46,6 +46,26 @@
           </div>
         </div>
       </ng-container>
+
+      <ng-container *ngIf="focus === 'resolutionReview'">
+        <div class="player-vote-wrap">
+          <div class="relative-position">
+            <div class="tab-background voting blur" >
+              <img src="assets/hex.jpg"/>
+            </div>
+      
+            <div class="tab-foreground player-vote">
+              <h1>PREVIOUS RESOLUTION</h1>
+              <hr style="width: 100%"/>
+              <br/>
+              <h2>{{ division?.lastResolution?.title }}</h2>
+              <div>{{ division?.lastResolution?.value }}</div>
+              <br/>
+              <em style="font-size: 14px">{{ division?.lastResolution?.consequence }}</em>
+            </div>
+          </div>
+        </div>
+      </ng-container>
       
       <!-- VOTE -->
       <ng-container *ngIf="focus === 'resolutions' || focus === 'principles' || focus === 'scenerio'">
