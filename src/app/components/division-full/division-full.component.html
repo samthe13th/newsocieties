@@ -1,0 +1,46 @@
+<ng-container *ngIf="($division | async) as division">
+  <h1 class="division-full__header">{{division?.code}} Division
+    <!-- <span class="score">{{div?.score}}</span> -->
+  </h1>
+  <div class="division-full__body">
+    <div class="division-stats">
+      <h2>STATS</h2>
+      <p>Season: {{ division?.season }}</p>
+      <p>Score: {{ division?.score }} ({{ division?.VP }})</p>
+      <p>Reserve: {{ division?.reserve }}</p>
+      <p>Harvest: {{ division?.harvest ? division.harvest : 0 }}</p>
+      <p>Capacity: {{ division?.capacity ? division.capacity : 0 }}</p>
+      <p>Land cost: {{ division?.landCost }}</p>
+    </div>
+    <div class="division-decisions-wrap">
+      <app-button-group
+        #divisionDecision
+        (select)="onDivisionDecisionSelect($event)"
+        selectById="principles"
+        [buttons]="divisionDecisionsButtons">
+      </app-button-group>
+      <hr/>
+      <div class="division-decisions">
+        <ng-container *ngIf="showDecisions === 'principles'">
+          <div *ngFor="let principle of ($principles | async)">
+            <h3 style="margin: 0"><strong>{{ principle.title }}</strong></h3>
+            <div [innerHtml]="principle.value"></div>
+          </div>
+        </ng-container>
+        <ng-container *ngIf="showDecisions === 'resolutions'">
+          <div *ngFor="let resolution of ($resolutions | async)">
+            <h3 style="margin: 0"><strong>{{ resolution.title }}</strong></h3>
+            <div [innerHtml]="resolution.value"></div>
+          </div>
+        </ng-container>
+        <ng-container *ngIf="showDecisions === 'events'">
+          <div *ngFor="let event of ($events | async)">
+            <h3 style="margin: 0"><strong>{{ event.header }}</strong></h3>
+            <div [innerHtml]="event.value"></div>
+            <br/>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+</ng-container>

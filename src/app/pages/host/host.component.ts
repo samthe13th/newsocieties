@@ -4,7 +4,7 @@ import { AngularFireDatabase } from '@angular/fire/database';
 import { getRandomInt, pluckRandom } from 'src/app/utilties';
 import { LandTile, LandCardValues } from 'src/app/interfaces';
 import * as _ from 'lodash';
-import { includes, difference, trim, differenceBy, toNumber, each, partition, toArray } from 'lodash';
+import { includes, difference, trim, differenceBy, toNumber, each, partition } from 'lodash';
 import { take, map, tap } from 'rxjs/operators'
 import { BankService } from 'src/app/services/bank.service';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
@@ -612,19 +612,19 @@ export class HostComponent implements OnInit {
   setResolution() {
     const resolution = `${this.divisionVote.vote.result} ${this.divisionVote.selection.result}`;
     const consequence = this.divisionVote.selection.consequence;
+    const resolutionData = {
+      title: this.divisionVote.vote.title,
+      value: resolution,
+      consequence, 
+      cosequencesImplemented: false
+    }
 
     this.db.object(`${this.divisionPath}/vote`).update({
       state: 'final',
       selected: this.divisionVote.selection
     })
-
-    this.db.object(`${this.divisionPath}/lastResolution`).set({
-      title: this.divisionVote.vote.title,
-      value: resolution,
-      consequence, 
-      cosequencesImplemented: false
-    })
-
+    this.db.object(`${this.divisionPath}/lastResolution`).set(resolutionData)
+    this.db.list(`${this.divisionPath}/resolutions`).push(resolutionData)
     this.db.list(`${this.divisionPath}/notifications`).push({
       type: NotificationType.resolution,
       header: "RESOLUTION",

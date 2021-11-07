@@ -26,6 +26,7 @@ import { ExportsComponent } from './exports/exports.component';
 import { NgMultiSelectDropDownModule } from 'ng-multiselect-dropdown';
 import { FlashNewsComponent } from './flash-news/flash-news.component';
 import { UsersGridComponent } from './users-grid/users-grid.component';
+import { DivisionFullComponent } from './division-full/division-full.component';
 
 
 const components = [
@@ -34,6 +35,7 @@ const components = [
   CardComponent,
   ChatComponent,
   DialogComponent,
+  DivisionFullComponent,
   ExportsComponent,
   FlashNewsComponent,
   FundraisingComponent,

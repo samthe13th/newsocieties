@@ -60,7 +60,7 @@ export class CentralComponent implements OnInit, AfterViewInit {
 
   modalContent: TemplateRef<any>;
   showKey: string;
-  divisions = DIVISIONS;
+  divisions;
   chatInput = "";
   tabs;
   csvFileData = {
@@ -115,6 +115,7 @@ export class CentralComponent implements OnInit, AfterViewInit {
         return { start, clock, time, live }
       })
     )
+    this.divisions = DIVISIONS;
   }
 
   ngAfterViewInit() {
@@ -126,7 +127,7 @@ export class CentralComponent implements OnInit, AfterViewInit {
         { id: 'show', tabTemplate: this.showTab, bodyTemplate: this.showBody },
         { id: 'users', tabTemplate: this.usersTab, bodyTemplate: this.usersBody },
         { id: 'summary', tabTemplate: this.summaryTab, bodyTemplate: this.summaryBody },
-        ...this.divisions.map((div, i) => {
+        ...DIVISIONS.map((div, i) => {
           return { id: div, tabTemplate: tabTemplates[i], bodyTemplate: bodyTemplates[i] }
         })
       ]

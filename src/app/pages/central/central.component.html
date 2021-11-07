@@ -237,7 +237,7 @@
 </ng-template>
 
 <ng-container *ngFor="let div of divisions">
-  <ng-template #tab>{{div}}</ng-template>
+  <ng-template #tab>{{ div }}</ng-template>
   <ng-template #division>
     <div class="central__division">
       <div class="central__division-chat">
@@ -280,7 +280,7 @@
         </div>
       </div>
       <div class="central__division-main">
-        {{div.code}}
+        <app-division-full [showKey]="showKey" [division]="div"></app-division-full>
       </div>
     </div>
   </ng-template>

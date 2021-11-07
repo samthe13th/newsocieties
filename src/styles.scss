@@ -112,6 +112,15 @@ select {
   margin-left: 20px;
 }
 
+.app-division-full {
+  display: flex; 
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  margin-left: 10px;
+  overflow: hidden
+}
+
 .app-flash-news {
   text-align: center;
   justify-content: center;
