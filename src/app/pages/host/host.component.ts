@@ -84,6 +84,7 @@ export class HostComponent implements OnInit {
   $globalLand;
   $turnButtons;
   $lastResolution;
+  $exports;
 
   selectedCitizen;
   changeAttribute;
@@ -152,6 +153,7 @@ export class HostComponent implements OnInit {
           this.citizenCount = citizens.length;
       })
     )
+    this.$exports = this.db.list(`${this.divisionPath}/exports`).valueChanges();
     this.$lastResolution = this.db.object(`${this.divisionPath}/lastResolution`).valueChanges()
     this.$resolutions = this.db.list(`${this.divisionPath}/resolutions`).valueChanges();
     this.$principles = this.db.list(`${this.divisionPath}/principles`).valueChanges();
@@ -640,15 +642,6 @@ export class HostComponent implements OnInit {
     })
     this.db.object(`${this.divisionPath}/lastResolution`).set(resolutionData)
     this.db.list(`${this.divisionPath}/resolutions`).push(resolutionData)
-    this.db.list(`${this.divisionPath}/notifications`).push({
-      type: NotificationType.resolution,
-      header: "RESOLUTION",
-      value: resolution,
-      requiresAction: consequence,
-      resolved: false,
-      rejectable: false,
-      sender: null
-    })
   }
 
   clearVote() {

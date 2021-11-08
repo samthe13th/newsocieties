@@ -188,8 +188,8 @@
 </ng-template>
 
 <ng-template #miscTemplate>
-  Misc
-  <button (click)="startMisc()">Start</button>
+  Open market
+  <button (click)="startMisc()">Continue</button>
 </ng-template>
 
 <!-- TABS-->
@@ -489,6 +489,14 @@
      [showKey]="showKey"
      [divisionKey]="divisionKey">
     </app-exports>
+    <div class="exports-list">
+      <div *ngFor="let export of ($exports | async)">
+        <h2 style="margin: 0">TO: {{ export?.reciever }} Division</h2>
+        <em>{{ export?.header }}</em>
+        <p>{{ export?.value }}</p>
+        <br/>
+      </div>
+    </div>
   </div>
 </ng-template>
 

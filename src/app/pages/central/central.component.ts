@@ -138,7 +138,6 @@ export class CentralComponent implements OnInit, AfterViewInit {
   }
 
   onTabChange(tab) {
-    console.log("tab change; ", tab)
     if (includes(DIVISIONS, tab.id)) {
       this.db.object(`shows/${this.showKey}/centralUnseen/${tab.id}`).set(0)
     }

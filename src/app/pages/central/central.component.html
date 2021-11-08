@@ -161,7 +161,22 @@
   <div class="flex-row" style="overflow: hidden">
     <div class="central-left-section">
       <button (click)="resetShow()">Reset Show</button>
-    
+
+      <br/>
+
+      <ng-container *ngIf="$contamination | async as contam">
+        Global Contamination Level (%):
+        <ng-number-picker
+         class="number-picker"
+         (valueChange)="onContaminationChange($event)" 
+         [min]="0"
+         [max]="100"
+         [value]="contam?.current">
+        </ng-number-picker>
+      </ng-container>
+
+      <hr/>
+      
       <div class="vote-data">
         Principles
         <input [(ngModel)]="csvFileData.principles" (change)="uploadPrinciplesData($event)" type="file" #fileUpload/>
@@ -188,17 +203,6 @@
       </div>
 
       <hr/>
-
-      <ng-container *ngIf="$contamination | async as contam">
-        Global Contamination Level (%):
-        <ng-number-picker
-         class="number-picker"
-         (valueChange)="onContaminationChange($event)" 
-         [min]="0"
-         [max]="100"
-         [value]="contam?.current">
-        </ng-number-picker>
-      </ng-container>
     </div>
     <div class="timeline">
       <div>

@@ -125,34 +125,34 @@ export class ExportsComponent implements OnInit {
 
   async sendResources() {
     console.log("send: ", this.resourcePicker.value);
-    this.bankService.removeFromReserve(`shows/${this.showKey}/divisions/${this.divisionKey}`, this.resourcePicker.value).then(() => {
-      this.db.list(`shows/${this.showKey}/divisions/${this.selectedDivision.select_id}/notifications`).push({
-        type: NotificationType.resourceGift,
-        header: `The ${this.divisionKey} Division has sent you resouces: ${this.resourcePicker.value}`,
-        value: this.messageInput ?? '',
-        resolved: false,
-        rejectable: true,
-        acceptable: true,
-        sender: this.divisionKey,
-        data: this.resourcePicker.value ?? 0
-      }).then(() => {
-        this.db.list(`shows/${this.showKey}/divisions/${this.selectedDivision.select_id}/unseenNotifications`).push(this.divisionKey)
-        this.clearAll();
-      })
-    })
+    await this.bankService.removeFromReserve(`shows/${this.showKey}/divisions/${this.divisionKey}`, this.resourcePicker.value);
+    const data = {
+      type: NotificationType.resourceGift,
+      header: `The ${this.divisionKey} Division has sent you resouces: ${this.resourcePicker.value}`,
+      value: this.messageInput ?? '',
+      resolved: false,
+      rejectable: true,
+      acceptable: true,
+      sender: this.divisionKey,
+      reciever: this.selectedDivision.select_id,
+      data: this.resourcePicker.value ?? 0
+    }
+    await this.logExport(data);
+    this.clearAll();
   }
 
-  sendMessage() {
-    this.db.list(`shows/${this.showKey}/divisions/${this.selectedDivision.select_id}/notifications`).push({
+  async sendMessage() {
+    console.log('reciever: ', this.selectedDivision)
+    const data = {
       type: NotificationType.message,
       header: `Message from ${this.divisionKey} Division:`,
       value: this.messageInput,
       resolved: false,
       sender: this.divisionKey,
-    }).then(() => {
-      this.db.list(`shows/${this.showKey}/divisions/${this.selectedDivision.select_id}/unseenNotifications`).push(this.divisionKey)
-      this.clearAll();
-    })
+      reciever: this.selectedDivision?.select_id
+    }
+    await this.logExport(data);
+    this.clearAll();
   }
 
   async makeGLAForcedAquisition() {
@@ -164,17 +164,25 @@ export class ExportsComponent implements OnInit {
     }))
 
     await this.divisionService.acquireLand(this.showKey, this.selectedDivision.select_id, data);
-
-    this.db.list(`shows/${this.showKey}/divisions/${this.selectedDivision.select_id}/notifications`).push({
+    await this.logExport({
       type: NotificationType.glaHostile,
       header: `The ${this.divisionKey} division has taken land plots by force: ${this.selectedFrom.length}`,
       value: this.messageInput ?? '',
       resolved: false,
       sender: this.divisionKey, 
+      reciever: this.selectedDivision?.select_id,
       data
-    }).then(() => {
-      this.db.list(`shows/${this.showKey}/divisions/${this.selectedDivision.select_id}/unseenNotifications`).push(this.divisionKey);
-      this.clearAll();
+    })
+
+    this.clearAll();
+  }
+
+  async logExport(data) {
+    return new Promise(async (resolve) => {
+      await this.db.list(`shows/${this.showKey}/divisions/${this.selectedDivision.select_id}/notifications`).push(data);
+      await this.db.list(`shows/${this.showKey}/divisions/${this.selectedDivision.select_id}/unseenNotifications`).push(this.divisionKey);
+      await this.db.list(`shows/${this.showKey}/divisions/${this.divisionKey}/exports`).push(data)
+      resolve()
     })
   }
 
@@ -190,8 +198,7 @@ export class ExportsComponent implements OnInit {
         );
       })
 
-      console.log('selected division: ', this.selectedDivision);
-      this.db.list(`shows/${this.showKey}/divisions/${this.selectedDivision.select_id}/notifications`).push({
+      const data = {
         type: NotificationType.glaRequest,
         header: `The ${this.divisionKey} division would like to purchase land plots: ${this.selectedFrom.length}`,
         value: this.messageInput ?? '',
@@ -199,16 +206,17 @@ export class ExportsComponent implements OnInit {
         rejectable: true,
         acceptable: true,
         sender: this.divisionKey,
+        reciever: this.selectedDivision.select_id,
         data: this.selectedFrom.map((selection) => ({
           id: selection.select_id,
           name: this.divisionKey,
           division: this.divisionKey,
           cost: this.selectedDivision.landCost
         }))
-      }).then(() => {
-        this.db.list(`shows/${this.showKey}/divisions/${this.selectedDivision.select_id}/unseenNotifications`).push(this.divisionKey)
-        this.clearAll();
-      })
+      }
+
+      await this.logExport(data);
+      this.clearAll();
     }
   }
 

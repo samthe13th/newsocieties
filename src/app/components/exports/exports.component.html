@@ -30,7 +30,8 @@ Send:
 
     <br/>
 
-    <ng-number-picker
+    <div style="display:flex">
+      <ng-number-picker
       #resourcePicker
       class="number-picker"
       [arrowKeys]="true"
@@ -38,6 +39,7 @@ Send:
       [max]="$reserve | async"
       >
     </ng-number-picker>
+    </div>
   </ng-container>
 
   <br/>
@@ -73,5 +75,6 @@ Send:
   </span>
 </div>
 
-<hr/>
 <button (click)="send()">EXPORT</button>
+
+<hr/>
