@@ -1,6 +1,7 @@
 Send:
 <select
   [(ngModel)]="selectedExportType"
+  (change)="onSelectExportTypeChange()"
   name="vote-options"
   id="vote-options">
   <option
@@ -12,33 +13,63 @@ Send:
 
 <ng-container *ngIf="selectedExportType">
   <ng-container *ngIf="selectedExportType.type === 'multi'">
-    <br/>
-    From:
-    <ng-multiselect-dropdown
-      class="ns-multiselect"
-      [(ngModel)]="selectedFrom"
-      [settings]="multiSelectSettings"
-      [data]="$citizens | async"
-      (onSelect)="onFromSelect($event)"
-    >
-    </ng-multiselect-dropdown>
-  </ng-container>
+    <ng-container *ngIf="selectedExportType.name === 'Resources'">
+      <div *ngIf="$reserve | async as reserve">
+        From reserve ({{ reserve }}): <em *ngIf="reserve === 0">No resources</em>
 
-  <ng-container *ngIf="selectedExportType.name === 'Resources'">
-    <br/>
-    Send from reserve ({{ $reserve | async }}):
+        <br/>
+  
+        <div class="flex-row">
+          <ng-number-picker
+            #resourcePicker
+            class="number-picker"
+            [arrowKeys]="true"
+            [min]="0"
+            [max]="reserve"
+            >
+          </ng-number-picker>
+        </div>
+      </div>
+
+    </ng-container>
 
     <br/>
 
-    <div style="display:flex">
-      <ng-number-picker
-      #resourcePicker
-      class="number-picker"
-      [arrowKeys]="true"
-      [min]="0"
-      [max]="$reserve | async"
-      >
-    </ng-number-picker>
+    <div *ngIf="citizenData">
+      <table>
+        <tr>
+          <th>Add</th>
+          <th>Name</th>
+          <th>Resources</th>
+        </tr>
+        <ng-container>
+          <tr *ngFor="let citizen of citizenData">
+            <td>
+              <input 
+                type="checkbox"
+                [(ngModel)]="citizen.sendRequest"
+                id="citizen-{{citizen.id}}"
+                name="citizen-{{citizen.id}}">
+            </td>
+            <td>{{citizen?.position}}: {{ citizen?.name }}</td>
+            <td>
+              <div class="flex-row" *ngIf="citizen?.sendRequest === true">
+                <ng-number-picker
+                  *ngIf="citizen?.wealth > 0"
+                  [min]="0"
+                  [max]="citizen.wealth"
+                  [(value)]="citizen.spend"
+                  [arrowKeys]="true"
+                  class="number-picker">
+                </ng-number-picker>
+                <em *ngIf="citizen?.wealth === 0">No resources</em>
+              </div>
+            </td>
+          </tr>
+        </ng-container>
+      </table>
+      <br/>
+      TOTAL: {{ (resourcePicker ? resourcePicker.value : 0) + addResources(citizenData) }}
     </div>
   </ng-container>
 
@@ -47,7 +78,6 @@ Send:
   <select
     *ngIf="$divisions | async as divisions"
     [(ngModel)]="selectedDivision"
-    (change)="onDivisionSelect()"
     name="vote-options"
     id="vote-options">
     <option
@@ -75,6 +105,8 @@ Send:
   </span>
 </div>
 
-<button (click)="send()">EXPORT</button>
+<br/>
+
+<button *ngIf="selectedDivision" (click)="send()">EXPORT</button>
 
 <hr/>

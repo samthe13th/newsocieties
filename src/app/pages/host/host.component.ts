@@ -138,8 +138,6 @@ export class HostComponent implements OnInit {
     this.divisionKey = this.route.snapshot.params.division;
     this.showKey = this.route.snapshot.params.show;
     this.divisionPath = `shows/${this.showKey}/divisions/${this.divisionKey}`;
-    console.log('division path: ', this.divisionPath)
-    
     this.landTilesPath = `${this.divisionPath}/landTiles`;
 
     this.$vote = this.db.object(`${this.divisionPath}/vote`).valueChanges();
@@ -171,7 +169,6 @@ export class HostComponent implements OnInit {
         map((citizens: any) => citizens.map((c, index) => ({ id: c.id, label: index + 1 })))
       )
     this.$focus.subscribe((focus) => {
-      console.log({focus})
       this.focus = focus;
     })
 
@@ -201,14 +198,12 @@ export class HostComponent implements OnInit {
     const citizens = await this.db.list(`${divisionPath}/citizens`).valueChanges().pipe(
       take(1)
     ).toPromise();
-    console.log('UPDATE POSITIONS: ', {citizens});
     this.positions = citizens.map((c: any) => c?.id);
     this.db.object(`${divisionPath}/positions`).set(this.positions);
   }
 
   onAttributeUpdate(value) {
     this.actionSheet.dismiss();
-    console.log('on update: ', value)
   }
 
   calculateWealth(resources) {
@@ -225,7 +220,6 @@ export class HostComponent implements OnInit {
   }
 
   onRightTabChange(tab) {
-    console.log("tab: ", tab)
     this.rightTab = tab.id;
     if (this.rightTab === 'notifications' || tab.id === 'notifications') {
       this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/unseenNotifications`).remove();
@@ -233,9 +227,7 @@ export class HostComponent implements OnInit {
   }
 
   async onLeftTabChange(tab) {
-    console.log('tab: ', tab, this.leftTab, this.leftTab === 'central' || tab?.id === 'central')
     if (this.leftTab === 'central' || tab.id === 'central') {
-      console.log('CLEAR THIS')
       await this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/unseenChat`).set(0)
     }
     this.leftTab = tab.id;
@@ -264,19 +256,15 @@ export class HostComponent implements OnInit {
       },
       dbPath: `${this.divisionPath}/citizens/${citizen.id}/advancements/${adv}`
     }
-    console.log('change attr: ', this.changeAttribute)
     this.actionSheet = this.bottomSheet.open(this.advancementSheet);
   }
 
   async buyAdvancement(advancement, price, updatePath) {
-    console.log({advancement, price, updatePath})
     if (advancement > 3 || !this.selectedCitizen?.id) return;
     const wealth = this.bankService.calculateWealth(this.selectedCitizen.resources);
-    console.log({wealth, price})
     if (wealth >= price) {
       this.db.object(updatePath).query.ref.transaction(adv => ++adv ?? 1)
       this.bankService.spendResources(this.showKey, this.divisionKey, this.selectedCitizen?.id, price);
-      console.log('buy advancement: ', advancement, this.selectedCitizen, price, wealth);
     }
     const individualPath = `${this.divisionPath}/advancements/${advancement}/individual`;
     await this.db.object(individualPath).query.ref.transaction((ind) => ind ? ind + 1 : 1)
@@ -285,7 +273,6 @@ export class HostComponent implements OnInit {
   }
 
   buyLocalLand(price, updatePath) {
-    console.log('buy local land: ', this.selectedCitizen, price)
     this.bankService.spendResources(
       this.showKey,
       this.divisionKey,
@@ -324,7 +311,6 @@ export class HostComponent implements OnInit {
   }
 
   changeCitizenProperty(citizen, prop, type, name=null) {
-    console.log('change: ', citizen, prop, type, name)
     this.selectedCitizen = citizen;
     this.changeAttribute = {
       name: name ?? prop,
@@ -361,7 +347,6 @@ export class HostComponent implements OnInit {
       .valueChanges()
       .pipe(take(1))
       .subscribe((principles) => {
-        console.log('principles: ', principles)
         this.globalPrinciples = principles
       });
   }
@@ -376,19 +361,16 @@ export class HostComponent implements OnInit {
   }
 
   onTurnSelect(button) {
-    console.log("turn select: ", button)
     this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/turn`)
       .set({ id: button.id })
   }
 
   onFocusSelect(button) {
-    console.log('focus select: ', button);
     this.setFocus(button.id);
   }
 
   startVote(focus) {
     this.db.object(`${this.divisionPath}/focus`).set(focus);
-    console.log('start vote: ', this.voteDropdownSelect)
     this.showModal = false;
     this.action = 'voting';
     
@@ -459,7 +441,6 @@ export class HostComponent implements OnInit {
 
   closeModal() {
     this.showModal = false;
-    console.log("reset focus: ", focus);
     this.focusButtonsComponent.reset();
   }
 
@@ -468,11 +449,9 @@ export class HostComponent implements OnInit {
       const sourceKey = source.key.split('-')[0];
       if (!source?.value) { return }
       if (sourceKey === 'reserve') {
-        console.log("take from reserve: ", source, this.divisionVote.vote);
         this.bank.removeFromReserve(this.divisionPath, source.value)
       } else {
         const path = `${this.divisionPath}/citizens/${sourceKey}/resources`;
-        console.log({path})
         this.bank.spendResources(this.showKey, this.divisionKey, sourceKey, source.value)
       }
     })
@@ -496,21 +475,8 @@ export class HostComponent implements OnInit {
   }
 
   implement() {
-    let confirmed = false;
     if (this.divisionVote.vote.type === 'resolution') {
       this.setResolution();
-      // const fundResolutionResult = this.fundResolution();
-      // if (!fundResolutionResult.canEnact) {
-      //   alert(fundResolutionResult.warning);
-      // } else if (fundResolutionResult.warning) {
-      //   confirmed = confirm(fundResolutionResult.warning);
-      // } else {
-      //   confirmed = true;
-      // }
-      // if (confirmed) {
-      //   this.collectFunds();
-      //   this.setResolution();
-      // }
     } else if (this.divisionVote.vote.type === 'principle') {
       this.setPrinciple();
     } else if (this.divisionVote.vote.type === 'scenerio') {
@@ -528,25 +494,21 @@ export class HostComponent implements OnInit {
   }
 
   changeCitizenResources(citizen) {
-    console.log("change resources: ", citizen);
     this.selectedCitizen = citizen;
     this.actionSheet = this.bottomSheet.open(this.changeResourcesSheet);
   }
 
   removeCitizenResources(citizen) {
-    console.log("remove resources: ", citizen);
     this.selectedCitizen = citizen;
     this.actionSheet = this.bottomSheet.open(this.removeResourcesSheet);
   }
 
   addCitizenResources(citizen) {
-    console.log("add resources: ", citizen);
     this.selectedCitizen = citizen;
     this.actionSheet = this.bottomSheet.open(this.addResourcesSheet);
   }
 
   transferCitizenResources(citizen) {
-    console.log('transfer ', citizen);
     this.selectedCitizen = citizen;
     this.actionSheet = this.bottomSheet.open(this.transferResourcesSheet);
   }
@@ -562,7 +524,6 @@ export class HostComponent implements OnInit {
   }
 
   setVoteDropdown(type) {
-    console.log("set dropdown: ", type)
     const divisionPath = `shows/${this.showKey}/divisions/${this.divisionKey}`;
     this.voteDropdown = null;
     this.voteDropdownSelect = null;
@@ -574,17 +535,14 @@ export class HostComponent implements OnInit {
         .subscribe((resolutions) => {
           this.voteType = 'resolution';
           this.voteDropdown = differenceBy(this.globalResolutions, resolutions, 'title');
-          console.log(resolutions, this.voteDropdown);
         });
     } else if (type === 'principles') {
       this.db.list(`${divisionPath}/principles`)
         .valueChanges()
         .pipe(take(1))
         .subscribe((principles) => {
-          console.log('principles: ', principles)
           this.voteType = 'principle';
           this.voteDropdown = differenceBy(this.globalPrinciples, principles, 'title');
-          console.log(principles, this.voteDropdown);
         })
     } else if (type === 'scenerios') {
       this.db.list(`${divisionPath}/scenerios`)
@@ -593,7 +551,6 @@ export class HostComponent implements OnInit {
         .subscribe((scenerios) => {
           this.voteType = 'scenerio';
           this.voteDropdown = differenceBy(this.globalScenerios, scenerios, 'title');
-          console.log(scenerios, this.voteDropdown);
         })
     }
   }
@@ -652,12 +609,9 @@ export class HostComponent implements OnInit {
 
   submitChat(division) {
     if (!trim(this.chatInput)) return;
-
-    console.log("SUBMIT: ", division, this.showKey, this.chatInput);
     this.db.list(`shows/${this.showKey}/feeds/${this.divisionKey}`)
       .push({ from: this.divisionKey, type: 'chat', value: this.chatInput })
       .then((res) => { 
-        console.log('callback: ', res)
         this.chatInput = "";
       })
     this.db.object(`shows/${this.showKey}/centralUnseen/${division}`).query.ref.transaction(
@@ -690,7 +644,6 @@ export class HostComponent implements OnInit {
 
   changeResources(value) {
     const wealth = this.bankService.calculateWealth(this.selectedCitizen.resources);
-    console.log('change R: ', wealth, value);
     if (value > wealth) {
       this.addResources(value - wealth);
     } else if (value < wealth) {
@@ -712,9 +665,7 @@ export class HostComponent implements OnInit {
   }
 
   onResourceTypeSelect(x) {
-    console.log({x})
     this.resourceType = toNumber(x?.id);
-    console.log(this.resourceType, typeof this.resourceType)
   }
 
   async startSeason(division, newSeason) {
@@ -738,7 +689,6 @@ export class HostComponent implements OnInit {
     })
     this.resetCitizenActions();
     this.showModal = false;
-    console.log('NEW HARVEST: ', this.harvest)
   }
 
   newSeason(division) {
@@ -759,8 +709,6 @@ export class HostComponent implements OnInit {
         C: this.db.object(`shows/${this.showKey}/global`).valueChanges(),
         ...divisions,
       }
-
-      console.log({listeners})
 
       return DIVISIONS.map((code) => listeners[code]
         ? { code, listener: listeners[code] }
@@ -789,7 +737,6 @@ export class HostComponent implements OnInit {
   }
 
   private adjustContamination(level) {
-    console.log('adjust contam')
     this.contamination = level;
     if (this.harvest) {
       const cardIndexes = this.harvest
@@ -801,13 +748,11 @@ export class HostComponent implements OnInit {
         .filter(value => value !== -1);
       const adjustment = contaminantsCount - currentContaminantIndexes.length;
 
-      console.log({cardIndexes, contaminantsCount, current: currentContaminantIndexes.length, adjustment })
       if (adjustment > 0) {
         const contaminate = pluckRandom(
           difference(cardIndexes, currentContaminantIndexes),
           Math.min(adjustment, cardIndexes.length)
         );
-        console.log('add contams: ', contaminate)
         contaminate.forEach((i) => {
           if (!this.harvest[i].harvested) {
             this.harvest[i].value = LandCardValues.CONTAM;
@@ -815,7 +760,6 @@ export class HostComponent implements OnInit {
         })
       } else if (adjustment < 0) {
         const uncontaminate = pluckRandom(currentContaminantIndexes, Math.min(Math.abs(adjustment), currentContaminantIndexes.length));
-        console.log('Remove contams: ', uncontaminate)
         uncontaminate.forEach((i) => {
           if (!this.harvest[i].harvested) {
             this.harvest[i].value = getRandomInt(1,3);

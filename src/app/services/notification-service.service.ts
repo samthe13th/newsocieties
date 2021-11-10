@@ -41,13 +41,14 @@ export class NotificationService {
     })
   }
 
-  rejectResources(showKey, sender, resources) {
-    console.log('reject: ', showKey, sender, resources)
-    const divisionPath = `shows/${showKey}/divisions/${sender}`
+  rejectResources(showKey, sender, data) {
+    console.log('reject: ', showKey, sender, data)
     return new Promise((resolve) => {
-      this.bankService.addToReserve(divisionPath, resources).then(() => {
-        resolve(true)
+      data.senders.forEach(async (data) => {
+        const resources = this.bankService.quickConvert(sender, data.spend);
+        await this.bankService.depositResources(showKey, sender, data.id, resources);
       })
+      resolve(true);
     })
   }
 
@@ -66,7 +67,7 @@ export class NotificationService {
   acceptResources(showKey, divisionKey, data) {
     const divisionPath = `shows/${showKey}/divisions/${divisionKey}`
     return new Promise((resolve) => {
-      this.bankService.addToReserve(divisionPath, data).then(() => {
+      this.bankService.addToReserve(divisionPath, data.total).then(() => {
         resolve(true)
       })
     })

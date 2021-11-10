@@ -70,6 +70,14 @@ select {
   margin-bottom: 10px;
 }
 
+.align-center {
+  align-items: center;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
 .tab-card {
   background: white;
   padding: 10px; 
@@ -167,6 +175,7 @@ select {
   padding: 15px;
   padding-bottom: 0;
   background: black;
+  max-width: 1100px;
 }
 
 .app-vote {

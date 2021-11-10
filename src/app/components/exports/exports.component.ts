@@ -33,11 +33,14 @@ export class ExportsComponent implements OnInit {
     private bankService: BankService) {}
 
   $citizens: Observable<any>;
+  $positions: Observable<any>;
   $divisions: Observable<any>;
   $reserve: Observable<any>;
 
   failedValidations = [];
+  dropdownData;
 
+  citizenData;
   multiSelectSettings = {
     ...DROPDOWN_SETTINGS,
     singleSelection: false,
@@ -55,8 +58,8 @@ export class ExportsComponent implements OnInit {
   exportTypeOptions = [
     { type: 'none', name: ''},
     { type: 'multi', name: 'GLA request' },
-    { type: 'multi', name: 'GLA hostile aquisition' },
-    { type: 'single', name: 'Resources' },
+    { type: 'multi', name: 'GLA hostile acquisition' },
+    { type: 'multi', name: 'Resources' },
     { type: 'single', name: 'Message' }
   ]
 
@@ -68,24 +71,35 @@ export class ExportsComponent implements OnInit {
   @Input() showKey;
   @Input() divisionKey;
 
-  ngOnInit() {
+  setCitizenData() {
     const divisionPath = `shows/${this.showKey}/divisions/${this.divisionKey}`
-    this.$citizens = this.db.list(`${divisionPath}/citizens`)
-      .valueChanges()
-      .pipe(
-        map((citizens) => {
-          return citizens.map((citizen: any, index: number) => {
-            const resources = citizen.resources
-              ? citizen.resources.reduce((acc, R) => acc + R.value, 0)
-              : 0
-            return {
-              resources,
-              select_id: citizen.id,
-              select_text: `${index}: ${citizen.name} | ${resources}`,
-            }
-          })
-        })
-      );
+    combineLatest(
+      this.db.list(`${divisionPath}/positions`).valueChanges(),
+      this.db.object(`${divisionPath}/citizens`).valueChanges()
+    ).pipe(
+      take(1),
+      map(([positions, citizens]: [any, any]) => {
+        return positions.map((id, index) => ({
+          position: index + 1,
+          ...citizens[id]
+        }))
+      }),
+      tap((citizens) => {
+        this.citizenData = citizens.map((citizen) => ({
+          position: citizen.position,
+          id: citizen.id,
+          name: citizen.name,
+          wealth: this.bankService.calculateWealth(citizen.resources),
+          spend: 0,
+          sendRequest: false,
+        }))
+        console.log("data: ", this.citizenData)
+      })
+    ).subscribe();
+  }
+
+  ngOnInit() {
+    this.setCitizenData();
 
     this.$divisions = this.db.list(`shows/${this.showKey}/divisions`)
       .valueChanges()
@@ -99,11 +113,29 @@ export class ExportsComponent implements OnInit {
         })
       )
 
-    this.$reserve = this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/reserve`).valueChanges();
+    this.$reserve = this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/reserve`)
+      .valueChanges()
+      .pipe(tap((x) => console.log('reserve: ', x)))
+  }
+
+  addResources(citizens) {
+    let total = 0;
+    citizens.forEach((citizen) => {
+      total += citizen.spend;
+    })
+    return total;
+  }
+
+  changeCheckbox(e) {
+    console.log('check: ', e)
+  }
+
+  onSelectExportTypeChange() {
+    console.log('export type: ', this.selectedExportType, this.citizenData);
   }
 
   onExportTypeSelect(item) {
-    console.log("select type: ", item, this.selectedExportType);
+    console.log("select type: ", item, this.selectedExportType, this.citizenData);
   }
 
   onFromSelect(item: any) {
@@ -112,10 +144,11 @@ export class ExportsComponent implements OnInit {
   }
 
   send() {
+    console.log('send: ', this.selectedExportType)
     if (this.selectedExportType?.name === 'GLA request') {
-      this.makeGLARequest();
-    } else if (this.selectedExportType?.name === 'GLA hostile aquisition') {
-      this.makeGLAForcedAquisition();
+      this.makeGLARequest(false);
+    } else if (this.selectedExportType?.name === 'GLA hostile acquisition') {
+      this.makeGLARequest(true);
     } else if (this.selectedExportType?.name === 'Message') {
       this.sendMessage();
     } else if (this.selectedExportType?.name === 'Resources') {
@@ -124,25 +157,36 @@ export class ExportsComponent implements OnInit {
   }
 
   async sendResources() {
-    console.log("send: ", this.resourcePicker.value);
-    await this.bankService.removeFromReserve(`shows/${this.showKey}/divisions/${this.divisionKey}`, this.resourcePicker.value);
+    console.log("CITIZEN DATA: ", this.citizenData)
+    const senders = this.citizenData.map((citizen) => ({ id: citizen.id, spend: citizen.spend }))
+    const resourceTotal = this.addResources(this.citizenData);
+    senders.forEach(async (citizen) => {
+      await this.bankService.spendResources(
+        this.showKey,
+        this.divisionKey,
+        citizen.id,
+        citizen.spend
+      );
+    })
+
+    // await this.bankService.removeFromReserve(`shows/${this.showKey}/divisions/${this.divisionKey}`, resourceTotal);
     const data = {
       type: NotificationType.resourceGift,
-      header: `The ${this.divisionKey} Division has sent you resouces: ${this.resourcePicker.value}`,
+      header: `The ${this.divisionKey} Division has sent you resouces: ${resourceTotal}`,
       value: this.messageInput ?? '',
       resolved: false,
       rejectable: true,
       acceptable: true,
       sender: this.divisionKey,
       reciever: this.selectedDivision.select_id,
-      data: this.resourcePicker.value ?? 0
+      data: resourceTotal ? { total: resourceTotal, senders } : { total: 0, senders: [] }
     }
     await this.logExport(data);
     this.clearAll();
   }
 
   async sendMessage() {
-    console.log('reciever: ', this.selectedDivision)
+    console.log('SEND MESSAGE TO: ', this.selectedDivision)
     const data = {
       type: NotificationType.message,
       header: `Message from ${this.divisionKey} Division:`,
@@ -155,28 +199,6 @@ export class ExportsComponent implements OnInit {
     this.clearAll();
   }
 
-  async makeGLAForcedAquisition() {
-    const data = this.selectedFrom.map((selection) => ({
-      id: selection.select_id,
-      name: this.divisionKey,
-      division: this.divisionKey,
-      cost: this.selectedDivision.landCost
-    }))
-
-    await this.divisionService.acquireLand(this.showKey, this.selectedDivision.select_id, data);
-    await this.logExport({
-      type: NotificationType.glaHostile,
-      header: `The ${this.divisionKey} division has taken land plots by force: ${this.selectedFrom.length}`,
-      value: this.messageInput ?? '',
-      resolved: false,
-      sender: this.divisionKey, 
-      reciever: this.selectedDivision?.select_id,
-      data
-    })
-
-    this.clearAll();
-  }
-
   async logExport(data) {
     return new Promise(async (resolve) => {
       await this.db.list(`shows/${this.showKey}/divisions/${this.selectedDivision.select_id}/notifications`).push(data);
@@ -186,50 +208,43 @@ export class ExportsComponent implements OnInit {
     })
   }
 
-  async makeGLARequest() {
-    this.failedValidations  = await this.validateGLARequest(this.selectedDivision.landCost, this.selectedFrom);
-    if (this.failedValidations.length === 0) {
-      this.selectedFrom.forEach(async (citizen) => {
+  async makeGLARequest(force = false) {
+    const requests = _.filter(this.citizenData, (citizen) => citizen.sendRequest );
+    console.log('make request: ', force, requests, this.citizenData);
+    const resources = this.addResources(this.citizenData);
+    const landRequests = requests.map((citizen) => ({
+      id: citizen.id,
+      name: this.divisionKey,
+      division: this.divisionKey,
+      cost: citizen.spend
+    }))
+    const notification: any = {
+      value: this.messageInput ?? '',
+      resolved: false,
+      sender: this.divisionKey,
+      reciever: this.divisionKey,
+      data: landRequests,
+      ...(force === true)
+        ? this.glaHostileNotify(this.divisionKey, resources, requests.length)
+        : this.glaFriendlyNotify(this.divisionKey, resources, requests.length)
+    }
+
+    if (force === true) {
+      console.log('acquire land')
+      await this.divisionService.acquireLand(this.showKey, this.selectedDivision.select_id, landRequests);
+    } else {
+      requests.forEach(async (citizen) => {
         await this.bankService.spendResources(
           this.showKey,
           this.divisionKey,
-          citizen.select_id,
-          this.selectedDivision.landCost
+          citizen.id,
+          citizen.spend
         );
       })
-
-      const data = {
-        type: NotificationType.glaRequest,
-        header: `The ${this.divisionKey} division would like to purchase land plots: ${this.selectedFrom.length}`,
-        value: this.messageInput ?? '',
-        resolved: false,
-        rejectable: true,
-        acceptable: true,
-        sender: this.divisionKey,
-        reciever: this.selectedDivision.select_id,
-        data: this.selectedFrom.map((selection) => ({
-          id: selection.select_id,
-          name: this.divisionKey,
-          division: this.divisionKey,
-          cost: this.selectedDivision.landCost
-        }))
-      }
-
-      await this.logExport(data);
-      this.clearAll();
     }
-  }
+    await this.logExport(notification);
 
-  clearAll() {
-    this.selectedExportType = undefined;
-    this.selectedDivision = undefined;
-    this.selectedFrom = undefined;
-    this.failedValidations = [];
-    this.messageInput = undefined;
-  }
-
-  async onDivisionSelect() {
-    console.log('div select', this.selectedExportType)
+    this.clearAll();
   }
 
   async validateGLARequest(cost, citizens): Promise<string[]> {
@@ -252,5 +267,26 @@ export class ExportsComponent implements OnInit {
       ).toPromise();
 
     return result
+  }
+
+  glaHostileNotify = (divisionKey, resources, requestCount) => ({
+    type: NotificationType.glaHostile,
+    header: `The ${divisionKey} division has sent ${resources} resources, and has taken ${requestCount} land plot(s)`,
+  })
+
+  glaFriendlyNotify = (divisionKey, resources, requestCount) => ({
+    type: NotificationType.glaRequest,
+    header: `The ${divisionKey} division has sent ${resources} resources to purchase ${requestCount} land plot(s)`,
+    rejectable: true,
+    acceptable: true,
+  })
+
+  clearAll() {
+    this.selectedExportType = undefined;
+    this.selectedDivision = undefined;
+    this.selectedFrom = undefined;
+    this.failedValidations = [];
+    this.messageInput = undefined;
+    this.setCitizenData();
   }
 }
