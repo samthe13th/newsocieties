@@ -25,8 +25,6 @@ const DROPDOWN_SETTINGS = {
   }
 })
 export class ExportsComponent implements OnInit {
-  @ViewChild('resourcePicker') resourcePicker: NumberPickerComponent;
-
   constructor(
     private db: AngularFireDatabase, 
     private divisionService: DivisionService,
@@ -37,10 +35,12 @@ export class ExportsComponent implements OnInit {
   $divisions: Observable<any>;
   $reserve: Observable<any>;
 
-  failedValidations = [];
-  dropdownData;
-
+  fromReserve;
   citizenData;
+  selectedDivision;
+  selectedExportType;
+  messageInput;
+
   multiSelectSettings = {
     ...DROPDOWN_SETTINGS,
     singleSelection: false,
@@ -62,11 +62,6 @@ export class ExportsComponent implements OnInit {
     { type: 'multi', name: 'Resources' },
     { type: 'single', name: 'Message' }
   ]
-
-  selectedDivision;
-  selectedFrom = [];
-  selectedExportType;
-  messageInput;
 
   @Input() showKey;
   @Input() divisionKey;
@@ -125,24 +120,7 @@ export class ExportsComponent implements OnInit {
     })
     return total;
   }
-
-  changeCheckbox(e) {
-    console.log('check: ', e)
-  }
-
-  onSelectExportTypeChange() {
-    console.log('export type: ', this.selectedExportType, this.citizenData);
-  }
-
-  onExportTypeSelect(item) {
-    console.log("select type: ", item, this.selectedExportType, this.citizenData);
-  }
-
-  onFromSelect(item: any) {
-    this.failedValidations = [];
-    console.log(this.selectedFrom);
-  }
-
+  
   send() {
     console.log('send: ', this.selectedExportType)
     if (this.selectedExportType?.name === 'GLA request') {
@@ -159,7 +137,7 @@ export class ExportsComponent implements OnInit {
   async sendResources() {
     console.log("CITIZEN DATA: ", this.citizenData)
     const senders = this.citizenData.map((citizen) => ({ id: citizen.id, spend: citizen.spend }))
-    const resourceTotal = this.addResources(this.citizenData);
+    let resourceTotal = this.addResources(this.citizenData);
     senders.forEach(async (citizen) => {
       await this.bankService.spendResources(
         this.showKey,
@@ -168,25 +146,30 @@ export class ExportsComponent implements OnInit {
         citizen.spend
       );
     })
-
-    // await this.bankService.removeFromReserve(`shows/${this.showKey}/divisions/${this.divisionKey}`, resourceTotal);
+    if (this.fromReserve) {
+      resourceTotal += this.fromReserve;
+      console.log("take from reserve: ", this.fromReserve)
+      await this.bankService.removeFromReserve(
+        `shows/${this.showKey}/divisions/${this.divisionKey}`,
+        this.fromReserve
+      );
+    }
     const data = {
       type: NotificationType.resourceGift,
-      header: `The ${this.divisionKey} Division has sent you resouces: ${resourceTotal}`,
+      header: `The ${this.divisionKey} Division has sent you ${resourceTotal} resource(s)`,
       value: this.messageInput ?? '',
       resolved: false,
       rejectable: true,
       acceptable: true,
       sender: this.divisionKey,
       reciever: this.selectedDivision.select_id,
-      data: resourceTotal ? { total: resourceTotal, senders } : { total: 0, senders: [] }
+      data: { total: resourceTotal, fromReserve: this.fromReserve, senders }
     }
     await this.logExport(data);
     this.clearAll();
   }
 
   async sendMessage() {
-    console.log('SEND MESSAGE TO: ', this.selectedDivision)
     const data = {
       type: NotificationType.message,
       header: `Message from ${this.divisionKey} Division:`,
@@ -210,7 +193,6 @@ export class ExportsComponent implements OnInit {
 
   async makeGLARequest(force = false) {
     const requests = _.filter(this.citizenData, (citizen) => citizen.sendRequest );
-    console.log('make request: ', force, requests, this.citizenData);
     const resources = this.addResources(this.citizenData);
     const landRequests = requests.map((citizen) => ({
       id: citizen.id,
@@ -284,9 +266,8 @@ export class ExportsComponent implements OnInit {
   clearAll() {
     this.selectedExportType = undefined;
     this.selectedDivision = undefined;
-    this.selectedFrom = undefined;
-    this.failedValidations = [];
     this.messageInput = undefined;
+    this.fromReserve = undefined;
     this.setCitizenData();
   }
 }

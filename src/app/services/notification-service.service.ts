@@ -44,6 +44,9 @@ export class NotificationService {
   rejectResources(showKey, sender, data) {
     console.log('reject: ', showKey, sender, data)
     return new Promise((resolve) => {
+      if (data.fromReserve) {
+        this.bankService.addToReserve(`shows/${showKey}/divisions/${sender}`, data.fromReserve);
+      }
       data.senders.forEach(async (data) => {
         const resources = this.bankService.quickConvert(sender, data.spend);
         await this.bankService.depositResources(showKey, sender, data.id, resources);
@@ -72,4 +75,6 @@ export class NotificationService {
       })
     })
   }
+
+  
 }

@@ -1,7 +1,6 @@
 Send:
 <select
   [(ngModel)]="selectedExportType"
-  (change)="onSelectExportTypeChange()"
   name="vote-options"
   id="vote-options">
   <option
@@ -21,9 +20,9 @@ Send:
   
         <div class="flex-row">
           <ng-number-picker
-            #resourcePicker
             class="number-picker"
             [arrowKeys]="true"
+            [(value)]="fromReserve"
             [min]="0"
             [max]="reserve"
             >
@@ -69,7 +68,7 @@ Send:
         </ng-container>
       </table>
       <br/>
-      TOTAL: {{ (resourcePicker ? resourcePicker.value : 0) + addResources(citizenData) }}
+      TOTAL: {{ ( fromReserve ? fromReserve : 0) + addResources(citizenData) }}
     </div>
   </ng-container>
 
@@ -97,13 +96,6 @@ Send:
     type="text">
   </textarea>
 </ng-container>
-
-<div class="validation-errors" *ngIf="failedValidations.length > 0">
-  ERROR: Not enough funds for following citizens:
-  <span class="citizen-name" *ngFor="let citizenName of failedValidations">
-    {{ citizenName }}
-  </span>
-</div>
 
 <br/>
 

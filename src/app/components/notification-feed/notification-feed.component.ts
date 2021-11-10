@@ -83,20 +83,43 @@ export class NotificationFeedComponent implements AfterViewInit {
 
   async rejectRequest(notification) {
     console.log('REJECT: ', notification);
+    let notificationHeader;
     if (notification.type === NotificationType.glaRequest) {
+      notificationHeader = `The ${this.divisionKey} Division rejected your land request(s).`;
       await this.notificationService.rejectGLA(this.showKey, notification.data);
     } else if (notification.type === NotificationType.resourceGift) {
+      notificationHeader = `The ${this.divisionKey} Division rejected your gift of resources.`;
       await this.notificationService.rejectResources(this.showKey, notification.sender, notification.data)
     }
-    this.markAsRejected(notification.key)
+    console.log("REJECT: ", notification)
+    await this.db.list(`shows/${this.showKey}/divisions/${notification.sender}/notifications`).push({
+      type: NotificationType.message,
+      header: notificationHeader,
+      sender: this.divisionKey,
+      reciever: notification.sender,
+      resolved: false
+    });
+    await this.db.list(`shows/${this.showKey}/divisions/${notification.sender}/unseenNotifications`).push(this.divisionKey);
+    this.markAsRejected(notification.key);
   }
 
   async acceptRequest(notification) {
+    let notificationHeader;
     if (notification.type === NotificationType.glaRequest) {
+      notificationHeader = `The ${this.divisionKey} Division accepted your land request(s).`
       await this.notificationService.acceptGLA(this.showKey, this.divisionKey, notification.data);
     } else if (notification.type === NotificationType.resourceGift) {
+      notificationHeader = `The ${this.divisionKey} Division accepted your gift of resources.`
       await this.notificationService.acceptResources(this.showKey, this.divisionKey, notification.data);
     }
+    await this.db.list(`shows/${this.showKey}/divisions/${notification.sender}/notifications`).push({
+      type: NotificationType.message,
+      header: notificationHeader,
+      sender: this.divisionKey,
+      reciever: notification.sender,
+      resolved: false
+    });
+    await this.db.list(`shows/${this.showKey}/divisions/${notification.sender}/unseenNotifications`).push(this.divisionKey);
     this.markAsAccepted(notification.key);
   }
 
