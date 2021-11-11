@@ -64,6 +64,7 @@
         #landGrid
         *ngIf="action === 'harvesting'"
         (gatherResource)="onGather($event)"
+        (select)="onSelectLandTile($event)"
         [markCards]="true"
         [showId]="showKey"
         [divisionKey]="divisionKey"
@@ -81,7 +82,7 @@
             [buttons]="buttons">
           </app-button-group>
         </ng-container>
-        <app-player-turn [divisionPath]="divisionPath"></app-player-turn>
+        <app-player-turn (turnChange)="onTurnChange($event)" [divisionPath]="divisionPath"></app-player-turn>
       </div>
     </div>
     <div *ngIf="focus === 'principles' || focus === 'resolutions' || focus === 'scenerio'" class="resolution-wrapper">
@@ -640,5 +641,28 @@
     <ng-template #noMoney>
       Not enough resources to purchase land
     </ng-template>
+  </div>
+</ng-template>
+
+<ng-template #harvestTileSheet>
+  <div class="action-sheet">
+    <div class="flex-column flex-center">
+      <h2>Perform Harvest action for {{ selectedCitizen?.player }}</h2>
+
+      <div class="flex-row">
+        <div 
+          class="large-action-button"
+          (click)="explore()">
+          <fa-icon size="lg" [icon]="exploreIcon"></fa-icon>
+          Explore (e)
+        </div>
+        <div 
+          class="large-action-button"
+          (click)="gather()">
+          <fa-icon size="lg" [icon]="gatherIcon"></fa-icon>
+          Gather (g)
+        </div>
+      </div>
+    </div>
   </div>
 </ng-template>

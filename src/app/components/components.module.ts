@@ -27,6 +27,7 @@ import { NgMultiSelectDropDownModule } from 'ng-multiselect-dropdown';
 import { FlashNewsComponent } from './flash-news/flash-news.component';
 import { UsersGridComponent } from './users-grid/users-grid.component';
 import { DivisionFullComponent } from './division-full/division-full.component';
+import { ToastComponent } from './toast/toast.component';
 
 
 const components = [
@@ -49,6 +50,7 @@ const components = [
   SocietyGridComponent,
   SocietySummaryComponent,
   TabsComponent,
+  ToastComponent,
   UsersGridComponent,
   VoteComponent
 ]

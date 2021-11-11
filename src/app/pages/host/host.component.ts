@@ -10,8 +10,7 @@ import { BankService } from 'src/app/services/bank.service';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { ButtonGroupComponent } from 'src/app/components/button-group/button-group.component';
 import { DivisionService } from 'src/app/services/division-service.service';
-import { faPen, faGavel, faLandmark, faGlobe, faLeaf, faCartPlus } from '@fortawesome/free-solid-svg-icons';
-import { NotificationType } from 'src/app/shared/types';
+import { faPen, faGavel, faLandmark, faGlobe, faLeaf, faCartPlus, faEye, faShoppingBag } from '@fortawesome/free-solid-svg-icons';
 import { LandGridComponent } from 'src/app/components/land-grid/land-grid.component';
 import * as fa from '@fortawesome/free-solid-svg-icons';
 
@@ -44,12 +43,16 @@ export class HostComponent implements OnInit {
   @ViewChild('changeAdvancementSheet') changeAdvancementSheet: TemplateRef<any>;
   @ViewChild('advancementSheet') advancementSheet: TemplateRef<any>;
   @ViewChild('localLandSheet') localLandSheet: TemplateRef<any>;
+
+  @ViewChild('harvestTileSheet', { static: false }) harvestTileSheet: TemplateRef<any>;
   
   modalContent: TemplateRef<any>;
 
   // ICONS
   faPen = faPen;
   fa = fa;
+  exploreIcon = faEye;
+  gatherIcon = faShoppingBag;
 
   showModal = false;
 
@@ -87,6 +90,7 @@ export class HostComponent implements OnInit {
   $exports;
 
   selectedCitizen;
+  selectedLandTile;
   changeAttribute;
   changeListAttribute;
 
@@ -202,6 +206,24 @@ export class HostComponent implements OnInit {
     this.db.object(`${divisionPath}/positions`).set(this.positions);
   }
 
+  gather() {
+    console.log('GATHER: ', this.selectedCitizen?.playerId);
+    this.landGrid.gather(this.selectedLandTile, this.selectedCitizen?.playerId);
+    this.actionSheet.dismiss();
+  }
+
+  explore() {
+    console.log('EXPLORE: ', this.selectedCitizen?.playerId);
+    this.landGrid.explore(this.selectedLandTile, this.selectedCitizen?.playerId);
+    this.actionSheet.dismiss();
+  }
+
+  onSelectLandTile(tile) {
+    console.log("select land tile: ", tile);
+    this.selectedLandTile = tile;
+    this.actionSheet = this.bottomSheet.open(this.harvestTileSheet);
+  }
+
   onAttributeUpdate(value) {
     this.actionSheet.dismiss();
   }
@@ -289,15 +311,29 @@ export class HostComponent implements OnInit {
   }
 
   async onGather(tile) {
-    if (tile.value > 0) {
+    console.log('on gather: ', tile, this.selectedCitizen);
+    const playerId = tile.owner ?? this.selectedCitizen?.playerId;
+    const divisionKey = tile.owner?.division ?? this.divisionKey;
+    const tileValue = tile.value;
+
+    if (tile.value && playerId && divisionKey) {
       this.bank.depositResources(
         this.showKey,
-        tile.owner.division,
-        tile.owner.id, [{
+        divisionKey,
+        playerId, [{
         value: tile.value,
-        division: tile.owner.division
+        division: divisionKey
       }]).then(() => {
-        console.log('deposited')
+        console.log('deposited resources from land', tile, this.selectedCitizen)
+        if (!tile.owner && this.selectedCitizen) {
+          console.log('push event', `shows/${this.showKey}/divisions/${this.divisionKey}/harvestEvent`, tileValue)
+          this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/harvestEvent`).set({
+            tile: tile.index,
+            type: 'resource',
+            message: `${this.selectedCitizen?.player} gathered a resource`,
+            value: tileValue
+          })
+        }
       })
     }
   }
@@ -367,6 +403,16 @@ export class HostComponent implements OnInit {
 
   onFocusSelect(button) {
     this.setFocus(button.id);
+  }
+
+  onTurnChange(citizen) {
+    this.selectedCitizen = citizen;
+    this.clearSelection();
+    console.log("TURN ", citizen);
+  }
+
+  clearSelection() {
+    this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/selection`).remove();
   }
 
   startVote(focus) {

@@ -105,6 +105,9 @@ export class PlayerComponent implements OnInit {
     this.votePath = `${this.divisionPath}/vote`;
 
     this.$player = this.db.object(`${this.divisionPath}/citizens/${this.id}`).valueChanges();
+    this.$player.pipe(take(1)).subscribe((player) => {
+      this.user = player;
+    })
     this.$turn = this.db.object(`${this.divisionPath}/turn`).valueChanges();
     this.$division = this.db.object(this.divisionPath).valueChanges();
     this.$citizens = this.db.list(`${this.divisionPath}/citizens`).valueChanges()
@@ -235,22 +238,24 @@ export class PlayerComponent implements OnInit {
   }
 
   onSelect(card) {
+    console.log('users: ', )
     this.selectedCard = card;
-    this.actionSheet = this._bottomSheet.open(this.sheetTemplate);
-    this.selectedResourceStatus = this.getResourceStatus(card);
+    // this.actionSheet = this._bottomSheet.open(this.sheetTemplate);
+    // this.selectedResourceStatus = this.getResourceStatus(card);
     this.db.object(this.divisionPath).update({
       selection: {
         type: 'harvest-tile',
-        value: card?.index
+        value: card?.index,
+        mark : this.user ? this.user?.name[0] : ''
       }
     })
-    this.actionSheet.afterDismissed()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(() => {
-        if (this.selectedCard) {
-          this.landGrid.clearSelection(this.selectedCard.index)
-        }
-      })
+    // this.actionSheet.afterDismissed()
+    //   .pipe(takeUntil(this.destroy$))
+    //   .subscribe(() => {
+    //     if (this.selectedCard) {
+    //       this.landGrid.clearSelection(this.selectedCard.index)
+    //     }
+    //   })
   }
 
   calculateWealth(resources) {
@@ -287,14 +292,14 @@ export class PlayerComponent implements OnInit {
 
   explore() {
     console.log('explore');
-    this.landGrid.explore(this.selectedCard, true);
+    this.landGrid.explore(this.selectedCard, this.id);
     this.actionSheet.dismiss();
   }
 
   gather() {
     const status = this.selectedResourceStatus?.status;
     if (status === 'explorable' || status === 'explored') {
-      this.landGrid.gather(this.selectedCard, true)
+      this.landGrid.gather(this.selectedCard, this.id)
     }
     this.actionSheet.dismiss();
   }

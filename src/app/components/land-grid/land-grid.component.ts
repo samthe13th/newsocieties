@@ -20,7 +20,7 @@ const HARVEST_ROW_LENGTH = 7;
   }
 })
 export class LandGridComponent implements OnInit {
-  selectionIndex: number;
+  selection;
   landTiles;
   animateTiles;
 
@@ -29,6 +29,7 @@ export class LandGridComponent implements OnInit {
   selectedCardIndex;
   positions;
   contamination;
+  harvestEvent;
 
   private _turn;
   private destroy$ = new Subject<boolean>();
@@ -62,9 +63,18 @@ export class LandGridComponent implements OnInit {
 
   ngOnInit() {
     console.log('selection path: ', `shows/${this.showId}/divisions/${this.divisionKey}/selection`)
-    this.db.object(`shows/${this.showId}/divisions/${this.divisionKey}/positions`).valueChanges().subscribe((positions) => {
+    this.db.object(`shows/${this.showId}/divisions/${this.divisionKey}/positions`)
+      .valueChanges()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((positions) => {
       this.positions = positions;
     })
+    this.db.object(`shows/${this.showId}/divisions/${this.divisionKey}/harvestEvent`).valueChanges()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((event) => {
+        this.harvestEvent = event;
+      })
+
     combineLatest(
       this.db.object(this.updatePath)
         .valueChanges()
@@ -78,7 +88,7 @@ export class LandGridComponent implements OnInit {
       )
     ).subscribe(([tiles, selection]: [any[], any]) => {
       console.log('update: ', selection)
-        this.selectionIndex = selection?.type === 'harvest-tile' ? toNumber(selection.value) : null;
+        this.selection = selection;
         if (!this.landTiles) {
           this.landTiles = tiles;
         }
@@ -99,6 +109,10 @@ export class LandGridComponent implements OnInit {
         console.log('adjust contam: ', level)
         this.adjustContamination(level);
       })
+  }
+
+  afterToastHide() {
+    this.harvestEvent = undefined;
   }
 
   private adjustContamination(level) {
@@ -223,7 +237,7 @@ export class LandGridComponent implements OnInit {
 
   selectTile(card) {
     console.log('select: ', this.player)
-    if (this.turn?.id !== this.player?.id || this.player?.actions < 1) {
+    if (this.turn?.id !== this.player?.id) {
       console.log('cannot make move', this.turn, this.turn?.id !== this.player?.id, this.player?.actions < 1, this.player?.id)
       return
     }
@@ -246,34 +260,34 @@ export class LandGridComponent implements OnInit {
   //   this.updateDB();
   // }
 
-  explore(card, takeAction=false) {
+  explore(card, playerId=null) {
     console.log('explore: ', card);
     if (!card.harvested && card.value !== LandCardValues.EMPTY) {
       this.landTiles[card.index].harvested = true;
       this.updateDB();
     }
     this.clearSelection(card.index);
-    if (takeAction) {
-      this.takeAction();
+    if (playerId) {
+      this.takeAction(playerId);
     }
   }
 
-  takeAction() {
-    console.log('take action... ', this.player?.id)
-    this.db.object(`shows/${this.showId}/divisions/${this.divisionKey}/citizens/${this.player?.id}/actions`)
+  takeAction(playerId) {
+    console.log('take action... ', playerId)
+    this.db.object(`shows/${this.showId}/divisions/${this.divisionKey}/citizens/${playerId}/actions`)
       .query.ref.transaction(actions => actions ? --actions : 0
     );
   }
 
-  gather(card, takeAction=false) {
+  gather(card, playerId) {
     console.log('do gather')
     this.gatherResource.emit(card);
     this.landTiles[card.index].value = -1;
     this.updateHarvestedCount(1);
     this.updateDB();
     this.clearSelection(card.index);
-    if (takeAction) {
-      this.takeAction();
+    if (playerId) {
+      this.takeAction(playerId);
     }
   }
 

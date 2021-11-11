@@ -1,3 +1,4 @@
+
 <div class="grid">
   <div 
     *ngFor="let card of landTiles; let i = index"
@@ -12,7 +13,7 @@
       (click)="selectTile(card)"
       [side]="card.harvested ? 'front' : 'back'"
       [class.owned]="true"
-      [mark]="selectionIndex === card.index ? selectionIndex : null"
+      [mark]="selection?.value === card.index ? selection?.mark : null"
       [playerId]="player?.id"
       [class.disabled]="card.value == -1 || card.contaminated == true"
       (sideChange)="process(i)">
@@ -36,4 +37,15 @@
       </div>
     </card>
   </div>
+</div>
+<div *ngIf="harvestEvent" class="harvest-events">
+  <app-toast (afterDismiss)="afterToastHide()" [data]="{ message: harvestEvent?.message }">
+      <div 
+        class="resource toast-event-resource"
+        [class.one]="harvestEvent.value === 1"
+        [class.two]="harvestEvent.value === 2"
+        [class.three]="harvestEvent.value === 3">
+        {{harvestEvent.value}}
+      </div>
+  </app-toast>
 </div>
