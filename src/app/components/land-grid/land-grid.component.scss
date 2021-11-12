@@ -23,6 +23,20 @@
   height: 40px; 
   margin: 10px; 
   border-radius: 10px;
+
+  &.contamination {
+    width: 80px;
+    height: 80px;
+    background: tomato;
+    height: 100%;
+    display: flex;
+
+    img {
+      padding: 4px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+  }
 }
 
 .harvest-events {

@@ -319,23 +319,23 @@ export class LandGridComponent implements OnInit {
     if (tile.value === LandCardValues.CONTAM && tile.harvested) {
       const placements = ['left', 'right', 'top', 'bottom'];
       const tiles = placements.map((placement) => this.landTiles[this.getRelativeGridIndex(i, placement, 1)])
-      const destroyed = [];
+      //const destroyed = [];
 
       setTimeout(() => {
         tiles.forEach((tile, index) => {
           if (tile && !tile.owner && !tile.contaminated) {
-            destroyed.push(tile.value)
+            //destroyed.push(tile.value)
             tiles[index].contaminated = true;
           }
         })
 
-        this.db.object(`shows/${this.showId}/divisions/${this.divisionKey}/harvestEvent`).set({
-          tile: tile.index,
-          type: 'exposeContaminant',
-          message: `A contaminant has been exposed!`,
-          value: filter(destroyed, (value) => value > 0),
-          duration: 2500
-        })
+        // this.db.object(`shows/${this.showId}/divisions/${this.divisionKey}/harvestEvent`).set({
+        //   tile: tile.index,
+        //   type: 'exposeContaminant',
+        //   message: `A contaminant has been exposed!`,
+        //   value: filter(destroyed, (value) => value > 0),
+        //   duration: 2500
+        // })
 
         this.updateDB();
       })

@@ -316,7 +316,16 @@ export class HostComponent implements OnInit {
     const divisionKey = tile.owner?.division ?? this.divisionKey;
     const tileValue = tile.value;
 
-    if (tile.value && playerId && divisionKey) {
+    if (tile.value == 0) {
+      const contaminateCallback = await this.divisionService.contaminateResources(this.showKey, this.divisionKey, this.selectedCitizen?.playerId);
+      this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/harvestEvent`).set({
+        tile: tile.index,
+        type: 'contaminant',
+        message: `${this.selectedCitizen?.player} gathered a contaminant!`,
+        value: contaminateCallback,
+        duration: 2500
+      })
+    } else if (tile.value && playerId && divisionKey) {
       this.bank.depositResources(
         this.showKey,
         divisionKey,

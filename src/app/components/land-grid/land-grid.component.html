@@ -51,7 +51,16 @@
       [class.three]="harvestEvent.value === 3">
       {{harvestEvent.value}}
     </div>
-    <div style="padding-top: 10px" *ngIf="harvestEvent.type == 'exposeContaminant'" class="flex-column flex-center">
+    <div
+      *ngIf="harvestEvent.type === 'contaminant'"
+      class="flex-column flex-center"
+      >
+      <em *ngIf="harvestEvent.value">{{harvestEvent.value}}</em>
+      <div class="contamination toast-event-resource">
+        <img src="../assets/contamination.png"/>
+      </div>
+    </div>
+    <!-- <div style="padding-top: 10px" *ngIf="harvestEvent.type == 'exposeContaminant'" class="flex-column flex-center">
       <ng-container *ngIf="!harvestEvent.value">
         <em>No resources were destroyed</em>
       </ng-container>
@@ -68,6 +77,6 @@
           </div>
         </div>
       </ng-container>
-    </div>
+    </div> -->
   </app-toast>
 </div>

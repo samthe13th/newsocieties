@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { combineLatest } from 'rxjs';
 import { map, tap, take } from 'rxjs/operators';
-import { reduce, filter } from 'lodash';
+import { reduce, filter, slice } from 'lodash';
 import { pluckRandom } from '../utilties';
 const ADVANCEMENTS = ["safety", "health", "arts", "knowledge", "infrastructure"];
 
@@ -168,6 +168,32 @@ export class DivisionService {
     return 'high'
   }
 
+  async contaminateResources(showKey, divisionKey, playerId) {
+    const dbPath = `shows/${showKey}/divisions/${divisionKey}/citizens/${playerId}`;
+    const citizen: any = await this.db.object(dbPath)
+      .valueChanges()
+      .pipe(take(1))
+      .toPromise()
+    const resources = citizen?.resources;
+
+    return new Promise((resolve) => {
+      if (resources) {
+        const toDestroy = Math.ceil(resources.length / 2);
+        const adjustedResources = slice(resources, toDestroy);
+        const toastMessage = toDestroy > 0 
+        ? `${formatPlural(toDestroy, 'resource has', 'resources have')} been destroyed`
+        : ''
+        this.db.object(dbPath).update({
+          resources: adjustedResources
+        }).then(() => {
+          resolve(toastMessage)
+        })
+      } else {
+        resolve(null)
+      }
+    })
+  }
+
   async setLandTiles(showKey, divisionKey) {
     const divisionPath = `shows/${showKey}/divisions/${divisionKey}`;
     const pendingGLA = await this.db.list(`${divisionPath}/pendingGLA`)
@@ -217,4 +243,8 @@ export class DivisionService {
 
 function round(number) {
   return Math.round(number * 100) / 100;
+}
+
+function formatPlural(num, singular, plural) {
+  return num == 1 ? `${num} ${singular}` : `${num} ${plural}`;
 }
