@@ -1,5 +1,5 @@
 import { Output, Component, OnInit, Input, EventEmitter } from '@angular/core';
-import { range, chunk, isEqual, each, toNumber, difference } from 'lodash';
+import { range, chunk, isEqual, each, filter, toNumber, difference } from 'lodash';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { Subject, combineLatest } from 'rxjs';
@@ -113,6 +113,7 @@ export class LandGridComponent implements OnInit {
 
   afterToastHide() {
     this.harvestEvent = undefined;
+    this.db.object(`shows/${this.showId}/divisions/${this.divisionKey}/harvestEvent`).remove()
   }
 
   private adjustContamination(level) {
@@ -316,16 +317,26 @@ export class LandGridComponent implements OnInit {
   process(i) {
     const tile = this.landTiles[i];
     if (tile.value === LandCardValues.CONTAM && tile.harvested) {
-      const left = this.landTiles[this.getRelativeGridIndex(i, 'left', 1)];
-      const right = this.landTiles[this.getRelativeGridIndex(i, 'right', 1)];
-      const top = this.landTiles[this.getRelativeGridIndex(i, 'top', 1)];
-      const bottom = this.landTiles[this.getRelativeGridIndex(i, 'bottom', 1)];
+      const placements = ['left', 'right', 'top', 'bottom'];
+      const tiles = placements.map((placement) => this.landTiles[this.getRelativeGridIndex(i, placement, 1)])
+      const destroyed = [];
 
       setTimeout(() => {
-        if (left && !left.owner) { left.contaminated = true }
-        if (right && !right.owner) { right.contaminated = true }
-        if (top && !top.owner) { top.contaminated = true }
-        if (bottom && !bottom.owner) { bottom.contaminated = true }
+        tiles.forEach((tile, index) => {
+          if (tile && !tile.owner && !tile.contaminated) {
+            destroyed.push(tile.value)
+            tiles[index].contaminated = true;
+          }
+        })
+
+        this.db.object(`shows/${this.showId}/divisions/${this.divisionKey}/harvestEvent`).set({
+          tile: tile.index,
+          type: 'exposeContaminant',
+          message: `A contaminant has been exposed!`,
+          value: filter(destroyed, (value) => value > 0),
+          duration: 2500
+        })
+
         this.updateDB();
       })
     }

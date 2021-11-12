@@ -31,21 +31,43 @@
         </div>
       </div>
       <div back class="harvest-card back">
-        <div class="flex-row flex-center" *ngIf="markCards">
-          {{card.value == 0 ? 'X' : ''}}
+        <div class="flex-row flex-center" *ngIf="markCards || (card.value > 0 && card.contaminated)">
+          <ng-container *ngIf="card.value !== -1">
+            {{card.value == 0 ? 'X' : card.value }}
+          </ng-container>
         </div>
       </div>
     </card>
   </div>
 </div>
 <div *ngIf="harvestEvent" class="harvest-events">
-  <app-toast (afterDismiss)="afterToastHide()" [data]="{ message: harvestEvent?.message }">
-      <div 
-        class="resource toast-event-resource"
-        [class.one]="harvestEvent.value === 1"
-        [class.two]="harvestEvent.value === 2"
-        [class.three]="harvestEvent.value === 3">
-        {{harvestEvent.value}}
-      </div>
+  <app-toast
+     (afterDismiss)="afterToastHide()" [data]="harvestEvent">
+    <div
+      *ngIf="harvestEvent.type === 'resource'"
+      class="resource toast-event-resource"
+      [class.one]="harvestEvent.value === 1"
+      [class.two]="harvestEvent.value === 2"
+      [class.three]="harvestEvent.value === 3">
+      {{harvestEvent.value}}
+    </div>
+    <div style="padding-top: 10px" *ngIf="harvestEvent.type == 'exposeContaminant'" class="flex-column flex-center">
+      <ng-container *ngIf="!harvestEvent.value">
+        <em>No resources were destroyed</em>
+      </ng-container>
+      <ng-container *ngIf="harvestEvent.value">
+        <em>Resources destroyed:</em>
+        <div class="flex-row">
+          <div
+            *ngFor="let resource of harvestEvent.value"
+            class="resource toast-event-resource"
+            [class.one]="resource === 1"
+            [class.two]="resource === 2"
+            [class.three]="resource === 3">
+            {{resource}}
+          </div>
+        </div>
+      </ng-container>
+    </div>
   </app-toast>
 </div>

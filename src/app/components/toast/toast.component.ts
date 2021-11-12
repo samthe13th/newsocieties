@@ -41,11 +41,11 @@ export class ToastComponent implements OnInit {
   }
 
   show() {
-    console.log("show toast");
+    console.log("show toast", this.data);
     this.animateIn = true;
     setTimeout(() => {
       this.dismiss();
-    }, this.duration)
+    }, this.data?.duration ?? this.duration)
   }
 
   dismiss() {
@@ -53,6 +53,6 @@ export class ToastComponent implements OnInit {
     console.log('dismiss toast');
     setTimeout(() => {
       this.afterDismiss.emit()
-    }, 300)
+    }, 400)
   }
 }
