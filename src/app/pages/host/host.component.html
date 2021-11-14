@@ -88,15 +88,6 @@
     </div>
     <div *ngIf="focus === 'principles' || focus === 'resolutions' || focus === 'scenario'" class="resolution-wrapper">
       <ng-container *ngIf="($vote | async) as vote">
-        <!-- <app-fundraising
-          style="background: black"
-          *ngIf="vote?.state === 'review' && vote?.type === 'resolution'"
-          [showKey]="showKey"
-          [divisionKey]="divisionKey"
-          [isCentral]="true"
-          (fundsChange)="onFundsChange($event)"
-          >
-        </app-fundraising> -->
         <app-vote 
           (selectionChange)="onSelectionChange($event)"
           [showVotes]="true"
@@ -131,6 +122,8 @@
 
 <ng-template #principleTemplate>
   <h1>Principle</h1>
+  <button (click)="autoPick('principles')">Autopick</button>
+  <br/>
   <select
     *ngIf="voteDropdown"
     [(ngModel)]="voteDropdownSelect"
@@ -143,7 +136,7 @@
     </option>
   </select>
 
-  <button *ngIf="voteDropdownSelect" (click)="startVote('principles')">Vote on Principle</button>
+  <button *ngIf="voteDropdownSelect" (click)="startVote('principles')">Select Principle</button>
 </ng-template>
 
 <ng-template #resolutionReviewTemplate>
@@ -153,6 +146,8 @@
 
 <ng-template #resolutionTemplate>
   <h1>Resolution</h1>
+  <button (click)="autoPick('resolutions')">Autopick</button>
+  <br/>
   <select
     *ngIf="voteDropdown"
     [(ngModel)]="voteDropdownSelect"

@@ -433,7 +433,13 @@ export class HostComponent implements OnInit, OnDestroy {
     this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/selection`).remove();
   }
 
+  autoPick(focus) {
+    this.voteDropdownSelect = pluckRandom(this.voteDropdown, 1)[0];
+    this.startVote(focus)
+  }
+
   startVote(focus) {
+    console.log('DROPDOWN SELECT: ', this.voteDropdownSelect)
     this.db.object(`${this.divisionPath}/focus`).set(focus);
     this.showModal = false;
     this.action = 'voting';
