@@ -116,6 +116,11 @@
     }
   }
 
+  &.disabled {
+    opacity: 0;
+    pointer-events: none;
+  }
+
   &.owned[data-badge] {
     &::after {
       content: attr(data-badge);

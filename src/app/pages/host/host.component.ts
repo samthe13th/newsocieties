@@ -44,6 +44,7 @@ export class HostComponent implements OnInit, OnDestroy {
   @ViewChild('changeAdvancementSheet') changeAdvancementSheet: TemplateRef<any>;
   @ViewChild('advancementSheet') advancementSheet: TemplateRef<any>;
   @ViewChild('localLandSheet') localLandSheet: TemplateRef<any>;
+  @ViewChild('disableColumnsSheet') disableColumnsSheet: TemplateRef<any>;
 
   @ViewChild('harvestTileSheet', { static: false }) harvestTileSheet: TemplateRef<any>;
   
@@ -64,6 +65,8 @@ export class HostComponent implements OnInit, OnDestroy {
     { id: 'scenario', label: 'Scenario', faIcon: faGlobe },
     { id: 'misc', label: 'Market', faIcon: faCartPlus },
   ]
+
+  disableHarvestColumnButtons = []
 
   resourceType = 3;
   resourceTypes = [
@@ -130,6 +133,7 @@ export class HostComponent implements OnInit, OnDestroy {
   leftTab;
   citizenCount = 0;
   positions;
+  lockColumns;
 
 
   constructor(
@@ -191,9 +195,6 @@ export class HostComponent implements OnInit, OnDestroy {
 
     this.db.object(`shows/${this.showKey}/contamination/current`)
       .valueChanges()
-      .pipe(
-
-      )
       .subscribe((level) => {
         this.contamination = level;
         console.log('level: ', level)
@@ -248,6 +249,29 @@ export class HostComponent implements OnInit, OnDestroy {
     landGrid.gatherOwnedLand();
   }
 
+  disableColumns() {
+    this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/harvestColumn`).valueChanges()
+      .pipe(take(1))
+      .subscribe((columns: any) => {
+        this.disableHarvestColumnButtons = columns.map((showColumn, i) => ({ label: i, value: showColumn }))
+      })
+    this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/lockHarvestColumns`).valueChanges()
+      .pipe(take(1))
+      .subscribe((lock: boolean) => {
+        console.log("LOCK: ", lock)
+        this.lockColumns = lock ?? false
+      })
+    this.actionSheet = this.bottomSheet.open(this.disableColumnsSheet);
+  }
+
+  toggleLockColumnsStatus() {
+    setTimeout(() => {
+      this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/lockHarvestColumns`).set(
+        this.lockColumns ?? false
+      )
+    })
+  }
+
   onRightTabChange(tab) {
     this.rightTab = tab.id;
     if (this.rightTab === 'notifications' || tab.id === 'notifications') {
@@ -260,6 +284,10 @@ export class HostComponent implements OnInit, OnDestroy {
       await this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/unseenChat`).set(0)
     }
     this.leftTab = tab.id;
+  }
+
+  onHarvestColumnSelect(select) {
+    console.log('select: ', select)
   }
 
   updateCitizenLand(citizen, landCost) {
@@ -483,6 +511,13 @@ export class HostComponent implements OnInit, OnDestroy {
       this.modalContent = this.miscTemplate;
     }
     this.showModal = true;
+  }
+
+  toggleColumnDisabledState(i) {
+    const button = this.disableHarvestColumnButtons[i];
+    button.value = !button.value;
+    this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/harvestColumn/${i}`)
+      .query.ref.transaction((show) => show == null ? false : !show)
   }
 
   startHarvest() {
@@ -743,6 +778,9 @@ export class HostComponent implements OnInit, OnDestroy {
     this.harvest = this.generateHarvest(landTiles, newSeason?.harvest, newSeason?.contaminantLevel);
 
     this.db.object(`${this.divisionPath}`).update({
+      harvestColumn: division.lockHarvestColumns
+        ? division.harvestColumn
+        : _.range(7).map(() => true),
       season: newSeason.season,
       contaminantLevel: newSeason.contaminantLevel,
       capacity: newSeason.capacity,

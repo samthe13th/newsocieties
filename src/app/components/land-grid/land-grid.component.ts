@@ -30,6 +30,7 @@ export class LandGridComponent implements OnInit {
   positions;
   contamination;
   harvestEvent;
+  harvestColumns;
 
   private _turn;
   private destroy$ = new Subject<boolean>();
@@ -117,6 +118,18 @@ export class LandGridComponent implements OnInit {
         this.updateDB();
       })
     }
+
+    this.db.object(`shows/${this.showId}/divisions/${this.divisionKey}/harvestColumn`)
+      .valueChanges().pipe(takeUntil(this.destroy$))
+      .subscribe((columns: any) => {
+        console.log("COLUMNS: ", columns, this.harvestColumns)
+        columns.forEach((showColumn: boolean, i: string) => {
+          if (this.harvestColumns?.[i] !== showColumn) {
+            this.toggleColumn(i, showColumn)
+          }
+        })
+        this.harvestColumns = columns;
+      })
   }
 
   afterToastHide() {
@@ -331,6 +344,18 @@ export class LandGridComponent implements OnInit {
     if (tile.type === LandCardTypes.C && tile.harvested) {
       this.contaminateAdjacentTiles(tile);
     }
+  }
+
+  toggleColumn(n, enable) {
+    if (!this.landTiles) return;
+    console.log('toggle column: ', n, enable);
+    range(7).forEach((i) => {
+      const index = n + (i * 7);
+      console.log({index})
+      this.landTiles[index].disabled = !enable;
+    })
+    console.log(this.landTiles)
+    this.updateDB();
   }
 
   contaminateAdjacentTiles(tile) {

@@ -4,6 +4,7 @@
     *ngFor="let card of landTiles; let i = index"
     class="land-tile"
     [class.contaminated]="card.contaminated == true"
+    [class.disabled]="card.disabled"
     [attr.data-badge]="(card.owner && card.owner?.division == divisionKey) ? getPosition(card.owner.id) : card.owner?.division"
     [attr.data-local]="card.owner && card.owner?.division == divisionKey"
     [class.empty]="card.value === -1"

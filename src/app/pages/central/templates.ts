@@ -5,6 +5,8 @@ export const DIVISION_TEMPLATE = {
       value: 'Greetings division, any pressing information about your society will show up here, stay tuned for news!'
     }
   ],
+  harvestColumn: [true, true, true, true, true, true, true],
+  lockHarvestColumns: false,
   advancements: {
     safety: {
       communal: 0,

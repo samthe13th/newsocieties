@@ -74,6 +74,7 @@
       <div class="button-row">
         <button (click)="exploreOwnedLand(landGrid)">Flip owned</button>
         <button (click)="gatherOwnedLand(landGrid)">Gather owned</button>
+        <button (click)="disableColumns()">Disable Columns</button>
       </div>
       <div class="turn-controls" *ngIf="($turn | async) as turn">
         <ng-container *ngIf="$turnButtons | async as buttons">
@@ -594,6 +595,33 @@
       (click)="buyAdvancement(changeAttribute.name, changeAttribute.data.cost, changeAttribute.dbPath)">
       Buy
     </button>
+  </div>
+</ng-template>
+
+<ng-template #disableColumnsSheet>
+  <div class="flex-column flex-center">
+    <h1>Columns</h1>
+    <div class="flex-row">
+      <input
+          name="show-columns"
+          #showColumnsCheckbox
+          type="checkbox"
+          [(ngModel)]="lockColumns"
+          (click)="toggleLockColumnsStatus()" 
+      >
+      <label style="font-size: 16px" for="show-columns">Set Permanently</label>
+    </div>
+    <br/>
+    <div class="flex-row">
+      <button
+        class="harvest-column-button"
+        *ngFor="let button of disableHarvestColumnButtons; let i = index"
+        [class.highlighted]="button.value"
+        (click)="toggleColumnDisabledState(i)"
+      >
+        {{button.label}}
+      </button>
+    </div>
   </div>
 </ng-template>
 

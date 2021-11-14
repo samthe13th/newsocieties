@@ -21,6 +21,19 @@
   }
 }
 
+.harvest-column-button {
+  padding: 20px;
+  border-radius: 0;
+
+  &:not(:first-child) {
+    border-left: 0;
+  }
+
+  &.highlighted {
+    background: rgb(255, 179, 0);
+  }
+}
+
 .review-card {
   background: white;
   padding: 20px;
