@@ -86,7 +86,7 @@
         <app-player-turn (turnChange)="onTurnChange($event)" [divisionPath]="divisionPath"></app-player-turn>
       </div>
     </div>
-    <div *ngIf="focus === 'principles' || focus === 'resolutions' || focus === 'scenerio'" class="resolution-wrapper">
+    <div *ngIf="focus === 'principles' || focus === 'resolutions' || focus === 'scenario'" class="resolution-wrapper">
       <ng-container *ngIf="($vote | async) as vote">
         <!-- <app-fundraising
           style="background: black"
@@ -172,8 +172,8 @@
   </button>
 </ng-template>
 
-<ng-template #scenerioTemplate>
-  <h1>Scenerio</h1>
+<ng-template #scenarioTemplate>
+  <h1>Scenario</h1>
   <select
     *ngIf="voteDropdown"
     [(ngModel)]="voteDropdownSelect"
@@ -186,7 +186,7 @@
     </option>
   </select>
 
-  <button *ngIf="voteDropdownSelect" (click)="startVote('scenerio')">Vote on Scenerio</button>
+  <button *ngIf="voteDropdownSelect" (click)="startVote('scenario')">Vote on Scenario</button>
 </ng-template>
 
 <ng-template #miscTemplate>
@@ -394,9 +394,9 @@
     </div>
 
     <div class="tab-card">
-      <h2>Scenerios</h2>
-      <p *ngFor="let scenerio of ($scenerios | async)">
-        {{ scenerio?.value }}
+      <h2>Scenarios</h2>
+      <p *ngFor="let scenario of ($scenarios | async)">
+        {{ scenario?.value }}
       </p>
     </div>
 

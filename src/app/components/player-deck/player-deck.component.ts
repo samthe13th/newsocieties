@@ -78,18 +78,18 @@ export class PlayerDeckComponent {
       )
   }
 
-  // public add(R) {
-  //   console.log({R})
-  //   if (R.value === LandCardValues.CONTAM) {
-  //     this.contaminateResources()
-  //   } else {
-  //     console.log('make deposit')
-  //     this.bank.depositResources(this.showKey, this.division?.code, this.id, [{
-  //       ...R,
-  //       division: this.division?.code
-  //     }])
-  //   }
-  // }
+  public add(R) {
+    console.log({R})
+    if (R.value === LandCardValues.CONTAM) {
+      this.contaminateResources()
+    } else {
+      console.log('make deposit')
+      this.bank.depositResources(this.showKey, this.division?.code, this.id, [{
+        ...R,
+        division: this.division?.code
+      }])
+    }
+  }
 
   private contaminateResources() {
     console.log('contam... ')

@@ -106,12 +106,14 @@ export class LandGridComponent implements OnInit {
       })
 
     if (this.isHost) {
-      this.db.object(`shows/${this.showId}/contamination/current`)
-      .valueChanges()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((level) => {
-        console.log('adjust contam: ', level)
-        this.adjustContamination(level);
+      combineLatest(
+        this.db.object(`shows/${this.showId}/contamination/current`).valueChanges(),
+        this.db.object(`shows/${this.showId}/divisions/${this.divisionKey}/contaminationLevel`).valueChanges()
+      ).pipe(
+        takeUntil(this.destroy$)
+      ).subscribe(([percent, level]) => {
+        console.log('adjust contam: ', percent, level)
+        this.adjustContamination(percent, level);
         this.updateDB();
       })
     }
@@ -122,11 +124,9 @@ export class LandGridComponent implements OnInit {
     this.db.object(`shows/${this.showId}/divisions/${this.divisionKey}/harvestEvent`).remove()
   }
 
-  private adjustContamination(level) {
-    console.log('adjust contam (GRID): ', this.player)
-    this.contamination = level;
+  private adjustContamination(percent, level) {
+    this.contamination = percent;
     if (this.landTiles) {
-      console.log('land tiles: ', this.landTiles)
       const harvestable = this.landTiles
         .filter(card => card.value !== LandCardValues.EMPTY && !card.contaminated)
       const contaminantsCount = Math.ceil((this.contamination / 100) * harvestable.length)
@@ -141,22 +141,20 @@ export class LandGridComponent implements OnInit {
           difference(harvestable.map(h => h.index), currentContaminantIndexes),
           Math.min(adjustment, harvestable.length)
         );
-        console.log('add contams: ', contaminate)
         contaminate.forEach((i) => {
           if (!this.landTiles[i].harvested) {
             this.landTiles[i].type =  LandCardTypes.C;
-            this.landTiles[i].value = getRandomInt(1,2);
+            this.landTiles[i].value = getRandomInt(1, level);
           }
         })
       } else if (adjustment < 0) {
         const uncontaminate = pluckRandom(
           currentContaminantIndexes,
           Math.min(Math.abs(adjustment), currentContaminantIndexes.length));
-        console.log('Remove contams: ', uncontaminate)
         uncontaminate.forEach((i) => {
           if (!this.landTiles[i].harvested) {
             this.landTiles[i].type = LandCardTypes.R;
-            this.landTiles[i].value = getRandomInt(1,3);
+            this.landTiles[i].value = getRandomInt(1, 3);
           }
         })
       }

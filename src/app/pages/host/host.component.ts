@@ -29,7 +29,7 @@ export class HostComponent implements OnInit {
   @ViewChild('principleTemplate') principleTemplate: TemplateRef<any>;
   @ViewChild('resolutionTemplate') resolutionTemplate: TemplateRef<any>;
   @ViewChild('resolutionReviewTemplate') resolutionReviewTemplate: TemplateRef<any>;
-  @ViewChild('scenerioTemplate') scenerioTemplate: TemplateRef<any>;
+  @ViewChild('scenarioTemplate') scenarioTemplate: TemplateRef<any>;
   @ViewChild('miscTemplate') miscTemplate: TemplateRef<any>;
   @ViewChild('newSeasonTemplate') newSeasonModal: TemplateRef<any>;
   
@@ -60,7 +60,7 @@ export class HostComponent implements OnInit {
     { id: 'harvest', label: 'Harvest', faIcon: faLeaf },
     { id: 'principles', label: 'Principle', faIcon: faLandmark },
     { id: 'resolutions', label: 'Resolution', faIcon: faGavel },
-    { id: 'scenerio', label: 'Scenerio', faIcon: faGlobe },
+    { id: 'scenario', label: 'Scenario', faIcon: faGlobe },
     { id: 'misc', label: 'Market', faIcon: faCartPlus },
   ]
 
@@ -76,7 +76,7 @@ export class HostComponent implements OnInit {
   $citizens;
   $resolutions;
   $principles;
-  $scenerios;
+  $scenarios;
   $turn;
   $focus;
   $unseenNotifications;
@@ -120,7 +120,7 @@ export class HostComponent implements OnInit {
   fontSize = 16;
   globalResolutions;
   globalPrinciples; 
-  globalScenerios;
+  globalScenarios;
   voteDropdown;
   voteDropdownSelect;
   rightTab;
@@ -159,7 +159,7 @@ export class HostComponent implements OnInit {
     this.$lastResolution = this.db.object(`${this.divisionPath}/lastResolution`).valueChanges()
     this.$resolutions = this.db.list(`${this.divisionPath}/resolutions`).valueChanges();
     this.$principles = this.db.list(`${this.divisionPath}/principles`).valueChanges();
-    this.$scenerios = this.db.list(`${this.divisionPath}/scenerios`).valueChanges();
+    this.$scenarios = this.db.list(`${this.divisionPath}/scenarios`).valueChanges();
     this.$focus = this.db.object(`${this.divisionPath}/focus`).valueChanges();
     this.$turn = this.db.object(`${this.divisionPath}/turn`).valueChanges();
     this.$pendingGLA = this.db.list(`${this.divisionPath}/pendingGLA`).valueChanges();
@@ -177,11 +177,11 @@ export class HostComponent implements OnInit {
     })
 
     this.db.object(`shows/${this.showKey}`)
-    .valueChanges()
-    .pipe(take(1))
-    .subscribe((show) => {
-      this.divisions = this.getDivisionObservables(show);
-    })
+      .valueChanges()
+      .pipe(take(1))
+      .subscribe((show) => {
+        this.divisions = this.getDivisionObservables(show);
+      })
 
     this.divisionService.calculateDivisionScore$(this.showKey, this.divisionKey).subscribe();
     this.divisionService.thresholdListener$(this.showKey, this.divisionKey).subscribe();
@@ -194,7 +194,7 @@ export class HostComponent implements OnInit {
 
     this.getResolutions();
     this.getPrinciples();
-    this.getScenerios();
+    this.getScenarios();
   }
 
   async updatePositions() {
@@ -396,12 +396,12 @@ export class HostComponent implements OnInit {
       });
   }
 
-  getScenerios() {
-    this.db.list(`scenerios`)
+  getScenarios() {
+    this.db.list(`scenarios`)
       .valueChanges()
       .pipe(take(1))
-      .subscribe((scenerios) => {
-        this.globalScenerios = scenerios
+      .subscribe((scenarios) => {
+        this.globalScenarios = scenarios
       });
   }
 
@@ -459,9 +459,9 @@ export class HostComponent implements OnInit {
         this.setVoteDropdown('resolutions');
         this.modalContent = this.resolutionTemplate;
       }
-    } else if (type === 'scenerio') {
-      this.setVoteDropdown('scenerios');
-      this.modalContent = this.scenerioTemplate;
+    } else if (type === 'scenario') {
+      this.setVoteDropdown('scenarios');
+      this.modalContent = this.scenarioTemplate;
     } else if (type === 'harvest') {
       this.modalContent = this.harvestTemplate;
     } else if (type === 'misc') {
@@ -534,8 +534,8 @@ export class HostComponent implements OnInit {
       this.setResolution();
     } else if (this.divisionVote.vote.type === 'principle') {
       this.setPrinciple();
-    } else if (this.divisionVote.vote.type === 'scenerio') {
-      this.setScenerio();
+    } else if (this.divisionVote.vote.type === 'scenario') {
+      this.setScenario();
     }
   }
 
@@ -599,28 +599,28 @@ export class HostComponent implements OnInit {
           this.voteType = 'principle';
           this.voteDropdown = differenceBy(this.globalPrinciples, principles, 'title');
         })
-    } else if (type === 'scenerios') {
-      this.db.list(`${divisionPath}/scenerios`)
+    } else if (type === 'scenarios') {
+      this.db.list(`${divisionPath}/scenarios`)
         .valueChanges()
         .pipe(take(1))
-        .subscribe((scenerios) => {
-          this.voteType = 'scenerio';
-          this.voteDropdown = differenceBy(this.globalScenerios, scenerios, 'title');
+        .subscribe((scenarios) => {
+          this.voteType = 'scenario';
+          this.voteDropdown = differenceBy(this.globalScenarios, scenarios, 'title');
         })
     }
   }
 
-  setScenerio() {
-    const scenerio = `${this.divisionVote.vote.result} ${this.divisionVote.selection.result}`;
+  setScenario() {
+    const scenario = `${this.divisionVote.vote.result} ${this.divisionVote.selection.result}`;
 
     this.db.object(`${this.divisionPath}/vote`).update({
       state: 'final',
       selected: this.divisionVote.selection
     })
 
-    this.db.list(`${this.divisionPath}/scenerios`).push({
+    this.db.list(`${this.divisionPath}/scenarios`).push({
       title: this.divisionVote.vote.title,
-      value: scenerio
+      value: scenario
     })
   }
 
@@ -725,10 +725,11 @@ export class HostComponent implements OnInit {
 
   async startSeason(division, newSeason) {
     const landTiles = await this.divisionService.setLandTiles(this.showKey, this.divisionKey)
-    this.harvest = this.generateHarvest(landTiles, newSeason?.harvest);
+    this.harvest = this.generateHarvest(landTiles, newSeason?.harvest, newSeason?.contaminantLevel);
 
     this.db.object(`${this.divisionPath}`).update({
       season: newSeason.season,
+      contaminantLevel: newSeason.contaminantLevel,
       capacity: newSeason.capacity,
       harvest: newSeason.harvest,
       highThresholdMet: false,
@@ -837,7 +838,7 @@ export class HostComponent implements OnInit {
   //   console.log("harvest: ", this.harvest)
   // }
 
-  private generateHarvest(landTiles, harvestableCards): Array<LandTile> {
+  private generateHarvest(landTiles, harvestableCards, contaminantLevel = 1): Array<LandTile> {
     const tiles: LandTile[] = [ ...this.resetLandTiles(landTiles) ];
     const [owned, open]: LandTile[][] = partition(tiles, (tile) => tile.owner !== undefined);
     const harvestableCount = harvestableCards - owned.length;
@@ -851,10 +852,10 @@ export class HostComponent implements OnInit {
 
     harvestIndexes.forEach((i) => {
       if (includes(contaminants, i)) {
-        tiles[i].value = getRandomInt(1,2)
+        tiles[i].value = getRandomInt(1, contaminantLevel)
         tiles[i].type =  LandCardTypes.C
       } else {
-        tiles[i].value = getRandomInt(1,3)
+        tiles[i].value = getRandomInt(1, 3)
         tiles[i].type =  LandCardTypes.R
       }
     })

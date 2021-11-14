@@ -225,16 +225,16 @@ export class DivisionService {
   }
 
   async newSeason(showKey, divisionKey) {
-    console.log("NEW SEASON");
     const divisionPath = `shows/${showKey}/divisions/${divisionKey}`;
-
     this.db.object(divisionPath)
       .valueChanges()
       .pipe(take(1))
       .subscribe((division: any) => {
-        console.log("SCORE: ", division?.season, division?.score, SCORE[division?.score])
         this.db.object(`${divisionPath}/nextSeason`).set({
           season: division?.season + 1,
+          contaminantLevel: division?.contaminantLevel < 3
+            ? division?.contaminantLevel + 1
+            : division?.contaminantLevel,
           ...SCORE[division?.score]
         })
       })

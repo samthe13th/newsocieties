@@ -67,6 +67,7 @@ export const DIVISION_TEMPLATE = {
     resources: [],
     players: []
   },
+  contaminantLevel: 1,
   landCost: 5,
   VP: 0,
   score: 'low',

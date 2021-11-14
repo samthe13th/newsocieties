@@ -16,7 +16,7 @@ export class DivisionFullComponent {
 
   $principles: Observable<any>;
   $resolutions: Observable<any>;
-  $scenerios: Observable<any>;
+  $scenarios: Observable<any>;
   $events: Observable<any>;
   $division: Observable<any>;
 
@@ -43,7 +43,7 @@ export class DivisionFullComponent {
     this.$principles = this.db.list(`${divisionPath}/principles`).valueChanges();
     this.$resolutions = this.db.list(`${divisionPath}/resolutions`).valueChanges();
     this.$events = this.db.list(`${divisionPath}/events`).valueChanges();
-    this.$scenerios = this.db.list(`${divisionPath}/scenerios`).valueChanges();
+    this.$scenarios = this.db.list(`${divisionPath}/scenarios`).valueChanges();
   }
 
   onDivisionDecisionSelect(button) {

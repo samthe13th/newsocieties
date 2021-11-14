@@ -44,7 +44,7 @@ export class CentralComponent implements OnInit, AfterViewInit {
 
   @ViewChild('resolutionsPreview') resolutionsPreview: TemplateRef<any>;
   @ViewChild('principlesPreview') principlesPreview: TemplateRef<any>;
-  @ViewChild('sceneriosPreview') sceneriosPreview: TemplateRef<any>;
+  @ViewChild('scenariosPreview') scenariosPreview: TemplateRef<any>;
   @ViewChild('eventsPreview') eventsPreview: TemplateRef<any>;
   @ViewChild('usersPreview') usersPreview: TemplateRef<any>;
   @ViewChild('timelinePreview') timelinePreview: TemplateRef<any>;
@@ -68,7 +68,7 @@ export class CentralComponent implements OnInit, AfterViewInit {
   csvFileData = {
     resolutions: '', 
     principles: '',
-    scenerios: '',
+    scenarios: '',
     events: '', 
     users: '',
     timeline: '',
@@ -76,7 +76,7 @@ export class CentralComponent implements OnInit, AfterViewInit {
   csvData = {
     resolutions: undefined,
     principles: undefined,
-    scenerios: undefined,
+    scenarios: undefined,
     events: undefined, 
     users: undefined,
     timeline: undefined,
@@ -165,8 +165,8 @@ export class CentralComponent implements OnInit, AfterViewInit {
     this.db.object(`shows/${this.showKey}/contamination/current`).set(amount);
   }
 
-  uploadSceneriosData(e) {
-    this.parseCsvData(e, 'scenerios');
+  uploadScenariosData(e) {
+    this.parseCsvData(e, 'scenarios');
   }
 
   uploadPrinciplesData(e) {
@@ -208,7 +208,7 @@ export class CentralComponent implements OnInit, AfterViewInit {
     return data;
   }
 
-  parseSceneriosData(_data) {
+  parseScenariosData(_data) {
     const data = _data.map(([title, _header, ...options]) => {
       const header = _header.split('|');
 
@@ -325,8 +325,8 @@ export class CentralComponent implements OnInit, AfterViewInit {
           data = this.parseResolutionsData(results.data);
         } else if (type === 'principles') {
           data = this.parsePrinciplesData(results.data);
-        } else if (type === 'scenerios') {
-          data = this.parseSceneriosData(results.data);
+        } else if (type === 'scenarios') {
+          data = this.parseScenariosData(results.data);
         } else if (type === 'events') {
           data = this.parseEventsData(results.data);
         } else if (type === 'users') {
@@ -368,8 +368,8 @@ export class CentralComponent implements OnInit, AfterViewInit {
       this.modalContent = this.resolutionsPreview;
     } else if (type === 'principles') {
       this.modalContent = this.principlesPreview;
-    } else if (type === 'scenerios') {
-      this.modalContent = this.sceneriosPreview;
+    } else if (type === 'scenarios') {
+      this.modalContent = this.scenariosPreview;
     } else if (type === 'events') {
       this.modalContent = this.eventsPreview;
     } else if (type === 'users') {

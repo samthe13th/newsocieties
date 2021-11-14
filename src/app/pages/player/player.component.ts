@@ -117,7 +117,7 @@ export class PlayerComponent implements OnInit {
     this.$focus = this.db.object(`${this.divisionPath}/focus`).valueChanges();
     this.$focus.subscribe((focus) => {
       this.focus = focus;
-      if (focus === 'principles' || focus === 'resolutions' || focus === 'scenerio') {
+      if (focus === 'principles' || focus === 'resolutions' || focus === 'scenario') {
         this.db.object(`${this.divisionPath}/vote`)
           .valueChanges()
           .subscribe((vote: any) => {

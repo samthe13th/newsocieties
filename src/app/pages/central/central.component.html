@@ -11,22 +11,22 @@
   </div>
 </div>
 
-<ng-template #sceneriosPreview>
+<ng-template #scenariosPreview>
   <div class="button-row">
-    <button (click)="cancelUpdate('scenerios')">Cancel</button>
-    <button (click)="updateCsvData('scenerios')">Update</button>
+    <button (click)="cancelUpdate('scenarios')">Cancel</button>
+    <button (click)="updateCsvData('scenarios')">Update</button>
   </div>
-  <table *ngIf="csvData?.scenerios" style="width: 100%">
+  <table *ngIf="csvData?.scenarios" style="width: 100%">
     <tr>
       <th>Pre-vote</th>
       <th>Post-vote</th>
     </tr>
-    <tr *ngFor="let scenerio of csvData.scenerios">
+    <tr *ngFor="let scenario of csvData.scenarios">
       <td>
-        <div><strong>{{ scenerio.title }}</strong></div>
-        <div>{{ scenerio.prompt }}</div>
+        <div><strong>{{ scenario.title }}</strong></div>
+        <div>{{ scenario.prompt }}</div>
         <ul style="margin-top: 0">
-          <ng-container *ngFor="let option of scenerio.options">
+          <ng-container *ngFor="let option of scenario.options">
             <li *ngIf="option?.prompt">
               {{option?.prompt}}
             </li>
@@ -35,10 +35,10 @@
       </td>
 
       <td>
-        <div><strong>{{ scenerio.title }}</strong></div>
-        <div>{{ scenerio.result }}</div>
+        <div><strong>{{ scenario.title }}</strong></div>
+        <div>{{ scenario.result }}</div>
         <ul style="margin-top: 0">
-          <ng-container *ngFor="let option of scenerio.options">
+          <ng-container *ngFor="let option of scenario.options">
             <li *ngIf="option?.result">
               {{option?.result}}
             </li>
@@ -188,8 +188,8 @@
       </div>
     
       <div class="vote-data">
-        Scenerios
-        <input [(ngModel)]="csvFileData.scenerios" (change)="uploadSceneriosData($event)" type="file" #fileUpload/>
+        Scenarios
+        <input [(ngModel)]="csvFileData.scenarios" (change)="uploadScenariosData($event)" type="file" #fileUpload/>
       </div>
     
       <div class="vote-data">
