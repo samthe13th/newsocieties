@@ -19,21 +19,21 @@
       (sideChange)="process(i)">
       <div front class="harvest-card">
         <div 
-          *ngIf="card.value > 0"
+          *ngIf="card.type !== 'C' && card.value > 0"
           class="resource"
           [class.one]="card.value === 1"
           [class.two]="card.value === 2"
           [class.three]="card.value === 3">
           {{card.value}}
         </div>
-        <div *ngIf="card.value === 0" class="contamination">
+        <div *ngIf="card.type === 'C'" class="contamination">
           <img src="../assets/contamination.png"/>
         </div>
       </div>
       <div back class="harvest-card back">
-        <div class="flex-row flex-center" *ngIf="markCards || (card.value > 0 && card.contaminated)">
+        <div class="flex-row flex-center" *ngIf="markCards || (card.type === 'R' && card.contaminated)">
           <ng-container *ngIf="card.value !== -1">
-            {{card.value == 0 ? 'X' : card.value }}
+            {{card.type === 'C' ? 'C' + card.value : card.value }}
           </ng-container>
         </div>
       </div>
@@ -44,7 +44,7 @@
   <app-toast
      (afterDismiss)="afterToastHide()" [data]="harvestEvent">
     <div
-      *ngIf="harvestEvent.type === 'resource'"
+      *ngIf="harvestEvent.type === 'R'"
       class="resource toast-event-resource"
       [class.one]="harvestEvent.value === 1"
       [class.two]="harvestEvent.value === 2"
@@ -52,7 +52,7 @@
       {{harvestEvent.value}}
     </div>
     <div
-      *ngIf="harvestEvent.type === 'contaminant'"
+      *ngIf="harvestEvent.type === 'C'"
       class="flex-column flex-center"
       >
       <em *ngIf="harvestEvent.value">{{harvestEvent.value}}</em>

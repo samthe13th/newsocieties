@@ -537,7 +537,7 @@ export class CentralComponent implements OnInit, AfterViewInit {
     return slots.map((_, index) => ({ 
       value: -1, 
       owner: null, 
-      harvested: false, 
+      harvested: false,
       contaminated: false,
       mark: null, 
       index

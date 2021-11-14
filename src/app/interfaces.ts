@@ -1,7 +1,8 @@
 export interface LandTile {
-  value: number;
+  value: LandCardValue;
   owner: LandOwner, 
   side?: 'back' | 'front';
+  type: LandCardType;
   harvested?: boolean;
   contaminated: boolean;
   mark: string | number | null;
@@ -19,5 +20,10 @@ export enum LandCardValues {
   V2 = 2,
   V3 = 3
 }
-
 export type LandCardValue = LandCardValues | keyof typeof LandCardValues;
+
+export enum LandCardTypes {
+  C = 'C',
+  R = 'R'
+}
+export type LandCardType = LandCardTypes | keyof typeof LandCardTypes;

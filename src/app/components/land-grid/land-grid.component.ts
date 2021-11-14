@@ -4,7 +4,7 @@ import { AngularFireDatabase } from '@angular/fire/database';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { Subject, combineLatest } from 'rxjs';
 import { takeUntil, tap, take, isEmpty } from 'rxjs/operators';
-import { LandCardValues, LandTile } from 'src/app/interfaces';
+import { LandCardValues, LandTile, LandCardTypes } from 'src/app/interfaces';
 import { BankService } from 'src/app/services/bank.service';
 import { pluckRandom, getRandomInt } from 'src/app/utilties';
 
@@ -41,6 +41,7 @@ export class LandGridComponent implements OnInit {
   @Input() updatePath;
   @Input() showId;
   @Input() player;
+  @Input() isHost = false;
   @Input() divisionKey;
   @Input() 
   get turn() { return this._turn };
@@ -95,6 +96,7 @@ export class LandGridComponent implements OnInit {
         tiles.forEach((update, i) => {
           if (!isEqual(update, this.landTiles[i])) {
             const tile = this.landTiles[i];
+            tile.type = update.type;
             tile.harvested = update.harvested;
             tile.value = update.value;
             tile.contaminated = update.contaminated;
@@ -103,12 +105,16 @@ export class LandGridComponent implements OnInit {
         })
       })
 
-    this.db.object(`shows/${this.showId}/contamination/current`)
+    if (this.isHost) {
+      this.db.object(`shows/${this.showId}/contamination/current`)
       .valueChanges()
+      .pipe(takeUntil(this.destroy$))
       .subscribe((level) => {
         console.log('adjust contam: ', level)
         this.adjustContamination(level);
+        this.updateDB();
       })
+    }
   }
 
   afterToastHide() {
@@ -117,35 +123,39 @@ export class LandGridComponent implements OnInit {
   }
 
   private adjustContamination(level) {
-    console.log('adjust contam')
+    console.log('adjust contam (GRID): ', this.player)
     this.contamination = level;
     if (this.landTiles) {
-      const cardIndexes = this.landTiles
-        .map((tile, index) => tile.value == LandCardValues.EMPTY ? -1 : index)
-        .filter(value => value !== -1);
-      const contaminantsCount = Math.ceil((this.contamination / 100) * cardIndexes.length)
-      const currentContaminantIndexes = this.landTiles
-        .map((tile, index) => tile.value === LandCardValues.CONTAM ? index : -1)
-        .filter(value => value !== -1);
+      console.log('land tiles: ', this.landTiles)
+      const harvestable = this.landTiles
+        .filter(card => card.value !== LandCardValues.EMPTY && !card.contaminated)
+      const contaminantsCount = Math.ceil((this.contamination / 100) * harvestable.length)
+      const currentContaminantIndexes = harvestable
+        .filter(card => card.type === LandCardTypes.C)
+        .map(card => card.index)
       const adjustment = contaminantsCount - currentContaminantIndexes.length;
 
-      console.log({cardIndexes, contaminantsCount, current: currentContaminantIndexes.length, adjustment })
+      console.log({harvestable, contaminantsCount, current: currentContaminantIndexes.length, adjustment })
       if (adjustment > 0) {
         const contaminate = pluckRandom(
-          difference(cardIndexes, currentContaminantIndexes),
-          Math.min(adjustment, cardIndexes.length)
+          difference(harvestable.map(h => h.index), currentContaminantIndexes),
+          Math.min(adjustment, harvestable.length)
         );
         console.log('add contams: ', contaminate)
         contaminate.forEach((i) => {
           if (!this.landTiles[i].harvested) {
-            this.landTiles[i].value = LandCardValues.CONTAM;
+            this.landTiles[i].type =  LandCardTypes.C;
+            this.landTiles[i].value = getRandomInt(1,2);
           }
         })
       } else if (adjustment < 0) {
-        const uncontaminate = pluckRandom(currentContaminantIndexes, Math.min(Math.abs(adjustment), currentContaminantIndexes.length));
+        const uncontaminate = pluckRandom(
+          currentContaminantIndexes,
+          Math.min(Math.abs(adjustment), currentContaminantIndexes.length));
         console.log('Remove contams: ', uncontaminate)
         uncontaminate.forEach((i) => {
           if (!this.landTiles[i].harvested) {
+            this.landTiles[i].type = LandCardTypes.R;
             this.landTiles[i].value = getRandomInt(1,3);
           }
         })
@@ -312,33 +322,38 @@ export class LandGridComponent implements OnInit {
     if (dir === 'right') { return grid[r]?.[c + dist] }
     if (dir === 'top') { return grid[r - dist]?.[c] }
     if (dir === 'bottom') { return grid[r + dist]?.[c] }
+    if (dir === 'topleft') { return grid[r - dist]?.[c - dist] }
+    if (dir === 'topright') { return grid[r - dist]?.[c + dist] }
+    if (dir === 'bottomleft') { return grid[r + dist]?.[c - dist] }
+    if (dir === 'bottomright') { return grid[r + dist]?.[c + dist] }
   }
 
   process(i) {
     const tile = this.landTiles[i];
-    if (tile.value === LandCardValues.CONTAM && tile.harvested) {
-      const placements = ['left', 'right', 'top', 'bottom'];
-      const tiles = placements.map((placement) => this.landTiles[this.getRelativeGridIndex(i, placement, 1)])
-      //const destroyed = [];
-
-      setTimeout(() => {
-        tiles.forEach((tile, index) => {
-          if (tile && !tile.owner && !tile.contaminated) {
-            //destroyed.push(tile.value)
-            tiles[index].contaminated = true;
-          }
-        })
-
-        // this.db.object(`shows/${this.showId}/divisions/${this.divisionKey}/harvestEvent`).set({
-        //   tile: tile.index,
-        //   type: 'exposeContaminant',
-        //   message: `A contaminant has been exposed!`,
-        //   value: filter(destroyed, (value) => value > 0),
-        //   duration: 2500
-        // })
-
-        this.updateDB();
-      })
+    if (tile.type === LandCardTypes.C && tile.harvested) {
+      this.contaminateAdjacentTiles(tile);
     }
+  }
+
+  contaminateAdjacentTiles(tile) {
+    let placements;
+    if (tile.value === 1) {
+      placements = ['left', 'right'];
+    } else if (tile.value === 2) {
+      placements = ['left', 'right', 'top', 'bottom'];
+    } else if (tile.value === 3) {
+      placements = ['left', 'right', 'top', 'bottom', 'topleft', 'topright', 'bottomleft', 'bottomright'];
+    }
+    const tiles = placements.map((placement) => this.landTiles[this.getRelativeGridIndex(tile.index, placement, 1)])
+
+    setTimeout(() => {
+      tiles.forEach((tile, index) => {
+        if (tile && !tile.owner && !tile.contaminated && !tile.harvested) {
+          tiles[index].contaminated = true;
+        }
+      })
+    
+      this.updateDB();
+    })
   }
 }

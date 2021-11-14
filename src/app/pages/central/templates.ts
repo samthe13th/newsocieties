@@ -69,7 +69,7 @@ export const DIVISION_TEMPLATE = {
   },
   landCost: 5,
   VP: 0,
-  score: 'Low',
+  score: 'low',
   season: 0,
   reserve: 0,
   reserveThresholds: {
