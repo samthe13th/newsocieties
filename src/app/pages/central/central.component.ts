@@ -394,13 +394,13 @@ export class CentralComponent implements OnInit, AfterViewInit {
     this.db.object(`shows/${this.showKey}`).set({
       divisions,
       ...SHOW_TEMPLATE,
-      users: Object.keys(users).reduce((acc, key) => {
+      users: users ? Object.keys(users).reduce((acc, key) => {
         return { ...acc, [key]: {
           ...users[key],
           division: null,
           name: null
         }}
-      }, {})
+      }, {}) : null
     }).then((res) => {
       this.buildShow(this.showKey)
     })
