@@ -53,6 +53,7 @@
   height: 100%;
   display: flex; 
   justify-content: center;
+  align-items: center;
   position: relative;
   cursor: pointer;
 
@@ -69,6 +70,10 @@
       width: 100%;
       box-sizing: border-box;
     }
+  }
+
+  &.contaminated {
+    background: black;
   }
 
   &.back {

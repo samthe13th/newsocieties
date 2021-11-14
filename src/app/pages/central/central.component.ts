@@ -8,6 +8,7 @@ import { DIVISION_TEMPLATE, SHOW_TEMPLATE } from './templates';
 import { map } from 'rxjs/operators';
 import * as moment from 'moment';
 import { ActivatedRoute } from '@angular/router';
+import { pluckRandom, getRandomInt } from 'src/app/utilties';
 
 const DIVISIONS = ['N', 'S', 'E', 'W', 'NE', 'SE', 'SW', 'NW'];
 const COLORS = {
@@ -389,8 +390,6 @@ export class CentralComponent implements OnInit, AfterViewInit {
       .pipe(take(1))
       .toPromise()
 
-    console.log({users})
-
     const divisions = this.generateDivisions();
     this.db.object(`shows/${this.showKey}`).set({
       divisions,
@@ -534,13 +533,21 @@ export class CentralComponent implements OnInit, AfterViewInit {
 
   generateLandTiles() {
     const slots = range(MAX_HARVEST);
-    return slots.map((_, index) => ({ 
+    const tiles = slots.map((_, index) => ({ 
       value: -1, 
       owner: null, 
       harvested: false,
+      type: 'R',
       contaminated: false,
       mark: null, 
       index
      }))
+     const plucked = pluckRandom(tiles, 18);
+     plucked.forEach((x, i) => {
+       let value = 1;
+       if (i > 5) { value += (i > 11) ? 2 : 1 }
+       tiles[x.index].value = value;
+     })
+    return tiles;
   }
 }

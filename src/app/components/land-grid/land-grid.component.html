@@ -15,8 +15,14 @@
       [class.owned]="true"
       [mark]="selection?.value === card.index ? selection?.mark : null"
       [playerId]="player?.id"
+      [contaminated]="card.contaminated"
       [class.disabled]="card.value == -1 || card.contaminated == true"
       (sideChange)="process(i)">
+      <div contaminatedTile class="harvest-card contaminated">
+        <ng-container *ngIf="(card.type === 'R' && card.value > 0)">
+          {{ card.value }}
+        </ng-container>
+      </div>
       <div front class="harvest-card">
         <div 
           *ngIf="card.type !== 'C' && card.value > 0"
@@ -31,9 +37,9 @@
         </div>
       </div>
       <div back class="harvest-card back">
-        <div class="flex-row flex-center" *ngIf="markCards || (card.type === 'R' && card.contaminated)">
+        <div class="flex-row flex-center" *ngIf="markCards">
           <ng-container *ngIf="card.value !== -1">
-            {{card.type === 'C' ? 'C' + card.value : card.value }}
+            {{ card.type === 'C' ? 'C' + card.value : card.value }}
           </ng-container>
         </div>
       </div>

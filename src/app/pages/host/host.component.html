@@ -408,51 +408,24 @@
           <span class="new-value" *ngFor="let gla of ($pendingGLA | async)">{{ gla.division }}</span>
         </div>
         <div>
-          <!-- <button (click)="changeDivisionProperty('nextSeason/capacity')">
-            <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
-          </button>
-          Capacity: {{ division.capacity }} &#8594;  -->
           Capacity: <span class="new-value">{{ next?.capacity }}</span>
         </div>
         <div>
-          <!-- <button (click)="changeDivisionProperty('nextSeason/harvest')">
-            <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
-          </button>
-          Harvest: {{ division.harvest }} &#8594;  -->
           Harvest: <span class="new-value">{{ next?.harvest }}</span>
         </div>
         <div>
-          <!-- <button (click)="changeDivisionProperty('nextSeason/landCost')">
-            <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
-          </button>
-          Land Cost: {{ division.landCost }} &#8594;  -->
           Land Cost: <span class="new-value">{{ next?.landCost }}</span>
         </div>
         <div *ngIf="next?.thresholds">
           Thresholds
           <ul style="margin: 0">
             <li>
-              <!-- <button (click)="changeDivisionProperty('nextSeason/thresholds/0', 'Low')">
-                <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
-              </button>
-              Low: {{ division.reserveThresholds.low }}
-              &#8594;  -->
               Low: <span class="new-value">{{ next?.thresholds[0] }}</span>
             </li>
             <li>
-              <!-- <button (click)="changeDivisionProperty('nextSeason/thresholds/1', 'Low')">
-                <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
-              </button>
-              Mid: {{ division.reserveThresholds.mid }}
-              &#8594;  -->
               Mid: <span class="new-value">{{ next?.thresholds[1] }}</span>
             </li>
             <li>
-              <!-- <button (click)="changeDivisionProperty('nextSeason/thresholds/2', 'High')">
-                <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
-              </button>
-              High: {{ division.reserveThresholds.high }}
-              &#8594;  -->
               High: <span class="new-value">{{ next?.thresholds[2] }}</span>
             </li>
           </ul>

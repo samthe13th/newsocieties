@@ -342,11 +342,13 @@ export class LandGridComponent implements OnInit {
     } else if (tile.value === 3) {
       placements = ['left', 'right', 'top', 'bottom', 'topleft', 'topright', 'bottomleft', 'bottomright'];
     }
-    const tiles = placements.map((placement) => this.landTiles[this.getRelativeGridIndex(tile.index, placement, 1)])
+    const tiles = placements.map(
+      (placement) => this.landTiles[this.getRelativeGridIndex(tile.index, placement, 1)]
+    )
 
     setTimeout(() => {
       tiles.forEach((tile, index) => {
-        if (tile && !tile.owner && !tile.contaminated && !tile.harvested) {
+        if (tile && !tile.owner && !tile.contaminated) {
           tiles[index].contaminated = true;
         }
       })

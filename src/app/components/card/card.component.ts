@@ -24,6 +24,7 @@ export class CardComponent implements OnInit {
   @Input() mark = null
   @Input() xray = false;
   @Input() playerId;
+  @Input() contaminated = false;
   @Input() 
   set side(val) {
     if (this._side && this.animate === false && val !== this._side) {

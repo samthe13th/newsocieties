@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, TemplateRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { getRandomInt, pluckRandom } from 'src/app/utilties';
@@ -6,6 +6,7 @@ import { LandTile, LandCardValues, LandCardTypes } from 'src/app/interfaces';
 import * as _ from 'lodash';
 import { includes, difference, trim, differenceBy, toNumber, each, partition } from 'lodash';
 import { take, map, tap } from 'rxjs/operators'
+import { Subject } from 'rxjs';
 import { BankService } from 'src/app/services/bank.service';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { ButtonGroupComponent } from 'src/app/components/button-group/button-group.component';
@@ -24,7 +25,7 @@ const DIVISIONS = ["N", "NE", "W", "NW", "E", "SW", "S", "SE"];
     '[class.app-host]': 'true'
   }
 })
-export class HostComponent implements OnInit {
+export class HostComponent implements OnInit, OnDestroy {
   @ViewChild('harvestTemplate') harvestTemplate: TemplateRef<any>;
   @ViewChild('principleTemplate') principleTemplate: TemplateRef<any>;
   @ViewChild('resolutionTemplate') resolutionTemplate: TemplateRef<any>;
@@ -71,6 +72,8 @@ export class HostComponent implements OnInit {
     { id: '1', label: '1'}
   ]
 
+  private destroy$ = new Subject<boolean>();
+  
   $vote;
   $division;
   $citizens;
@@ -98,7 +101,7 @@ export class HostComponent implements OnInit {
   actionSheet;
   voteResultFunds = 0;
   division;
-  contamination = 50;
+  contamination;
   harvest;
   divisionKey;
   showKey;
@@ -186,11 +189,15 @@ export class HostComponent implements OnInit {
     this.divisionService.calculateDivisionScore$(this.showKey, this.divisionKey).subscribe();
     this.divisionService.thresholdListener$(this.showKey, this.divisionKey).subscribe();
 
-    // this.db.object(`shows/${this.showKey}/contamination/current`)
-    //   .valueChanges()
-    //   .subscribe((level) => {
-    //     this.adjustContamination(level);
-    //   })
+    this.db.object(`shows/${this.showKey}/contamination/current`)
+      .valueChanges()
+      .pipe(
+
+      )
+      .subscribe((level) => {
+        this.contamination = level;
+        console.log('level: ', level)
+      })
 
     this.getResolutions();
     this.getPrinciples();
@@ -317,7 +324,9 @@ export class HostComponent implements OnInit {
     const tileValue = tile.value;
 
     if (tile.type === LandCardTypes.C) {
-      const contaminateCallback = await this.divisionService.contaminateResources(this.showKey, this.divisionKey, this.selectedCitizen?.playerId);
+      const contaminateCallback = await this.divisionService.contaminateResources(
+        this.showKey, this.divisionKey, this.selectedCitizen?.playerId
+      );
       this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/harvestEvent`).set({
         tile: tile.index,
         type: LandCardTypes.C,
@@ -794,50 +803,6 @@ export class HostComponent implements OnInit {
     })
   }
 
-  // private adjustContamination(level) {
-  //   this.contamination = level;
-  //   if (this.harvest) {
-  //     const cardIndexes = this.harvest
-  //       .map((tile, index) => tile.value == LandCardValues.EMPTY ? -1 : index)
-  //       .filter(value => value !== -1);
-  //     console.log('card indexes: ', cardIndexes)
-  //     const contaminantsCount = Math.ceil((this.contamination / 100) * cardIndexes.length)
-  //     console.log({contaminantsCount})
-  //     const currentContaminantIndexes = this.harvest
-  //       .map((tile, index) => tile.type === LandCardTypes.C ? index : -1)
-  //       .filter(value => value !== -1);
-  //     console.log({currentContaminantIndexes});
-  //     const adjustment = contaminantsCount - currentContaminantIndexes.length;
-
-  //     if (adjustment > 0) {
-  //       const contaminate = pluckRandom(
-  //         difference(cardIndexes, currentContaminantIndexes),
-  //         Math.min(adjustment, cardIndexes.length)
-  //       );
-  //       contaminate.forEach((i) => {
-  //         if (!this.harvest[i].harvested) {
-  //           console.log("contaminate: ", this.harvest[i])
-  //           this.harvest[i].type = LandCardTypes.C;
-  //           // his.harvest[i].value = LandCardValues.CONTAM;
-  //         }
-  //       })
-  //     } else if (adjustment < 0) {
-  //       const uncontaminate = pluckRandom(
-  //         currentContaminantIndexes,
-  //         Math.min(Math.abs(adjustment),
-  //         currentContaminantIndexes.length)
-  //       );
-  //       uncontaminate.forEach((i) => {
-  //         if (!this.harvest[i].harvested) {
-  //           this.harvest[i].type = LandCardTypes.R;
-  //           this.harvest[i].value = getRandomInt(1,3);
-  //         }
-  //       })
-  //     }
-  //   }
-  //   console.log("harvest: ", this.harvest)
-  // }
-
   private generateHarvest(landTiles, harvestableCards, contaminantLevel = 1): Array<LandTile> {
     const tiles: LandTile[] = [ ...this.resetLandTiles(landTiles) ];
     const [owned, open]: LandTile[][] = partition(tiles, (tile) => tile.owner !== undefined);
@@ -847,7 +812,6 @@ export class HostComponent implements OnInit {
       ...pluckRandom(open.map((tile: any) => tile.index), harvestableCount > 0 ? harvestableCount : 0)
     ]
     const contaminantsCount = Math.ceil((this.contamination / 100) * harvestableCards);
-    console.log('contaminants: ', this.contamination, contaminantsCount)
     const contaminants: number[] = pluckRandom(harvestIndexes, contaminantsCount);
 
     harvestIndexes.forEach((i) => {
@@ -860,8 +824,6 @@ export class HostComponent implements OnInit {
       }
     })
 
-    console.log('TILES: ', tiles.filter(t => t.value !== -1))
-
     return tiles;
   }
 
@@ -872,5 +834,9 @@ export class HostComponent implements OnInit {
       contaminated: false,
       harvested: false
     }))
+  }
+  ngOnDestroy() {
+    this.destroy$.next(true);
+    this.destroy$.unsubscribe();
   }
 }
