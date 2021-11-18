@@ -426,6 +426,7 @@ export class CentralComponent implements OnInit, AfterViewInit {
     this.divisionDropdownSelect = find(this.divisionDropdownOptions, (div) => div.title === this.divisionDropdownValue);
     if (type === 'event') {
       this.divisionEventVariables = this.divisionDropdownSelect?.variables;
+      console.log('DIV vars: ', this.divisionEventVariables)
     }
   }
 

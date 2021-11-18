@@ -1,13 +1,37 @@
 
 <ng-container *ngIf="($division | async) as division">
-<!-- 
-  <div class="player-turn">
-    <app-player-turn 
-      [divisionPath]="divisionPath">
-    </app-player-turn>
-  </div> -->
+  <div *ngIf="!signedIn" class="user-signin">
+    <div *ngIf="!id" class="user-signin-form">
 
-  <ng-container *ngIf="signedIn else signInTemplate">
+      <input #userCode type="text">
+      <br/>
+
+      <button (click)="signIn(userCode.value)" class="action-button">
+        Sign In
+      </button>
+    </div>
+
+    <br/>
+
+    <div *ngFor="let validation of loginValidations">
+      <em>{{ validation }}</em>
+    </div>
+
+  </div>
+
+  <div *ngIf="signedIn && !name" class="user-signin">
+    <div class="user-signin-form">
+      Enter a name for us to call you by!
+      <input type="text" [(ngModel)]="nameInput">
+      <br/>
+  
+      <button class="action-button" (click)="setName()">
+        Join Division
+      </button>
+    </div>
+  </div>
+
+  <ng-container *ngIf="signedIn && name">
     <app-flash-news [showKey]="showKey" [divisionKey]="divisionKey"></app-flash-news>
 
     <div class="player-page-layout">
@@ -200,14 +224,6 @@
   
   </ng-container>
 
-  <!-- <app-tabs
-    selectedClass="player-selected-tab"
-    [tabs]="[
-      { id: 'division', tabTemplate: divisionTab, bodyTemplate: divisionBody },
-      { id: 'global', tabTemplate: global, bodyTemplate: globalBody }
-    ]"
-  ></app-tabs> -->
-
   <ng-template #divisionTab>
     <div class="player-folder__tab-division">
       {{ division?.code }}
@@ -239,39 +255,6 @@
         Gather (g)
       </div>
     </div>
-  </ng-template>
-
-  <ng-template #signInTemplate>
-
-    <div class="user-signin">
-      <div *ngIf="!id" class="user-signin-form">
-
-        <input #userCode type="text">
-        <br/>
-
-        <button (click)="signIn(userCode.value)" class="action-button">
-          Sign In
-        </button>
-      </div>
-
-      <div *ngIf="id" class="user-signin-form">
-        Enter a name for us to call you by!
-        <input #userName type="text">
-        <br/>
-  
-        <button class="action-button" (click)="setName(userName.value)">
-          Join Division
-        </button>
-      </div>
-
-      <br/>
-
-      <div *ngFor="let validation of loginValidations">
-        <em>{{ validation }}</em>
-      </div>
-
-    </div>
-
   </ng-template>
 
 </ng-container>

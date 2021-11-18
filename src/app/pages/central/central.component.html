@@ -326,7 +326,7 @@
         <span [innerHtml]="block"></span>
         <input
           style="width: 30px"
-          *ngIf="divisionEventVariables[i]?.value"
+          *ngIf="i < (divisionDropdownSelect?.content?.length - 1) && divisionEventVariables[i]?.value !== undefined"
           type="number"
           [(ngModel)]="divisionEventVariables[i].value"/>
       </ng-container>
