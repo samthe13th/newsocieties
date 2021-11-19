@@ -18,36 +18,6 @@
   }
 }
 
-.toast-event-resource {
-  width: 40px; 
-  height: 40px; 
-  margin: 10px; 
-  border-radius: 10px;
-
-  &.contamination {
-    width: 80px;
-    height: 80px;
-    background: tomato;
-    height: 100%;
-    display: flex;
-
-    img {
-      padding: 4px;
-      width: 100%;
-      box-sizing: border-box;
-    }
-  }
-}
-
-.harvest-events {
-  position: absolute;
-  height: 100%; 
-  width: 100%; 
-  display: flex; 
-  align-items: center;
-  justify-content: center;
-}
-
 .harvest-card {
   width: 100%;
   height: 100%;

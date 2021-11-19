@@ -129,6 +129,19 @@ select {
   overflow: hidden
 }
 
+.app-division-popups {
+  &.hide {
+    display: none;
+  }
+  
+  position: absolute;
+  height: 100%; 
+  width: 100%; 
+  display: flex; 
+  align-items: center;
+  justify-content: center;
+}
+
 .app-flash-news {
   text-align: center;
   justify-content: center;
@@ -238,6 +251,7 @@ select {
 .app-player-turn {
   display: inline-flex;
   background: white;
+  position: relative;
   flex-direction: column;
   color: black;
   border-radius: 10px;

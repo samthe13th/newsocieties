@@ -157,6 +157,7 @@ export class HostComponent implements OnInit, OnDestroy {
       .pipe(
         tap((citizens) => {
           if (this.citizenCount !== citizens.length) {
+            console.log('update positions')
             this.updatePositions();
           }
           this.citizenCount = citizens.length;
@@ -211,18 +212,19 @@ export class HostComponent implements OnInit, OnDestroy {
       take(1)
     ).toPromise();
     this.positions = citizens.map((c: any) => c?.id);
+    console.log('new: ', this.positions)
     this.db.object(`${divisionPath}/positions`).set(this.positions);
   }
 
   gather() {
-    console.log('GATHER: ', this.selectedCitizen?.playerId);
-    this.landGrid.gather(this.selectedLandTile, this.selectedCitizen?.playerId);
+    console.log('GATHER: ', this.selectedCitizen?.id);
+    this.landGrid.gather(this.selectedLandTile, this.selectedCitizen?.id);
     this.actionSheet.dismiss();
   }
 
   explore() {
-    console.log('EXPLORE: ', this.selectedCitizen?.playerId);
-    this.landGrid.explore(this.selectedLandTile, this.selectedCitizen?.playerId);
+    console.log('EXPLORE: ', this.selectedCitizen?.id);
+    this.landGrid.explore(this.selectedLandTile, this.selectedCitizen?.id);
     this.actionSheet.dismiss();
   }
 
@@ -330,32 +332,39 @@ export class HostComponent implements OnInit, OnDestroy {
   }
 
   buyLocalLand(price, updatePath) {
+    console.log("buy local: ", this.selectedCitizen, this.positions)
     this.bankService.spendResources(
       this.showKey,
       this.divisionKey,
       this.selectedCitizen.id,
       price
     ).then(() => {
+      console.log("GET LAND FOR ", this.selectedCitizen)
       this.divisionService.acquireLand(this.showKey, this.divisionKey, [{
         division: this.divisionKey,
         id: this.selectedCitizen.id,
         name: this.positions.indexOf(this.selectedCitizen.id) + 1
-      }]);
+      }]).then(() => {
+        console.log("send popup", LandCardTypes.L)
+        this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/divisionPopup`).set({
+          message: `${this.selectedCitizen?.player} acquired a new plot of land!`,
+        })
+      });
       this.actionSheet.dismiss();
     })
   }
 
   async onGather(tile) {
     console.log('on gather: ', tile, this.selectedCitizen);
-    const playerId = tile.owner ?? this.selectedCitizen?.playerId;
+    const playerId = tile.owner ?? this.selectedCitizen?.id;
     const divisionKey = tile.owner?.division ?? this.divisionKey;
     const tileValue = tile.value;
 
     if (tile.type === LandCardTypes.C) {
       const contaminateCallback = await this.divisionService.contaminateResources(
-        this.showKey, this.divisionKey, this.selectedCitizen?.playerId
+        this.showKey, this.divisionKey, this.selectedCitizen?.id
       );
-      this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/harvestEvent`).set({
+      this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/divisionPopup`).set({
         tile: tile.index,
         type: LandCardTypes.C,
         message: `${this.selectedCitizen?.player} gathered a contaminant!`,
@@ -372,8 +381,8 @@ export class HostComponent implements OnInit, OnDestroy {
       }]).then(() => {
         console.log('deposited resources from land', tile, this.selectedCitizen)
         if (!tile.owner && this.selectedCitizen) {
-          console.log('push event', `shows/${this.showKey}/divisions/${this.divisionKey}/harvestEvent`, tileValue)
-          this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/harvestEvent`).set({
+          console.log('push event', `shows/${this.showKey}/divisions/${this.divisionKey}/divisionPopup`, tileValue)
+          this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/divisionPopup`).set({
             tile: tile.index,
             type: LandCardTypes.R,
             message: `${this.selectedCitizen?.player} gathered a resource`,
@@ -611,6 +620,12 @@ export class HostComponent implements OnInit, OnDestroy {
   addCitizenResources(citizen) {
     this.selectedCitizen = citizen;
     this.actionSheet = this.bottomSheet.open(this.addResourcesSheet);
+  }
+
+  removeCitizen(id) {
+    if (confirm('Are you sure you want to remove this citizen?')) {
+      this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/citizens/${id}`).remove();
+    }
   }
 
   transferCitizenResources(citizen) {

@@ -6,7 +6,7 @@ import { AngularFireDatabase } from '@angular/fire/database';
 
 export interface PlayerTurn  {
   player: string,
-  playerId: string,
+  id: string,
   actions: number, 
   actionsAvailable: number
 }
@@ -39,7 +39,7 @@ export class PlayerTurnComponent implements OnInit {
         const player = find(citizens, ['id', turn.id]);
         return {
           player: player?.name,
-          playerId: player?.id,
+          id: player?.id,
           playerPosition: turn?.index,
           actions: player?.actions ?? 2,
           actionsAvailable: player?.actionsAvailable ?? 2

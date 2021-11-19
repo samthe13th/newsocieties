@@ -66,7 +66,7 @@
         (gatherResource)="onGather($event)"
         (select)="onSelectLandTile($event)"
         [markCards]="true"
-        [showId]="showKey"
+        [showKey]="showKey"
         [isHost]="true"
         [divisionKey]="divisionKey"
         [updatePath]="landTilesPath"> 
@@ -93,7 +93,7 @@
           (selectionChange)="onSelectionChange($event)"
           [showVotes]="true"
           [allowSelection]="vote?.state === 'review'"
-          [showId]="showKey"
+          [showKey]="showKey"
           role="central"
           [divisionId]="divisionKey"
         ></app-vote>
@@ -102,6 +102,7 @@
       </ng-container>
   
     </div>
+
     <div *ngIf="focus === 'resolutionReview'">
       <h1>Last Resolution</h1>
     
@@ -314,7 +315,12 @@
       <h2>Citizens</h2>
       <div *ngFor="let citizen of ($citizens | async); let index = index" style="margin-bottom: 10px">
         <hr/>
-        <div><strong>{{index + 1}}: {{citizen.name}} ({{citizen.id}})</strong></div>
+        <div>
+          <strong>{{index + 1}}: {{citizen.name}} ({{citizen.id}})</strong>
+          <button (click)="removeCitizen(citizen.id)">
+            Remove
+          </button>
+        </div>
         <div class="editable-item">
           <button (click)="changeCitizenProperty(citizen, 'actions', 'basic')">
             <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
@@ -628,7 +634,7 @@
 <ng-template #localLandSheet>
   <div class="action-sheet flex-column">
     <ng-container *ngIf="changeAttribute?.data.wealth >= changeAttribute?.data.cost; else noMoney">
-      <div>Purchase new land plot for citizen? (cost: {{changeAttribute.data.cost}})</div>
+      <div>Purchase new land plot for {{selectedCitizen?.name}}? (cost: {{changeAttribute.data.cost}})</div>
       <button 
         (click)="buyLocalLand(changeAttribute.data.cost, changeAttribute.dbPath)">
         Confirm
@@ -663,3 +669,6 @@
     </div>
   </div>
 </ng-template>
+
+<app-division-popups [showKey]="showKey" [divisionKey]="divisionKey">
+</app-division-popups>

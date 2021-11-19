@@ -28,6 +28,7 @@ import { FlashNewsComponent } from './flash-news/flash-news.component';
 import { UsersGridComponent } from './users-grid/users-grid.component';
 import { DivisionFullComponent } from './division-full/division-full.component';
 import { ToastComponent } from './toast/toast.component';
+import { DivisionPopupsComponent } from './division-popups/division-popups.component';
 
 
 const components = [
@@ -37,6 +38,7 @@ const components = [
   ChatComponent,
   DialogComponent,
   DivisionFullComponent,
+  DivisionPopupsComponent,
   ExportsComponent,
   FlashNewsComponent,
   FundraisingComponent,

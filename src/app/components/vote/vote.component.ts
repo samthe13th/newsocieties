@@ -18,7 +18,7 @@ export class VoteComponent implements OnInit {
   @Output() selectionChange = new EventEmitter<any>()
   @Output() voteChange = new EventEmitter<any>()
   @Input() showVotes: boolean;
-  @Input() showId: string;
+  @Input() showKey: string;
   @Input() divisionId: string;
   @Input() includeOtherOption = false;
   @Input() hideLast: boolean;
@@ -54,7 +54,7 @@ export class VoteComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.$vote = this.db.object(`shows/${this.showId}/divisions/${this.divisionId}/vote`)
+    this.$vote = this.db.object(`shows/${this.showKey}/divisions/${this.divisionId}/vote`)
       .valueChanges();
     this.$vote.subscribe((vote) => {
       this.vote = { ...vote };

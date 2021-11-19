@@ -23,16 +23,15 @@ export class LandGridComponent implements OnInit {
   selection;
   landTiles;
   animateTiles;
-
   landSelectSheet;
   selectedResourceStatus;
   selectedCardIndex;
   positions;
   contamination;
-  harvestEvent;
   harvestColumns;
 
   private _turn;
+  private _player;
   private destroy$ = new Subject<boolean>();
 
   @Output() gatherResource: EventEmitter<{ value: number }> = new EventEmitter();
@@ -40,8 +39,14 @@ export class LandGridComponent implements OnInit {
 
   @Input() markCards: boolean;
   @Input() updatePath;
-  @Input() showId;
-  @Input() player;
+  @Input() showKey;
+  @Input()
+  get player() { return this._player }
+  set player(value) {
+    console.log('set player: ', value)
+    this._player = value
+  }
+
   @Input() isHost = false;
   @Input() divisionKey;
   @Input() 
@@ -64,25 +69,20 @@ export class LandGridComponent implements OnInit {
   }
 
   ngOnInit() {
-    console.log('selection path: ', `shows/${this.showId}/divisions/${this.divisionKey}/selection`)
-    this.db.object(`shows/${this.showId}/divisions/${this.divisionKey}/positions`)
+    console.log('selection path: ', `shows/${this.showKey}/divisions/${this.divisionKey}/selection`)
+    this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/positions`)
       .valueChanges()
       .pipe(takeUntil(this.destroy$))
       .subscribe((positions) => {
       this.positions = positions;
     })
-    this.db.object(`shows/${this.showId}/divisions/${this.divisionKey}/harvestEvent`).valueChanges()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((event) => {
-        this.harvestEvent = event;
-      })
 
     combineLatest(
       this.db.object(this.updatePath)
         .valueChanges()
         .pipe(takeUntil(this.destroy$)
       ),
-      this.db.object(`shows/${this.showId}/divisions/${this.divisionKey}/selection`)
+      this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/selection`)
         .valueChanges()
         .pipe(
           tap((x) => console.log({x})),
@@ -108,8 +108,8 @@ export class LandGridComponent implements OnInit {
 
     if (this.isHost) {
       combineLatest(
-        this.db.object(`shows/${this.showId}/contamination/current`).valueChanges(),
-        this.db.object(`shows/${this.showId}/divisions/${this.divisionKey}/contaminationLevel`).valueChanges()
+        this.db.object(`shows/${this.showKey}/contamination/current`).valueChanges(),
+        this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/contaminationLevel`).valueChanges()
       ).pipe(
         takeUntil(this.destroy$)
       ).subscribe(([percent, level]) => {
@@ -119,7 +119,7 @@ export class LandGridComponent implements OnInit {
       })
     }
 
-    this.db.object(`shows/${this.showId}/divisions/${this.divisionKey}/harvestColumn`)
+    this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/harvestColumn`)
       .valueChanges().pipe(takeUntil(this.destroy$))
       .subscribe((columns: any) => {
         console.log("COLUMNS: ", columns, this.harvestColumns)
@@ -130,11 +130,6 @@ export class LandGridComponent implements OnInit {
         })
         this.harvestColumns = columns;
       })
-  }
-
-  afterToastHide() {
-    this.harvestEvent = undefined;
-    this.db.object(`shows/${this.showId}/divisions/${this.divisionKey}/harvestEvent`).remove()
   }
 
   private adjustContamination(percent, level) {
@@ -196,15 +191,6 @@ export class LandGridComponent implements OnInit {
     return this.landTiles?.[this.selectedCardIndex] ?? null;
   }
 
-  // gatherOwnedLand() {
-  //   this.landTiles.forEach((card, i) => {
-  //     if (card.owner) {
-  //       card.harvested = false;
-  //       this.process(i);
-  //     }
-  //   })
-  // }
-
   exploreOwnedLand() {
     console.log("harvest owned land")
     this.landTiles.forEach((tile) => {
@@ -243,7 +229,7 @@ export class LandGridComponent implements OnInit {
       console.log("bulk deposit... ", id, division)
       harvestCount += resources.length;
       this.bankService.depositResources(
-        this.showId,
+        this.showKey,
         division,
         id,
         resources
@@ -268,19 +254,9 @@ export class LandGridComponent implements OnInit {
 
   clearSelection(index) {
     this.selectedCardIndex = null;
-    this.db.object(`shows/${this.showId}/divisions/${this.divisionKey}/selection`).remove();
+    this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/selection`).remove();
     this.updateDB();
   }
-
-  // mark(_card) {
-  //   if (this.selectedCardIndex) {
-  //     this.clearSelection(this.selectedCardIndex);
-  //   }
-  //   const card = this.landTiles[_card.index];
-  //   card.mark = card.mark ? null : this.playerId;
-  //   this.selectedCardIndex = card.index;
-  //   this.updateDB();
-  // }
 
   explore(card, playerId=null) {
     console.log('explore: ', card);
@@ -295,14 +271,12 @@ export class LandGridComponent implements OnInit {
   }
 
   takeAction(playerId) {
-    console.log('take action... ', playerId)
-    this.db.object(`shows/${this.showId}/divisions/${this.divisionKey}/citizens/${playerId}/actions`)
+    this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/citizens/${playerId}/actions`)
       .query.ref.transaction(actions => actions ? --actions : 0
     );
   }
 
   gather(card, playerId) {
-    console.log('do gather')
     this.gatherResource.emit(card);
     this.landTiles[card.index].value = -1;
     this.updateHarvestedCount(1);
@@ -314,7 +288,7 @@ export class LandGridComponent implements OnInit {
   }
 
   async updateHarvestedCount(n) {
-    const path = `shows/${this.showId}/divisions/${this.divisionKey}/harvested`;
+    const path = `shows/${this.showKey}/divisions/${this.divisionKey}/harvested`;
     console.log('update harvested count: ', path, n)
     this.db.object(path).query.ref.transaction(harvested => harvested ? ++n : n)
   }
@@ -348,13 +322,10 @@ export class LandGridComponent implements OnInit {
 
   toggleColumn(n, enable) {
     if (!this.landTiles) return;
-    console.log('toggle column: ', n, enable);
     range(7).forEach((i) => {
       const index = n + (i * 7);
-      console.log({index})
       this.landTiles[index].disabled = !enable;
     })
-    console.log(this.landTiles)
     this.updateDB();
   }
 

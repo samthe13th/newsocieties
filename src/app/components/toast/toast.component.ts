@@ -44,7 +44,7 @@ export class ToastComponent implements OnInit {
     console.log("show toast", this.data);
     this.animateIn = true;
     setTimeout(() => {
-      this.dismiss();
+     this.dismiss();
     }, this.data?.duration ?? this.duration)
   }
 

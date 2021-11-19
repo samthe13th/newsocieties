@@ -10,6 +10,7 @@ import { LandCardValues } from 'src/app/interfaces';
 import { toArray, includes, findIndex, filter } from 'lodash';
 import { faLeaf, faFlag, faEye, faArchway, faBriefcaseMedical, faShieldAlt, faShoppingBag, faBrain, faTheaterMasks, faBuilding } from '@fortawesome/free-solid-svg-icons';
 import { DivisionService } from 'src/app/services/division-service.service';
+import { ThrowStmt } from '@angular/compiler';
 
 const KEY_CODE = {
   e: 69,
@@ -39,14 +40,8 @@ export class PlayerComponent implements OnInit {
   @HostListener('window:keyup', ['$event'])
   keyEvent(event: KeyboardEvent) {
     if (event.keyCode === KEY_CODE.enter && !this.name) {
-      console.log("ENTER");
       this.setName();
     }
-    // if(event.keyCode === KEY_CODE.e){
-    //   this.explore();
-    // } else if (event.keyCode === KEY_CODE.g) {
-    //   this.gather(); 
-    // }
   }
 
   private destroy$ = new Subject<boolean>();
@@ -99,19 +94,18 @@ export class PlayerComponent implements OnInit {
     const { show, division, id } = this.route.snapshot.params;
     this.showKey = show;
     this.divisionKey = division;
+    this.id = id;
+    this.signedIn = this.id !== undefined;
+
     this.db.object(`shows/${this.showKey}/users`).valueChanges()
       .pipe(take(1))
       .subscribe((users) => {
       this.user = users[id];
-      console.log('USER: ', this.user)
       this.name = this.user?.name;
+      if (this.id && this.name) {
+        this.setPlayer();
+      }
    })
-    console.log("ID: ", id)
-    if (id) {
-      console.log('SIGNED IN')
-      this.id = id;
-      this.signedIn = true;
-    }
 
     const showPath = `shows/${this.showKey}`;
     this.divisionPath = `${showPath}/divisions/${this.divisionKey}`;
@@ -134,24 +128,15 @@ export class PlayerComponent implements OnInit {
     } else {
       this.db.object(`shows/${this.showKey}/users`).valueChanges().pipe(take(1)).subscribe((users) => {
         this.user = users[code];
-        console.log('user: ', this.user)
-  
         if (!this.user) {
           this.loginValidations.push("Sorry, this code is not correct");
         }
         if (this.loginValidations.length === 0) {
           this.db.object(`shows/${this.showKey}/users/${code}`).update(
             { division: this.divisionKey }
-          ).then((x) => {
+          ).then(() => {
             console.log('redirect: ', this.user);
             this.navigateToPlayerPage(code);
-            // const name = users[code]?.name;
-            // if (name) {
-            //   this.continueToDivision(code, name);
-            // } else {
-            //   this.id = code;
-            //   console.log("set: ", this.id, this.divisionKey);
-            // }
           })
         }
       })
@@ -169,13 +154,10 @@ export class PlayerComponent implements OnInit {
   }
 
   continueToDivision(code, name) {
-    console.log("continue... ", code, name, this.user, this.divisionKey);
     this.name = name;
     if (this.user?.division === this.divisionKey || !this.user?.division) {
-      console.log('join division: ', this.divisionKey)
       this.joinDivision(code, name);
     } else {
-      console.log('transfer from division: ', this.user.division, ' to: ', this.divisionKey)
       this.transferFromDivision(this.user.division, code);
     }
   }
@@ -192,6 +174,7 @@ export class PlayerComponent implements OnInit {
   }
 
   setPlayer() {
+    console.log('set player: ', this.id)
     this.$player = this.db.object(`${this.divisionPath}/citizens/${this.id}`).valueChanges();
     this.$turn = this.db.object(`${this.divisionPath}/turn`).valueChanges();
     this.$citizens = this.db.list(`${this.divisionPath}/citizens`).valueChanges()
@@ -243,7 +226,6 @@ export class PlayerComponent implements OnInit {
     this.divisionSummaries = toArray(divisions).map(division => {
       return this.db.object(`shows/${this.showKey}/divisions/${division.code}`).valueChanges();
     })
-    console.log('divisions: ', this.divisionSummaries);
   }
 
   onGather(card) {
@@ -255,7 +237,6 @@ export class PlayerComponent implements OnInit {
   }
 
   onSelect(card) {
-    console.log('users: ', )
     this.selectedCard = card;
     // this.actionSheet = this._bottomSheet.open(this.sheetTemplate);
     // this.selectedResourceStatus = this.getResourceStatus(card);
@@ -308,7 +289,6 @@ export class PlayerComponent implements OnInit {
   }
 
   explore() {
-    console.log('explore');
     this.landGrid.explore(this.selectedCard, this.id);
     this.actionSheet.dismiss();
   }

@@ -24,6 +24,7 @@ export type LandCardValue = LandCardValues | keyof typeof LandCardValues;
 
 export enum LandCardTypes {
   C = 'C',
-  R = 'R'
+  R = 'R',
+  L = 'L'
 }
 export type LandCardType = LandCardTypes | keyof typeof LandCardTypes;

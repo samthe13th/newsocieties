@@ -81,10 +81,6 @@ export class DivisionService {
     })
   }
 
-  expelCitizen(showKey, divisionKey, code, ban=false) {
-
-  }
-
   acquireLand(showKey, divisionKey, data) {
     return new Promise((resolve) => {
       data.forEach(async (request) => {
@@ -96,7 +92,7 @@ export class DivisionService {
         await this.db.list(`shows/${showKey}/divisions/${divisionKey}/pendingGLA`).push(request);
       })
       console.log('acquire: ', data)
-      resolve(true);
+      resolve();
     })
   }
 

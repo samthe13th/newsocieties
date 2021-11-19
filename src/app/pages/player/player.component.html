@@ -36,102 +36,109 @@
 
     <div class="player-page-layout">
   
-      <!-- ON-BOARDING -->
-      <ng-container *ngIf="focus === 'none'">
-        <div class="onboarding-page">
-          <h1>Welcome to the {{division?.code}} Division!</h1>
-        </div>
-      </ng-container>
-  
-      <!-- HARVEST -->
-      <ng-container *ngIf="focus === 'harvest'">
-        <div class="flex-row" style="width: 100%">
-          <div class="player-folder__body-harvest">
-            <div class="harvest-header">
-              <div>
-                <h1>Harvest</h1>
-              </div>
-              <div class="harvest-details">
-                <div>Capacity: {{ division?.capacity }}</div>
-                <div>Harvested: {{ division?.harvested }}</div>
-              </div>
-            </div>
-            <app-land-grid 
-              #landGrid
-              [markCards]="false"
-              [turn]="division?.turn"
-              [updatePath]="landTilesPath"
-              [showId]="showKey"
-              [player]="$player | async"
-              [divisionKey]="divisionKey"
-              (gatherResource)="onGather($event)"
-              (select)="onSelect($event)"
-            ></app-land-grid>
+      <div class="player-focus">
+        <!-- ON-BOARDING -->
+        <ng-container *ngIf="focus === 'none'">
+          <div class="onboarding-page">
+            <h1>Welcome to the {{division?.code}} Division!</h1>
           </div>
-        </div>
-      </ng-container>
+        </ng-container>
+    
+        <!-- HARVEST -->
+        <ng-container *ngIf="focus === 'harvest'">
+          <div class="flex-row" style="width: 100%">
+            <div class="player-folder__body-harvest">
+              <div class="harvest-header">
+                <div>
+                  <h1>Harvest</h1>
+                </div>
+                <div class="harvest-details">
+                  <div>Capacity: {{ division?.capacity }}</div>
+                  <div>Harvested: {{ division?.harvested }}</div>
+                </div>
+              </div>
+              <app-land-grid 
+                #landGrid
+                [markCards]="false"
+                [turn]="division?.turn"
+                [updatePath]="landTilesPath"
+                [showKey]="showKey"
+                [player]="$player | async"
+                [divisionKey]="divisionKey"
+                (gatherResource)="onGather($event)"
+                (select)="onSelect($event)"
+              ></app-land-grid>
+            </div>
+          </div>
+        </ng-container>
 
-      <ng-container *ngIf="focus === 'resolutionReview'">
-        <div class="player-vote-wrap">
-          <div class="relative-position">
-            <div class="tab-background voting blur" >
-              <img src="assets/hex.jpg"/>
-            </div>
-      
-            <div class="tab-foreground player-vote">
-              <h1>PREVIOUS RESOLUTION</h1>
-              <hr style="width: 100%"/>
-              <br/>
-              <h2>{{ division?.lastResolution?.title }}</h2>
-              <div>{{ division?.lastResolution?.value }}</div>
-              <br/>
-              <em style="font-size: 14px">{{ division?.lastResolution?.consequence }}</em>
-            </div>
-          </div>
-        </div>
-      </ng-container>
-      
-      <!-- VOTE -->
-      <ng-container *ngIf="focus === 'resolutions' || focus === 'principles' || focus === 'scenario'">
-        <div class="player-vote-wrap">
-          <div class="relative-position">
-            <div class="tab-background voting blur" >
-              <img src="assets/hex.jpg"/>
-            </div>
-      
-            <div class="tab-foreground player-vote">
-              <div *ngIf="hasVoted && vote?.state === 'voting'" style="text-align: center">
-                <p>Thanks for voting!</p>
-                <p>Waiting for polls to close...</p>
+        <!-- RESOLUTION REVIEW -->
+        <ng-container *ngIf="focus === 'resolutionReview'">
+          <div class="player-vote-wrap">
+            <div class="relative-position">
+              <div class="tab-background voting blur" >
+                <img src="assets/hex.jpg"/>
               </div>
-              <ng-container *ngIf="!(hasVoted && vote?.state === 'voting')">
-                <app-vote
-                  (selectionChange)="onSelectionChange($event)"
-                  [showVotes]="vote?.state === 'review'"
-                  [allowSelection]="vote?.state === 'voting'"
-                  [showId]="showKey"
-                  role="citizen"
-                  hideOption="last"
-                  [divisionId]="division.code"
-                ></app-vote>
-                <button class="action-button" *ngIf="!hasVoted && vote?.state === 'voting'" (click)="castVote()">Vote</button>
-              </ng-container>
+        
+              <div class="tab-foreground player-vote">
+                <h1>PREVIOUS RESOLUTION</h1>
+                <hr style="width: 100%"/>
+                <br/>
+                <h2>{{ division?.lastResolution?.title }}</h2>
+                <div>{{ division?.lastResolution?.value }}</div>
+                <br/>
+                <em style="font-size: 14px">{{ division?.lastResolution?.consequence }}</em>
+              </div>
             </div>
           </div>
-          <!-- <div>
-            <app-fundraising
-              *ngIf="vote?.state === 'review'"
-              [showKey]="showKey"
-              [divisionKey]="divisionKey"
-              [playerId]="id">
-            </app-fundraising>
-          </div> -->
-        </div>
-      </ng-container>
+        </ng-container>
+        
+        <!-- VOTE -->
+        <ng-container *ngIf="focus === 'resolutions' || focus === 'principles' || focus === 'scenario'">
+          <div class="player-vote-wrap">
+            <div class="relative-position">
+              <div class="tab-background voting blur" >
+                <img src="assets/hex.jpg"/>
+              </div>
+        
+              <div class="tab-foreground player-vote">
+                <div *ngIf="hasVoted && vote?.state === 'voting'" style="text-align: center">
+                  <p>Thanks for voting!</p>
+                  <p>Waiting for polls to close...</p>
+                </div>
+                <ng-container *ngIf="!(hasVoted && vote?.state === 'voting')">
+                  <app-vote
+                    (selectionChange)="onSelectionChange($event)"
+                    [showVotes]="vote?.state === 'review'"
+                    [allowSelection]="vote?.state === 'voting'"
+                    [showKey]="showKey"
+                    role="citizen"
+                    hideOption="last"
+                    [divisionId]="division.code"
+                  ></app-vote>
+                  <button class="action-button" *ngIf="!hasVoted && vote?.state === 'voting'" (click)="castVote()">Vote</button>
+                </ng-container>
+              </div>
+            </div>
+            <!-- <div>
+              <app-fundraising
+                *ngIf="vote?.state === 'review'"
+                [showKey]="showKey"
+                [divisionKey]="divisionKey"
+                [playerId]="id">
+              </app-fundraising>
+            </div> -->
+          </div>
+        </ng-container>
 
-      <ng-container  *ngIf="focus === 'misc'">
-        <app-society-grid [showKey]="showKey" details="brief"></app-society-grid>
-      </ng-container>
+        <!-- MARKET -->
+        <ng-container  *ngIf="focus === 'misc'">
+          <app-society-grid [showKey]="showKey" details="brief"></app-society-grid>
+        </ng-container>
+
+        <!-- POPUPS -->
+        <app-division-popups [showKey]="showKey" [divisionKey]="divisionKey"></app-division-popups>
+      </div>
   
       <!-- PLAYER CONTROLS -->
       <div class="player-folder__body-citizens space-between">
@@ -256,5 +263,4 @@
       </div>
     </div>
   </ng-template>
-
 </ng-container>
