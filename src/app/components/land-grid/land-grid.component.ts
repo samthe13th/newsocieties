@@ -223,11 +223,11 @@ export class LandGridComponent implements OnInit {
   }
 
   bulkGatherResources(toGather) {
-    let harvestCount = 0;
+    let actionsCount = 0;
     each(toGather, async (resources, id) => {
       const { division } = resources[0];
       console.log("bulk deposit... ", id, division)
-      harvestCount += resources.length;
+      actionsCount += resources.length;
       this.bankService.depositResources(
         this.showKey,
         division,
@@ -235,18 +235,16 @@ export class LandGridComponent implements OnInit {
         resources
       ).then(() => {
         console.log('up harvest count: ', resources.length)
-        console.log('deposited')
       })
     })
 
-    this.updateHarvestedCount(harvestCount);
     this.updateDB();
   }
 
   selectTile(card) {
     console.log('select: ', this.player)
-    if (this.turn?.id !== this.player?.id) {
-      console.log('cannot make move', this.turn, this.turn?.id !== this.player?.id, this.player?.actions < 1, this.player?.id)
+    if (this.turn !== this.player?.id) {
+      console.log('cannot make move', this.turn, this.turn !== this.player?.id, this.player?.actions < 1, this.player?.id)
       return
     }
     this.select.emit(card);
@@ -259,38 +257,34 @@ export class LandGridComponent implements OnInit {
   }
 
   explore(card, playerId=null) {
-    console.log('explore: ', card);
+    console.log('explore: ', card, playerId, this.positions);
     if (!card.harvested && card.value !== LandCardValues.EMPTY) {
       this.landTiles[card.index].harvested = true;
       this.updateDB();
+      if (playerId) {
+        this.takeAction(playerId);
+      }
     }
     this.clearSelection(card.index);
-    if (playerId) {
-      this.takeAction(playerId);
-    }
   }
 
   takeAction(playerId) {
+    this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/actions`)
+      .query.ref.transaction(actions => actions ? ++actions : 1);
     this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/citizens/${playerId}/actions`)
-      .query.ref.transaction(actions => actions ? --actions : 0
-    );
+      .query.ref.transaction(actions => actions ? ++actions : 1);
   }
 
   gather(card, playerId) {
+    console.log("GATHER for ", playerId);
+    if (playerId===null) return;
     this.gatherResource.emit(card);
     this.landTiles[card.index].value = -1;
-    this.updateHarvestedCount(1);
     this.updateDB();
     this.clearSelection(card.index);
     if (playerId) {
       this.takeAction(playerId);
     }
-  }
-
-  async updateHarvestedCount(n) {
-    const path = `shows/${this.showKey}/divisions/${this.divisionKey}/harvested`;
-    console.log('update harvested count: ', path, n)
-    this.db.object(path).query.ref.transaction(harvested => harvested ? ++n : n)
   }
 
   updateDB() {

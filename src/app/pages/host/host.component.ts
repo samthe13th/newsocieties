@@ -80,6 +80,7 @@ export class HostComponent implements OnInit, OnDestroy {
   $vote;
   $division;
   $citizens;
+  $capacity;
   $resolutions;
   $principles;
   $scenarios;
@@ -94,6 +95,7 @@ export class HostComponent implements OnInit, OnDestroy {
   $turnButtons;
   $lastResolution;
   $exports;
+  $actions;
 
   selectedCitizen;
   selectedLandTile;
@@ -132,6 +134,7 @@ export class HostComponent implements OnInit, OnDestroy {
   rightTab;
   leftTab;
   citizenCount = 0;
+  citizens;
   positions;
   lockColumns;
 
@@ -159,10 +162,13 @@ export class HostComponent implements OnInit, OnDestroy {
           if (this.citizenCount !== citizens.length) {
             console.log('update positions')
             this.updatePositions();
+            this.citizens = citizens;
           }
           this.citizenCount = citizens.length;
       })
     )
+    this.$actions = this.db.object(`${this.divisionPath}/actions`).valueChanges();
+    this.$capacity = this.db.object(`${this.divisionPath}/capacity`).valueChanges();
     this.$exports = this.db.list(`${this.divisionPath}/exports`).valueChanges();
     this.$lastResolution = this.db.object(`${this.divisionPath}/lastResolution`).valueChanges()
     this.$resolutions = this.db.list(`${this.divisionPath}/resolutions`).valueChanges();
@@ -178,6 +184,7 @@ export class HostComponent implements OnInit, OnDestroy {
     this.$turnButtons = this.db.list(`${this.divisionPath}/citizens`)
       .valueChanges()
       .pipe(
+        tap((citz) => console.log('citz: ', citz)),
         map((citizens: any) => citizens.map((c, index) => ({ id: c.id, label: index + 1 })))
       )
     this.$focus.subscribe((focus) => {
@@ -345,7 +352,7 @@ export class HostComponent implements OnInit, OnDestroy {
         id: this.selectedCitizen.id,
         name: this.positions.indexOf(this.selectedCitizen.id) + 1
       }]).then(() => {
-        console.log("send popup", LandCardTypes.L)
+        console.log("send popup")
         this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/divisionPopup`).set({
           message: `${this.selectedCitizen?.player} acquired a new plot of land!`,
         })
@@ -367,7 +374,7 @@ export class HostComponent implements OnInit, OnDestroy {
       this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/divisionPopup`).set({
         tile: tile.index,
         type: LandCardTypes.C,
-        message: `${this.selectedCitizen?.player} gathered a contaminant!`,
+        message: `${this.selectedCitizen?.name} gathered a contaminant!`,
         value: contaminateCallback,
         duration: 2500
       })
@@ -385,7 +392,7 @@ export class HostComponent implements OnInit, OnDestroy {
           this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/divisionPopup`).set({
             tile: tile.index,
             type: LandCardTypes.R,
-            message: `${this.selectedCitizen?.player} gathered a resource`,
+            message: `${this.selectedCitizen?.name} gathered a resource`,
             value: tileValue
           })
         }
@@ -412,8 +419,12 @@ export class HostComponent implements OnInit, OnDestroy {
       : this.bottomSheet.open(this.updateSheet)
   }
 
-  percentHarvested(harvested, capacity) {
-    return Math.round((toNumber(harvested)/toNumber(capacity)) * 100)
+  capacityUsed(actions, capacity) {
+    const actionsTotal = toNumber(actions);
+    const capacityTotal = toNumber(capacity);
+    return actionsTotal
+      ? Math.round((actionsTotal/capacityTotal) * 100)
+      : capacityTotal
   }
 
   async onAdvancementUpdate(newVal, prop) {
@@ -453,7 +464,7 @@ export class HostComponent implements OnInit, OnDestroy {
 
   onTurnSelect(button) {
     this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/turn`)
-      .set({ id: button.id })
+      .set( button.id)
   }
 
   onFocusSelect(button) {
@@ -808,7 +819,7 @@ export class HostComponent implements OnInit, OnDestroy {
       },
       landCost: newSeason.landCost,
       landTiles: this.harvest,
-      harvested: 0,
+      actions: 0,
       selection: null
     })
     this.resetCitizenActions();
@@ -853,13 +864,13 @@ export class HostComponent implements OnInit, OnDestroy {
 
     citizens.forEach((citizen) => {
       this.db.object(`${this.divisionPath}/citizens/${citizen.id}`).update({
-        actions: 2
+        actions: 0
       });
     })
 
-    this.db.object(`${this.divisionPath}/turn`).set({
-      id: citizens[0].id
-    })
+    this.db.object(`${this.divisionPath}/turn`).set(
+     citizens[0].id
+    )
   }
 
   private generateHarvest(landTiles, harvestableCards, contaminantLevel = 1): Array<LandTile> {

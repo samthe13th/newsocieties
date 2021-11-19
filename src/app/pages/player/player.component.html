@@ -54,7 +54,6 @@
                 </div>
                 <div class="harvest-details">
                   <div>Capacity: {{ division?.capacity }}</div>
-                  <div>Harvested: {{ division?.harvested }}</div>
                 </div>
               </div>
               <app-land-grid 
@@ -198,9 +197,11 @@
           </ng-container>
         </div>
   
+        <ng-container *ngIf="$turn | async as turn">
         <app-player-deck
           [id]="id" 
-          [myTurn]="id == ($turn | async)?.id"
+          [position]="position"
+          [myTurn]="id == turn"
           [showKey]="showKey"
           [division]="division">
         </app-player-deck>
@@ -209,7 +210,9 @@
           <div 
             class="citizen-summary flex-row space-between"
             *ngFor="let citizen of ($citizens | async)">
-              <span [class.player-turn-indicator]="citizen.id == ($turn | async)?.id">{{citizen.name}}</span>
+              <span [class.player-turn-indicator]="citizen.id == turn">
+                <strong>{{ citizen?.position }}:</strong> {{citizen.name}}
+              </span>
               <div>
                 <span style="margin-right: 5px">
                   <fa-icon size="sm" [icon]="resourceIcon"></fa-icon>
@@ -226,6 +229,7 @@
               </app-player-turn> -->
           </div>
         </div>
+        </ng-container>
       </div>
     </div>
   

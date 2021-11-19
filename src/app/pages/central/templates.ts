@@ -60,7 +60,6 @@ export const DIVISION_TEMPLATE = {
   nextSeason: {
     season: 1,
     capacity: 18,
-    extra: 8,
     harvest: 25
   },
   exports: {
@@ -80,12 +79,10 @@ export const DIVISION_TEMPLATE = {
     mid: 12,
     high: 17
   },
-  harvested: 0,
+  actions: 0,
   focus: "none",
-  turn: {
-    index: 1,
-    actions: 2
-  }
+  capacity: 18,
+  harvest: 25
 }
 
 export const SHOW_TEMPLATE = {

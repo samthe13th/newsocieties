@@ -42,6 +42,7 @@ export class PlayerDeckComponent {
   @Input() showKey: string;
   @Input() division;
   @Input() myTurn: boolean;
+  @Input() position: number | string;
 
 
   constructor(

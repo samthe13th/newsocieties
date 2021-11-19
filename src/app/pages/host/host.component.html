@@ -56,6 +56,7 @@
       [selectById]="focus"
       [buttons]="focusButtons">
     </app-button-group>
+    <div style="font-size: 24; margin-bottom: 10px">Actions Taken: {{$actions | async}} / {{ $capacity | async }}</div>
     <div *ngIf="focus === 'misc'" class="misc-wrapper">
       <app-society-grid [showKey]="showKey" details="brief"></app-society-grid>
     </div>
@@ -76,15 +77,18 @@
         <button (click)="gatherOwnedLand(landGrid)">Gather owned</button>
         <button (click)="disableColumns()">Disable Columns</button>
       </div>
-      <div class="turn-controls" *ngIf="($turn | async) as turn">
+      <div class="turn-controls">
         <ng-container *ngIf="$turnButtons | async as buttons">
           <app-button-group
             (select)="onTurnSelect($event)"
-            [selectById]="turn?.id"
+            [selectById]="($turn | async)"
             [buttons]="buttons">
           </app-button-group>
         </ng-container>
-        <app-player-turn (turnChange)="onTurnChange($event)" [divisionPath]="divisionPath"></app-player-turn>
+        <app-player-turn
+          (turnChange)="onTurnChange($event)"
+          [divisionPath]="divisionPath">
+        </app-player-turn>
       </div>
     </div>
     <div *ngIf="focus === 'principles' || focus === 'resolutions' || focus === 'scenario'" class="resolution-wrapper">
@@ -267,8 +271,8 @@
         <strong>Global land: </strong>
         {{ ($globalLand | async)?.length }}
       </div>
-      <div class="editable-item"><strong>Harvested: </strong>
-        {{ division.harvested }} <span *ngIf="division.harvested">({{ percentHarvested(division.harvested, division.capacity) }}% of capacity)</span>
+      <div class="editable-item"><strong>Actions: </strong>
+        {{ division.actions }} <span *ngIf="division.actions">({{ capacityUsed(division.actions, division.capacity) }}% of capacity)</span>
       </div>
       <div class="editable-item">
         <strong>Capacity: </strong>
@@ -650,7 +654,7 @@
 <ng-template #harvestTileSheet>
   <div class="action-sheet">
     <div class="flex-column flex-center">
-      <h2>Perform Harvest action for {{ selectedCitizen?.player }}</h2>
+      <h2>Perform Harvest action for {{ selectedCitizen?.name }}</h2>
 
       <div class="flex-row">
         <div 

@@ -4,10 +4,10 @@ import { PlayerDeckComponent } from 'src/app/components/player-deck/player-deck.
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { LandGridComponent } from 'src/app/components/land-grid/land-grid.component';
-import { takeUntil, take, map } from 'rxjs/operators';
+import { tap, take, map } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { LandCardValues } from 'src/app/interfaces';
-import { toArray, includes, findIndex, filter } from 'lodash';
+import { toArray, includes, findIndex, filter, find } from 'lodash';
 import { faLeaf, faFlag, faEye, faArchway, faBriefcaseMedical, faShieldAlt, faShoppingBag, faBrain, faTheaterMasks, faBuilding } from '@fortawesome/free-solid-svg-icons';
 import { DivisionService } from 'src/app/services/division-service.service';
 import { ThrowStmt } from '@angular/compiler';
@@ -48,6 +48,7 @@ export class PlayerComponent implements OnInit {
 
   nameInput; 
 
+  position;
   user;
   loginValidations = [];
   signedIn = false;
@@ -174,11 +175,18 @@ export class PlayerComponent implements OnInit {
   }
 
   setPlayer() {
-    console.log('set player: ', this.id)
+    console.log('set player: ', this.id);
+    this.db.object(`${this.divisionPath}/turn`).query.ref.transaction((turn) => {
+      return turn ?? this.id;
+    })
     this.$player = this.db.object(`${this.divisionPath}/citizens/${this.id}`).valueChanges();
-    this.$turn = this.db.object(`${this.divisionPath}/turn`).valueChanges();
+    this.$turn = this.db.object(`${this.divisionPath}/turn`).valueChanges().pipe(
+      tap((turn) => console.log("turn: ", turn))
+    )
     this.$citizens = this.db.list(`${this.divisionPath}/citizens`).valueChanges()
       .pipe(
+        map((citizens) => citizens.map((c: any, index: number) => ({ ...c, position: index + 1 }))),
+        tap((citizens) => this.position = find(citizens, ['id', this.id])?.position ),
         map((citizens) => filter(citizens, c => c.id !== this.id))
       );
     this.$focus = this.db.object(`${this.divisionPath}/focus`).valueChanges();

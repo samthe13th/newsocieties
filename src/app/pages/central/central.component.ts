@@ -84,7 +84,6 @@ export class CentralComponent implements OnInit, AfterViewInit {
   }
   showModal = false; 
   globalEvents;
-
   selectedDivision;
   divisionDropdownOptions;
   divisionDropdownValue;
@@ -520,7 +519,7 @@ export class CentralComponent implements OnInit, AfterViewInit {
       ...acc,
       [`${division}${index + 1}${name}`]: {
         name,
-        actions: 2,
+        actions: 0,
         id: `${division}${index + 1}${name}`,
         position: index + 1,
         advancements: ADVANCEMENTS.reduce((acc, type) => ({

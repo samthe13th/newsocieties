@@ -56,7 +56,7 @@ export class DivisionService {
     return new Promise((resolve) => {
       this.db.object(`shows/${showKey}/divisions/${divisionKey}/citizens/${id}`).set({
         name,
-        actions: 2,
+        actions: 0,
         id,
         advancements: {
           safety: 0, 
@@ -76,7 +76,7 @@ export class DivisionService {
     console.log("TRANSFER: ", path, citizen)
     return new Promise((resolve) => {
       this.db.object(`shows/${showKey}/divisions/${newDivisionKey}/citizens/${code}`).set(
-        { ...citizen, actions: 2 }
+        { ...citizen, actions: 0 }
       ).then(() => resolve())
     })
   }

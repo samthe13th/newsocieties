@@ -8,7 +8,6 @@ export interface PlayerTurn  {
   player: string,
   id: string,
   actions: number, 
-  actionsAvailable: number
 }
 
 @Component({
@@ -35,15 +34,9 @@ export class PlayerTurnComponent implements OnInit {
       this.db.object(`${this.divisionPath}/citizens`).valueChanges()
     ).pipe(
       map(([turn, citizens]: any) => {
-        console.log({turn, citizens})
-        const player = find(citizens, ['id', turn.id]);
-        return {
-          player: player?.name,
-          id: player?.id,
-          playerPosition: turn?.index,
-          actions: player?.actions ?? 2,
-          actionsAvailable: player?.actionsAvailable ?? 2
-        };
+        const player = find(citizens, ['id', turn]);
+        console.log('TURN CHANGE: ', turn, player)
+        return player;
       }),
       tap((turn) => {
         console.log('turn change.... ', turn)
