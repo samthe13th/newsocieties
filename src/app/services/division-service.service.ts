@@ -52,7 +52,6 @@ export class DivisionService {
   ) {}
 
   addCitizen(showKey, divisionKey, id, name) {
-    console.log('add citizen', showKey, divisionKey, id, name);
     return new Promise((resolve) => {
       this.db.object(`shows/${showKey}/divisions/${divisionKey}/citizens/${id}`).set({
         name,
@@ -73,7 +72,6 @@ export class DivisionService {
     const path = `shows/${showKey}/divisions/${oldDivisionKey}/citizens/${code}`;
     const citizen: any = await this.db.object(path).valueChanges().pipe(take(1)).toPromise();
     await this.db.object(path).remove();
-    console.log("TRANSFER: ", path, citizen)
     return new Promise((resolve) => {
       this.db.object(`shows/${showKey}/divisions/${newDivisionKey}/citizens/${code}`).set(
         { ...citizen, actions: 0 }
@@ -84,14 +82,12 @@ export class DivisionService {
   acquireLand(showKey, divisionKey, data) {
     return new Promise((resolve) => {
       data.forEach(async (request) => {
-        console.log({request})
         const landList = (divisionKey === request.division) ? 'localLand' : 'globalLand';
         await this.db.object(`shows/${showKey}/divisions/${request.division}/citizens/${request.id}/land`)
           .query.ref.transaction((land) => land ? ++land : 1)
         await this.db.list(`shows/${showKey}/divisions/${request.division}/${landList}`).push(request);
         await this.db.list(`shows/${showKey}/divisions/${divisionKey}/pendingGLA`).push(request);
       })
-      console.log('acquire: ', data)
       resolve();
     })
   }
@@ -109,9 +105,7 @@ export class DivisionService {
         reserveThresholds,
         highThresholdMet
       ]: [number,any, boolean]) => {
-        console.log({reserve, reserveThresholds, highThresholdMet})
         if (!highThresholdMet && reserveThresholds.high <= reserve) {
-          console.log('update: ', reserve, reserveThresholds, highThresholdMet)
           this.db.object(`${divisionPath}/highThresholdMet`).set(true);
           this.db.object(`${divisionPath}/highThresholdsMet`)
             .query.ref.transaction(met => ++met ?? 1);
@@ -135,7 +129,6 @@ export class DivisionService {
         highthresholdsMet,
         advancements,
       ]: [ any, any, number, any ]) => {
-        console.log({ globalLand, localLand, highthresholdsMet, advancements })
         const VP = (
           + (globalLand.length * 0.8)
           + localLand.length
@@ -145,7 +138,6 @@ export class DivisionService {
         return { VP: round(VP), score: this.getScore(VP) }
       }),
       tap((updates) => {
-        console.log({updates})
         this.db.object(divisionPath).update(updates)
       })
     )
@@ -192,7 +184,7 @@ export class DivisionService {
 
   async setLandTiles(showKey, divisionKey) {
     const divisionPath = `shows/${showKey}/divisions/${divisionKey}`;
-    const pendingGLA = await this.db.list(`${divisionPath}/pendingGLA`)
+    const pendingGLA: any = await this.db.list(`${divisionPath}/pendingGLA`)
       .valueChanges()
       .pipe(take(1))
       .toPromise();

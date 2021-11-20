@@ -33,13 +33,10 @@ export class PlayerTurnComponent implements OnInit {
       this.db.object(`${this.divisionPath}/turn`).valueChanges(),
       this.db.object(`${this.divisionPath}/citizens`).valueChanges()
     ).pipe(
-      map(([turn, citizens]: any) => {
-        const player = find(citizens, ['id', turn]);
-        console.log('TURN CHANGE: ', turn, player)
-        return player;
-      }),
+      map(([turn, citizens]: any) => (
+        find(citizens, ['id', turn])
+      )),
       tap((turn) => {
-        console.log('turn change.... ', turn)
         this.turnChange.emit(turn)
       })
     )

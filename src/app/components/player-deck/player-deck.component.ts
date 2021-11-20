@@ -53,7 +53,6 @@ export class PlayerDeckComponent {
   }
 
   ngOnInit() {
-    console.log('division: ', this.division)
     // this.resources = sortBy(this.resources, 'value');
     const { show, division, id } = this.route.snapshot.params;
     this.subToCitizen(show, division, id);

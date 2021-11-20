@@ -24,13 +24,11 @@ export class ChatComponent implements AfterViewInit {
   constructor(private db: AngularFireDatabase) {}
 
   ngOnInit() {
-    console.log('sub to ', this.showKey)
     this.$feed = this.db.list(
       `shows/${this.showKey}/feeds/${this.feedName}`
     ).valueChanges();
 
     this.subscriptions.push(this.$feed.subscribe((n) => {
-      console.log("sub: ", n);
       setTimeout(() => {
         this.scrollToBottom();
       })

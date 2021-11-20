@@ -33,7 +33,6 @@ export class DivisionFullComponent {
   ]
 
   clickNewEventBtn() {
-    console.log('click: ')
     this.clickNewEvent.emit(this.division);
   }
 

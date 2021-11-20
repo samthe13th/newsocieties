@@ -12,14 +12,14 @@ import { pluckRandom, getRandomInt } from 'src/app/utilties';
 
 const DIVISIONS = ['N', 'S', 'E', 'W', 'NE', 'SE', 'SW', 'NW'];
 const COLORS = {
-  E: '#4286f4',
-  N: '#000000',
-  NE: '#660300',
-  NW: '#34a853',
-  S: '#bf7221',
-  SE: '#a296c0',
-  SW: '#42b3bd',
-  W: '#eeb303'
+  E: '#3A84FF',
+  NE: '#660000',
+  N: '#C82687',
+  NW: '#25BA4D',
+  S: '#CA7216',
+  SE: '#6C4EF2',
+  SW: '#30C6D4',
+  W: '#EEB201'
 }
 const MAX_HARVEST = 49;
 const CITIZEN_NAMES = ['Sam', 'Mark', 'Mandy', 'Sarah', 'Kimmy', 'Zed'];
@@ -153,7 +153,6 @@ export class CentralComponent implements OnInit, AfterViewInit {
 
   startClock() {
     const date = new Date();
-    console.log('start clock: ', date)
 
     this.db.object(`shows/${this.showKey}`).update({
       live: true,
@@ -269,7 +268,6 @@ export class CentralComponent implements OnInit, AfterViewInit {
           const [ tail, ...head ] = content.reverse();
           const newContent = tail.split(`{${name}}`);
           content = [...head, ...newContent]
-          console.log('content: ', content)
           variables.push({
             id: name,
             value: toNumber(values[i])
@@ -433,20 +431,17 @@ export class CentralComponent implements OnInit, AfterViewInit {
     this.showModal = true;
     this.selectedDivision = division;
     this.db.list(`shows/${this.showKey}/divisions/${division}/events`).valueChanges().pipe(take(1)).subscribe((events) => {
-      console.log('build dat list: ', this.globalEvents, events)
       this.divisionDropdownOptions = differenceWith(
         this.globalEvents,
         events,
         (g, e) => g.title === e.header
       );
       this.divisionDropdownOptions = sortBy(this.divisionDropdownOptions, ['level']);
-      console.log('options: ', this.divisionDropdownOptions)
     })
     this.modalContent = this.eventTemplate;
   }
 
   onClickNewEvent(div) {
-    console.log('on click: ', div)
     this.getEvent(div);
   }
 
@@ -456,7 +451,6 @@ export class CentralComponent implements OnInit, AfterViewInit {
   }
 
   sendEvent(division, event) {
-    console.log('event: ', division, event)
     const value = event.content.map((block, index) => this.divisionEventVariables?.[index]?.value
       ? `${block} <strong>${this.divisionEventVariables[index]?.value}</strong>`
       : block
@@ -489,7 +483,6 @@ export class CentralComponent implements OnInit, AfterViewInit {
   }
 
   generateDivisions() {
-    console.log('gen div: ', DIVISION_TEMPLATE)
     return DIVISIONS.reduce((acc, abv) => ({ 
       ...acc, 
       [abv]: { 

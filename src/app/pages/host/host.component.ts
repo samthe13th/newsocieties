@@ -1,10 +1,10 @@
-import { Component, OnInit, OnDestroy, ViewChild, TemplateRef } from '@angular/core';
+import { Component, HostListener, OnInit, OnDestroy, ViewChild, TemplateRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { getRandomInt, pluckRandom } from 'src/app/utilties';
-import { LandTile, LandCardValues, LandCardTypes } from 'src/app/interfaces';
+import { LandTile, LandCardTypes } from 'src/app/interfaces';
 import * as _ from 'lodash';
-import { includes, difference, trim, differenceBy, toNumber, each, partition } from 'lodash';
+import { includes, isNaN, trim, differenceBy, toNumber, each, partition } from 'lodash';
 import { take, map, tap } from 'rxjs/operators'
 import { Subject } from 'rxjs';
 import { BankService } from 'src/app/services/bank.service';
@@ -26,6 +26,20 @@ const DIVISIONS = ["N", "NE", "W", "NW", "E", "SW", "S", "SE"];
   }
 })
 export class HostComponent implements OnInit, OnDestroy {
+  @HostListener('window:keyup', ['$event'])
+  keyEvent(event: KeyboardEvent) {
+    const numberKey = toNumber(event.key);
+    if (this.actionSheet === undefined && this.positions[numberKey - 1]) {
+      this.onTurnSelect(this.positions[numberKey - 1])
+    }
+    if (this.hostAction === 'harvest' && event.key === 'e') {
+      this.explore();
+    }
+    if (this.hostAction === 'harvest' && event.key === 'g') {
+      this.gather();
+    }
+  }
+
   @ViewChild('harvestTemplate') harvestTemplate: TemplateRef<any>;
   @ViewChild('principleTemplate') principleTemplate: TemplateRef<any>;
   @ViewChild('resolutionTemplate') resolutionTemplate: TemplateRef<any>;
@@ -101,13 +115,14 @@ export class HostComponent implements OnInit, OnDestroy {
   selectedLandTile;
   changeAttribute;
   changeListAttribute;
-
+  hostAction;
   divisions;
   actionSheet;
   voteResultFunds = 0;
   division;
   contamination;
   harvest;
+  divisionColor;
   divisionKey;
   showKey;
   divisionPath;
@@ -153,6 +168,10 @@ export class HostComponent implements OnInit, OnDestroy {
     this.showKey = this.route.snapshot.params.show;
     this.divisionPath = `shows/${this.showKey}/divisions/${this.divisionKey}`;
     this.landTilesPath = `${this.divisionPath}/landTiles`;
+    this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/color`).valueChanges()
+      .pipe(take(1)).subscribe((color) =>{
+        this.divisionColor = color;
+      })
 
     this.$vote = this.db.object(`${this.divisionPath}/vote`).valueChanges();
     this.$division = this.db.object(this.divisionPath).valueChanges();
@@ -160,7 +179,6 @@ export class HostComponent implements OnInit, OnDestroy {
       .pipe(
         tap((citizens) => {
           if (this.citizenCount !== citizens.length) {
-            console.log('update positions')
             this.updatePositions();
             this.citizens = citizens;
           }
@@ -184,7 +202,6 @@ export class HostComponent implements OnInit, OnDestroy {
     this.$turnButtons = this.db.list(`${this.divisionPath}/citizens`)
       .valueChanges()
       .pipe(
-        tap((citz) => console.log('citz: ', citz)),
         map((citizens: any) => citizens.map((c, index) => ({ id: c.id, label: index + 1 })))
       )
     this.$focus.subscribe((focus) => {
@@ -205,7 +222,6 @@ export class HostComponent implements OnInit, OnDestroy {
       .valueChanges()
       .subscribe((level) => {
         this.contamination = level;
-        console.log('level: ', level)
       })
 
     this.getResolutions();
@@ -219,30 +235,34 @@ export class HostComponent implements OnInit, OnDestroy {
       take(1)
     ).toPromise();
     this.positions = citizens.map((c: any) => c?.id);
-    console.log('new: ', this.positions)
     this.db.object(`${divisionPath}/positions`).set(this.positions);
   }
 
   gather() {
-    console.log('GATHER: ', this.selectedCitizen?.id);
+    this.hostAction = undefined;
     this.landGrid.gather(this.selectedLandTile, this.selectedCitizen?.id);
-    this.actionSheet.dismiss();
+    this.dismissSheet();
   }
 
   explore() {
-    console.log('EXPLORE: ', this.selectedCitizen?.id);
+    this.hostAction = undefined;
     this.landGrid.explore(this.selectedLandTile, this.selectedCitizen?.id);
+    this.dismissSheet();
+  }
+
+  dismissSheet() {
     this.actionSheet.dismiss();
+    this.actionSheet = undefined;
   }
 
   onSelectLandTile(tile) {
-    console.log("select land tile: ", tile);
     this.selectedLandTile = tile;
+    this.hostAction = 'harvest';
     this.actionSheet = this.bottomSheet.open(this.harvestTileSheet);
   }
 
   onAttributeUpdate(value) {
-    this.actionSheet.dismiss();
+    this.dismissSheet();
   }
 
   calculateWealth(resources) {
@@ -254,8 +274,8 @@ export class HostComponent implements OnInit, OnDestroy {
     landGrid.exploreOwnedLand();
   }
 
-  gatherOwnedLand(landGrid) {
-    landGrid.gatherOwnedLand();
+  gatherGLA(landGrid) {
+    landGrid.gatherGLA();
   }
 
   disableColumns() {
@@ -267,7 +287,6 @@ export class HostComponent implements OnInit, OnDestroy {
     this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/lockHarvestColumns`).valueChanges()
       .pipe(take(1))
       .subscribe((lock: boolean) => {
-        console.log("LOCK: ", lock)
         this.lockColumns = lock ?? false
       })
     this.actionSheet = this.bottomSheet.open(this.disableColumnsSheet);
@@ -335,35 +354,32 @@ export class HostComponent implements OnInit, OnDestroy {
     const individualPath = `${this.divisionPath}/advancements/${advancement}/individual`;
     await this.db.object(individualPath).query.ref.transaction((ind) => ind ? ind + 1 : 1)
 
-    this.actionSheet.dismiss();
+    this.dismissSheet();
   }
 
   buyLocalLand(price, updatePath) {
-    console.log("buy local: ", this.selectedCitizen, this.positions)
     this.bankService.spendResources(
       this.showKey,
       this.divisionKey,
       this.selectedCitizen.id,
       price
     ).then(() => {
-      console.log("GET LAND FOR ", this.selectedCitizen)
       this.divisionService.acquireLand(this.showKey, this.divisionKey, [{
         division: this.divisionKey,
         id: this.selectedCitizen.id,
+        color: this.divisionColor,
         name: this.positions.indexOf(this.selectedCitizen.id) + 1
       }]).then(() => {
-        console.log("send popup")
         this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/divisionPopup`).set({
-          message: `${this.selectedCitizen?.player} acquired a new plot of land!`,
+          message: `${this.selectedCitizen?.name} acquired a new plot of land!`,
         })
       });
-      this.actionSheet.dismiss();
+      this.dismissSheet();
     })
   }
 
   async onGather(tile) {
-    console.log('on gather: ', tile, this.selectedCitizen);
-    const playerId = tile.owner ?? this.selectedCitizen?.id;
+    const playerId = tile.owner?.id ?? this.selectedCitizen?.id;
     const divisionKey = tile.owner?.division ?? this.divisionKey;
     const tileValue = tile.value;
 
@@ -386,9 +402,7 @@ export class HostComponent implements OnInit, OnDestroy {
         value: tile.value,
         division: divisionKey
       }]).then(() => {
-        console.log('deposited resources from land', tile, this.selectedCitizen)
         if (!tile.owner && this.selectedCitizen) {
-          console.log('push event', `shows/${this.showKey}/divisions/${this.divisionKey}/divisionPopup`, tileValue)
           this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/divisionPopup`).set({
             tile: tile.index,
             type: LandCardTypes.R,
@@ -432,7 +446,7 @@ export class HostComponent implements OnInit, OnDestroy {
     const value = newVal - this.selectedCitizen.advancements[prop];
     await this.db.object(individualPath).query.ref.transaction((ind) => ind ? ind + value : value)
     this.db.object(this.changeAttribute.dbPath).set(newVal);
-    this.actionSheet.dismiss();
+    this.dismissSheet();
   }
 
   getResolutions() {
@@ -462,9 +476,13 @@ export class HostComponent implements OnInit, OnDestroy {
       });
   }
 
-  onTurnSelect(button) {
+  onTurnSelect(id) {
     this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/turn`)
-      .set( button.id)
+      .set(id)
+    this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/divisionPopup`).set({
+      message: `It is now ${this.selectedCitizen.name}'s turn!`,
+      duration: 2000
+    })
   }
 
   onFocusSelect(button) {
@@ -474,7 +492,6 @@ export class HostComponent implements OnInit, OnDestroy {
   onTurnChange(citizen) {
     this.selectedCitizen = citizen;
     this.clearSelection();
-    console.log("TURN ", citizen);
   }
 
   clearSelection() {
@@ -487,7 +504,6 @@ export class HostComponent implements OnInit, OnDestroy {
   }
 
   startVote(focus) {
-    console.log('DROPDOWN SELECT: ', this.voteDropdownSelect)
     this.db.object(`${this.divisionPath}/focus`).set(focus);
     this.showModal = false;
     this.action = 'voting';
@@ -650,7 +666,7 @@ export class HostComponent implements OnInit, OnDestroy {
         .query.ref.transaction(reserve => reserve + amount ?? amount)
     }
     this.bankService.spendResources(this.showKey, this.divisionKey, this.selectedCitizen?.id, amount).then(() => {
-      this.actionSheet.dismiss();
+      this.dismissSheet();
     })
   }
 
@@ -769,7 +785,7 @@ export class HostComponent implements OnInit, OnDestroy {
       this.selectedCitizen.id,
       amount
     ).then(() => {
-      this.actionSheet.dismiss();
+      this.dismissSheet();
     })
   }
 
@@ -780,7 +796,7 @@ export class HostComponent implements OnInit, OnDestroy {
     } else if (value < wealth) {
       this.removeResources(wealth - value);
     } else {
-      this.actionSheet.dismiss();
+      this.dismissSheet();
     }
   }
 
@@ -791,7 +807,7 @@ export class HostComponent implements OnInit, OnDestroy {
       this.selectedCitizen.id,
       this.bankService.quickConvert(this.divisionKey, amount)
     ).then(() => {
-      this.actionSheet.dismiss();
+      this.dismissSheet();
     })
   }
 

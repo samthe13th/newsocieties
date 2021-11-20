@@ -43,7 +43,6 @@ export class LandGridComponent implements OnInit {
   @Input()
   get player() { return this._player }
   set player(value) {
-    console.log('set player: ', value)
     this._player = value
   }
 
@@ -69,7 +68,6 @@ export class LandGridComponent implements OnInit {
   }
 
   ngOnInit() {
-    console.log('selection path: ', `shows/${this.showKey}/divisions/${this.divisionKey}/selection`)
     this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/positions`)
       .valueChanges()
       .pipe(takeUntil(this.destroy$))
@@ -85,11 +83,9 @@ export class LandGridComponent implements OnInit {
       this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/selection`)
         .valueChanges()
         .pipe(
-          tap((x) => console.log({x})),
           takeUntil(this.destroy$)
       )
     ).subscribe(([tiles, selection]: [any[], any]) => {
-      console.log('update: ', selection)
         this.selection = selection;
         if (!this.landTiles) {
           this.landTiles = tiles;
@@ -113,7 +109,6 @@ export class LandGridComponent implements OnInit {
       ).pipe(
         takeUntil(this.destroy$)
       ).subscribe(([percent, level]) => {
-        console.log('adjust contam: ', percent, level)
         this.adjustContamination(percent, level);
         this.updateDB();
       })
@@ -122,7 +117,6 @@ export class LandGridComponent implements OnInit {
     this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/harvestColumn`)
       .valueChanges().pipe(takeUntil(this.destroy$))
       .subscribe((columns: any) => {
-        console.log("COLUMNS: ", columns, this.harvestColumns)
         columns.forEach((showColumn: boolean, i: string) => {
           if (this.harvestColumns?.[i] !== showColumn) {
             this.toggleColumn(i, showColumn)
@@ -143,7 +137,6 @@ export class LandGridComponent implements OnInit {
         .map(card => card.index)
       const adjustment = contaminantsCount - currentContaminantIndexes.length;
 
-      console.log({harvestable, contaminantsCount, current: currentContaminantIndexes.length, adjustment })
       if (adjustment > 0) {
         const contaminate = pluckRandom(
           difference(harvestable.map(h => h.index), currentContaminantIndexes),
@@ -175,7 +168,6 @@ export class LandGridComponent implements OnInit {
   }
 
   tileSelected(index) {
-    console.log("selected? : ", index, this.selectedCardIndex, typeof index, typeof this.selectedCardIndex);
     return index === this.selectedCardIndex
   }
 
@@ -191,33 +183,21 @@ export class LandGridComponent implements OnInit {
     return this.landTiles?.[this.selectedCardIndex] ?? null;
   }
 
-  exploreOwnedLand() {
-    console.log("harvest owned land")
-    this.landTiles.forEach((tile) => {
-      if (tile.owner) {
-        console.log("FLIP: ", tile);
-        this.explore(tile);
-      }
-    })
-  }
-
-  gatherOwnedLand() {
+  gatherGLA() {
     const toGather = {};
     this.landTiles.forEach((tile) => {
-      if (tile.owner && tile.value !== -1) {
+      if (tile.owner && tile.owner?.division !== this.divisionKey && tile.value !== -1) {
         if (!toGather[tile.owner.id]) {
           toGather[tile.owner.id] = [];
         }
         toGather[tile.owner.id].push({
-          value: tile.owner.division != this.divisionKey 
-            ? 3 : tile.value,
+          value: tile.owner.division != this.divisionKey ? 3 : tile.value,
           division: tile.owner.division
         })
         this.landTiles[tile.index].value = -1;
       }
     })
     if (Object.keys(toGather).length !== 0) {
-      console.log("to gather: ", toGather)
       this.bulkGatherResources(toGather);
     }
   }
@@ -226,23 +206,19 @@ export class LandGridComponent implements OnInit {
     let actionsCount = 0;
     each(toGather, async (resources, id) => {
       const { division } = resources[0];
-      console.log("bulk deposit... ", id, division)
       actionsCount += resources.length;
       this.bankService.depositResources(
         this.showKey,
         division,
         id,
         resources
-      ).then(() => {
-        console.log('up harvest count: ', resources.length)
-      })
+      )
     })
 
     this.updateDB();
   }
 
   selectTile(card) {
-    console.log('select: ', this.player)
     if (this.turn !== this.player?.id) {
       console.log('cannot make move', this.turn, this.turn !== this.player?.id, this.player?.actions < 1, this.player?.id)
       return
@@ -253,19 +229,29 @@ export class LandGridComponent implements OnInit {
   clearSelection(index) {
     this.selectedCardIndex = null;
     this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/selection`).remove();
+  }
+
+  exploreOwnedLand() {
+    this.landTiles.forEach((tile) => {
+      if (tile.owner) {
+        if (!tile.harvested && tile.value !== LandCardValues.EMPTY) {
+          this.landTiles[tile.index].harvested = true;
+        }
+      }
+    })
     this.updateDB();
   }
 
-  explore(card, playerId=null) {
-    console.log('explore: ', card, playerId, this.positions);
+  explore(card, playerId = null) {
+    console.log("explore: ", card, playerId)
     if (!card.harvested && card.value !== LandCardValues.EMPTY) {
       this.landTiles[card.index].harvested = true;
-      this.updateDB();
       if (playerId) {
         this.takeAction(playerId);
       }
     }
     this.clearSelection(card.index);
+    this.updateDB();
   }
 
   takeAction(playerId) {
@@ -276,20 +262,19 @@ export class LandGridComponent implements OnInit {
   }
 
   gather(card, playerId) {
-    console.log("GATHER for ", playerId);
     if (playerId===null) return;
     this.gatherResource.emit(card);
     this.landTiles[card.index].value = -1;
-    this.updateDB();
     this.clearSelection(card.index);
     if (playerId) {
       this.takeAction(playerId);
     }
+    this.updateDB();
   }
 
   updateDB() {
-    console.log('update db: ', this.landTiles)
-    this.db.object(this.updatePath).update(this.landTiles);
+    console.log('update db')
+    this.db.object(this.updatePath).set(this.landTiles);
   }
 
   getRelativeGridIndex(index, dir, dist) {
@@ -309,8 +294,9 @@ export class LandGridComponent implements OnInit {
 
   process(i) {
     const tile = this.landTiles[i];
-    if (tile.type === LandCardTypes.C && tile.harvested) {
+    if (tile.type === LandCardTypes.C && tile.harvested && !tile.owner) {
       this.contaminateAdjacentTiles(tile);
+      this.updateDB();
     }
   }
 
@@ -335,6 +321,7 @@ export class LandGridComponent implements OnInit {
     const tiles = placements.map(
       (placement) => this.landTiles[this.getRelativeGridIndex(tile.index, placement, 1)]
     )
+    
 
     setTimeout(() => {
       tiles.forEach((tile, index) => {
@@ -342,8 +329,6 @@ export class LandGridComponent implements OnInit {
           tiles[index].contaminated = true;
         }
       })
-    
-      this.updateDB();
     })
   }
 }

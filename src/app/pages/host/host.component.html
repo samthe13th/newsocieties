@@ -74,13 +74,13 @@
       </app-land-grid>
       <div class="button-row">
         <button (click)="exploreOwnedLand(landGrid)">Flip owned</button>
-        <button (click)="gatherOwnedLand(landGrid)">Gather owned</button>
+        <button (click)="gatherGLA(landGrid)">Gather GLA</button>
         <button (click)="disableColumns()">Disable Columns</button>
       </div>
       <div class="turn-controls">
         <ng-container *ngIf="$turnButtons | async as buttons">
           <app-button-group
-            (select)="onTurnSelect($event)"
+            (select)="onTurnSelect($event.id)"
             [selectById]="($turn | async)"
             [buttons]="buttons">
           </app-button-group>
@@ -613,11 +613,11 @@
     <h1>Columns</h1>
     <div class="flex-row">
       <input
-          name="show-columns"
-          #showColumnsCheckbox
-          type="checkbox"
-          [(ngModel)]="lockColumns"
-          (click)="toggleLockColumnsStatus()" 
+        name="show-columns"
+        #showColumnsCheckbox
+        type="checkbox"
+        [(ngModel)]="lockColumns"
+        (click)="toggleLockColumnsStatus()" 
       >
       <label style="font-size: 16px" for="show-columns">Set Permanently</label>
     </div>

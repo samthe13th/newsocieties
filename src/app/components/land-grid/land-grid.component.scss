@@ -28,7 +28,7 @@
   cursor: pointer;
 
   .contamination {
-    background: tomato;
+    background: black;
     height: 100%;
     display: flex;
     position: absolute;
@@ -43,7 +43,7 @@
   }
 
   &.contaminated {
-    background: black;
+    background: #908c69;
   }
 
   &.back {
@@ -52,12 +52,6 @@
     img {
       margin: 5px;
     }
-  }
-
-  .resource {
-    width: 100%;
-    font-size: 22px;
-    height: 100%;
   }
 }
 
@@ -103,12 +97,47 @@
       z-index: 10;
       top: -5px;
       right: -5px;
+      color: white;
       background: black;
     }
-    &[data-local="true"] {
+    &[data-division="E"] {
       &::after {
-        background: white;
-        color: black;
+        background: #3A84FF;
+      }
+    }
+    &[data-division="NE"] {
+      &::after {
+        background: #660000;
+      }
+    }
+    &[data-division="N"] {
+      &::after {
+        background: #C82687
+      }
+    }
+    &[data-division="NW"] {
+      &::after {
+        background: #25BA4D
+      }
+    }
+    &[data-division="S"] {
+      &::after {
+        background: #CA7216
+      }
+    }
+    &[data-division="SE"] {
+      &::after {
+        background: #6C4EF2
+      }
+    }
+    &[data-division="SW"] {
+      &::after {
+        background: #30C6D4
+      }
+    }
+    &[data-division="W"] {
+      &::after {
+        background: #EEB201
       }
     }
   }

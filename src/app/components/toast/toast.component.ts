@@ -29,7 +29,6 @@ export class ToastComponent implements OnInit {
   constructor() {}
 
   ngOnInit() {
-    console.log('init toast')
   }
 
   reset() {
@@ -41,7 +40,6 @@ export class ToastComponent implements OnInit {
   }
 
   show() {
-    console.log("show toast", this.data);
     this.animateIn = true;
     setTimeout(() => {
      this.dismiss();
@@ -50,7 +48,6 @@ export class ToastComponent implements OnInit {
 
   dismiss() {
     this.animateOut = true;
-    console.log('dismiss toast');
     setTimeout(() => {
       this.afterDismiss.emit()
     }, 400)

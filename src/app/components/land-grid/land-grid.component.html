@@ -5,8 +5,8 @@
     class="land-tile"
     [class.contaminated]="card.contaminated == true"
     [class.disabled]="card.disabled"
+    [attr.data-division]="card.owner ? card.owner?.division : null"
     [attr.data-badge]="(card.owner && card.owner?.division == divisionKey) ? getPosition(card.owner.id) : card.owner?.division"
-    [attr.data-local]="card.owner && card.owner?.division == divisionKey"
     [class.empty]="card.value === -1"
     [class.owned]="card.owner !== null"
   >
@@ -20,19 +20,20 @@
       [class.disabled]="card.value == -1 || card.contaminated == true"
       (sideChange)="process(i)">
       <div contaminatedTile class="harvest-card contaminated">
-        <ng-container *ngIf="(card.type === 'R' && card.value > 0)">
-          {{ card.value }}
-        </ng-container>
+        <app-harvest-image
+          *ngIf="card.type === 'R' && card.value > 0"
+          [contaminated]="true"
+          type="R"
+          [value]="card.value">
+        </app-harvest-image>
       </div>
       <div front class="harvest-card">
-        <div 
-          *ngIf="card.type !== 'C' && card.value > 0"
-          class="resource"
-          [class.one]="card.value === 1"
-          [class.two]="card.value === 2"
-          [class.three]="card.value === 3">
-          {{card.value}}
-        </div>
+        <app-harvest-image
+          *ngIf="card.type === 'R' && card.value > 0"
+          [contaminated]="false"
+          type="R"
+          [value]="card.value">
+        </app-harvest-image>
         <div *ngIf="card.type === 'C'" class="contamination">
           <img src="../assets/contamination.png"/>
         </div>

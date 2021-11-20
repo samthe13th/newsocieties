@@ -32,11 +32,9 @@ export class FundraisingComponent {
   }
 
   ngOnInit() {
-    console.log('FUNDRAISING: ', this.showKey, this.divisionKey);
     this.divisionPath = `shows/${this.showKey}/divisions/${this.divisionKey}`;
     this.$funds = this.db.list(`${this.divisionPath}/vote/funds`).valueChanges();
     this.$funds.subscribe((funds) => {
-      console.log('funds: ', funds)
       this.totalFunds = this.addAllFunds(funds);
       this.fundsChange.emit(this.totalFunds);
     })

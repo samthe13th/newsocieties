@@ -33,7 +33,6 @@ export class ButtonGroupComponent implements OnInit {
   @Input() selectedClass: string = 'button-selected';
 
   ngOnInit() {
-    console.log('buttons init: ', this.buttons, this.selectById)
     this.setButton();
   }
   
@@ -42,13 +41,11 @@ export class ButtonGroupComponent implements OnInit {
   }
 
   setButton() {
-    console.log("select by id: ", this.selectById, this.buttons)
     if (this.buttons) {
       this.currentButton = this.selectById
         ? find(this.buttons, ['id', this.selectById])
         : this.buttons[0];
     }
-    console.log('set... ', this.buttons, this.selectById, this.currentButton)
   }
 
   selectButton(button) {

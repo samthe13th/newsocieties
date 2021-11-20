@@ -134,6 +134,7 @@ select {
     display: none;
   }
   
+  z-index: 100;
   position: absolute;
   height: 100%; 
   width: 100%; 
@@ -186,7 +187,7 @@ select {
 .app-toast {
   display: flex; 
   flex-direction: column; 
-  background: rgba(rgb(255, 255, 255), 0.9);
+  background: white;
   border-radius: 10px;
   box-shadow: 1px 1px 1px;
   padding: 20px; 
@@ -581,17 +582,25 @@ select {
   align-items: center;
   justify-content: center;
   color: white;
+  width: 100%;
+  font-size: 22px;
+  height: 100%;
 
-  &.one {
-    background: #3f7ba3;
+  .resource-image {
+    width: 100%;
   }
-  &.two {
-    background: #8148a7;
+
+  &:not(.contaminated) {
+    &.one { background: #3f7ba3 }
+    &.two { background: #8148a7 }
+    &.three { background: #a74578 }
   }
-  &.three {
-    background: #a74578;
+
+  &.contaminated {
+    background: black;
+    opacity: 0.8;
   }
-}x
+}
 
 /** COMPONENTS **/
 .announcement {

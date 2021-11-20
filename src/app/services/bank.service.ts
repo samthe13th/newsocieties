@@ -39,14 +39,12 @@ export class BankService {
       .pipe(take(1))
       .toPromise();
 
-    console.log('add to reserve');
     return new Promise((resolve) => {
       this.db.object(reservePath).set(toNumber(reserve) + amount).then(() => resolve(true));
     })
   }
 
   $resources(showKey, divisionKey, id) {
-    console.log('get resources:', `shows/${showKey}/divisions/${divisionKey}/citizens/${id}/resources`)
     return this.db.list(`shows/${showKey}/divisions/${divisionKey}/citizens/${id}/resources`).valueChanges();
   }
 
@@ -62,12 +60,9 @@ export class BankService {
 
   async depositResources(showKey, divisionKey, id, newResources): Promise<boolean> {
     const path = `shows/${showKey}/divisions/${divisionKey}/citizens/${id}/resources`;
-    console.log('deposit: ', path)
     const resources: any[] = await this.db.list(path).valueChanges()
       .pipe(take(1))
       .toPromise();
-
-    console.log("deposit: ", divisionKey, id, newResources)
 
     return new Promise((resolve) => {
       this.db.object(path).set([
@@ -91,7 +86,6 @@ export class BankService {
   }
 
   async spendResources(showKey, divisionKey, id, cost): Promise<boolean> {
-    console.log("SPEND: ", showKey, divisionKey, id, cost)
     let spend = 0;
     let transactions = 0;
     const resourcePath = `shows/${showKey}/divisions/${divisionKey}/citizens/${id}/resources`
@@ -100,7 +94,6 @@ export class BankService {
       .pipe(take(1))
       .toPromise();
 
-    console.log({resources})
     const maxTransactions = resources.length;
 
     while (spend < cost && transactions <= maxTransactions) {

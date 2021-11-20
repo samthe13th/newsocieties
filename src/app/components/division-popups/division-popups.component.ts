@@ -27,13 +27,11 @@ export class DivisionPopupsComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     const popupUrl = `shows/${this.showKey}/divisions/${this.divisionKey}/divisionPopup`;
-    console.log('POPUP: ', {popupUrl})
     this.db.object(popupUrl)
       .valueChanges()
       .pipe(
         takeUntil(this.destroy$)
       ).subscribe((popup) => {
-        console.log('POPUP: ', popup)
         this.divisionEvent = popup;
       })
   }

@@ -29,6 +29,7 @@ import { UsersGridComponent } from './users-grid/users-grid.component';
 import { DivisionFullComponent } from './division-full/division-full.component';
 import { ToastComponent } from './toast/toast.component';
 import { DivisionPopupsComponent } from './division-popups/division-popups.component';
+import { HarvestImageComponent } from './harvest-image/harvest-image.component';
 
 
 const components = [
@@ -42,6 +43,7 @@ const components = [
   ExportsComponent,
   FlashNewsComponent,
   FundraisingComponent,
+  HarvestImageComponent,
   LandGridComponent,
   NotificationFeedComponent,
   NumberChangeComponent,
