@@ -1,4 +1,4 @@
-import { Component, Input, TemplateRef, EventEmitter, Output } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-harvest-image',
@@ -13,8 +13,12 @@ import { Component, Input, TemplateRef, EventEmitter, Output } from '@angular/co
     '[class.contamination]': 'type === "C"'
   }
 })
-export class HarvestImageComponent {
+export class HarvestImageComponent implements OnInit {
   @Input() type: 'C' | 'R';
   @Input() value: number;
   @Input() contaminated: boolean;
+
+  ngOnInit() {
+    console.log('harvest image: ', this.type, this.value)
+  }
 }

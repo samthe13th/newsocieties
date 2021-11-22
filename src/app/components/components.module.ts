@@ -30,7 +30,7 @@ import { DivisionFullComponent } from './division-full/division-full.component';
 import { ToastComponent } from './toast/toast.component';
 import { DivisionPopupsComponent } from './division-popups/division-popups.component';
 import { HarvestImageComponent } from './harvest-image/harvest-image.component';
-
+import { PlayerViewControlComponent } from './player-view-control/player-view-control.component';
 
 const components = [
   AnnouncementComponent,
@@ -50,6 +50,7 @@ const components = [
   PlayerHandsComponent,
   PlayerDeckComponent,
   PlayerTurnComponent,
+  PlayerViewControlComponent,
   ScorecardComponent,
   SocietyGridComponent,
   SocietySummaryComponent,
@@ -60,7 +61,7 @@ const components = [
 ]
 
 const directives = [
-  TemplateIdDirective
+  TemplateIdDirective,
 ]
 
 const ngMaterial = [

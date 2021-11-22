@@ -5,12 +5,11 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { LandGridComponent } from 'src/app/components/land-grid/land-grid.component';
 import { tap, take, map } from 'rxjs/operators';
-import { Subject } from 'rxjs';
+import { Subject, combineLatest } from 'rxjs';
 import { LandCardValues } from 'src/app/interfaces';
 import { toArray, includes, findIndex, filter, find } from 'lodash';
 import { faLeaf, faFlag, faEye, faArchway, faBriefcaseMedical, faShieldAlt, faShoppingBag, faBrain, faTheaterMasks, faBuilding } from '@fortawesome/free-solid-svg-icons';
 import { DivisionService } from 'src/app/services/division-service.service';
-import { ThrowStmt } from '@angular/compiler';
 
 const KEY_CODE = {
   e: 69,
@@ -32,6 +31,7 @@ export class PlayerComponent implements OnInit {
   $turn;
   $citizens;
   $player;
+  $playerView;
 
   @ViewChild(PlayerDeckComponent, { static: false }) playerDeck: PlayerDeckComponent;
   @ViewChild(LandGridComponent, { static: false }) landGrid: LandGridComponent;
@@ -39,14 +39,19 @@ export class PlayerComponent implements OnInit {
   
   @HostListener('window:keyup', ['$event'])
   keyEvent(event: KeyboardEvent) {
-    if (event.keyCode === KEY_CODE.enter && !this.name) {
-      this.setName();
+    if (event.keyCode === KEY_CODE.enter) {
+      if (!this.signedIn) {
+        this.signIn();
+      } else if (!this.name) {
+        this.setName();
+      }
     }
   }
 
   private destroy$ = new Subject<boolean>();
 
   nameInput; 
+  codeInput;
 
   position;
   user;
@@ -113,6 +118,12 @@ export class PlayerComponent implements OnInit {
     this.landTilesPath = `${this.divisionPath}/landTiles`;
     this.votePath = `${this.divisionPath}/vote`;
     this.$division = this.db.object(this.divisionPath).valueChanges();
+    this.$playerView = combineLatest(
+      this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/playerViewHighlight`).valueChanges(),
+      this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/playerViews`).valueChanges()
+    ).pipe(
+      map(([highlight, views]) => ({ highlight, views }))
+    )
 
     this.db.object(`shows/${show}/divisions`)
       .valueChanges()
@@ -122,24 +133,26 @@ export class PlayerComponent implements OnInit {
       })
   }
 
-  signIn(code) {
+  signIn() {
     this.loginValidations = [];
-    if (code === 'ns-host') {
+    if (this.codeInput === 'ns-host') {
       this.router.navigate([this.showKey, 'host', this.divisionKey]);
     } else {
-      this.db.object(`shows/${this.showKey}/users`).valueChanges().pipe(take(1)).subscribe((users) => {
-        this.user = users[code];
-        if (!this.user) {
-          this.loginValidations.push("Sorry, this code is not correct");
-        }
-        if (this.loginValidations.length === 0) {
-          this.db.object(`shows/${this.showKey}/users/${code}`).update(
-            { division: this.divisionKey }
-          ).then(() => {
-            console.log('redirect: ', this.user);
-            this.navigateToPlayerPage(code);
-          })
-        }
+      this.db.object(`shows/${this.showKey}/users`).valueChanges()
+        .pipe(take(1))
+        .subscribe((users) => {
+          this.user = users[this.codeInput];
+          if (!this.user) {
+            this.loginValidations.push("Sorry, this code is not correct");
+          }
+          if (this.loginValidations.length === 0) {
+            this.db.object(`shows/${this.showKey}/users/${this.codeInput}`).update(
+              { division: this.divisionKey }
+            ).then(() => {
+              console.log('redirect: ', this.user);
+              this.navigateToPlayerPage(this.codeInput);
+            })
+          }
       })
     }
   }

@@ -57,6 +57,13 @@ export const DIVISION_TEMPLATE = {
     resources: [],
     players: []
   },
+  playerViews: {
+    banner: true,
+    player: true,
+    otherPlayers: true,
+    resources: false,
+    advancements: false,
+  },
   nextSeason: {
     season: 1,
     capacity: 18,

@@ -129,6 +129,49 @@ select {
   overflow: hidden
 }
 
+.app-player-view-control {
+  display: flex;
+  border-radius: 10px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  background: #6c6c6c;
+  display: flex;
+  width: 100%;
+  color: rgb(194, 194, 194);
+  border: solid 1px white;
+  justify-content: center;
+  box-sizing: border-box;
+  margin-bottom: 5px;
+  height: 100%;
+
+  &.show {
+    color: white;
+    background: #3a88b6;
+
+    .player-info-btn.show {
+      background: #ffc107;
+    }
+  }
+
+  &.highlight {
+    .player-info-btn.highlight {
+      background: #ffc107;
+    }
+  }
+
+  &.short {
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 10px;
+  }
+
+  .player-info-btn {
+    padding: 10px;
+  }
+}
+
 .app-division-popups {
   &.hide {
     display: none;
@@ -187,11 +230,11 @@ select {
 .app-toast {
   display: flex; 
   flex-direction: column; 
-  background: white;
+  background: black;
   border-radius: 10px;
   box-shadow: 1px 1px 1px;
   padding: 20px; 
-  color: black;
+  color: white;
   justify-content: center;
   align-items: center;
   font-size: 18px;
@@ -246,6 +289,39 @@ select {
       width: 100%;
       color: white;
     }
+  }
+}
+
+.app-pulse {
+  &--sm {
+    animation: pulse-sm 400ms ease-in-out infinite;
+    animation-direction: alternate;
+  }
+  &--md {
+    animation: pulse-md 400ms ease-in-out infinite;
+    animation-direction: alternate;
+  }
+}
+
+@keyframes pulse-md {
+  0% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  100% {
+    transform: scale(1.2);
+    filter: brightness(1.2);
+  }
+}
+
+@keyframes pulse-sm {
+  0% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  100% {
+    transform: scale(1.02);
+    filter: brightness(1.2)
   }
 }
 
@@ -337,7 +413,6 @@ select {
 
 .button-row {
   display: flex; 
-  width: 100%;
   flex-direction: row;
 
   button:not(:last-child) {
@@ -591,9 +666,9 @@ select {
   }
 
   &:not(.contaminated) {
-    &.one { background: #3f7ba3 }
-    &.two { background: #8148a7 }
-    &.three { background: #a74578 }
+    &.one { background: #A30164 }
+    &.two { background: #C62486 }
+    &.three { background: #EB49AB }
   }
 
   &.contaminated {
@@ -633,8 +708,8 @@ select {
     &[data-mark]::after {
       content: attr(data-mark);
       position: absolute;
-      top: -20px;
-      right: 30px;
+      bottom: 90%;
+      right: 90%;
       z-index: 1000;
       box-shadow: 2px 2px black;
       height: 10px;

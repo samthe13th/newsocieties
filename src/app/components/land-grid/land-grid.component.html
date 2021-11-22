@@ -29,14 +29,10 @@
       </div>
       <div front class="harvest-card">
         <app-harvest-image
-          *ngIf="card.type === 'R' && card.value > 0"
           [contaminated]="false"
-          type="R"
+          [type]="card.type"
           [value]="card.value">
         </app-harvest-image>
-        <div *ngIf="card.type === 'C'" class="contamination">
-          <img src="../assets/contamination.png"/>
-        </div>
       </div>
       <div back class="harvest-card back">
         <div class="flex-row flex-center" *ngIf="markCards">

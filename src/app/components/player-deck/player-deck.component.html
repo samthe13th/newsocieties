@@ -10,19 +10,23 @@
        
       </div>
       <div class="citizen-stats">
-        <fa-icon size="sm" [icon]="resourceIcon"></fa-icon>
-        {{ wealth }}
+        <!-- <fa-icon size="sm" [icon]="resourceIcon"></fa-icon>
+        {{ wealth }} -->
         <fa-icon size="sm" [icon]="landIcon"></fa-icon>
         {{ citizen?.land ? citizen?.land : 0 }}
       </div>
     </div>
   </div>
-  <div class="flex-row stretch-h">
-   
-  </div>
   <div class="player-hand">
     <div class="local-resources">
-      <div 
+      <app-harvest-image
+        *ngFor="let resource of citizen?.resources"
+        class="resource"
+        [contaminated]="false"
+        type="R"
+        [value]="resource.value">
+      </app-harvest-image>
+      <!-- <div 
         class="resource" 
         *ngFor="let resource of citizen?.resources"
         [class.one]="resource.value == 1"
@@ -31,7 +35,7 @@
         <span *ngIf="resource.division !== division?.code">
           {{resource.division}}
         </span>
-      </div>
+      </div> -->
     </div>
   </div>
 </ng-container>

@@ -1,7 +1,13 @@
 <ng-container *ngIf="divisionEvent">
   <app-toast
      (afterDismiss)="afterToastHide()" [data]="divisionEvent">
-    <div
+    <app-harvest-image
+      class="resource toast-event-resource"
+      [contaminated]="false"
+      [type]="divisionEvent.type"
+      [value]="divisionEvent.value">
+    </app-harvest-image>
+    <!-- <div
       *ngIf="divisionEvent.type === 'R'"
       class="resource toast-event-resource"
       [class.one]="divisionEvent.value === 1"
@@ -11,12 +17,11 @@
     </div>
     <div
       *ngIf="divisionEvent.type === 'C'"
-      class="flex-column flex-center"
-      >
+      class="flex-column flex-center">
       <em *ngIf="divisionEvent.value">{{divisionEvent.value}}</em>
       <div class="contamination toast-event-resource">
         <img src="../assets/contamination.png"/>
       </div>
-    </div>
+    </div> -->
   </app-toast>
 </ng-container>

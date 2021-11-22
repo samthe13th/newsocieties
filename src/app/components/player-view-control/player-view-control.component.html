@@ -1,0 +1,15 @@
+
+{{label}}
+<div class="flex-row">
+  <button
+    (click)="toggleHighlight()"
+    class="player-info-btn highlight">
+    <fa-icon [icon]="highlightIcon"></fa-icon>
+  </button>
+  <button
+    *ngIf="!constant"
+    (click)="toggleView()"
+    class="player-info-btn show">
+    <fa-icon [icon]="showIcon"></fa-icon>
+  </button>
+</div>

@@ -6,12 +6,12 @@ import { LandTile, LandCardTypes } from 'src/app/interfaces';
 import * as _ from 'lodash';
 import { includes, isNaN, trim, differenceBy, toNumber, each, partition } from 'lodash';
 import { take, map, tap } from 'rxjs/operators'
-import { Subject } from 'rxjs';
+import { Subject, combineLatest } from 'rxjs';
 import { BankService } from 'src/app/services/bank.service';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { ButtonGroupComponent } from 'src/app/components/button-group/button-group.component';
 import { DivisionService } from 'src/app/services/division-service.service';
-import { faPen, faGavel, faLandmark, faGlobe, faLeaf, faCartPlus, faEye, faShoppingBag } from '@fortawesome/free-solid-svg-icons';
+import { faPen, faGavel, faLandmark, faBullseye, faEyeSlash, faGlobe, faLeaf, faCartPlus, faEye, faShoppingBag } from '@fortawesome/free-solid-svg-icons';
 import { LandGridComponent } from 'src/app/components/land-grid/land-grid.component';
 import * as fa from '@fortawesome/free-solid-svg-icons';
 
@@ -69,6 +69,8 @@ export class HostComponent implements OnInit, OnDestroy {
   fa = fa;
   exploreIcon = faEye;
   gatherIcon = faShoppingBag;
+  visibleIcon = faEyeSlash;
+  highlightIcon = faBullseye;
 
   showModal = false;
 
@@ -87,6 +89,11 @@ export class HostComponent implements OnInit, OnDestroy {
     { id: '3', label: '3' },
     { id: '2', label: '2' },
     { id: '1', label: '1'}
+  ]
+
+  visibleDataButtons = [
+    { id: 'visible', faIcon: this.visibleIcon },
+    { id: 'highlight', faIcon: this.highlightIcon },
   ]
 
   private destroy$ = new Subject<boolean>();
@@ -110,7 +117,9 @@ export class HostComponent implements OnInit, OnDestroy {
   $lastResolution;
   $exports;
   $actions;
+  $playerView;
 
+  voteState;
   selectedCitizen;
   selectedLandTile;
   changeAttribute;
@@ -173,7 +182,9 @@ export class HostComponent implements OnInit, OnDestroy {
         this.divisionColor = color;
       })
 
-    this.$vote = this.db.object(`${this.divisionPath}/vote`).valueChanges();
+    this.$vote = this.db.object(`${this.divisionPath}/vote`).valueChanges().pipe(
+      tap((vote: any) => this.voteState = vote?.state)
+    )
     this.$division = this.db.object(this.divisionPath).valueChanges();
     this.$citizens = this.db.list(`${this.divisionPath}/citizens`).valueChanges()
       .pipe(
@@ -207,6 +218,12 @@ export class HostComponent implements OnInit, OnDestroy {
     this.$focus.subscribe((focus) => {
       this.focus = focus;
     })
+    this.$playerView = combineLatest(
+      this.db.object(`${this.divisionPath}/playerViewHighlight`).valueChanges(),
+      this.db.object(`${this.divisionPath}/playerViews`).valueChanges()
+    ).pipe(
+      map(([highlight, views]) => ({highlight, views}))
+    )
 
     this.db.object(`shows/${this.showKey}`)
       .valueChanges()
@@ -236,6 +253,17 @@ export class HostComponent implements OnInit, OnDestroy {
     ).toPromise();
     this.positions = citizens.map((c: any) => c?.id);
     this.db.object(`${divisionPath}/positions`).set(this.positions);
+  }
+
+  onPlayerDataButtonClick(component, property) {
+    console.log("click: ", component, property);
+    if (property === 'visible') {
+      this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/playerViews/${component}`)
+        .query.ref.transaction(value => value ? !value : true)
+    } else if (property === 'highlight') {
+      this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/playerViewHighlight`)
+        .query.ref.transaction(value => component !== value ? component : null)
+    }
   }
 
   gather() {
@@ -371,7 +399,7 @@ export class HostComponent implements OnInit, OnDestroy {
         name: this.positions.indexOf(this.selectedCitizen.id) + 1
       }]).then(() => {
         this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/divisionPopup`).set({
-          message: `${this.selectedCitizen?.name} acquired a new plot of land!`,
+          header: `${this.selectedCitizen?.name} acquired a new plot of land!`,
         })
       });
       this.dismissSheet();
@@ -387,11 +415,13 @@ export class HostComponent implements OnInit, OnDestroy {
       const contaminateCallback = await this.divisionService.contaminateResources(
         this.showKey, this.divisionKey, this.selectedCitizen?.id
       );
+      console.log('contam: ', tileValue, tile.value)
       this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/divisionPopup`).set({
         tile: tile.index,
         type: LandCardTypes.C,
-        message: `${this.selectedCitizen?.name} gathered a contaminant!`,
-        value: contaminateCallback,
+        header: `${this.selectedCitizen?.name} gathered a contaminant!`,
+        message: contaminateCallback,
+        value: tileValue,
         duration: 2500
       })
     } else if (tile.value && playerId && divisionKey) {
@@ -406,7 +436,7 @@ export class HostComponent implements OnInit, OnDestroy {
           this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/divisionPopup`).set({
             tile: tile.index,
             type: LandCardTypes.R,
-            message: `${this.selectedCitizen?.name} gathered a resource`,
+            header: `${this.selectedCitizen?.name} gathered a resource`,
             value: tileValue
           })
         }
@@ -479,10 +509,10 @@ export class HostComponent implements OnInit, OnDestroy {
   onTurnSelect(id) {
     this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/turn`)
       .set(id)
-    this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/divisionPopup`).set({
-      message: `It is now ${this.selectedCitizen.name}'s turn!`,
-      duration: 2000
-    })
+    // this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/divisionPopup`).set({
+    //   message: `It is now ${this.selectedCitizen.name}'s turn!`,
+    //   duration: 2000
+    // })
   }
 
   onFocusSelect(button) {
