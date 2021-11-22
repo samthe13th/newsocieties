@@ -183,7 +183,7 @@ export class HostComponent implements OnInit, OnDestroy {
       })
 
     this.$vote = this.db.object(`${this.divisionPath}/vote`).valueChanges().pipe(
-      tap((vote: any) => this.voteState = vote?.state)
+      tap((vote: any) => { console.log('VOTE: ', vote); this.voteState = vote?.state })
     )
     this.$division = this.db.object(this.divisionPath).valueChanges();
     this.$citizens = this.db.list(`${this.divisionPath}/citizens`).valueChanges()

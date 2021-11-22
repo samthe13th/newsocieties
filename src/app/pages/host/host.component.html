@@ -117,7 +117,7 @@
           <app-player-view-control
             [class.app-pulse--md]="playerView?.views?.resources && playerView?.highlight === 'resources'"
             name="resources"
-            label="Resources"
+            label="Reserve"
             [highlight]="playerView?.highlight === 'resources'"
             [show]="playerView?.views?.resources"
             (highlightChange)="onPlayerDataButtonClick('resources', 'highlight')"
@@ -156,7 +156,7 @@
       </div>
     </div>
 
-    <div class="harvest-controls" *ngIf="focus === 'harvest' || focus === 'resolutions'">
+    <div class="harvest-controls">
       <ng-container *ngIf="focus === 'harvest'">
         <div class="harvest-data">
           <app-player-turn
@@ -182,7 +182,7 @@
           </div>
         </div>
       </ng-container>
-      <ng-container *ngIf="focus === 'resolutions'">
+      <ng-container *ngIf="focus === 'principles' || focus === 'resolutions' || focus === 'scenario'">
         <div>
           <button *ngIf="voteState === 'voting'" (click)="closePolls()">Close Polls</button>
           <button *ngIf="voteState === 'review' && divisionVote" (click)="implement()">Implement</button>

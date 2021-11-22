@@ -24,7 +24,7 @@ export class ToastComponent implements OnInit {
     this._data = value;
     this.reset();
   }
-  @Input() duration: number = 1800;
+  @Input() duration: number = 2200;
 
   constructor() {}
 
