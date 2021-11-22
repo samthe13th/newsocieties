@@ -4,24 +4,9 @@
     <app-harvest-image
       class="resource toast-event-resource"
       [contaminated]="false"
+      [division]="divisionKey"
       [type]="divisionEvent.type"
       [value]="divisionEvent.value">
     </app-harvest-image>
-    <!-- <div
-      *ngIf="divisionEvent.type === 'R'"
-      class="resource toast-event-resource"
-      [class.one]="divisionEvent.value === 1"
-      [class.two]="divisionEvent.value === 2"
-      [class.three]="divisionEvent.value === 3">
-      {{divisionEvent.value}}
-    </div>
-    <div
-      *ngIf="divisionEvent.type === 'C'"
-      class="flex-column flex-center">
-      <em *ngIf="divisionEvent.value">{{divisionEvent.value}}</em>
-      <div class="contamination toast-event-resource">
-        <img src="../assets/contamination.png"/>
-      </div>
-    </div> -->
   </app-toast>
 </ng-container>

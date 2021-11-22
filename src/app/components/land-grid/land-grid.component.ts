@@ -211,7 +211,7 @@ export class LandGridComponent implements OnInit {
         this.showKey,
         division,
         id,
-        resources
+        resources.map(r => ({ ...r, division: this.divisionKey }))
       )
     })
 

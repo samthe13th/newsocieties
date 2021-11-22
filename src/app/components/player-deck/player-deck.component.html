@@ -23,6 +23,7 @@
         *ngFor="let resource of citizen?.resources"
         class="resource"
         [contaminated]="false"
+        [division]="resource.division"
         type="R"
         [value]="resource.value">
       </app-harvest-image>

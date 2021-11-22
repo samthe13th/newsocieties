@@ -666,9 +666,46 @@ select {
   }
 
   &:not(.contaminated) {
-    &.one { background: #A30164 }
-    &.two { background: #C62486 }
-    &.three { background: #EB49AB }
+    &[data-division="N"] {
+      &.one { background: #A30164 }
+      &.two { background: #C62486 }
+      &.three { background: #EB49AB }
+    }
+    &[data-division="NE"] {
+      &.one { background: #771111 }
+      &.two { background: #932D2D }
+      &.three { background: #B14B4B }
+    }
+    &[data-division="E"] {
+      &.one { background: #0044B0 }
+      &.two { background: #1E68E3 }
+      &.three { background: #478CFF }
+    }
+    &[data-division="SE"] {
+      &.one { background: #4020C4 }
+      &.two { background: #6344E8 }
+      &.three { background: #876DFF }
+    }
+    &[data-division="S"] {
+      &.one { background: #7F4200 }
+      &.two { background: #B55D01 }
+      &.three { background: #D67D22 }
+    }
+    &[data-division="SW"] {
+      &.one { background: #00555E }
+      &.two { background: #008592 }
+      &.three { background: #1AAFBE }
+    }
+    &[data-division="W"] {
+      &.one { background: #816000 }
+      &.two { background: #AC8000 }
+      &.three { background: #DAA400 }
+    }
+    &[data-division="NW"] {
+      &.one { background: #006119 }
+      &.two { background: #03982B }
+      &.three { background: #28BD51 }
+    }
   }
 
   &.contaminated {

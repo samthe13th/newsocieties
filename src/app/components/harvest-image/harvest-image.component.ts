@@ -10,15 +10,17 @@ import { Component, Input, OnInit } from '@angular/core';
     '[class.two]': 'value === 2',
     '[class.three]': 'value === 3',
     '[class.contaminated]': 'contaminated',
-    '[class.contamination]': 'type === "C"'
+    '[class.contamination]': 'type === "C"',
+    '[attr.data-division]': 'division'
   }
 })
 export class HarvestImageComponent implements OnInit {
   @Input() type: 'C' | 'R';
   @Input() value: number;
   @Input() contaminated: boolean;
+  @Input() division;
 
   ngOnInit() {
-    console.log('harvest image: ', this.type, this.value)
+    console.log('harvest image: ', this.type, this.value, this.division)
   }
 }

@@ -23,6 +23,7 @@
         <app-harvest-image
           *ngIf="card.type === 'R' && card.value > 0"
           [contaminated]="true"
+          [division]="divisionKey"
           type="R"
           [value]="card.value">
         </app-harvest-image>
@@ -30,6 +31,7 @@
       <div front class="harvest-card">
         <app-harvest-image
           [contaminated]="false"
+          [division]="divisionKey"
           [type]="card.type"
           [value]="card.value">
         </app-harvest-image>
