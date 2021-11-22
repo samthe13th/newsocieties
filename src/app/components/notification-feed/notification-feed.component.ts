@@ -1,9 +1,7 @@
-import { Component, AfterViewInit, ViewChild, ElementRef, Input } from '@angular/core';
+import { Component, ViewChild, ElementRef, Input } from '@angular/core';
 import { Observable, Subscription } from 'rxjs';
-import { tap, map } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { AngularFireDatabase } from '@angular/fire/database';
-import { DivisionService } from 'src/app/services/division-service.service';
-import { BankService } from 'src/app/services/bank.service';
 import { NotificationService } from 'src/app/services/notification-service.service';
 import { NotificationType } from 'src/app/shared/types';
 
@@ -15,7 +13,7 @@ import { NotificationType } from 'src/app/shared/types';
     '[class.app-notification-feed]': 'true'
   }
 })
-export class NotificationFeedComponent implements AfterViewInit {
+export class NotificationFeedComponent {
   @ViewChild('feedWrapper') feedWrapper: ElementRef;
 
   @Input() showKey: string; 
@@ -28,8 +26,6 @@ export class NotificationFeedComponent implements AfterViewInit {
 
   constructor(
     private db: AngularFireDatabase,
-    private divisionService: DivisionService,
-    private bankService: BankService,
     private notificationService: NotificationService,
   ) {}
 
@@ -41,22 +37,9 @@ export class NotificationFeedComponent implements AfterViewInit {
         notifications.map((n: any) => ({
           key: n.key,
           ...n.payload.val()
-        }))
+        })).reverse()
       )
     ));
-
-    this.subscriptions.push(this.$notifications.subscribe((n) => {
-      console.log("sub: ", n);
-      setTimeout(() => {
-        this.scrollToBottom();
-      })
-    }))
-  }
-
-  ngAfterViewInit() {
-    setTimeout(() => {
-      this.scrollToBottom();
-    });
   }
 
   ngOnDestroy() {
@@ -82,7 +65,6 @@ export class NotificationFeedComponent implements AfterViewInit {
   }
 
   async rejectRequest(notification) {
-    console.log('REJECT: ', notification);
     let notificationHeader;
     if (notification.type === NotificationType.glaRequest) {
       notificationHeader = `The ${this.divisionKey} Division rejected your land request(s).`;
@@ -91,7 +73,6 @@ export class NotificationFeedComponent implements AfterViewInit {
       notificationHeader = `The ${this.divisionKey} Division rejected your gift of resources.`;
       await this.notificationService.rejectResources(this.showKey, notification.sender, notification.data)
     }
-    console.log("REJECT: ", notification)
     await this.db.list(`shows/${this.showKey}/divisions/${notification.sender}/notifications`).push({
       type: NotificationType.message,
       header: notificationHeader,
@@ -121,14 +102,5 @@ export class NotificationFeedComponent implements AfterViewInit {
     });
     await this.db.list(`shows/${this.showKey}/divisions/${notification.sender}/unseenNotifications`).push(this.divisionKey);
     this.markAsAccepted(notification.key);
-  }
-
-  rejectWithMessage() {
-    console.log("reject with message")
-  }
-
-  scrollToBottom() {
-    console.log("scroll to bottom: ", this.feedWrapper, this.feedWrapper.nativeElement)
-    this.feedWrapper.nativeElement.scrollTop = this.feedWrapper.nativeElement.scrollHeight;
   }
 }

@@ -42,6 +42,8 @@ export class DivisionPopupsComponent implements OnInit, OnDestroy {
   }
 
   afterToastHide() {
-    this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/divisionPopup`).remove()
+    setTimeout(() => {
+      this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/divisionPopup`).remove()
+    }, 1000)
   }
 }

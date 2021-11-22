@@ -109,6 +109,7 @@ export class HostComponent implements OnInit, OnDestroy {
   $focus;
   $unseenNotifications;
   $unseenChat;
+  $unseenNews;
   $citizenAdvancements;
   $pendingGLA;
   $localLand;
@@ -210,6 +211,7 @@ export class HostComponent implements OnInit, OnDestroy {
     this.$globalLand = this.db.list(`${this.divisionPath}/globalLand`).valueChanges();
     this.$unseenNotifications = this.db.list(`${this.divisionPath}/unseenNotifications`).valueChanges();
     this.$unseenChat = this.db.object(`${this.divisionPath}/unseenChat`).valueChanges();
+    this.$unseenNews = this.db.object(`${this.divisionPath}/unseenNews`).valueChanges();
     this.$turnButtons = this.db.list(`${this.divisionPath}/citizens`)
       .valueChanges()
       .pipe(
@@ -233,7 +235,7 @@ export class HostComponent implements OnInit, OnDestroy {
       })
 
     this.divisionService.calculateDivisionScore$(this.showKey, this.divisionKey).subscribe();
-    this.divisionService.thresholdListener$(this.showKey, this.divisionKey).subscribe();
+    // this.divisionService.thresholdListener$(this.showKey, this.divisionKey).subscribe();
 
     this.db.object(`shows/${this.showKey}/contamination/current`)
       .valueChanges()
@@ -329,10 +331,16 @@ export class HostComponent implements OnInit, OnDestroy {
   }
 
   onRightTabChange(tab) {
-    this.rightTab = tab.id;
+    console.log('tab change: ', tab, this.rightTab);
     if (this.rightTab === 'notifications' || tab.id === 'notifications') {
       this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/unseenNotifications`).remove();
     }
+    
+    if (this.rightTab === 'news' || tab.id === 'news') {
+      console.log('clear unseen news')
+      this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/unseenNews`).remove();
+    }
+    this.rightTab = tab.id;
   }
 
   async onLeftTabChange(tab) {
@@ -846,6 +854,8 @@ export class HostComponent implements OnInit, OnDestroy {
   }
 
   async startSeason(division, newSeason) {
+    console.log('start season')
+    await this.divisionService.validateThreshold(this.showKey, this.divisionKey);
     const landTiles = await this.divisionService.setLandTiles(this.showKey, this.divisionKey)
     this.harvest = this.generateHarvest(landTiles, newSeason?.harvest, newSeason?.contaminantLevel);
 

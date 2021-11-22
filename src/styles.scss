@@ -37,6 +37,10 @@ table {
   width: 100%;
 }
 
+hr {
+  width: 100%;
+}
+
 td, th {
   border: 1px solid #868686;
   text-align: left;
@@ -192,16 +196,26 @@ select {
   display: flex; 
   flex-direction: column;
   width: 100%;
-  padding: 10px 40px;
-  background: #1f4d62;
+  padding: 20px 40px;
+  background: #173547;
   color: white;
+  border: solid 1px;
   border-radius: 10px;
   margin-bottom: 10px;
   box-sizing: border-box;
   flex-shrink: 0;
-  height: 140px;
+  min-height: 140px;
   font-weight: 200;
   font-size: 18px;
+}
+
+.app-news-feed {
+  padding: 10px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  overflow: hidden;
 }
 
 .app-notification-feed {
@@ -835,6 +849,22 @@ select {
       height: 100%;
       background: white;
     }
+  }
+}
+
+.unseen-count {
+  border-radius: 100%;
+  width: 20px;
+  height: 20px;
+  padding: 4px;
+  display: flex; 
+  align-items: center;
+  justify-content: center;
+  color: white;
+  margin-left: 5px;
+
+  &.events {
+    background: rgb(0, 128, 85);
   }
 }
 

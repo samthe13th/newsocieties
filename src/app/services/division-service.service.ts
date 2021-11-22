@@ -92,26 +92,33 @@ export class DivisionService {
     })
   }
 
-  thresholdListener$(showKey, divisionKey) {
+  async validateThreshold(showKey, divisionKey) {
+    console.log('validate')
     const divisionPath = `shows/${showKey}/divisions/${divisionKey}`;
 
-    return combineLatest(
-      this.db.object(`${divisionPath}/reserve`).valueChanges(),
-      this.db.object(`${divisionPath}/reserveThresholds`).valueChanges(),
-      this.db.object(`${divisionPath}/highThresholdMet`).valueChanges()
-    ).pipe(
-      map(([
-        reserve,
-        reserveThresholds,
-        highThresholdMet
-      ]: [number,any, boolean]) => {
-        if (!highThresholdMet && reserveThresholds.high <= reserve) {
-          this.db.object(`${divisionPath}/highThresholdMet`).set(true);
-          this.db.object(`${divisionPath}/highThresholdsMet`)
-            .query.ref.transaction(met => ++met ?? 1);
-        }
-      })
-    )
+    return new Promise((resolve) => {
+      combineLatest(
+        this.db.object(`${divisionPath}/reserve`).valueChanges(),
+        this.db.object(`${divisionPath}/reserveThresholds`).valueChanges()
+      ).pipe(
+        take(1),
+        map(([
+          reserve,
+          reserveThresholds
+        ]: [number,any]) => {
+          console.log({reserve, reserveThresholds});
+          if (reserveThresholds.high <= reserve) {
+            console.log("raise threshold");
+            this.db.object(`${divisionPath}/highThresholdsMet`).query
+              .ref.transaction(met => met ? ++met : 1).then(() => {
+                resolve();
+              })
+          } else {
+            resolve();
+          }
+        })
+      ).subscribe();
+    })
   }
 
   calculateDivisionScore$(showKey, divisionKey) {

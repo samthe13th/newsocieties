@@ -1,0 +1,30 @@
+<app-flash-news [showKey]="showKey" [divisionKey]="divisionKey"></app-flash-news>
+<h1>Events</h1>
+<button (click)="clearBannerEvent()">Clear Banner Event</button>
+<br/><hr/><br/>
+
+<div 
+  class="event-feed"
+  #feedWrapper>
+  <ng-container *ngFor="let event of ($events | async)">
+    <div
+      *ngIf="!(showResolved == false && event?.resolved)"
+      class="event-bubble">
+
+      <div 
+        class="event-header"
+        *ngIf="event?.header">
+        {{event.header}}
+      </div>
+
+      <div [innerHTML]="event?.value"></div>
+
+      <ng-container *ngIf="event?.requiresAction">
+        <div [innerHTML]="event?.requiresAction"></div>
+        <button *ngIf="!event?.resolved" (click)="showInBanner(event)">Show in Banner</button>
+        <div *ngIf="event?.resolved" class="resolved-action"><em>Shown</em></div>
+      </ng-container>
+      
+    </div>
+  </ng-container>
+</div>

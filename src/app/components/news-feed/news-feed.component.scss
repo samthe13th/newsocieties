@@ -1,0 +1,72 @@
+.event-feed {
+  overflow: auto;
+  height: 100%;
+}
+
+.event-header {
+  font-weight: bold;
+  margin-top: 5px;
+  margin-bottom: 10px;
+}
+
+%resolved {
+  display: inline-flex; 
+  padding: 2px 6px;
+  border-radius: 10px; 
+  padding-right: 10px;
+  color: white;
+  margin-top: 10px;
+
+  &::before {
+    content: '✓';
+    align-items: center; 
+    justify-content: center;
+    margin-right: 5px;
+  }
+}
+
+.mark-as-seen {
+  @extend %resolved;
+  background: #008bcb;
+}
+
+.resolved-action {
+  @extend %resolved;
+  background: #01a352;
+}
+
+.event-bubble {
+  padding: 10px;
+  font-size: 16px;
+  background: white;
+  font-family: sans-serif;
+  color: black;
+  box-sizing: content-box;
+  margin-bottom: 10px;
+  border-radius: 10px; 
+
+  &.event, 
+  &.resolution,
+  &.broadcast {
+    border-radius: 0;
+  }
+
+  &.incoming {
+    background: #6EC2DD;
+    margin-right: 40px;
+  }
+
+  &.outgoing {
+    border: solid 1px;
+    margin-left: 40px;
+  }
+
+  &.outgoing:not(.broadcast) {
+    background: white;
+  }
+
+  &.broadcast {
+    background: black;
+    color: white;
+  }
+}

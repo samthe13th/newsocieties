@@ -24,13 +24,11 @@ export class FlashNewsComponent {
   }
 
   ngOnInit() {
-    this.$flashNews = this.db.list(
-      `shows/${this.showKey}/divisions/${this.divisionKey}/events`,
-      ref => ref.limitToLast(1)
+    this.$flashNews = this.db.object(
+      `shows/${this.showKey}/divisions/${this.divisionKey}/news`,
     ).valueChanges()
     .pipe(
       tap((x) => console.log('tap: ', x)),
-      map(([last]) => last)
     )
   }
 }

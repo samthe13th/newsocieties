@@ -31,6 +31,7 @@ import { ToastComponent } from './toast/toast.component';
 import { DivisionPopupsComponent } from './division-popups/division-popups.component';
 import { HarvestImageComponent } from './harvest-image/harvest-image.component';
 import { PlayerViewControlComponent } from './player-view-control/player-view-control.component';
+import { NewsFeedComponent } from './news-feed/news-feed.component';
 
 const components = [
   AnnouncementComponent,
@@ -46,6 +47,7 @@ const components = [
   HarvestImageComponent,
   LandGridComponent,
   NotificationFeedComponent,
+  NewsFeedComponent,
   NumberChangeComponent,
   PlayerHandsComponent,
   PlayerDeckComponent,

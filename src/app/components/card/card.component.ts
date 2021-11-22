@@ -27,6 +27,7 @@ export class CardComponent implements OnInit {
   @Input() contaminated = false;
   @Input() 
   set side(val) {
+    console.log({val})
     if (this._side && this.animate === false && val !== this._side) {
       this.animate = true;
     }

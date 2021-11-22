@@ -27,7 +27,8 @@
   (tabChange)="onRightTabChange($event)"
   [tabs]="[
     { id: 'focus', tabTemplate: focusTab, bodyTemplate: focusBody },
-    { id: 'notifications', tabTemplate: notifications, bodyTemplate: notificationsBody }
+    { id: 'notifications', tabTemplate: notifications, bodyTemplate: notificationsBody },
+    { id: 'news', tabTemplate: news, bodyTemplate: newsBody }
   ]">
 </app-tabs>
 
@@ -39,6 +40,18 @@
     </ng-container>
   </span>
 </ng-template>
+
+<ng-template #news>
+  Banner
+  <ng-container *ngIf="($unseenNews | async) as news">
+    <span 
+      *ngIf="news > 0 && rightTab !== 'news'"
+      class="unseen-count events app-pulse--md">
+      {{ news }}
+    </span>
+  </ng-container>
+</ng-template>
+
 <ng-template #focusTab>Focus</ng-template>
 
 <ng-template #notificationsBody>
@@ -46,6 +59,13 @@
     [showKey]="showKey"
     [divisionKey]="divisionKey">
   </app-notification-feed>
+</ng-template>
+
+<ng-template #newsBody>
+  <app-news-feed
+    [showKey]="showKey"
+    [divisionKey]="divisionKey">
+  </app-news-feed>
 </ng-template>
 
 <ng-template #focusBody>

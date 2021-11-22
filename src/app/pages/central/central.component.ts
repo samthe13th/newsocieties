@@ -415,6 +415,7 @@ export class CentralComponent implements OnInit, AfterViewInit {
       .then((res) => { 
         this.chatInput = "";
       })
+
     this.db.object(`shows/${this.showKey}/divisions/${division}/unseenChat`)
       .query.ref.transaction((unseen) => unseen ? ++unseen : 1)
   }
@@ -463,15 +464,15 @@ export class CentralComponent implements OnInit, AfterViewInit {
       type: 'event', 
       value
     };
-    this.db.list(`shows/${this.showKey}/divisions/${division}/notifications`).push(news);
-    this.db.list(`shows/${this.showKey}/divisions/${division}/unseenNotifications`).push('event');
+    this.db.object(`shows/${this.showKey}/divisions/${division}/unseenNews`)
+      .query.ref.transaction((unseen) => unseen ? ++unseen : 1)
     this.db.list(`shows/${this.showKey}/divisions/${division}/events`).push(news);
   }
 
   sendBroacastNotification(division) {
-    const news = { from: 'central', type: 'broadcast' };
-    this.db.list(`shows/${this.showKey}/feeds/${division}`).push(news);
-    this.db.list(`shows/${this.showKey}/divisions/${division}/events`).push(news);
+    const event = { from: 'central', type: 'broadcast' };
+    this.db.list(`shows/${this.showKey}/feeds/${division}`).push(event);
+    this.db.list(`shows/${this.showKey}/divisions/${division}/events`).push(event);
   }
 
   buildShow(key) {
