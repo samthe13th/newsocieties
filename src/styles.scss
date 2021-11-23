@@ -643,6 +643,11 @@ select {
   font-family: sans-serif;
   justify-content: center;
   align-items: center;
+
+  &.invert {
+    background: black;
+    color: white;
+  }
   
   fa-icon {
     margin-bottom: 10px;

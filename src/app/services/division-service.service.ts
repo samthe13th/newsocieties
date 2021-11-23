@@ -176,7 +176,7 @@ export class DivisionService {
         const toDestroy = Math.ceil(resources.length / 2);
         const adjustedResources = slice(resources, toDestroy);
         const toastMessage = toDestroy > 0 
-          ? `${formatPlural(toDestroy, 'resource has', 'resources have')} been destroyed`
+          ? `Half of collected resources been destroyed`
           : ''
         this.db.object(dbPath).update({
           resources: adjustedResources

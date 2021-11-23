@@ -268,9 +268,21 @@ export class HostComponent implements OnInit, OnDestroy {
     }
   }
 
+  safeGather() {
+    this.hostAction = undefined;
+    this.landGrid.gather(this.selectedLandTile, this.selectedCitizen?.id, true);
+    this.dismissSheet();
+  }
+
   gather() {
     this.hostAction = undefined;
     this.landGrid.gather(this.selectedLandTile, this.selectedCitizen?.id);
+    this.dismissSheet();
+  }
+
+  safeExplore() {
+    this.hostAction = undefined;
+    this.landGrid.explore(this.selectedLandTile, this.selectedCitizen?.id, true);
     this.dismissSheet();
   }
 
@@ -414,13 +426,14 @@ export class HostComponent implements OnInit, OnDestroy {
     })
   }
 
-  async onGather(tile) {
+  async onGather({ tile, safe }) {
     const playerId = tile.owner?.id ?? this.selectedCitizen?.id;
     const divisionKey = tile.owner?.division ?? this.divisionKey;
     const tileValue = tile.value;
 
     if (tile.type === LandCardTypes.C) {
-      const contaminateCallback = await this.divisionService.contaminateResources(
+      const contaminateCallback = safe ? "Thankfully, no resources were destroyed"
+        : await this.divisionService.contaminateResources(
         this.showKey, this.divisionKey, this.selectedCitizen?.id
       );
       console.log('contam: ', tileValue, tile.value)

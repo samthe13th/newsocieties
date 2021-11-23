@@ -17,8 +17,7 @@
       [mark]="selection?.value === card.index ? selection?.mark : null"
       [playerId]="player?.id"
       [contaminated]="card.contaminated"
-      [class.disabled]="card.value == -1 || card.contaminated == true"
-      (sideChange)="process(i)">
+      [class.disabled]="card.value == -1 || card.contaminated == true">
       <div contaminatedTile class="harvest-card contaminated">
         <app-harvest-image
           *ngIf="card.type === 'R' && card.value > 0"
