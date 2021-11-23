@@ -429,8 +429,12 @@ export class HostComponent implements OnInit, OnDestroy {
     })
   }
 
-  async onGather({ tile, safe }) {
-    const playerId = tile.owner?.id ?? this.selectedCitizen?.id;
+  notLocal(tile) {
+    return tile.owner && tile.owner?.division !== this.divisionKey
+  }
+  
+  async onGather({ tile, playerId, safe }) {
+    const id = this.notLocal(tile) ? tile.owner?.id : playerId
     const divisionKey = tile.owner?.division ?? this.divisionKey;
     const tileValue = tile.value;
 
@@ -448,15 +452,16 @@ export class HostComponent implements OnInit, OnDestroy {
         value: tileValue,
         duration: 2500
       })
-    } else if (tile.value && playerId && divisionKey) {
+    } else if (tile.value && id && divisionKey) {
       this.bank.depositResources(
         this.showKey,
         divisionKey,
-        playerId, [{
+        id, [{
         value: tile.value,
         division: divisionKey
       }]).then(() => {
-        if (!tile.owner && this.selectedCitizen) {
+        if (!this.notLocal(tile) && this.selectedCitizen) {
+          console.log("push new popup")
           this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/divisionPopup`).set({
             tile: tile.index,
             type: LandCardTypes.R,

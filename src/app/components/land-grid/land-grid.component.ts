@@ -231,27 +231,28 @@ export class LandGridComponent implements OnInit {
     this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/selection`).remove();
   }
 
-  exploreOwnedLand() {
-    this.landTiles.forEach((tile) => {
+  async exploreOwnedLand() {
+    this.landTiles.forEach(async (tile) => {
       if (tile.owner) {
         if (!tile.harvested && tile.value !== LandCardValues.EMPTY) {
           this.landTiles[tile.index].harvested = true;
+          await this.process(tile.index);
         }
       }
     })
     this.updateDB();
   }
 
-  explore(card, playerId = null, safe = false) {
-    console.log("explore: ", card, playerId)
+  async explore(card, playerId = null, safe = false) {
     if (!card.harvested && card.value !== LandCardValues.EMPTY) {
       this.landTiles[card.index].harvested = true;
-      this.process(card.index, safe);
+      await this.process(card.index, safe);
       if (playerId) {
         this.takeAction(playerId);
       }
     }
     this.clearSelection(card.index);
+    this.updateDB();
   }
 
   takeAction(playerId) {
@@ -263,7 +264,7 @@ export class LandGridComponent implements OnInit {
 
   gather(card, playerId, safe=false) {
     if (playerId===null) return;
-    this.gatherResource.emit({ tile: card, safe });
+    this.gatherResource.emit({ tile: card, playerId, safe });
     this.landTiles[card.index].value = -1;
     this.clearSelection(card.index);
     if (playerId) {
@@ -292,12 +293,13 @@ export class LandGridComponent implements OnInit {
     if (dir === 'bottomright') { return grid[r + dist]?.[c + dist] }
   }
 
-  process(i, safe=false) {
+  async process(i, safe=false) {
     const tile = this.landTiles[i];
     console.log('process: ', tile)
     if (!safe && tile.type === LandCardTypes.C && tile.harvested && !tile.owner) {
-      this.contaminateAdjacentTiles(tile);
+      await this.contaminateAdjacentTiles(tile);
     }
+    this.updateDB();
   }
 
   toggleColumn(n, enable) {
@@ -309,7 +311,7 @@ export class LandGridComponent implements OnInit {
     this.updateDB();
   }
 
-  contaminateAdjacentTiles(tile) {
+  async contaminateAdjacentTiles(tile) {
     console.log('contam adj: ', tile)
     let placements;
     if (tile.value === 1) {
@@ -323,14 +325,16 @@ export class LandGridComponent implements OnInit {
       (placement) => this.landTiles[this.getRelativeGridIndex(tile.index, placement, 1)]
     )
     
-    setTimeout(() => {
-      tiles.forEach((tile, index) => {
-        if (tile && !tile.owner && !tile.contaminated) {
-          this.landTiles[tile.index].contaminated = true;
-          console.log('contaminate tile: ', this.landTiles[index])
-        }
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        tiles.forEach((tile, index) => {
+          if (tile && !tile.owner && !tile.contaminated) {
+            this.landTiles[tile.index].contaminated = true;
+            console.log('contaminate tile: ', this.landTiles[index])
+          }
+        })
+        resolve();
       })
-      this.updateDB();
     })
   }
 }
