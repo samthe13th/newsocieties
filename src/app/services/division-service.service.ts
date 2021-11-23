@@ -82,6 +82,7 @@ export class DivisionService {
   acquireLand(showKey, divisionKey, data) {
     return new Promise((resolve) => {
       data.forEach(async (request) => {
+        console.log('acquire plot for ', data)
         const landList = (divisionKey === request.division) ? 'localLand' : 'globalLand';
         await this.db.object(`shows/${showKey}/divisions/${request.division}/citizens/${request.id}/land`)
           .query.ref.transaction((land) => land ? ++land : 1)

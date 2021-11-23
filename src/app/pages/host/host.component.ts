@@ -393,6 +393,7 @@ export class HostComponent implements OnInit, OnDestroy {
   }
 
   async buyAdvancement(advancement, price, updatePath) {
+    console.log('buy adv for ', this.selectedCitizen?.name)
     if (advancement > 3 || !this.selectedCitizen?.id) return;
     const wealth = this.bankService.calculateWealth(this.selectedCitizen.resources);
     if (wealth >= price) {
@@ -406,20 +407,22 @@ export class HostComponent implements OnInit, OnDestroy {
   }
 
   buyLocalLand(price, updatePath) {
+    const citizen = this.selectedCitizen;
+    console.log("buy land for ", citizen?.id)
     this.bankService.spendResources(
       this.showKey,
       this.divisionKey,
-      this.selectedCitizen.id,
+      citizen?.id,
       price
     ).then(() => {
       this.divisionService.acquireLand(this.showKey, this.divisionKey, [{
         division: this.divisionKey,
-        id: this.selectedCitizen.id,
+        id: citizen?.id,
         color: this.divisionColor,
-        name: this.positions.indexOf(this.selectedCitizen.id) + 1
+        name: this.positions.indexOf(citizen?.id) + 1
       }]).then(() => {
         this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/divisionPopup`).set({
-          header: `${this.selectedCitizen?.name} acquired a new plot of land!`,
+          header: `${citizen?.name} acquired a new plot of land!`,
         })
       });
       this.dismissSheet();
