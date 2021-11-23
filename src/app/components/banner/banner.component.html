@@ -1,0 +1,19 @@
+<div class="flex-row flex-center">
+  <div class="division-summaries">
+    <ng-container *ngFor="let $division of DivisionSummaries">
+      <div 
+        class="division-summary" 
+        *ngIf="($division | async) as division">
+        <div class="division-summary-header">
+          <span class="division-summary-code" [style.background]="division.color">{{division.code}}</span>
+          <div class="division-summary-score">{{division.score}}</div>
+        </div>
+        <span>Season: {{division.season}}</span>
+      </div>
+    </ng-container>
+  </div>
+</div>
+<div class="flash-news" *ngIf="$flashNews | async as flashNews">
+  <h2>ATTENTION</h2>
+  <div [innerHtml]="flashNews?.value"></div>
+</div>

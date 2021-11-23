@@ -3,9 +3,7 @@ import { Observable, Subscription } from 'rxjs';
 import { tap, map } from 'rxjs/operators';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { DivisionService } from 'src/app/services/division-service.service';
-import { BankService } from 'src/app/services/bank.service';
-import { NotificationService } from 'src/app/services/notification-service.service';
-import { NotificationType } from 'src/app/shared/types';
+
 
 @Component({
   selector: 'app-news-feed',

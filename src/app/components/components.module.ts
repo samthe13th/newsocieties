@@ -24,7 +24,6 @@ import { PlayerTurnComponent } from './player-turn/player-turn.component';
 import { NotificationFeedComponent } from './notification-feed/notification-feed.component';
 import { ExportsComponent } from './exports/exports.component';
 import { NgMultiSelectDropDownModule } from 'ng-multiselect-dropdown';
-import { FlashNewsComponent } from './flash-news/flash-news.component';
 import { UsersGridComponent } from './users-grid/users-grid.component';
 import { DivisionFullComponent } from './division-full/division-full.component';
 import { ToastComponent } from './toast/toast.component';
@@ -32,17 +31,18 @@ import { DivisionPopupsComponent } from './division-popups/division-popups.compo
 import { HarvestImageComponent } from './harvest-image/harvest-image.component';
 import { PlayerViewControlComponent } from './player-view-control/player-view-control.component';
 import { NewsFeedComponent } from './news-feed/news-feed.component';
+import { BannerComponent } from './banner/banner.component';
 
 const components = [
   AnnouncementComponent,
   ButtonGroupComponent,
+  BannerComponent,
   CardComponent,
   ChatComponent,
   DialogComponent,
   DivisionFullComponent,
   DivisionPopupsComponent,
   ExportsComponent,
-  FlashNewsComponent,
   FundraisingComponent,
   HarvestImageComponent,
   LandGridComponent,

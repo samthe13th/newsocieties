@@ -34,11 +34,11 @@
 
   <ng-container *ngIf="signedIn && name">
     <ng-container *ngIf="($playerView | async) as playerView">
-      <app-flash-news 
+      <app-banner
         [class.app-pulse--sm]="playerView?.highlight === 'banner'"
         [showKey]="showKey" 
         [divisionKey]="divisionKey">
-      </app-flash-news>
+      </app-banner>
 
       <div class="player-page-layout">
     

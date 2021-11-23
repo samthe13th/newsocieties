@@ -190,13 +190,14 @@ select {
   justify-content: center;
 }
 
-.app-flash-news {
+.app-banner {
+  position: relative;
+  overflow: hidden;
   text-align: center;
   justify-content: center;
   display: flex; 
   flex-direction: column;
   width: 100%;
-  padding: 20px 40px;
   background: #173547;
   color: white;
   border: solid 1px;
@@ -565,6 +566,10 @@ select {
   &.flex-center-v {
     align-items: center;
   }
+}
+
+.flex-wrap {
+  flex-wrap: wrap;
 }
 
 .flex-center {

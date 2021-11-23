@@ -1,4 +1,4 @@
-<app-flash-news [showKey]="showKey" [divisionKey]="divisionKey"></app-flash-news>
+<app-banner style="height: 200px" [showKey]="showKey" [divisionKey]="divisionKey"></app-banner>
 <h1>Events</h1>
 <button (click)="clearBannerEvent()">Clear Banner Event</button>
 <br/><hr/><br/>
@@ -20,7 +20,6 @@
       <div [innerHTML]="event?.value"></div>
 
       <ng-container *ngIf="event?.requiresAction">
-        <div [innerHTML]="event?.requiresAction"></div>
         <button *ngIf="!event?.resolved" (click)="showInBanner(event)">Show in Banner</button>
         <div *ngIf="event?.resolved" class="resolved-action"><em>Shown</em></div>
       </ng-container>
