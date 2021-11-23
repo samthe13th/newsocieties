@@ -130,12 +130,6 @@
   &.reserve {
     background: #398739;
   }
-  &.advancements {
-    background: #4f7663;
-    margin-bottom: 20px;
-    align-items: center;
-    font-size: 18px;
-  }
 }
 
 .harvest-header {
@@ -183,13 +177,14 @@
     margin: 5px 0;
     flex-direction: column;
     font-size: 16px;
-    font-weight: 200;
-    padding: 10px;
     border-radius: 10px;
-    background: #363636;
+    background: #292828;
+    color: black;
+    padding: 5px;
 
     > .citizen-summary {
-      margin: 5px 0;
+      color: white;
+      padding: 5px 10px;
     }
   }
 }

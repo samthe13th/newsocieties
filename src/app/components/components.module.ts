@@ -3,7 +3,6 @@ import { AnnouncementComponent } from './announcement/announcement.component';
 import { CardComponent } from './card/card.component';
 import { DialogComponent } from './dialog/dialog.component';
 import { PlayerHandsComponent } from './player-hands/player-hands.component';
-import { ScorecardComponent } from './scorecard/scorecard.component';
 import { SocietySummaryComponent } from './society-summary/society-summary.component';
 import { SocietyGridComponent } from './society-grid/society-grid.component';
 import { VoteComponent } from './vote/vote.component';
@@ -32,9 +31,14 @@ import { HarvestImageComponent } from './harvest-image/harvest-image.component';
 import { PlayerViewControlComponent } from './player-view-control/player-view-control.component';
 import { NewsFeedComponent } from './news-feed/news-feed.component';
 import { BannerComponent } from './banner/banner.component';
+import { ReserveBarComponent } from './reserve-bar/reserve-bar.component';
+import { ScorecardComponent } from './scorecard/scorecard.component';
+import { PlayerAdvancementsComponent } from './player-advancements/player-advancements.component';
+import { AdvancementTrackComponent } from './player-advancements/advancement-track/advancement-track.component';
 
 const components = [
   AnnouncementComponent,
+  AdvancementTrackComponent,
   ButtonGroupComponent,
   BannerComponent,
   CardComponent,
@@ -49,10 +53,12 @@ const components = [
   NotificationFeedComponent,
   NewsFeedComponent,
   NumberChangeComponent,
+  PlayerAdvancementsComponent,
   PlayerHandsComponent,
   PlayerDeckComponent,
   PlayerTurnComponent,
   PlayerViewControlComponent,
+  ReserveBarComponent,
   ScorecardComponent,
   SocietyGridComponent,
   SocietySummaryComponent,

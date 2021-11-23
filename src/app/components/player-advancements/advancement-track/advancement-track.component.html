@@ -1,0 +1,5 @@
+<div 
+  *ngFor="let slot of slots; let i = index"
+  class="adv-track-slot"
+  [style.background]="(i + 1) <= contributions ? color : 'white'">
+</div>

@@ -1,0 +1,31 @@
+.reserve-bar {
+  height: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.reserve-scale {
+  width: 100%;
+  top: 100%;
+  font-size: 14px;
+  position: absolute;
+  left: 0;
+  height: 20px;
+}
+
+.reserve-scale-threshold {
+  position: absolute;
+  top: 2px;
+
+  &:not(:last-child) {
+    &::after {
+      content: "";
+      height: 14px;
+      width: 3px;
+      background: #173547;
+      top: -14px;
+      position: absolute;
+    }
+  }
+}

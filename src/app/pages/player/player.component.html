@@ -146,71 +146,7 @@
         </div>
     
         <!-- PLAYER CONTROLS -->
-        <div class="player-folder__body-citizens space-between">
-
-          <!--RESERVE-->
-          <ng-container *ngIf="playerView?.views?.resources" >
-            <h3 style="margin-bottom: 0">Resources</h3>
-            <div
-            class="division-details reserve"
-            [class.app-pulse--sm]="playerView?.highlight === 'resources'"
-            >
-              <div class="flex-row stretch-h flex-center-v">
-                Reserve
-                <span class="division-details__number">
-                  <fa-icon size="sm" [icon]="resourceIcon"></fa-icon>
-                  {{division?.reserve}}
-                </span>
-              </div>
-              <div class="flex-row flex-center-v">
-                Thresholds
-                <span class="division-details__number">
-                  {{division?.reserveThresholds.low}}
-                  | {{division?.reserveThresholds.mid}}
-                  | {{division?.reserveThresholds.high}}
-                </span>
-              </div>
-            </div>
-          </ng-container>
-
-          <!-- ADVANCEMENTS -->
-          <ng-container *ngIf="playerView?.views?.advancements">
-            <h3 style="margin-bottom: 0">Advancements</h3>
-            <div
-              [class.app-pulse--sm]="playerView?.highlight === 'advancements'"
-              class="division-details advancements">
-              <ng-container *ngIf="division?.advancements?.safety as safety">
-                <span class="division-details__number">
-                  <fa-icon size="sm" [icon]="sIcon"></fa-icon>
-                  {{safety.communal + safety.individual}}
-                </span>
-              </ng-container>
-              <ng-container *ngIf="division?.advancements?.health as health">
-                <span class="division-details__number">
-                  <fa-icon size="sm" [icon]="hIcon"></fa-icon>
-                  {{health.communal + health.individual}}
-                </span>
-              </ng-container>
-              <ng-container *ngIf="division?.advancements?.arts as arts">
-                <span class="division-details__number">
-                  <fa-icon size="sm" [icon]="aIcon"></fa-icon>
-                  {{arts.communal + arts.individual}}
-                </span>
-              </ng-container>
-              <ng-container *ngIf="division?.advancements?.knowledge as knowledge">
-                <span class="division-details__number">
-                  <fa-icon size="sm" [icon]="kIcon"></fa-icon>
-                  {{knowledge.communal + knowledge.individual}}
-                </span>
-              </ng-container>
-              <ng-container *ngIf="division?.advancements?.infrastructure as inf">
-                <span class="division-details__number">
-                  <fa-icon size="sm" [icon]="iIcon"></fa-icon>
-                  {{inf.communal + inf.individual}}
-                </span>
-              </ng-container>
-            </div>
-          </ng-container>
+        <div class="player-folder__body-citizens">
 
           <!-- PLAYERS -->
           <ng-container *ngIf="$turn | async as turn">
@@ -248,6 +184,16 @@
                   </app-player-turn> -->
               </div>
             </div>
+
+            <!-- ADVANCEMENTS -->
+            <ng-container *ngIf="playerView?.views?.advancements">
+              <app-player-advancements
+                [showKey]="showKey"
+                [divisionKey]="divisionKey"
+                [playerId]="id"
+                [class.app-pulse--sm]="playerView?.highlight === 'advancements'">
+              </app-player-advancements>
+            </ng-container>
           </ng-container>
         </div>
       </div>

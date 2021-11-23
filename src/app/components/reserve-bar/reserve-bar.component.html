@@ -1,0 +1,14 @@
+<div 
+  [style.background]="color"
+  [style.width.%]="percent"
+  class="reserve-bar">
+</div>
+
+<div class="reserve-scale">
+  <span 
+    class="reserve-scale-threshold"
+    *ngFor="let threshold of thresholds"
+    [style.right.%]="100 - threshold.percent">
+    {{threshold.value}}
+  </span>
+</div>

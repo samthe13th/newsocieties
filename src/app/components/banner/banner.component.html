@@ -1,18 +1,43 @@
 <div class="flex-row flex-center">
-  <div class="division-summaries">
-    <ng-container *ngFor="let $division of DivisionSummaries">
-      <div 
-        class="division-summary" 
-        *ngIf="($division | async) as division">
-        <div class="division-summary-header">
-          <span class="division-summary-code" [style.background]="division.color">{{division.code}}</span>
-          <div class="division-summary-score">{{division.score}}</div>
-        </div>
-        <span>Season: {{division.season}}</span>
+  <ng-container *ngIf="$loaded | async">
+    <!--RESERVE-->
+    <div 
+      *ngIf="$reserveData | async as reserveData"
+      class="division-details reserve">
+      <div class="reserve-header">
+        RESERVE: {{reserveData?.reserve.value}}
       </div>
-    </ng-container>
-  </div>
+      <app-reserve-bar 
+        [percent]="reserveData?.reserve?.percent"
+        [thresholds]="reserveData?.thresholds"
+        [color]="reserveData?.color">
+      </app-reserve-bar>
+    </div>
+
+    <!-- DIVISIONS -->
+    <div class="division-summaries">
+      <ng-container *ngFor="let $division of DivisionSummaries">
+        <div 
+          class="division-summary" 
+          *ngIf="($division | async) as division">
+          <div class="division-summary-header">
+            <span class="division-summary-code" [style.background]="division.color">{{division.code}}</span>
+            <div class="division-summary-score">{{division.score}}</div>
+          </div>
+          <span>Season: {{division.season}}</span>
+        </div>
+      </ng-container>
+    </div>
+
+    <!-- GLOBAL CAPACITY -->
+    <div class="division-details reserve">
+      <span>GLOBAL CAPACITY</span>
+      <span>10 / 20</span>
+    </div>
+  </ng-container>
 </div>
+
+
 <div class="flash-news" *ngIf="$flashNews | async as flashNews">
   <h2>ATTENTION</h2>
   <div [innerHtml]="flashNews?.value"></div>
