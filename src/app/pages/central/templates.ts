@@ -1,10 +1,5 @@
 export const DIVISION_TEMPLATE = {
-  events: [
-    {
-      header: 'MESSAGE BOARD',
-      value: 'Greetings division, any pressing information about your society will show up here, stay tuned for news!'
-    }
-  ],
+  events: [],
   harvestColumn: [true, true, true, true, true, true, true],
   lockHarvestColumns: false,
   marketView: 'localLand',

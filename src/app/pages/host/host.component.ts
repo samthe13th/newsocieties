@@ -206,7 +206,7 @@ export class HostComponent implements OnInit, OnDestroy {
     )
     this.$actions = this.db.object(`${this.divisionPath}/actions`).valueChanges();
     this.$capacity = this.db.object(`${this.divisionPath}/capacity`).valueChanges();
-    this.$exports = this.db.list(`${this.divisionPath}/exports`).valueChanges();
+    this.$exports = this.db.list(`${this.divisionPath}/exports`).valueChanges().pipe(map((exports) => exports.reverse()));
     this.$lastResolution = this.db.object(`${this.divisionPath}/lastResolution`).valueChanges()
     this.$resolutions = this.db.list(`${this.divisionPath}/resolutions`).valueChanges();
     this.$principles = this.db.list(`${this.divisionPath}/principles`).valueChanges();

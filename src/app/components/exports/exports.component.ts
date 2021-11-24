@@ -135,7 +135,7 @@ export class ExportsComponent implements OnInit {
   }
 
   async sendResources() {
-    console.log("CITIZEN DATA: ", this.citizenData)
+    console.log("CITIZEN DATA: ", this.citizenData, 'FROM RESERVE: ', this.fromReserve)
     const senders = this.citizenData.map((citizen) => ({ id: citizen.id, spend: citizen.spend }))
     let resourceTotal = this.addResources(this.citizenData);
     senders.forEach(async (citizen) => {
@@ -147,6 +147,7 @@ export class ExportsComponent implements OnInit {
       );
     })
     if (this.fromReserve) {
+      console.log("FOUND ", this.fromReserve)
       resourceTotal += this.fromReserve;
       console.log("take from reserve: ", this.fromReserve)
       await this.bankService.removeFromReserve(
@@ -163,8 +164,9 @@ export class ExportsComponent implements OnInit {
       acceptable: true,
       sender: this.divisionKey,
       reciever: this.selectedDivision.select_id,
-      data: { total: resourceTotal, fromReserve: this.fromReserve, senders }
+      data: { total: resourceTotal, fromReserve: this.fromReserve ?? 0, senders }
     }
+    console.log({data })
     await this.logExport(data);
     this.clearAll();
   }
@@ -183,6 +185,7 @@ export class ExportsComponent implements OnInit {
   }
 
   async logExport(data) {
+    console.log("LOG: ", data, this.divisionKey)
     return new Promise(async (resolve) => {
       await this.db.list(`shows/${this.showKey}/divisions/${this.selectedDivision.select_id}/notifications`).push(data);
       await this.db.list(`shows/${this.showKey}/divisions/${this.selectedDivision.select_id}/unseenNotifications`).push(this.divisionKey);
@@ -204,7 +207,7 @@ export class ExportsComponent implements OnInit {
       value: this.messageInput ?? '',
       resolved: false,
       sender: this.divisionKey,
-      reciever: this.divisionKey,
+      reciever: this.selectedDivision.select_id,
       data: landRequests,
       ...(force === true)
         ? this.glaHostileNotify(this.divisionKey, resources, requests.length)
