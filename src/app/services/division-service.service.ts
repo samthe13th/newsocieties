@@ -79,6 +79,29 @@ export class DivisionService {
     })
   }
 
+  async assignLocalLand(showKey, divisionKey, request) {
+    console.log("assign local land: ", request);
+    const divisionPath = `shows/${showKey}/divisions/${divisionKey}`;
+    const landTiles: any = await this.db.object(`${divisionPath}/landTiles`)
+      .valueChanges()
+      .pipe(take(1))
+      .toPromise();
+    const freePlots = filter(landTiles, (tile) => tile.owner === undefined);
+    const plotIndex = pluckRandom(freePlots, 1)[0].index;
+    
+    console.log("plot index: ", plotIndex, "owner: ", request.id)
+    landTiles[plotIndex].owner = request;
+    
+    return new Promise((resolve) => {
+      this.db.object(`${divisionPath}/landTiles`)
+        .set({ ...landTiles })
+        .then(() => {
+          resolve(landTiles);
+        })
+    })
+  }
+
+
   acquireLand(showKey, divisionKey, data) {
     return new Promise((resolve) => {
       data.forEach(async (request) => {
@@ -87,7 +110,12 @@ export class DivisionService {
         await this.db.object(`shows/${showKey}/divisions/${request.division}/citizens/${request.id}/land`)
           .query.ref.transaction((land) => land ? ++land : 1)
         await this.db.list(`shows/${showKey}/divisions/${request.division}/${landList}`).push(request);
-        await this.db.list(`shows/${showKey}/divisions/${divisionKey}/pendingGLA`).push(request);
+        if (landList === 'globalLand') {
+          await this.db.list(`shows/${showKey}/divisions/${divisionKey}/pendingGLA`).push(request);
+        } else {
+          console.log('Get local plot')
+          this.assignLocalLand(showKey, divisionKey, request);
+        }
       })
       resolve();
     })

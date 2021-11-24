@@ -388,6 +388,7 @@ export class CentralComponent implements OnInit, AfterViewInit {
       .toPromise()
 
     const divisions = this.generateDivisions();
+    await this.db.object(`shows/${this.showKey}`).remove();
     this.db.object(`shows/${this.showKey}`).set({
       divisions,
       ...SHOW_TEMPLATE,

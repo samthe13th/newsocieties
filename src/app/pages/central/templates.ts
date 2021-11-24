@@ -96,9 +96,9 @@ export const SHOW_TEMPLATE = {
   clock: 0,
   live: false,
   contamination: {
-    min: 5,
+    min: 10,
     max: 100,
-    current: 5,
+    current: 10,
     formula: 'linear'
   },
   content: {},
