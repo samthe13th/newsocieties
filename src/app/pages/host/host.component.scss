@@ -23,6 +23,7 @@
 
 .resolution-wrapper {
   background: #e0e0e0;
+  overflow: auto;
   width: 100%;
   display: flex;
   padding: 10px;
@@ -53,6 +54,7 @@
 .focus-wrapper {
   background: black;
   display: flex;
+  height: 100%;
   flex-direction: column;
   padding: 10px;
 
@@ -148,8 +150,16 @@
   }
 }
 
+.host-division-review-wrap {
+  width: 100%;
+  height: 400px;
+  
+}
+
 .host-main {
   color: white;
+  display: flex;
+  flex-direction: column;
   width: 100%;
   position: relative;
   height: 100%;

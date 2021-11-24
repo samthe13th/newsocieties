@@ -7,6 +7,7 @@ export const DIVISION_TEMPLATE = {
   ],
   harvestColumn: [true, true, true, true, true, true, true],
   lockHarvestColumns: false,
+  marketView: 'localLand',
   advancements: {
     safety: {
       communal: 0,
@@ -89,7 +90,7 @@ export const DIVISION_TEMPLATE = {
   actions: 0,
   focus: "none",
   capacity: 18,
-  harvest: 25
+  harvest: 25,
 }
 
 export const SHOW_TEMPLATE = {

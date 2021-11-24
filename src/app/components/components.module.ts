@@ -38,6 +38,7 @@ import { AdvancementTrackComponent } from './player-advancements/advancement-tra
 import { GlobalLandComponent } from './global-land/global-land.component';
 import { AdvancementSummaryComponent } from './advancement-summary/advancement-summary.component';
 import { MarketComponent } from './market/market.component';
+import { DivisionReviewComponent } from './division-review/division-review.component';
 
 
 const components = [
@@ -51,6 +52,7 @@ const components = [
   DialogComponent,
   DivisionFullComponent,
   DivisionPopupsComponent,
+  DivisionReviewComponent,
   ExportsComponent,
   GlobalLandComponent,
   FundraisingComponent,

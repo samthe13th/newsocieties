@@ -11,7 +11,7 @@ import { BankService } from 'src/app/services/bank.service';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { ButtonGroupComponent } from 'src/app/components/button-group/button-group.component';
 import { DivisionService } from 'src/app/services/division-service.service';
-import { faPen, faGavel, faLandmark, faBullseye, faEyeSlash, faGlobe, faLeaf, faCartPlus, faEye, faShoppingBag } from '@fortawesome/free-solid-svg-icons';
+import { faPen, faGavel, faScroll, faLandmark, faBullseye, faEyeSlash, faGlobe, faLeaf, faCartPlus, faEye, faShoppingBag } from '@fortawesome/free-solid-svg-icons';
 import { LandGridComponent } from 'src/app/components/land-grid/land-grid.component';
 import * as fa from '@fortawesome/free-solid-svg-icons';
 
@@ -46,6 +46,7 @@ export class HostComponent implements OnInit, OnDestroy {
   @ViewChild('resolutionReviewTemplate') resolutionReviewTemplate: TemplateRef<any>;
   @ViewChild('scenarioTemplate') scenarioTemplate: TemplateRef<any>;
   @ViewChild('miscTemplate') miscTemplate: TemplateRef<any>;
+  @ViewChild('reviewTemplate') reviewTemplate: TemplateRef<any>;
   @ViewChild('newSeasonTemplate') newSeasonModal: TemplateRef<any>;
   
   @ViewChild('landGrid') landGrid: LandGridComponent;
@@ -80,7 +81,13 @@ export class HostComponent implements OnInit, OnDestroy {
     { id: 'resolutions', label: 'Resolution', faIcon: faGavel },
     { id: 'scenario', label: 'Scenario', faIcon: faGlobe },
     { id: 'misc', label: 'Market', faIcon: faCartPlus },
+    { id: 'review', label: 'Review', faIcon: faScroll }
   ]
+
+  divisionButtons = DIVISIONS.map(d => ({
+    id: d,
+    label: d
+  }))
 
   disableHarvestColumnButtons = []
 
@@ -138,7 +145,7 @@ export class HostComponent implements OnInit, OnDestroy {
   divisionPath;
   landTilesPath;
   chatInput = "";
-  focus;
+  focus = 'none';
   action = 'harvesting';
   divisionVote;
   voteNotes = "";
@@ -604,6 +611,8 @@ export class HostComponent implements OnInit, OnDestroy {
       this.modalContent = this.harvestTemplate;
     } else if (type === 'misc') {
       this.modalContent = this.miscTemplate;
+    } else if (type === 'review') {
+      this.modalContent = this.reviewTemplate;
     }
     this.showModal = true;
   }
@@ -621,9 +630,19 @@ export class HostComponent implements OnInit, OnDestroy {
     this.db.object(`${this.divisionPath}/focus`).set('harvest');
   }
 
+  setReviewDivision(division) {
+    console.log("set....", division)
+    this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/divisionReview`).set(division?.id);
+  }
+
   startMisc() {
     this.showModal = false;
     this.db.object(`${this.divisionPath}/focus`).set('misc');
+  }
+
+  startReview() {
+    this.showModal = false;
+    this.db.object(`${this.divisionPath}/focus`).set('review');
   }
 
   onSelectionChange(selection) {

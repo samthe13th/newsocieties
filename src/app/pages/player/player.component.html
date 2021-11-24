@@ -92,8 +92,6 @@
                   <br/>
                   <h2>{{ division?.lastResolution?.title }}</h2>
                   <div>{{ division?.lastResolution?.value }}</div>
-                  <br/>
-                  <em style="font-size: 14px">{{ division?.lastResolution?.consequence }}</em>
                 </div>
               </div>
             </div>
@@ -148,6 +146,11 @@
               </app-market>
             </div> 
           </ng-container>
+
+         <!-- REVIEW -->
+          <div style="max-height: 500px; width: 100%" *ngIf="focus === 'review'">
+            <app-division-review [showKey]="showKey" [divisionKey]="divisionKey"></app-division-review>
+          </div>
 
           <!-- POPUPS -->
           <app-division-popups [showKey]="showKey" [divisionKey]="divisionKey"></app-division-popups>

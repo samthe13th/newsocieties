@@ -77,7 +77,7 @@
       [buttons]="focusButtons">
     </app-button-group>
     <div class="focus-wrapper" *ngIf="($playerView | async) as playerView">
-      <div class="flex-row">
+      <div class="flex-row" >
         <app-player-view-control
           [class.app-pulse--sm]="playerView?.views?.resources && playerView?.highlight === 'resources'"
           name="resources"
@@ -110,7 +110,11 @@
         </app-player-view-control>
       </div>
 
-      <div class="flex-row">
+      <div class="flex-row" style="height: 100%; margin-top: 5px">
+
+        <div *ngIf="focus === 'none'" style="width: 100%; height: 100%">
+
+        </div>
 
         <div *ngIf="focus === 'harvest'" class="harvest-wrapper">
           <app-land-grid
@@ -151,13 +155,16 @@
           <button (click)="newResolution()">New Resolution</button>
         </div>
 
-        <div *ngIf="focus === 'misc'" class="misc-wrapper">
-          <app-market 
-            [showHeader]="false"
-            [showKey]="showKey" 
-            [divisionKey]="divisionKey">
-          </app-market>
+        <div class="host-division-review-wrap" *ngIf="focus === 'review'">
+          <app-division-review [showKey]="showKey" [divisionKey]="divisionKey"></app-division-review>
         </div>
+
+        <app-market 
+          *ngIf="focus === 'misc'"
+          [showHeader]="false"
+          [showKey]="showKey" 
+          [divisionKey]="divisionKey">
+        </app-market>
 
         <div class="player-data">
           <app-player-view-control
@@ -225,6 +232,13 @@
           <button *ngIf="voteState === 'review' && divisionVote" (click)="implement()">Implement</button>
         </div>
       </ng-container>
+      <div *ngIf="focus === 'review'">
+        <app-button-group
+          (select)="setReviewDivision($event)"
+          [selectById]="divisionKey"
+          [buttons]="divisionButtons">
+        </app-button-group>
+      </div>
       <div *ngIf="focus === 'misc'">
         <button (click)="marketView('localLand')">Local Land</button>
         <button (click)="marketView('globalLand')">Global Land</button>
@@ -307,6 +321,11 @@
 <ng-template #miscTemplate>
   Open market
   <button (click)="startMisc()">Continue</button>
+</ng-template>
+
+<ng-template #reviewTemplate>
+  Start Review
+  <button (click)="startReview()">Continue</button>
 </ng-template>
 
 <!-- TABS-->

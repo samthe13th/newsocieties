@@ -1,0 +1,9 @@
+<ng-container *ngIf="$divisionReview | async as division">
+  <h1>{{division?.code}} DIVISION</h1>
+  <h2>Principles</h2>
+  <p *ngFor="let p of division.principles">{{p.value}}</p>
+  <h2>Resolutions</h2>
+  <p *ngFor="let r of division.resolutions">{{r.value}}</p>
+  <h2>Large Events</h2>
+  <p *ngFor="let s of division.scenarios">{{s.value}}</p>
+</ng-container>

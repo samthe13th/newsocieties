@@ -189,12 +189,13 @@ export class CentralComponent implements OnInit, AfterViewInit {
   }
 
   parsePrinciplesData(_data) {
-    const data = _data.map(([title, principle, ...options]) => {
+    const data = _data.map(([title, principle, remarks, ...options]) => {
       console.log({options})
       return {
         title,
         prompt: `${principle}:`, 
         result: principle,
+        remarks: remarks,
         options: options.map(option => option ? ({
           prompt: `${capitalize(option)}`,
           result: option,
@@ -491,6 +492,7 @@ export class CentralComponent implements OnInit, AfterViewInit {
         ...DIVISION_TEMPLATE,
         color: COLORS[abv],
         code: abv, 
+        divisionReview: abv,
         landTiles: this.generateLandTiles(),
         // citizens: this.generateCitizens(abv)
       } 

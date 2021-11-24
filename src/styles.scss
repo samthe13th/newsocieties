@@ -124,11 +124,26 @@ select {
   margin-left: 20px;
 }
 
+.app-division-review {
+  padding: 20px;
+  height: 100%; 
+  width: 100%; 
+  background: white;
+  display: flex; 
+  flex-direction: column;
+  color: black;
+  box-sizing: border-box;
+  overflow: auto;
+  border-radius: 10px;
+}
+
 .app-advancement-summary {
   height: 100%;
   width: 100%; 
   display: flex; 
   flex-wrap: wrap;
+  overflow: hidden;
+  border-radius: 10px;
 }
 
 .app-global-land {
@@ -422,7 +437,6 @@ select {
 
 .app-market {
   width: 100%;
-  min-width: 400px;
   height: 100%;
   max-width: 500px;
   background: #0f2631;
