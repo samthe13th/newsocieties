@@ -19,6 +19,7 @@ export class NewsFeedComponent {
   @Input() showKey: string; 
   @Input() divisionKey: string;
 
+  $flashNews: Observable<any>;
   $events: Observable<any>;
   showResolved = false;
 
@@ -28,6 +29,9 @@ export class NewsFeedComponent {
   ) {}
 
   ngOnInit() {
+    this.$flashNews = this.db.object(
+      `shows/${this.showKey}/divisions/${this.divisionKey}/news`,
+    ).valueChanges()
     this.$events = this.db.list(
       `shows/${this.showKey}/divisions/${this.divisionKey}/events`
     ).snapshotChanges().pipe(

@@ -1,35 +1,9 @@
 <table *ngIf="($data | async) as data">
   <tr>
     <th>Adv</th>
-    <th>Track</th>
+    <th>Contribute</th>
     <th>Cost</th>
     <th>Benefit</th>
-  </tr>
-  <tr class="division-details__number">
-    <td>
-      <fa-icon size="sm" [icon]="sIcon"></fa-icon>
-      S
-    </td>
-    <td>
-      <app-adv-track [color]="data?.color" [contributions]="data?.adv?.safety"></app-adv-track>
-    </td>
-    <td>
-      {{advCost(data?.adv?.safety, data.costs)}}
-    </td>
-    <td><em>Safe explore</em></td>
-  </tr>
-  <tr class="division-details__number">
-    <td>
-      <fa-icon size="sm" [icon]="hIcon"></fa-icon>
-      H
-    </td>
-    <td>
-      <app-adv-track [color]="data?.color" [contributions]="data?.adv?.health"></app-adv-track>
-    </td>
-    <td>
-      {{advCost(data?.adv?.health, data.costs)}}
-    </td>
-    <td><em>Safe gather</em></td>
   </tr>
   <tr class="division-details__number">
     <td>
@@ -46,16 +20,16 @@
   </tr>
   <tr class="division-details__number">
     <td>
-      <fa-icon size="sm" [icon]="kIcon"></fa-icon>
-      K
+      <fa-icon size="sm" [icon]="hIcon"></fa-icon>
+      H
     </td>
     <td>
-      <app-adv-track [color]="data?.color" [contributions]="data?.adv?.knowledge"></app-adv-track>
+      <app-adv-track [color]="data?.color" [contributions]="data?.adv?.health"></app-adv-track>
     </td>
     <td>
-      {{advCost(data?.adv?.knowledge, data.costs)}}
+      {{advCost(data?.adv?.health, data.costs)}}
     </td>
-    <td><em>Harvest peak</em></td>
+    <td><em>Safe gather</em></td>
   </tr>
   <tr class="division-details__number">
     <td>
@@ -69,5 +43,31 @@
       {{advCost(data?.adv?.infrastructure, data.costs)}}
     </td>
     <td><em>+1 Action</em></td>
+  </tr>
+  <tr class="division-details__number">
+    <td>
+      <fa-icon size="sm" [icon]="kIcon"></fa-icon>
+      K
+    </td>
+    <td>
+      <app-adv-track [color]="data?.color" [contributions]="data?.adv?.knowledge"></app-adv-track>
+    </td>
+    <td>
+      {{advCost(data?.adv?.knowledge, data.costs)}}
+    </td>
+    <td><em>Harvest peak</em></td>
+  </tr>
+  <tr class="division-details__number">
+    <td>
+      <fa-icon size="sm" [icon]="sIcon"></fa-icon>
+      S
+    </td>
+    <td>
+      <app-adv-track [color]="data?.color" [contributions]="data?.adv?.safety"></app-adv-track>
+    </td>
+    <td>
+      {{advCost(data?.adv?.safety, data.costs)}}
+    </td>
+    <td><em>Safe explore</em></td>
   </tr>
 </table>

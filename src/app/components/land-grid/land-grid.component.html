@@ -10,38 +10,43 @@
     [class.empty]="card.value === -1"
     [class.owned]="card.owner !== null"
   >
+    <div *ngIf="!showHarvest" class="card">
+      <div class="face front"></div>
+    </div>
+
     <card
+      *ngIf="showHarvest"
       (click)="selectTile(card)"
       [side]="card.harvested ? 'front' : 'back'"
       [class.owned]="true"
       [mark]="selection?.value === card.index ? selection?.mark : null"
       [playerId]="player?.id"
       [contaminated]="card.contaminated"
-      [class.disabled]="card.value == -1 || card.contaminated == true">
-      <div contaminatedTile class="harvest-card contaminated">
-        <app-harvest-image
-          *ngIf="card.type === 'R' && card.value > 0"
-          [contaminated]="true"
-          [division]="divisionKey"
-          type="R"
-          [value]="card.value">
-        </app-harvest-image>
-      </div>
-      <div front class="harvest-card">
-        <app-harvest-image
-          [contaminated]="false"
-          [division]="divisionKey"
-          [type]="card.type"
-          [value]="card.value">
-        </app-harvest-image>
-      </div>
-      <div back class="harvest-card back">
-        <div class="flex-row flex-center" *ngIf="markCards">
-          <ng-container *ngIf="card.value !== -1">
-            {{ card.type === 'C' ? 'C' + card.value : card.value }}
-          </ng-container>
+      [class.disabled]="card.value == -1 || card.contaminated == true"> 
+        <div contaminatedTile class="harvest-card contaminated">
+          <app-harvest-image
+            *ngIf="card.type === 'R' && card.value > 0"
+            [contaminated]="true"
+            [division]="divisionKey"
+            type="R"
+            [value]="card.value">
+          </app-harvest-image>
         </div>
-      </div>
+        <div front class="harvest-card">
+          <app-harvest-image
+            [contaminated]="false"
+            [division]="divisionKey"
+            [type]="card.type"
+            [value]="card.value">
+          </app-harvest-image>
+        </div>
+        <div back class="harvest-card back">
+          <div class="flex-row flex-center" *ngIf="markCards">
+            <ng-container *ngIf="card.value !== -1">
+              {{ card.type === 'C' ? 'C' + card.value : card.value }}
+            </ng-container>
+          </div>
+        </div>
     </card>
   </div>
 </div>

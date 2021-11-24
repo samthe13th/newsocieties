@@ -1,0 +1,22 @@
+<ng-container *ngIf="$marketView | async as marketView">
+  <ng-container *ngIf="marketView === 'localLand'">
+    <div class="harvest-header" *ngIf="showHeader">
+      <div><h1>Land Plots</h1></div>
+      <div class="harvest-details">
+        <div>Cost {{ landCost }}</div>
+      </div>
+    </div>
+    <app-land-grid
+      [showKey]="showKey"
+      [showHarvest]="false"
+      [divisionKey]="divisionKey"
+      [updatePath]="landTilesPath"> 
+    </app-land-grid>
+  </ng-container>
+  <app-advancement-summary
+    *ngIf="marketView === 'advancements'"
+    [showKey]="showKey"
+    [divisionKey]="divisionKey">
+  </app-advancement-summary>
+  <app-global-land *ngIf="marketView == 'globalLand'" [showKey]="showKey"></app-global-land>
+</ng-container>

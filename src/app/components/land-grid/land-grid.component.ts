@@ -40,6 +40,7 @@ export class LandGridComponent implements OnInit {
   @Input() markCards: boolean;
   @Input() updatePath;
   @Input() showKey;
+  @Input() showHarvest = true;
   @Input()
   get player() { return this._player }
   set player(value) {

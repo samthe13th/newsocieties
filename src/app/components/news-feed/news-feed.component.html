@@ -1,4 +1,12 @@
-<app-banner style="height: 200px" [showKey]="showKey" [divisionKey]="divisionKey"></app-banner>
+
+<div class="app-banner">
+  <div *ngIf="$flashNews | async as flashNews">
+    <h2>ATTENTION</h2>
+    <div [innerHtml]="flashNews?.value"></div>
+  </div>
+</div>
+
+
 <h1>Events</h1>
 <button (click)="clearBannerEvent()">Clear Banner Event</button>
 <br/><hr/><br/>

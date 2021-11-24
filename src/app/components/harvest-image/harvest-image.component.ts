@@ -14,13 +14,9 @@ import { Component, Input, OnInit } from '@angular/core';
     '[attr.data-division]': 'division'
   }
 })
-export class HarvestImageComponent implements OnInit {
+export class HarvestImageComponent {
   @Input() type: 'C' | 'R';
   @Input() value: number;
   @Input() contaminated: boolean;
   @Input() division;
-
-  ngOnInit() {
-    console.log('harvest image: ', this.type, this.value, this.division)
-  }
 }

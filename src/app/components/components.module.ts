@@ -35,10 +35,15 @@ import { ReserveBarComponent } from './reserve-bar/reserve-bar.component';
 import { ScorecardComponent } from './scorecard/scorecard.component';
 import { PlayerAdvancementsComponent } from './player-advancements/player-advancements.component';
 import { AdvancementTrackComponent } from './player-advancements/advancement-track/advancement-track.component';
+import { GlobalLandComponent } from './global-land/global-land.component';
+import { AdvancementSummaryComponent } from './advancement-summary/advancement-summary.component';
+import { MarketComponent } from './market/market.component';
+
 
 const components = [
   AnnouncementComponent,
   AdvancementTrackComponent,
+  AdvancementSummaryComponent,
   ButtonGroupComponent,
   BannerComponent,
   CardComponent,
@@ -47,9 +52,11 @@ const components = [
   DivisionFullComponent,
   DivisionPopupsComponent,
   ExportsComponent,
+  GlobalLandComponent,
   FundraisingComponent,
   HarvestImageComponent,
   LandGridComponent,
+  MarketComponent,
   NotificationFeedComponent,
   NewsFeedComponent,
   NumberChangeComponent,

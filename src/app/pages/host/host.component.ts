@@ -5,7 +5,7 @@ import { getRandomInt, pluckRandom } from 'src/app/utilties';
 import { LandTile, LandCardTypes } from 'src/app/interfaces';
 import * as _ from 'lodash';
 import { includes, isNaN, trim, differenceBy, toNumber, each, partition } from 'lodash';
-import { take, map, tap } from 'rxjs/operators'
+import { take, map, tap, filter } from 'rxjs/operators'
 import { Subject, combineLatest } from 'rxjs';
 import { BankService } from 'src/app/services/bank.service';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
@@ -186,7 +186,7 @@ export class HostComponent implements OnInit, OnDestroy {
     this.$vote = this.db.object(`${this.divisionPath}/vote`).valueChanges().pipe(
       tap((vote: any) => { console.log('VOTE: ', vote); this.voteState = vote?.state })
     )
-    this.$division = this.db.object(this.divisionPath).valueChanges();
+    this.$division = this.db.object(this.divisionPath).valueChanges().pipe(filter((x) => x !== null && x  !== undefined));
     this.$citizens = this.db.list(`${this.divisionPath}/citizens`).valueChanges()
       .pipe(
         tap((citizens) => {
@@ -421,9 +421,9 @@ export class HostComponent implements OnInit, OnDestroy {
         color: this.divisionColor,
         name: this.positions.indexOf(citizen?.id) + 1
       }]).then(() => {
-        this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/divisionPopup`).set({
-          header: `${citizen?.name} acquired a new plot of land!`,
-        })
+        // this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/divisionPopup`).set({
+        //   header: `${citizen?.name} acquired a new plot of land!`,
+        // })
       });
       this.dismissSheet();
     })
@@ -870,15 +870,35 @@ export class HostComponent implements OnInit, OnDestroy {
     })
   }
 
+  marketView(view) {
+    console.log('change market view: ', view);
+    this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/marketView`).set(view)
+  }
+
   onResourceTypeSelect(x) {
     this.resourceType = toNumber(x?.id);
   }
 
   async startSeason(division, newSeason) {
-    console.log('start season')
+    console.log('start season', division);
     await this.divisionService.validateThreshold(this.showKey, this.divisionKey);
     const landTiles = await this.divisionService.setLandTiles(this.showKey, this.divisionKey)
     this.harvest = this.generateHarvest(landTiles, newSeason?.harvest, newSeason?.contaminantLevel);
+
+    if (division.season > 0) {
+      await this.db.object(`shows/${this.showKey}/global`).query.ref.transaction((global) => { 
+        console.log({global})
+        const result = global === null ? { 
+          actual: toNumber(division?.actions),
+          capacity: toNumber(division?.capacity)
+         } : { 
+           actual: toNumber(global?.actual) + toNumber(division?.actions),
+           capacity:  toNumber(global?.capacity) + toNumber(division?.capacity),
+         }
+        console.log({result})
+        return result
+      })
+    }
 
     this.db.object(`${this.divisionPath}`).update({
       harvestColumn: division.lockHarvestColumns

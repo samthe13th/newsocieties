@@ -1,0 +1,11 @@
+<ng-container *ngFor="let slot of divisions">
+  <div class="division-gla" *ngIf="(slot.listener | async) as division">
+    <div>
+      <span
+        class="division-summary-code"
+        [style.background]="division?.color">{{division?.code}}</span> 
+      DIVISION
+    </div>
+    <div>Land Cost: {{ division?.landCost }}</div>
+  </div>
+</ng-container>

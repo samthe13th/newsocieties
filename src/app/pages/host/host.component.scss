@@ -91,12 +91,8 @@
 
 .misc-wrapper {
   width: 100%;
-  background: white;
-  border-radius: 10px;
-  padding-bottom: 20px;
-  color: black;
-  padding: 10px; 
-  box-sizing: border-box;
+  height: 420px;
+  overflow: auto;
 }
 
 .host-side-panel {

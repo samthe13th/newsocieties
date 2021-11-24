@@ -124,6 +124,20 @@ select {
   margin-left: 20px;
 }
 
+.app-advancement-summary {
+  height: 100%;
+  width: 100%; 
+  display: flex; 
+  flex-wrap: wrap;
+}
+
+.app-global-land {
+  height: 100%;
+  width: 100%;
+  display: flex; 
+  flex-wrap: wrap;
+}
+
 .app-division-full {
   display: flex; 
   flex-direction: column;
@@ -136,6 +150,7 @@ select {
 .app-player-view-control {
   display: flex;
   border-radius: 10px;
+  text-align: center;
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -172,15 +187,17 @@ select {
   }
 
   .player-info-btn {
-    padding: 10px;
+    padding: 5px;
   }
 }
 
 .app-adv-track {
   display: flex;
+  justify-content: center;
 }
 
 .app-player-advancements {
+  border-radius: 10px;
   background: #0f2631;
   align-items: center;
   display: flex;
@@ -196,11 +213,13 @@ select {
       background: transparent;
       > td {
         border: none;
+        text-align: center;
         > em {
           font-size: 14px;
         }
       }
       > th {
+        text-align: center;
         border: none;
         border-bottom: solid 1px;
         font-size: 16px;
@@ -242,6 +261,24 @@ select {
   min-height: 140px;
   font-weight: 200;
   font-size: 18px;
+
+  .flash-news {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+    justify-content: center;
+    border-radius: 10px;
+    background: #8a1c2a;
+    display: flex;
+    flex-direction: column;
+    transition: transform 300ms ease-in;
+    transform: scale(0);
+    animation: grow 400ms ease-in forwards;
+  }
 }
 
 .app-reserve-bar {
@@ -367,7 +404,7 @@ select {
     filter: brightness(1);
   }
   100% {
-    transform: scale(1.2);
+    transform: scale(1.1);
     filter: brightness(1.2);
   }
 }
@@ -381,6 +418,17 @@ select {
     transform: scale(1.02);
     filter: brightness(1.2)
   }
+}
+
+.app-market {
+  width: 100%;
+  min-width: 400px;
+  height: 100%;
+  max-width: 500px;
+  background: #0f2631;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
 }
 
 .app-player-turn {
@@ -990,12 +1038,56 @@ select {
   display: flex;
 }
 
+.division-summary-code {
+  padding: 0 5px;
+  color: white;
+  border-radius: 5px;
+}
+
 .harvest {
   display: flex;
   padding: 10px;
   align-items: flex-start;
   width: 500px;
   background: #FDF4C5;
+}
+
+.harvest-header {
+  padding: 0 20px;
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  width: 100%;
+  border: #fdf4c5 solid 1px;
+  justify-content: space-between;
+  box-sizing: border-box;
+  align-items: center;
+  min-height: 60px;
+
+  h1 {
+    font-size: 30px;
+    margin: 0;
+    padding: 0;
+  }
+}
+
+.harvest-details {
+  display: flex;
+  flex-direction: row;
+  font-weight: 250;
+  font-size: 18px;
+  background: #1f4d62;
+  border-radius: 10px; 
+  line-height: 25px;
+
+  > * {
+    padding: 10px; 
+  }
+
+  .large {
+    font-size: 18px; 
+    margin-bottom: 10px;
+  }
 }
 
 .player-hands {

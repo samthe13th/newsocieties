@@ -18,6 +18,9 @@ export class BannerComponent {
   $flashNews: Observable<any>;
   $loaded: Observable<any>;
   $reserveData: Observable<any>;
+  $global: Observable<any>;
+  $playerViews: Observable<any>;
+  $playerViewHighlight: Observable<any>;
 
   divisionsLoaded = new Subject<boolean>();
   reserveLoaded = new Subject<boolean>();
@@ -33,6 +36,11 @@ export class BannerComponent {
   }
 
   ngOnInit() {
+    this.$playerViewHighlight = this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/playerViewHighlight`).valueChanges().pipe(
+      tap((x) => console.log("highlight: ", x))
+    )
+    this.$playerViews = this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/playerViews`).valueChanges();
+    this.$global = this.db.object(`shows/${this.showKey}/global`).valueChanges();
     this.$loaded = combineLatest(
       of(this.reserveLoaded),
       of(this.divisionsLoaded)

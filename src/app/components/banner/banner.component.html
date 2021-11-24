@@ -1,38 +1,55 @@
 <div class="flex-row flex-center">
-  <ng-container *ngIf="$loaded | async">
+  <ng-container *ngIf="$playerViews | async as playerViews">
     <!--RESERVE-->
-    <div 
-      *ngIf="$reserveData | async as reserveData"
-      class="division-details reserve">
-      <div class="reserve-header">
-        RESERVE: {{reserveData?.reserve.value}}
+
+      <div 
+        *ngIf="$reserveData | async as reserveData"
+        [class.app-pulse--md]="($playerViewHighlight | async) === 'resources'"
+        class="division-details reserve">
+        <ng-container *ngIf="playerViews?.resources">
+          <div class="reserve-header">
+            RESERVE: {{reserveData?.reserve.value}}
+          </div>
+          <app-reserve-bar 
+            [percent]="reserveData?.reserve?.percent"
+            [thresholds]="reserveData?.thresholds"
+            [color]="reserveData?.color">
+          </app-reserve-bar>
+        </ng-container>
       </div>
-      <app-reserve-bar 
-        [percent]="reserveData?.reserve?.percent"
-        [thresholds]="reserveData?.thresholds"
-        [color]="reserveData?.color">
-      </app-reserve-bar>
-    </div>
 
     <!-- DIVISIONS -->
-    <div class="division-summaries">
-      <ng-container *ngFor="let $division of DivisionSummaries">
-        <div 
-          class="division-summary" 
-          *ngIf="($division | async) as division">
-          <div class="division-summary-header">
-            <span class="division-summary-code" [style.background]="division.color">{{division.code}}</span>
-            <div class="division-summary-score">{{division.score}}</div>
+    <div
+     class="division-summaries"
+     [class.app-pulse--md]="($playerViewHighlight | async) === 'divisions'"
+    >
+      <ng-container *ngIf="playerViews?.divisions; else divisionHeader">
+        <ng-container *ngFor="let $division of DivisionSummaries">
+          <div 
+            class="division-summary" 
+            *ngIf="($division | async) as division">
+            <div class="division-summary-header">
+              <span class="division-summary-code" [style.background]="division.color">{{division.code}}</span>
+              <div class="division-summary-score">{{division.score}}</div>
+            </div>
+            <span>Season: {{division?.season}}</span>
           </div>
-          <span>Season: {{division.season}}</span>
-        </div>
+        </ng-container>
       </ng-container>
     </div>
 
+    <ng-template #divisionHeader>
+      <span style="font-size: 50px">{{divisionKey}} DIVISION</span>
+    </ng-template>
+
     <!-- GLOBAL CAPACITY -->
-    <div class="division-details reserve">
-      <span>GLOBAL CAPACITY</span>
-      <span>10 / 20</span>
+    <div class="division-details reserve" [class.app-pulse--md]="($playerViewHighlight | async) === 'global'">
+      <ng-container *ngIf="playerViews?.global">
+        <span>GLOBAL CAPACITY</span>
+        <span *ngIf="$global | async as global">
+          {{global?.actual}} / {{global?.capacity}}
+        </span>
+      </ng-container>
     </div>
   </ng-container>
 </div>

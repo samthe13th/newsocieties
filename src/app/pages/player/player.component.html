@@ -67,6 +67,7 @@
                   [markCards]="false"
                   [turn]="division?.turn"
                   [updatePath]="landTilesPath"
+                  [showHarvest]="true"
                   [showKey]="showKey"
                   [player]="$player | async"
                   [divisionKey]="divisionKey"
@@ -138,7 +139,14 @@
 
           <!-- MARKET -->
           <ng-container  *ngIf="focus === 'misc'">
-            <app-society-grid [showKey]="showKey" details="brief"></app-society-grid>
+            <div class="flex-row" style="width: 100%">
+              <app-market
+                [showKey]="showKey"
+                [divisionKey]="divisionKey"
+                [landCost]="division?.landCost"
+              >
+              </app-market>
+            </div> 
           </ng-container>
 
           <!-- POPUPS -->
