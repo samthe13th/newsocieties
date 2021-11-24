@@ -16,8 +16,7 @@
   [tabs]="[
     { id: 'division', tabTemplate: division, bodyTemplate: divisionBody },
     { id: 'global', tabTemplate: global, bodyTemplate: globalBody },
-    { id: 'exports', tabTemplate: exports, bodyTemplate: exportsBody },
-    { id: 'central', tabTemplate: central, bodyTemplate: centralBody }
+    { id: 'exports', tabTemplate: exports, bodyTemplate: exportsBody }
   ]">
 </app-tabs>
 
@@ -27,6 +26,7 @@
   (tabChange)="onRightTabChange($event)"
   [tabs]="[
     { id: 'focus', tabTemplate: focusTab, bodyTemplate: focusBody },
+    { id: 'central', tabTemplate: central, bodyTemplate: centralBody },
     { id: 'notifications', tabTemplate: notifications, bodyTemplate: notificationsBody },
     { id: 'news', tabTemplate: news, bodyTemplate: newsBody }
   ]">
@@ -404,7 +404,11 @@
         <strong>Global land: </strong>
         {{ ($globalLand | async)?.length }}
       </div>
-      <div class="editable-item"><strong>Actions: </strong>
+      <div class="editable-item">
+        <button (click)="changeDivisionProperty('actions')">
+          <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
+        </button>
+        <strong>Actions: </strong>
         {{ division.actions }} <span *ngIf="division.actions">({{ capacityUsed(division.actions, division.capacity) }}% of capacity)</span>
       </div>
       <div class="editable-item">
