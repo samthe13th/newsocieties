@@ -32,6 +32,9 @@ export class PlayerComponent implements OnInit {
   $citizens;
   $player;
   $playerView;
+  $overlay;
+  $pageState;
+  $focusState;
 
   @ViewChild(PlayerDeckComponent, { static: false }) playerDeck: PlayerDeckComponent;
   @ViewChild(LandGridComponent, { static: false }) landGrid: LandGridComponent;
@@ -106,12 +109,12 @@ export class PlayerComponent implements OnInit {
     this.db.object(`shows/${this.showKey}/users`).valueChanges()
       .pipe(take(1))
       .subscribe((users) => {
-      this.user = users[id];
-      this.name = this.user?.name;
-      if (this.id && this.name) {
-        this.setPlayer();
-      }
-   })
+        this.user = users[id];
+        this.name = this.user?.name;
+        if (this.id && this.name) {
+          this.setPlayer();
+        }
+    })
 
     const showPath = `shows/${this.showKey}`;
     this.divisionPath = `${showPath}/divisions/${this.divisionKey}`;
@@ -124,7 +127,12 @@ export class PlayerComponent implements OnInit {
     ).pipe(
       map(([highlight, views]) => ({ highlight, views }))
     )
-
+    this.$overlay = this.db.object(`${this.divisionPath}/overlay`).valueChanges();
+    this.$pageState = this.db.object(`${this.divisionPath}/focus`).valueChanges()
+      .pipe(
+        map(focus => focus !== 'new-season' ? 'main' : 'newSeason')
+      )
+    this.$focusState = this.db.object(`${this.divisionPath}/focus`).valueChanges()
     this.db.object(`shows/${show}/divisions`)
       .valueChanges()
       .pipe(take(1))

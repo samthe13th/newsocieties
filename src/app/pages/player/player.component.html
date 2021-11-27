@@ -1,246 +1,275 @@
 
 <ng-container *ngIf="($division | async) as division">
-  <div *ngIf="!signedIn" class="user-signin">
-    <div *ngIf="!id" class="user-signin-form">
+  <app-state 
+    [templates]="{
+      newSeason: newSeasonTemplate,
+      main: mainTemplate
+    }"
+    [templateName]="$pageState | async">
+  </app-state>
 
-      <input type="text" [(ngModel)]="codeInput">
+  <!-- <ng-container *ngTemplateOutlet="mainTemplate"></ng-container> -->
+
+  <ng-template #newSeasonTemplate>
+    <div *ngIf="($overlay | async) === 'new-season'" class="app-fullscreen-overlay">
+      A new Season is beginning...
+    </div>
+  </ng-template>
+
+  <ng-template #mainTemplate>
+    <div *ngIf="!signedIn" class="user-signin">
+      <div *ngIf="!id" class="user-signin-form">
+
+        <input type="text" [(ngModel)]="codeInput">
+
+        <br/>
+
+        <button (click)="signIn()" class="action-button">
+          Sign In
+        </button>
+      </div>
 
       <br/>
 
-      <button (click)="signIn()" class="action-button">
-        Sign In
-      </button>
+      <div *ngFor="let validation of loginValidations">
+        <em>{{ validation }}</em>
+      </div>
+
     </div>
 
-    <br/>
-
-    <div *ngFor="let validation of loginValidations">
-      <em>{{ validation }}</em>
-    </div>
-
-  </div>
-
-  <div *ngIf="signedIn && !name" class="user-signin">
-    <div class="user-signin-form">
-      Enter a name for us to call you by!
-      <input type="text" [(ngModel)]="nameInput">
-      <br/>
-  
-      <button class="action-button" (click)="setName()">
-        Join Division
-      </button>
-    </div>
-  </div>
-
-  <ng-container *ngIf="signedIn && name">
-    <ng-container *ngIf="($playerView | async) as playerView">
-      <app-banner
-        [class.app-pulse--sm]="playerView?.highlight === 'banner'"
-        [showKey]="showKey" 
-        [divisionKey]="divisionKey">
-      </app-banner>
-
-      <div class="player-page-layout">
+    <div *ngIf="signedIn && !name" class="user-signin">
+      <div class="user-signin-form">
+        Enter a name for us to call you by!
+        <input type="text" [(ngModel)]="nameInput">
+        <br/>
     
-        <div class="player-focus">
-          <!-- ON-BOARDING -->
-          <ng-container *ngIf="focus === 'none'">
-            <div class="onboarding-page">
-              <h1>Welcome to the {{division?.code}} Division!</h1>
-            </div>
-          </ng-container>
+        <button class="action-button" (click)="setName()">
+          Join Division
+        </button>
+      </div>
+    </div>
+
+    <ng-container *ngIf="signedIn && name">
+      <ng-container *ngIf="($playerView | async) as playerView">
+        <app-banner
+          [class.app-pulse--sm]="playerView?.highlight === 'banner'"
+          [showKey]="showKey" 
+          [divisionKey]="divisionKey">
+        </app-banner>
+
+        <div class="player-page-layout">
       
-          <!-- HARVEST -->
-          <ng-container *ngIf="focus === 'harvest'">
-            <div class="flex-row" style="width: 100%">
-              <div class="player-folder__body-harvest">
-                <div class="harvest-header">
-                  <div>
-                    <h1>Harvest</h1>
-                  </div>
-                  <div class="harvest-details">
-                    <div>Capacity: {{ division?.capacity }}</div>
-                  </div>
-                </div>
-                <app-land-grid 
-                  #landGrid
-                  [markCards]="false"
-                  [turn]="division?.turn"
-                  [updatePath]="landTilesPath"
-                  [showHarvest]="true"
-                  [showKey]="showKey"
-                  [player]="$player | async"
-                  [divisionKey]="divisionKey"
-                  (gatherResource)="onGather($event)"
-                  (select)="onSelect($event)"
-                ></app-land-grid>
-              </div>
-            </div>
-          </ng-container>
+          <div class="player-focus">
 
-          <!-- RESOLUTION REVIEW -->
-          <ng-container *ngIf="focus === 'resolutionReview'">
-            <div class="player-vote-wrap">
-              <div class="relative-position">
-                <div class="tab-background voting blur" >
-                  <img src="assets/hex.jpg"/>
-                </div>
-          
-                <div class="tab-foreground player-vote">
-                  <h1>PREVIOUS RESOLUTION</h1>
-                  <hr style="width: 100%"/>
-                  <br/>
-                  <h2>{{ division?.lastResolution?.title }}</h2>
-                  <div>{{ division?.lastResolution?.value }}</div>
-                </div>
-              </div>
-            </div>
-          </ng-container>
-          
-          <!-- VOTE -->
-          <ng-container *ngIf="focus === 'resolutions' || focus === 'principles' || focus === 'scenario'">
-            <div class="player-vote-wrap">
-              <div class="relative-position">
-                <div class="tab-background voting blur" >
-                  <img src="assets/hex.jpg"/>
-                </div>
-          
-                <div class="tab-foreground player-vote">
-                  <div *ngIf="hasVoted && vote?.state === 'voting'" style="text-align: center">
-                    <p>Thanks for voting!</p>
-                    <p>Waiting for polls to close...</p>
-                  </div>
-                  <ng-container *ngIf="!(hasVoted && vote?.state === 'voting')">
-                    <app-vote
-                      (selectionChange)="onSelectionChange($event)"
-                      [showVotes]="vote?.state === 'review'"
-                      [allowSelection]="vote?.state === 'voting'"
-                      [showKey]="showKey"
-                      role="citizen"
-                      hideOption="last"
-                      [divisionId]="division.code"
-                    ></app-vote>
-                    <button class="action-button" *ngIf="!hasVoted && vote?.state === 'voting'" (click)="castVote()">Vote</button>
-                  </ng-container>
-                </div>
-              </div>
-              <!-- <div>
-                <app-fundraising
-                  *ngIf="vote?.state === 'review'"
-                  [showKey]="showKey"
-                  [divisionKey]="divisionKey"
-                  [playerId]="id">
-                </app-fundraising>
-              </div> -->
-            </div>
-          </ng-container>
-
-          <!-- MARKET -->
-          <ng-container  *ngIf="focus === 'misc'">
-            <div class="flex-row" style="width: 100%">
-              <app-market
-                [showKey]="showKey"
-                [divisionKey]="divisionKey"
-                [landCost]="division?.landCost"
+            <app-state
+              style="width: 100%"
+              [templates]="{
+                none: welcomeTemplate,
+                harvest: harvestTemplate,
+                misc: marketTemplate,
+                resolutionReview: resolutionReviewTemplate,
+                resolutions: voteTemplate, 
+                principles: voteTemplate,
+                scenario: voteTemplate,
+                review: reviewTemplate
+              }"
+              [templateName]="$focusState | async"
               >
-              </app-market>
-            </div> 
-          </ng-container>
+            </app-state>
 
-         <!-- REVIEW -->
-          <div style="max-height: 500px; width: 100%" *ngIf="focus === 'review'">
-            <app-division-review [showKey]="showKey" [divisionKey]="divisionKey"></app-division-review>
-          </div>
-
-          <!-- POPUPS -->
-          <app-division-popups [showKey]="showKey" [divisionKey]="divisionKey"></app-division-popups>
-        </div>
-    
-        <!-- PLAYER CONTROLS -->
-        <div class="player-folder__body-citizens">
-
-          <!-- PLAYERS -->
-          <ng-container *ngIf="$turn | async as turn">
-            <app-player-deck
-              [class.app-pulse--sm]="playerView?.highlight === 'player'"
-              [id]="id" 
-              [position]="position"
-              [myTurn]="id == turn"
-              [showKey]="showKey"
-              [division]="division">
-            </app-player-deck>
-      
-            <div 
-              class="citizen-list"
-              [class.app-pulse--sm]="playerView?.highlight === 'otherPlayers'">
-              <div 
-                class="citizen-summary flex-row space-between"
-                *ngFor="let citizen of ($citizens | async)">
-                  <span [class.player-turn-indicator]="citizen.id == turn">
-                    <strong>{{ citizen?.position }}:</strong> {{citizen.name}}
-                  </span>
-                  <div>
-                    <!-- <span style="margin-right: 5px">
-                      <fa-icon size="sm" [icon]="resourceIcon"></fa-icon>
-                      {{calculateWealth(citizen?.resources)}}
-                    </span> -->
-                    <span>
-                      <fa-icon size="sm" [icon]="landIcon"></fa-icon>
-                      {{ citizen?.land ? citizen?.land : 0 }}
-                    </span>
-                  </div>
-                  <!-- <app-player-turn 
-                    [showLabel]="false"
-                    [divisionPath]="divisionPath">
-                  </app-player-turn> -->
+            <!-- ON-BOARDING -->
+            <ng-template #welcomeTemplate>
+              <div class="onboarding-page">
+                <h1>Welcome to the {{division?.code}} Division!</h1>
               </div>
-            </div>
+            </ng-template>
+        
+            <!-- HARVEST -->
+            <ng-template #harvestTemplate>
+              <div class="flex-row" style="width: 100%">
+                <div class="player-folder__body-harvest">
+                  <div class="harvest-header">
+                    <div>
+                      <h1>Harvest</h1>
+                    </div>
+                    <div class="harvest-details">
+                      <div>Capacity: {{ division?.capacity }}</div>
+                    </div>
+                  </div>
+                  <app-land-grid 
+                    #landGrid
+                    [markCards]="false"
+                    [turn]="division?.turn"
+                    [updatePath]="landTilesPath"
+                    [showHarvest]="true"
+                    [showKey]="showKey"
+                    [player]="$player | async"
+                    [divisionKey]="divisionKey"
+                    (gatherResource)="onGather($event)"
+                    (select)="onSelect($event)"
+                  ></app-land-grid>
+                </div>
+              </div>
+            </ng-template>
 
-            <!-- ADVANCEMENTS -->
-            <ng-container *ngIf="playerView?.views?.advancements">
-              <app-player-advancements
+            <!-- RESOLUTION REVIEW -->
+            <ng-template #resolutionReviewTemplate>
+              <div class="player-vote-wrap">
+                <div class="relative-position">
+                  <div class="tab-background voting blur" >
+                    <img src="assets/hex.jpg"/>
+                  </div>
+            
+                  <div class="tab-foreground player-vote">
+                    <h1>PREVIOUS RESOLUTION</h1>
+                    <hr style="width: 100%"/>
+                    <br/>
+                    <h2>{{ division?.lastResolution?.title }}</h2>
+                    <div>{{ division?.lastResolution?.value }}</div>
+                  </div>
+                </div>
+              </div>
+            </ng-template>
+            
+            <!-- VOTE -->
+            <ng-template #voteTemplate>
+              <div class="player-vote-wrap">
+                <div class="relative-position">
+                  <div class="tab-background voting blur" >
+                    <img src="assets/hex.jpg"/>
+                  </div>
+            
+                  <div class="tab-foreground player-vote">
+                    <div *ngIf="hasVoted && vote?.state === 'voting'" style="text-align: center">
+                      <p>Thanks for voting!</p>
+                      <p>Waiting for polls to close...</p>
+                    </div>
+                    <ng-container *ngIf="!(hasVoted && vote?.state === 'voting')">
+                      <app-vote
+                        (selectionChange)="onSelectionChange($event)"
+                        [showVotes]="vote?.state === 'review'"
+                        [allowSelection]="vote?.state === 'voting'"
+                        [showKey]="showKey"
+                        role="citizen"
+                        hideOption="last"
+                        [divisionId]="division.code"
+                      ></app-vote>
+                      <button class="action-button" *ngIf="!hasVoted && vote?.state === 'voting'" (click)="castVote()">Vote</button>
+                    </ng-container>
+                  </div>
+                </div>
+              </div>
+            </ng-template>
+
+            <!-- MARKET -->
+            <ng-template #marketTemplate>
+              <div class="flex-row" style="width: 100%">
+                <app-market
+                  [showKey]="showKey"
+                  [divisionKey]="divisionKey"
+                  [landCost]="division?.landCost"
+                >
+                </app-market>
+              </div> 
+            </ng-template>
+
+          <!-- REVIEW -->
+            <ng-template #reviewTemplate>
+              <div style="max-height: 500px; width: 100%">
+                <app-division-review [showKey]="showKey" [divisionKey]="divisionKey"></app-division-review>
+              </div>
+            </ng-template>
+
+            <!-- POPUPS -->
+            <app-division-popups [showKey]="showKey" [divisionKey]="divisionKey"></app-division-popups>
+          </div>
+      
+          <!-- PLAYER CONTROLS -->
+          <div class="player-folder__body-citizens">
+
+            <!-- PLAYERS -->
+            <ng-container *ngIf="$turn | async as turn">
+              <app-player-deck
+                [class.app-pulse--sm]="playerView?.highlight === 'player'"
+                [id]="id" 
+                [position]="position"
+                [myTurn]="id == turn"
                 [showKey]="showKey"
-                [divisionKey]="divisionKey"
-                [playerId]="id"
-                [class.app-pulse--sm]="playerView?.highlight === 'advancements'">
-              </app-player-advancements>
+                [division]="division">
+              </app-player-deck>
+        
+              <div 
+                class="citizen-list"
+                [class.app-pulse--sm]="playerView?.highlight === 'otherPlayers'">
+                <div 
+                  class="citizen-summary flex-row space-between"
+                  *ngFor="let citizen of ($citizens | async)">
+                    <span [class.player-turn-indicator]="citizen.id == turn">
+                      <strong>{{ citizen?.position }}:</strong> {{citizen.name}}
+                    </span>
+                    <div>
+                      <!-- <span style="margin-right: 5px">
+                        <fa-icon size="sm" [icon]="resourceIcon"></fa-icon>
+                        {{calculateWealth(citizen?.resources)}}
+                      </span> -->
+                      <span>
+                        <fa-icon size="sm" [icon]="landIcon"></fa-icon>
+                        {{ citizen?.land ? citizen?.land : 0 }}
+                      </span>
+                    </div>
+                    <!-- <app-player-turn 
+                      [showLabel]="false"
+                      [divisionPath]="divisionPath">
+                    </app-player-turn> -->
+                </div>
+              </div>
+
+              <!-- ADVANCEMENTS -->
+              <ng-container *ngIf="playerView?.views?.advancements">
+                <app-player-advancements
+                  [showKey]="showKey"
+                  [divisionKey]="divisionKey"
+                  [playerId]="id"
+                  [class.app-pulse--sm]="playerView?.highlight === 'advancements'">
+                </app-player-advancements>
+              </ng-container>
             </ng-container>
-          </ng-container>
+          </div>
+        </div>
+      </ng-container>
+    </ng-container>
+
+    <ng-template #divisionTab>
+      <div class="player-folder__tab-division">
+        {{ division?.code }}
+      </div>
+      <h1>Season {{ division?.season }}: {{division?.focus}}</h1>
+    </ng-template>
+
+    <ng-template #global>Global</ng-template>
+
+    <ng-template #globalBody>
+      <app-society-grid></app-society-grid>
+    </ng-template>
+
+    <ng-template #tileSelectSheet>
+      <div class="action-sheet">
+        {{ selectedResourceStatus?.message }}
+        <div 
+          *ngIf="selectedResourceStatus?.status === 'explorable'" 
+          class="large-action-button"
+          (click)="explore()">
+          <fa-icon size="lg" [icon]="exploreIcon"></fa-icon>
+          Explore (e)
+        </div>
+        <div 
+          *ngIf="selectedResourceStatus?.status === 'explored' || selectedResourceStatus?.status === 'explorable'"
+          class="large-action-button"
+          (click)="gather()">
+          <fa-icon size="lg" [icon]="gatherIcon"></fa-icon>
+          Gather (g)
         </div>
       </div>
-    </ng-container>
-  </ng-container>
-
-  <ng-template #divisionTab>
-    <div class="player-folder__tab-division">
-      {{ division?.code }}
-    </div>
-    <h1>Season {{ division?.season }}: {{division?.focus}}</h1>
-  </ng-template>
-
-  <ng-template #global>Global</ng-template>
-
-  <ng-template #globalBody>
-    <app-society-grid></app-society-grid>
-  </ng-template>
-
-  <ng-template #tileSelectSheet>
-    <div class="action-sheet">
-      {{ selectedResourceStatus?.message }}
-      <div 
-        *ngIf="selectedResourceStatus?.status === 'explorable'" 
-        class="large-action-button"
-        (click)="explore()">
-        <fa-icon size="lg" [icon]="exploreIcon"></fa-icon>
-        Explore (e)
-      </div>
-      <div 
-        *ngIf="selectedResourceStatus?.status === 'explored' || selectedResourceStatus?.status === 'explorable'"
-        class="large-action-button"
-        (click)="gather()">
-        <fa-icon size="lg" [icon]="gatherIcon"></fa-icon>
-        Gather (g)
-      </div>
-    </div>
+    </ng-template>
   </ng-template>
 </ng-container>

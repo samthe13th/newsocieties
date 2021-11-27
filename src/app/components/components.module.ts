@@ -39,6 +39,7 @@ import { GlobalLandComponent } from './global-land/global-land.component';
 import { AdvancementSummaryComponent } from './advancement-summary/advancement-summary.component';
 import { MarketComponent } from './market/market.component';
 import { DivisionReviewComponent } from './division-review/division-review.component';
+import { StateComponent } from './state/state.component';
 
 
 const components = [
@@ -71,6 +72,7 @@ const components = [
   ScorecardComponent,
   SocietyGridComponent,
   SocietySummaryComponent,
+  StateComponent,
   TabsComponent,
   ToastComponent,
   UsersGridComponent,

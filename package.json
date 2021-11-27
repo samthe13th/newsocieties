@@ -25,12 +25,15 @@
     "@fortawesome/angular-fontawesome": "0.6",
     "@fortawesome/fontawesome-svg-core": "^1.2.36",
     "@fortawesome/free-solid-svg-icons": "^5.15.4",
+    "crypto": "^1.0.1",
     "firebase": "^7.0 || ^8.0",
     "moment": "^2.29.1",
     "ng-multiselect-dropdown": "^0.3.4",
     "ng-number-picker": "^1.1.9",
     "papaparse": "^5.3.1",
+    "random-hash": "^4.0.1",
     "rxjs": "~6.5.4",
+    "time-stamp": "^2.2.0",
     "tslib": "^1.10.0",
     "zone.js": "~0.10.2"
   },
@@ -61,5 +64,8 @@
     "ts-node": "~8.3.0",
     "tslint": "~6.1.0",
     "typescript": "~3.8.3"
+  },
+  "browser": {
+    "crypto": false
   }
 }

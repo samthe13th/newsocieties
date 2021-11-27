@@ -17,8 +17,6 @@ export type CardSide = 'front' | 'back';
 export class CardComponent implements OnInit {
   private _side: CardSide;
 
-  animate = false;
-
   @Output() sideChange: EventEmitter<CardSide> = new EventEmitter<CardSide>();
 
   @Input() mark = null
@@ -27,18 +25,12 @@ export class CardComponent implements OnInit {
   @Input() contaminated = false;
   @Input() 
   set side(val) {
-    console.log({val})
-    if (this._side && this.animate === false && val !== this._side) {
-      this.animate = true;
-    }
     this._side = val;
-    if (this.animate) {
-      this.sideChange.emit(val);
-    }
   }
   get side() { return this._side }
   @Input() width: number = 50;
   @Input() height: number = 100;
+  @Input() animate = false;
 
   constructor() {}
 

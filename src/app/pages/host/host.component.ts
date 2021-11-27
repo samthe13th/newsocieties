@@ -126,6 +126,8 @@ export class HostComponent implements OnInit, OnDestroy {
   $exports;
   $actions;
   $playerView;
+  $overlay;
+  $pageState;
 
   voteState;
   selectedCitizen;
@@ -190,6 +192,10 @@ export class HostComponent implements OnInit, OnDestroy {
         this.divisionColor = color;
       })
 
+    this.$pageState = this.db.object(`${this.divisionPath}/focus`).valueChanges()
+      .pipe(
+        map(focus => focus !== 'new-season' ? 'main' : 'newSeason')
+      )
     this.$vote = this.db.object(`${this.divisionPath}/vote`).valueChanges().pipe(
       tap((vote: any) => { console.log('VOTE: ', vote); this.voteState = vote?.state })
     )
@@ -574,12 +580,14 @@ export class HostComponent implements OnInit, OnDestroy {
     this.showModal = false;
     this.action = 'voting';
     
-    this.db.object(`${this.divisionPath}/vote`).set({
-      type: this.voteType,
-      ...this.voteDropdownSelect,
-      state: 'voting',
-      voted: "[]"
-    })
+    setTimeout(() => {
+      this.db.object(`${this.divisionPath}/vote`).set({
+        type: this.voteType,
+        ...this.voteDropdownSelect,
+        state: 'voting',
+        voted: "[]"
+      })
+    }, 1000)
   }
 
   newResolution() {
@@ -898,6 +906,11 @@ export class HostComponent implements OnInit, OnDestroy {
     this.resourceType = toNumber(x?.id);
   }
 
+  nextSeason(division, newSeason) {
+    this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/focus`).set('new-season');
+    this.startSeason(division, newSeason);
+  }
+
   async startSeason(division, newSeason) {
     console.log('start season', division);
     await this.divisionService.validateThreshold(this.showKey, this.divisionKey);
@@ -906,7 +919,6 @@ export class HostComponent implements OnInit, OnDestroy {
 
     if (division.season > 0) {
       await this.db.object(`shows/${this.showKey}/global`).query.ref.transaction((global) => { 
-        console.log({global})
         const result = global === null ? { 
           actual: toNumber(division?.actions),
           capacity: toNumber(division?.capacity)
@@ -919,7 +931,7 @@ export class HostComponent implements OnInit, OnDestroy {
       })
     }
 
-    this.db.object(`${this.divisionPath}`).update({
+    await this.db.object(`${this.divisionPath}`).update({
       harvestColumn: division.lockHarvestColumns
         ? division.harvestColumn
         : _.range(7).map(() => true),
@@ -938,8 +950,12 @@ export class HostComponent implements OnInit, OnDestroy {
       actions: 0,
       selection: null
     })
+
     this.resetCitizenActions();
     this.showModal = false;
+    setTimeout(() => {
+      this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/focus`).set('harvest')
+    }, 3000)
   }
 
   newSeason(division) {
@@ -1018,7 +1034,8 @@ export class HostComponent implements OnInit, OnDestroy {
       ...tile,
       value: -1,
       contaminated: false,
-      harvested: false
+      harvested: false,
+      hash: Date.now().toString()
     }))
   }
   ngOnDestroy() {

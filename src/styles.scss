@@ -124,6 +124,21 @@ select {
   margin-left: 20px;
 }
 
+.app-fullscreen-overlay {
+  position: absolute;
+  z-index: 10000;
+  background: black;
+  height: 100%;
+  width: 100%;
+  display: flex; 
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 24px;
+  top: 0;
+  left: 0
+}
+
 .app-division-review {
   padding: 20px;
   height: 100%; 

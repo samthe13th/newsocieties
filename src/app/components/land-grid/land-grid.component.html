@@ -17,6 +17,7 @@
     <card
       *ngIf="showHarvest"
       (click)="selectTile(card)"
+      [animate]="card.harvested"
       [side]="card.harvested ? 'front' : 'back'"
       [class.owned]="true"
       [mark]="selection?.value === card.index ? selection?.mark : null"

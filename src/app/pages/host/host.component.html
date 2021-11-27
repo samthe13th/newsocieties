@@ -69,182 +69,200 @@
 </ng-template>
 
 <ng-template #focusBody>
-  <div class="host-main" *ngIf="focus">
+  <div class="host-main" *ngIf="$focus | async as focus">
     <app-button-group
       #focusButtonsComponent
       (select)="onFocusSelect($event)"
       [selectById]="focus"
       [buttons]="focusButtons">
     </app-button-group>
-    <div class="focus-wrapper" *ngIf="($playerView | async) as playerView">
-      <div class="flex-row" >
-        <app-player-view-control
-          [class.app-pulse--sm]="playerView?.views?.resources && playerView?.highlight === 'resources'"
-          name="resources"
-          label="Reserve"
-          [short]="true"
-          [highlight]="playerView?.highlight === 'resources'"
-          [show]="playerView?.views?.resources"
-          (highlightChange)="onPlayerDataButtonClick('resources', 'highlight')"
-          (visibilityChange)="onPlayerDataButtonClick('resources', 'visible')">
-        </app-player-view-control>
-        <app-player-view-control
-          [class.app-pulse--sm]="playerView?.views?.divisions && playerView?.highlight === 'divisions'"
-          name="divisions"
-          label="Divisions"
-          [short]="true"
-          [highlight]="playerView?.highlight === 'divisions'"
-          [show]="playerView?.views?.divisions"
-          (highlightChange)="onPlayerDataButtonClick('divisions', 'highlight')"
-          (visibilityChange)="onPlayerDataButtonClick('divisions', 'visible')">
-        </app-player-view-control>
-        <app-player-view-control
-          [class.app-pulse--sm]="playerView?.views?.global && playerView?.highlight === 'global'"
-          name="global"
-          label="GLC"
-          [short]="true"
-          [highlight]="playerView?.highlight === 'global'"
-          [show]="playerView?.views?.global"
-          (highlightChange)="onPlayerDataButtonClick('global', 'highlight')"
-          (visibilityChange)="onPlayerDataButtonClick('global', 'visible')">
-        </app-player-view-control>
+
+    <app-state
+      [templates]="{
+        main: mainTemplate,
+        newSeason: newSeasonOverlayTemplate
+      }"
+      [templateName]="$pageState | async"
+      class="host-main">
+    </app-state>  
+
+    <ng-template #newSeasonOverlayTemplate>
+      <div>
+        A new Season is beginning...
       </div>
+    </ng-template>
 
-      <div class="flex-row" style="height: 100%; margin-top: 5px">
-
-        <div *ngIf="focus === 'none'" style="width: 100%; height: 100%">
-
+    <ng-template #mainTemplate>
+      <div class="focus-wrapper" *ngIf="($playerView | async) as playerView">
+        <div class="flex-row" >
+          <app-player-view-control
+            [class.app-pulse--sm]="playerView?.views?.resources && playerView?.highlight === 'resources'"
+            name="resources"
+            label="Reserve"
+            [short]="true"
+            [highlight]="playerView?.highlight === 'resources'"
+            [show]="playerView?.views?.resources"
+            (highlightChange)="onPlayerDataButtonClick('resources', 'highlight')"
+            (visibilityChange)="onPlayerDataButtonClick('resources', 'visible')">
+          </app-player-view-control>
+          <app-player-view-control
+            [class.app-pulse--sm]="playerView?.views?.divisions && playerView?.highlight === 'divisions'"
+            name="divisions"
+            label="Divisions"
+            [short]="true"
+            [highlight]="playerView?.highlight === 'divisions'"
+            [show]="playerView?.views?.divisions"
+            (highlightChange)="onPlayerDataButtonClick('divisions', 'highlight')"
+            (visibilityChange)="onPlayerDataButtonClick('divisions', 'visible')">
+          </app-player-view-control>
+          <app-player-view-control
+            [class.app-pulse--sm]="playerView?.views?.global && playerView?.highlight === 'global'"
+            name="global"
+            label="GLC"
+            [short]="true"
+            [highlight]="playerView?.highlight === 'global'"
+            [show]="playerView?.views?.global"
+            (highlightChange)="onPlayerDataButtonClick('global', 'highlight')"
+            (visibilityChange)="onPlayerDataButtonClick('global', 'visible')">
+          </app-player-view-control>
         </div>
-
-        <div *ngIf="focus === 'harvest'" class="harvest-wrapper">
-          <app-land-grid
-            #landGrid
-            *ngIf="action === 'harvesting'"
-            (gatherResource)="onGather($event)"
-            (select)="onSelectLandTile($event)"
-            [markCards]="true"
-            [showKey]="showKey"
-            [isHost]="true"
-            [divisionKey]="divisionKey"
-            [updatePath]="landTilesPath"> 
-          </app-land-grid>
-        </div>
-
-        <div *ngIf="focus === 'principles' || focus === 'resolutions' || focus === 'scenario'" class="resolution-wrapper">
-          <ng-container *ngIf="($vote | async) as vote">
-            <app-vote 
-              (selectionChange)="onSelectionChange($event)"
-              [showVotes]="true"
-              [allowSelection]="vote?.state === 'review'"
+  
+        <div class="flex-row" style="height: 100%; margin-top: 5px">
+  
+          <div *ngIf="focus === 'none'" style="width: 100%; height: 100%">
+  
+          </div>
+  
+          <div *ngIf="focus === 'harvest'" class="harvest-wrapper">
+            <app-land-grid
+              #landGrid
+              *ngIf="action === 'harvesting'"
+              (gatherResource)="onGather($event)"
+              (select)="onSelectLandTile($event)"
+              [markCards]="true"
               [showKey]="showKey"
-              role="central"
-              [divisionId]="divisionKey"
-            ></app-vote>
-          </ng-container>
-        </div>
-    
-        <div *ngIf="focus === 'resolutionReview'">
-          <h1>Last Resolution</h1>
-        
-          <div class="review-card" *ngIf="($lastResolution | async) as resolution">
-            <h2>{{ resolution?.title }}</h2>
-            <p>{{ resolution?.value }}</p>
-            <hr/>
-            <p><strong>Consequences: </strong>{{ resolution?.consequence }}</p>
+              [isHost]="true"
+              [divisionKey]="divisionKey"
+              [updatePath]="landTilesPath"> 
+            </app-land-grid>
           </div>
-          <button (click)="newResolution()">New Resolution</button>
-        </div>
-
-        <div class="host-division-review-wrap" *ngIf="focus === 'review'">
-          <app-division-review [showKey]="showKey" [divisionKey]="divisionKey"></app-division-review>
-        </div>
-
-        <app-market 
-          *ngIf="focus === 'misc'"
-          [showHeader]="false"
-          [showKey]="showKey" 
-          [divisionKey]="divisionKey">
-        </app-market>
-
-        <div class="player-data">
-          <app-player-view-control
-            [class.app-pulse--sm]="playerView?.views?.player && playerView?.highlight === 'player'"
-            name="player"
-            label="Player"
-            [constant]="true"
-            [highlight]="playerView?.highlight === 'player'"
-            [show]="playerView?.views?.player"
-            (highlightChange)="onPlayerDataButtonClick('player', 'highlight')"
-            (visibilityChange)="onPlayerDataButtonClick('player', 'visible')">
-          </app-player-view-control>
-          <app-player-view-control
-            [class.app-pulse--sm]="playerView?.views?.otherPlayers && playerView?.highlight === 'otherPlayers'"
-            name="otherPlayers"
-            label="Other Players"
-            [constant]="true"
-            [highlight]="playerView?.highlight === 'otherPlayers'"
-            [show]="playerView?.views?.otherPlayers"
-            (highlightChange)="onPlayerDataButtonClick('otherPlayers', 'highlight')"
-            (visibilityChange)="onPlayerDataButtonClick('otherPlayers', 'visible')">
-          </app-player-view-control>
-          <app-player-view-control
-            [class.app-pulse--sm]="playerView?.views?.advancements && playerView?.highlight === 'advancements'"
-            name="advancements"
-            label="Adv."
-            [highlight]="playerView?.highlight === 'advancements'"
-            [show]="playerView?.views?.advancements"
-            (highlightChange)="onPlayerDataButtonClick('advancements', 'highlight')"
-            (visibilityChange)="onPlayerDataButtonClick('advancements', 'visible')">
-          </app-player-view-control>
+  
+          <div *ngIf="focus === 'principles' || focus === 'resolutions' || focus === 'scenario'" class="resolution-wrapper">
+            <ng-container *ngIf="($vote | async) as vote">
+              <app-vote 
+                (selectionChange)="onSelectionChange($event)"
+                [showVotes]="true"
+                [allowSelection]="vote?.state === 'review'"
+                [showKey]="showKey"
+                role="central"
+                [divisionId]="divisionKey"
+              ></app-vote>
+            </ng-container>
+          </div>
+      
+          <div *ngIf="focus === 'resolutionReview'">
+            <h1>Last Resolution</h1>
+          
+            <div class="review-card" *ngIf="($lastResolution | async) as resolution">
+              <h2>{{ resolution?.title }}</h2>
+              <p>{{ resolution?.value }}</p>
+              <hr/>
+              <p><strong>Consequences: </strong>{{ resolution?.consequence }}</p>
+            </div>
+            <button (click)="newResolution()">New Resolution</button>
+          </div>
+  
+          <div class="host-division-review-wrap" *ngIf="focus === 'review'">
+            <app-division-review [showKey]="showKey" [divisionKey]="divisionKey"></app-division-review>
+          </div>
+  
+          <app-market 
+            *ngIf="focus === 'misc'"
+            [showHeader]="false"
+            [showKey]="showKey" 
+            [divisionKey]="divisionKey">
+          </app-market>
+  
+          <div class="player-data">
+            <app-player-view-control
+              [class.app-pulse--sm]="playerView?.views?.player && playerView?.highlight === 'player'"
+              name="player"
+              label="Player"
+              [constant]="true"
+              [highlight]="playerView?.highlight === 'player'"
+              [show]="playerView?.views?.player"
+              (highlightChange)="onPlayerDataButtonClick('player', 'highlight')"
+              (visibilityChange)="onPlayerDataButtonClick('player', 'visible')">
+            </app-player-view-control>
+            <app-player-view-control
+              [class.app-pulse--sm]="playerView?.views?.otherPlayers && playerView?.highlight === 'otherPlayers'"
+              name="otherPlayers"
+              label="Other Players"
+              [constant]="true"
+              [highlight]="playerView?.highlight === 'otherPlayers'"
+              [show]="playerView?.views?.otherPlayers"
+              (highlightChange)="onPlayerDataButtonClick('otherPlayers', 'highlight')"
+              (visibilityChange)="onPlayerDataButtonClick('otherPlayers', 'visible')">
+            </app-player-view-control>
+            <app-player-view-control
+              [class.app-pulse--sm]="playerView?.views?.advancements && playerView?.highlight === 'advancements'"
+              name="advancements"
+              label="Adv."
+              [highlight]="playerView?.highlight === 'advancements'"
+              [show]="playerView?.views?.advancements"
+              (highlightChange)="onPlayerDataButtonClick('advancements', 'highlight')"
+              (visibilityChange)="onPlayerDataButtonClick('advancements', 'visible')">
+            </app-player-view-control>
+          </div>
         </div>
       </div>
-    </div>
-
-    <div class="harvest-controls">
-      <ng-container *ngIf="focus === 'harvest'">
-        <div class="harvest-data">
-          <app-player-turn
-            (turnChange)="onTurnChange($event)"
-            [divisionPath]="divisionPath">
-          </app-player-turn>
-          <div class="turn-actions">
-            Actions Taken: {{$actions | async}} / {{ $capacity | async }}
+  
+      <div class="harvest-controls">
+        <ng-container *ngIf="focus === 'harvest'">
+          <div class="harvest-data">
+            <app-player-turn
+              (turnChange)="onTurnChange($event)"
+              [divisionPath]="divisionPath">
+            </app-player-turn>
+            <div class="turn-actions">
+              Actions Taken: {{$actions | async}} / {{ $capacity | async }}
+            </div>
           </div>
-        </div>
-        <hr/>
-        <div class="harvest-buttons">
+          <hr/>
+          <div class="harvest-buttons">
+            <app-button-group
+              *ngIf="$turnButtons | async as buttons"
+              (select)="onTurnSelect($event.id)"
+              [selectById]="($turn | async)"
+              [buttons]="buttons">
+            </app-button-group>
+            <div class="button-row">
+              <button (click)="exploreOwnedLand(landGrid)">Flip owned</button>
+              <button (click)="gatherGLA(landGrid)">Gather GLA</button>
+              <button (click)="disableColumns()">Disable Columns</button>
+            </div>
+          </div>
+        </ng-container>
+        <ng-container *ngIf="focus === 'principles' || focus === 'resolutions' || focus === 'scenario'">
+          <div>
+            <button *ngIf="voteState === 'voting'" (click)="closePolls()">Close Polls</button>
+            <button *ngIf="voteState === 'review' && divisionVote" (click)="implement()">Implement</button>
+          </div>
+        </ng-container>
+        <div *ngIf="focus === 'review'">
           <app-button-group
-            *ngIf="$turnButtons | async as buttons"
-            (select)="onTurnSelect($event.id)"
-            [selectById]="($turn | async)"
-            [buttons]="buttons">
+            (select)="setReviewDivision($event)"
+            [selectById]="divisionKey"
+            [buttons]="divisionButtons">
           </app-button-group>
-          <div class="button-row">
-            <button (click)="exploreOwnedLand(landGrid)">Flip owned</button>
-            <button (click)="gatherGLA(landGrid)">Gather GLA</button>
-            <button (click)="disableColumns()">Disable Columns</button>
-          </div>
         </div>
-      </ng-container>
-      <ng-container *ngIf="focus === 'principles' || focus === 'resolutions' || focus === 'scenario'">
-        <div>
-          <button *ngIf="voteState === 'voting'" (click)="closePolls()">Close Polls</button>
-          <button *ngIf="voteState === 'review' && divisionVote" (click)="implement()">Implement</button>
+        <div *ngIf="focus === 'misc'">
+          <button (click)="marketView('localLand')">Local Land</button>
+          <button (click)="marketView('globalLand')">Global Land</button>
+          <button (click)="marketView('advancements')">Advancements</button>
         </div>
-      </ng-container>
-      <div *ngIf="focus === 'review'">
-        <app-button-group
-          (select)="setReviewDivision($event)"
-          [selectById]="divisionKey"
-          [buttons]="divisionButtons">
-        </app-button-group>
       </div>
-      <div *ngIf="focus === 'misc'">
-        <button (click)="marketView('localLand')">Local Land</button>
-        <button (click)="marketView('globalLand')">Global Land</button>
-        <button (click)="marketView('advancements')">Advancements</button>
-      </div>
-    </div>
+    </ng-template>
 
   </div>  
 </ng-template>
@@ -574,7 +592,7 @@
           </ul>
         </div>
         <hr/>
-        <button (click)="startSeason(division, next)">Start Season</button>
+        <button (click)="nextSeason(division, next)">Start Season</button>
       </div>
     </ng-template>
   </div>
