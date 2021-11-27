@@ -124,6 +124,11 @@ select {
   margin-left: 20px;
 }
 
+.app-state {
+  width: 100%;
+  height: 100%;
+}
+
 .app-fullscreen-overlay {
   position: absolute;
   z-index: 10000;
@@ -588,6 +593,12 @@ select {
   }
  }
 
+.text-input {
+  width: 100%;
+  font-size: 20px;
+  margin-top: 5px;
+}
+
  @keyframes blur-image {
    100% {
      filter: brightness(0.5) blur(5px);
@@ -625,6 +636,8 @@ select {
     animation-fill-mode: forwards;
     font-weight: 300;
     font-size: 18px;
+    padding: 20px; 
+    box-sizing: border-box;
    }
  }
 
@@ -737,6 +750,7 @@ select {
 
 .modal-wrap {
   position: fixed; 
+  font-size: 16px;
   top: 0; 
   left: 0;
   height: 100vh; 
@@ -754,13 +768,18 @@ select {
     background: white;
     border-radius: 15px; 
     color: black; 
-    padding: 20px;
     display: flex; 
     flex-direction: column;
     overflow: auto; 
     height: 100%; 
     width: 100%;
-    align-items: flex-start;
+    padding: 30px;
+    display: flex;
+    align-items: center;
+
+    > * {
+      margin-bottom: 10px;
+    }
 
     .modal-form-content {
       display: flex; 

@@ -1,6 +1,7 @@
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
 import { find } from 'lodash';
 
 
@@ -39,8 +40,10 @@ export class VoteComponent implements OnInit {
   };
   set selectedOption(value) {
     this._selectedOption = value;
-    const selected = find(this.vote.options, ["prompt", value]);
-    this.selectionChange.emit({ vote: this.vote, selection: selected });
+    if (this.vote) {
+      const selected = find(this.vote.options, ["prompt", value]);
+      this.selectionChange.emit({ vote: this.vote, selection: selected });
+    }
   }
 
   constructor(private db: AngularFireDatabase) {}
@@ -55,10 +58,16 @@ export class VoteComponent implements OnInit {
 
   ngOnInit() {
     this.$vote = this.db.object(`shows/${this.showKey}/divisions/${this.divisionId}/vote`)
-      .valueChanges();
-    this.$vote.subscribe((vote) => {
-      this.vote = { ...vote };
-      this.voteChange.emit({ ...vote });
-    });
+      .valueChanges()
+      .pipe(
+        tap((vote) => {
+          console.log('no dec: ', vote?.noDecision)
+          if (vote?.noDecision) {
+            this.selectedOption = undefined;
+          }
+          this.vote = vote;
+          this.voteChange.emit({ ...vote });
+        })
+      )
   }
 }

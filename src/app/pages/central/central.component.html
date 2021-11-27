@@ -61,7 +61,10 @@
       <div>{{principle.prompt}}</div>
       <ul style="margin-top: 0">
         <ng-container *ngFor="let option of principle.options">
-          <li *ngIf="option">{{option.result}}</li>
+          <li *ngIf="option">
+            <p>{{option.result}}</p>
+            <p><strong>Remark: </strong>{{option.remark}}</p>
+          </li>
         </ng-container>
       </ul>
     </ng-container>

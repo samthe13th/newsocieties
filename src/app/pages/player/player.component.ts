@@ -35,6 +35,7 @@ export class PlayerComponent implements OnInit {
   $overlay;
   $pageState;
   $focusState;
+  $vote;
 
   @ViewChild(PlayerDeckComponent, { static: false }) playerDeck: PlayerDeckComponent;
   @ViewChild(LandGridComponent, { static: false }) landGrid: LandGridComponent;
@@ -73,7 +74,7 @@ export class PlayerComponent implements OnInit {
   selectedCard;
   voteSelection;
   focus = 'harvest';
-  hasVoted = false;
+  //hasVoted = false;
 
   // DB PATHS
   landTilesPath;
@@ -211,21 +212,30 @@ export class PlayerComponent implements OnInit {
         map((citizens) => filter(citizens, c => c.id !== this.id))
       );
     this.$focus = this.db.object(`${this.divisionPath}/focus`).valueChanges();
-    this.$focus.subscribe((focus) => {
-      this.focus = focus;
-      if (focus === 'principles' || focus === 'resolutions' || focus === 'scenario') {
-        this.db.object(`${this.divisionPath}/vote`)
-          .valueChanges()
-          .subscribe((vote: any) => {
-            this.vote = { ...vote };
-            if (includes(JSON.parse(this.vote?.voted), this.id)) {
-              this.hasVoted = true;
-            } else {
-              this.hasVoted = false;
-            }
-          })
-      }
-    })
+    this.$vote = this.db.object(`${this.divisionPath}/vote`).valueChanges();
+    // this.$focus.subscribe((focus) => {
+    //   this.focus = focus;
+    //   if (focus === 'principles' || focus === 'resolutions' || focus === 'scenario') {
+    //     this.db.object(`${this.divisionPath}/vote`)
+    //       .valueChanges()
+    //       .pipe(take(1))
+    //       .subscribe((vote: any) => {
+    //         this.vote = { ...vote };
+    //         if (includes(JSON.parse(this.vote?.voted), this.id)) {
+    //           this.hasVoted = true;
+    //         } else {
+    //           this.hasVoted = false;
+    //         }
+    //       })
+    //   }
+    // })
+  }
+
+  hasVoted(voted) {
+    console.log({voted})
+    const hasVoted = includes(JSON.parse(voted), this.id);
+    console.log({hasVoted})
+    return hasVoted;
   }
 
   navigateToPlayerPage(code) {
@@ -246,7 +256,7 @@ export class PlayerComponent implements OnInit {
         ...this.vote,
         voted: JSON.stringify(voted)
       }).then(() => {
-        this.hasVoted = true;
+        // this.hasVoted = true;
       })
     }
   }

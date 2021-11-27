@@ -1,7 +1,7 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { Observable } from 'rxjs';
-import { faGavel, faLandmark, faGlobe, faLeaf, faCartPlus } from '@fortawesome/free-solid-svg-icons';
+import { faGavel, faFire, faLandmark, faGlobe, faLeaf, faCartPlus } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-division-full',
@@ -29,7 +29,8 @@ export class DivisionFullComponent {
   divisionDecisionsButtons = [
     { id: 'principles', label: 'Principles', faIcon: faLandmark },
     { id: 'resolutions', label: 'Resolutions', faIcon: faGavel },
-    { id: 'events', label: 'Events', faIcon: faGlobe },
+    { id: 'events', label: 'Events', faIcon: faFire },
+    { id: 'scenarios', label: 'Scenarios', faIcon: faGlobe },
   ]
 
   clickNewEventBtn() {
@@ -47,5 +48,6 @@ export class DivisionFullComponent {
 
   onDivisionDecisionSelect(button) {
     this.showDecisions = button.id;
+    console.log('change view: ', this.showDecisions)
   }
 }

@@ -8,8 +8,6 @@
     [templateName]="$pageState | async">
   </app-state>
 
-  <!-- <ng-container *ngTemplateOutlet="mainTemplate"></ng-container> -->
-
   <ng-template #newSeasonTemplate>
     <div *ngIf="($overlay | async) === 'new-season'" class="app-fullscreen-overlay">
       A new Season is beginning...
@@ -139,23 +137,29 @@
                     <img src="assets/hex.jpg"/>
                   </div>
             
-                  <div class="tab-foreground player-vote">
-                    <div *ngIf="hasVoted && vote?.state === 'voting'" style="text-align: center">
-                      <p>Thanks for voting!</p>
-                      <p>Waiting for polls to close...</p>
-                    </div>
-                    <ng-container *ngIf="!(hasVoted && vote?.state === 'voting')">
-                      <app-vote
-                        (selectionChange)="onSelectionChange($event)"
-                        [showVotes]="vote?.state === 'review'"
-                        [allowSelection]="vote?.state === 'voting'"
-                        [showKey]="showKey"
-                        role="citizen"
-                        hideOption="last"
-                        [divisionId]="division.code"
-                      ></app-vote>
-                      <button class="action-button" *ngIf="!hasVoted && vote?.state === 'voting'" (click)="castVote()">Vote</button>
-                    </ng-container>
+                  <div *ngIf="$vote | async as vote" class="tab-foreground player-vote">
+                      <div *ngIf="(vote?.state === 'voting' && hasVoted(vote?.voted)) else playerVoteTemplate" style="text-align: center">
+                        <p>Thanks for voting!</p>
+                        <p>Waiting for polls to close...</p>
+                      </div>
+
+                      <ng-template #playerVoteTemplate>
+                        <app-vote
+                          (selectionChange)="onSelectionChange($event)"
+                          [showVotes]="vote?.state === 'review'"
+                          [allowSelection]="vote?.state === 'voting'"
+                          [showKey]="showKey"
+                          role="citizen"
+                          hideOption="last"
+                          [divisionId]="division.code"
+                        ></app-vote>
+                        <button
+                          *ngIf="vote?.state === 'voting'"
+                          class="action-button"
+                          (click)="castVote()">
+                          Vote
+                        </button>
+                      </ng-template>
                   </div>
                 </div>
               </div>

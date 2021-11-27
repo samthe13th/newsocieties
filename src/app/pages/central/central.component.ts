@@ -189,16 +189,17 @@ export class CentralComponent implements OnInit, AfterViewInit {
   }
 
   parsePrinciplesData(_data) {
-    const data = _data.map(([title, principle, remarks, ...options]) => {
+    const data = _data.map(([title, principle, _remarks, ...options]) => {
       console.log({options})
+      const remarks = _remarks.split('|');
       return {
         title,
         prompt: `${principle}:`, 
         result: principle,
-        remarks: remarks,
-        options: options.map(option => option ? ({
+        options: options.map((option, i) => option ? ({
           prompt: `${capitalize(option)}`,
           result: option,
+          remark: remarks[i],
           votes: 0
         }) : null)
       }

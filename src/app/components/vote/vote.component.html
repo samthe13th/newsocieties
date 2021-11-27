@@ -1,10 +1,14 @@
-<ng-container *ngIf="vote">
+<ng-container *ngIf="$vote | async as vote">
   <div class="vote-wrapper">
+    <div *ngIf="vote?.state === 'final' && vote?.noDecision">
+      <em>The Society could not come to a decision</em>
+    </div>
+
     <div *ngIf="vote?.selected" class="vote-recap">
       {{ vote?.result }} {{ vote?.selected?.result }}
     </div>
 
-    <div *ngIf="!vote?.selected" class="vote-options">
+    <div *ngIf="vote?.state !== 'final' && !vote?.selected" class="vote-options">
       <div class="vote-prompt">{{ vote?.prompt }}</div>
       <ng-container *ngFor="let option of vote?.options; let i = index; let last = last">
         <div

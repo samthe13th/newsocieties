@@ -147,16 +147,22 @@
             </app-land-grid>
           </div>
   
-          <div *ngIf="focus === 'principles' || focus === 'resolutions' || focus === 'scenario'" class="resolution-wrapper">
+          <div
+            *ngIf="focus === 'principles' || focus === 'resolutions' || focus === 'scenario'"
+            class="resolution-wrapper">
             <ng-container *ngIf="($vote | async) as vote">
               <app-vote 
                 (selectionChange)="onSelectionChange($event)"
+                (voteChange)="onVoteChange($event)"
                 [showVotes]="true"
                 [allowSelection]="vote?.state === 'review'"
                 [showKey]="showKey"
                 role="central"
                 [divisionId]="divisionKey"
               ></app-vote>
+              <div *ngIf="focus === 'principles' && vote?.state === 'final'">
+                <em>{{vote?.selected?.remark}}</em>
+              </div>
             </ng-container>
           </div>
       
@@ -246,6 +252,8 @@
         <ng-container *ngIf="focus === 'principles' || focus === 'resolutions' || focus === 'scenario'">
           <div>
             <button *ngIf="voteState === 'voting'" (click)="closePolls()">Close Polls</button>
+            <button *ngIf="focus === 'principles' && voteState === 'review'" (click)="noDecision()">No Decision</button>
+            <button *ngIf="voteState === 'review'" (click)="customVoteOption()">Custom</button>
             <button *ngIf="voteState === 'review' && divisionVote" (click)="implement()">Implement</button>
           </div>
         </ng-container>
@@ -344,6 +352,15 @@
 <ng-template #reviewTemplate>
   Start Review
   <button (click)="startReview()">Continue</button>
+</ng-template>
+
+<ng-template #customVoteTemplate>
+  {{ divisionVote?.vote?.result }}
+  <input
+    [(ngModel)]="customVoteInput"
+    class="text-input"
+    name="customVoteInput"/>
+  <button (click)="implement(customVoteInput)">Confirm</button>
 </ng-template>
 
 <!-- TABS-->
@@ -466,7 +483,6 @@
       <div>
         <strong>Infrastructure: </strong>{{ division?.advancements.infrastructure.individual + division?.advancements.infrastructure.communal }}
       </div>
-
 
     </div>
 

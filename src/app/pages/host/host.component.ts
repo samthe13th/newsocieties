@@ -4,7 +4,7 @@ import { AngularFireDatabase } from '@angular/fire/database';
 import { getRandomInt, pluckRandom } from 'src/app/utilties';
 import { LandTile, LandCardTypes } from 'src/app/interfaces';
 import * as _ from 'lodash';
-import { includes, isNaN, trim, differenceBy, toNumber, each, partition } from 'lodash';
+import { isNumber, includes, trim, find, differenceBy, toNumber, each, partition } from 'lodash';
 import { take, map, tap, filter } from 'rxjs/operators'
 import { Subject, combineLatest } from 'rxjs';
 import { BankService } from 'src/app/services/bank.service';
@@ -29,14 +29,16 @@ export class HostComponent implements OnInit, OnDestroy {
   @HostListener('window:keyup', ['$event'])
   keyEvent(event: KeyboardEvent) {
     const numberKey = toNumber(event.key);
-    if (this.actionSheet === undefined && this.positions[numberKey - 1]) {
-      this.onTurnSelect(this.positions[numberKey - 1])
-    }
-    if (this.hostAction === 'harvest' && event.key === 'e') {
-      this.explore();
-    }
-    if (this.hostAction === 'harvest' && event.key === 'g') {
-      this.gather();
+    if (this.hostAction === 'harvest') {
+      if (this.actionSheet === undefined && this.positions[numberKey - 1]) {
+        this.onTurnSelect(this.positions[numberKey - 1])
+      }
+      if (this.hostAction === 'harvest' && event.key === 'e') {
+        this.explore();
+      }
+      if (this.hostAction === 'harvest' && event.key === 'g') {
+        this.gather();
+      }
     }
   }
 
@@ -48,6 +50,7 @@ export class HostComponent implements OnInit, OnDestroy {
   @ViewChild('miscTemplate') miscTemplate: TemplateRef<any>;
   @ViewChild('reviewTemplate') reviewTemplate: TemplateRef<any>;
   @ViewChild('newSeasonTemplate') newSeasonModal: TemplateRef<any>;
+  @ViewChild('customVoteTemplate') customVoteTemplate: TemplateRef<any>;
   
   @ViewChild('landGrid') landGrid: LandGridComponent;
   @ViewChild('focusButtonsComponent') focusButtonsComponent: ButtonGroupComponent;
@@ -129,6 +132,7 @@ export class HostComponent implements OnInit, OnDestroy {
   $overlay;
   $pageState;
 
+  customVoteInput;
   voteState;
   selectedCitizen;
   selectedLandTile;
@@ -199,7 +203,9 @@ export class HostComponent implements OnInit, OnDestroy {
     this.$vote = this.db.object(`${this.divisionPath}/vote`).valueChanges().pipe(
       tap((vote: any) => { console.log('VOTE: ', vote); this.voteState = vote?.state })
     )
-    this.$division = this.db.object(this.divisionPath).valueChanges().pipe(filter((x) => x !== null && x  !== undefined));
+    this.$division = this.db.object(this.divisionPath).valueChanges().pipe(
+      filter((x) => x !== null && x !== undefined)
+    );
     this.$citizens = this.db.list(`${this.divisionPath}/citizens`).valueChanges()
       .pipe(
         tap((citizens) => {
@@ -571,7 +577,9 @@ export class HostComponent implements OnInit, OnDestroy {
   }
 
   autoPick(focus) {
-    this.voteDropdownSelect = pluckRandom(this.voteDropdown, 1)[0];
+    const untouched = this.voteDropdown.filter((option) => !option.noDecision);
+    console.log('untouched: ', untouched)
+    this.voteDropdownSelect = pluckRandom(untouched, 1)[0];
     this.startVote(focus)
   }
 
@@ -657,6 +665,10 @@ export class HostComponent implements OnInit, OnDestroy {
     this.divisionVote = selection;
   }
 
+  onVoteChange(vote) {
+    this.divisionVote = { selection: undefined, vote };
+  }
+
   closePolls() {
     this.divisionVote = undefined;
     this.db.object(`${this.divisionPath}/vote/state`).set('review');
@@ -701,14 +713,38 @@ export class HostComponent implements OnInit, OnDestroy {
     }
   }
 
-  implement() {
+  noDecision() {
+    this.db.object(`${this.divisionPath}/vote`).update({
+      state: 'final',
+      noDecision: true,
+    });
+    this.db.list(`${this.divisionPath}/undecided-principles`).push({
+      title: this.divisionVote.vote.title,
+      value: 'No decision',
+      noDecision: true
+    });
+  }
+
+  customVoteOption() {
+    console.log('custom vote: ', this.divisionVote)
+    this.modalContent = this.customVoteTemplate;
+    this.showModal = true;
+  }
+
+  implement(customVote=null) {
+    const selection = customVote
+      ? { result: customVote }
+      : this.divisionVote.selection;
+    console.log("IMPLEMENT: ", selection)
+    if (!this.divisionVote) return;
     if (this.divisionVote.vote.type === 'resolution') {
-      this.setResolution();
+      this.setResolution(selection);
     } else if (this.divisionVote.vote.type === 'principle') {
-      this.setPrinciple();
+      this.setPrinciple(selection);
     } else if (this.divisionVote.vote.type === 'scenario') {
-      this.setScenario();
+      this.setScenario(selection);
     }
+    this.showModal = false;
   }
 
   reviewLastResolution() {
@@ -770,13 +806,21 @@ export class HostComponent implements OnInit, OnDestroy {
           this.voteDropdown = differenceBy(this.globalResolutions, resolutions, 'title');
         });
     } else if (type === 'principles') {
-      this.db.list(`${divisionPath}/principles`)
-        .valueChanges()
-        .pipe(take(1))
-        .subscribe((principles) => {
-          this.voteType = 'principle';
-          this.voteDropdown = differenceBy(this.globalPrinciples, principles, 'title');
-        })
+
+      combineLatest(
+        this.db.list(`${divisionPath}/principles`).valueChanges().pipe(take(1)),
+        this.db.list(`${divisionPath}/undecided-principles`).valueChanges().pipe(take(1))
+      ).pipe(take(1))
+      .subscribe(([principles, undecided]) => {
+        this.voteType = 'principle';
+        this.voteDropdown = differenceBy(this.globalPrinciples, principles, 'title').map((principle) => {
+          console.log('find ', principle, undecided, find(undecided, ['title', principle.title]));
+          return (find(undecided, ['title', principle.title])) 
+            ? { ...principle, noDecision: true }
+            : principle
+        });
+        console.log("set dropdown: ", principles, undecided, this.voteDropdown)
+      })
     } else if (type === 'scenarios') {
       this.db.list(`${divisionPath}/scenarios`)
         .valueChanges()
@@ -788,12 +832,12 @@ export class HostComponent implements OnInit, OnDestroy {
     }
   }
 
-  setScenario() {
-    const scenario = `${this.divisionVote.vote.result} ${this.divisionVote.selection.result}`;
+  setScenario(selection) {
+    const scenario = `${this.divisionVote.vote.result} ${selection.result}`;
 
     this.db.object(`${this.divisionPath}/vote`).update({
       state: 'final',
-      selected: this.divisionVote.selection
+      selected: selection
     })
 
     this.db.list(`${this.divisionPath}/scenarios`).push({
@@ -802,12 +846,13 @@ export class HostComponent implements OnInit, OnDestroy {
     })
   }
 
-  setPrinciple() {
-    const principle = `${this.divisionVote.vote.result} ${this.divisionVote.selection.result}`;
-
+  setPrinciple(selection) {
+    const principle = `${this.divisionVote.vote.result} ${selection.result}`;
+    console.log('SET PRINCIPLE: ', this.divisionVote)
     this.db.object(`${this.divisionPath}/vote`).update({
       state: 'final',
-      selected: this.divisionVote.selection
+      selected: selection,
+      noDecision: false
     })
 
     this.db.list(`${this.divisionPath}/principles`).push({
@@ -816,9 +861,9 @@ export class HostComponent implements OnInit, OnDestroy {
     })
   }
 
-  setResolution() {
-    const resolution = `${this.divisionVote.vote.result} ${this.divisionVote.selection.result}`;
-    const consequence = this.divisionVote.selection.consequence;
+  setResolution(selection) {
+    const resolution = `${this.divisionVote.vote.result} ${selection.result}`;
+    const consequence = selection?.consequence ?? null;
     const resolutionData = {
       title: this.divisionVote.vote.title,
       value: resolution,
@@ -828,9 +873,10 @@ export class HostComponent implements OnInit, OnDestroy {
 
     this.db.object(`${this.divisionPath}/vote`).update({
       state: 'final',
-      selected: this.divisionVote.selection
+      selected: selection
     })
     this.db.object(`${this.divisionPath}/lastResolution`).set(resolutionData)
+    console.log("set resolution: ", resolutionData)
     this.db.list(`${this.divisionPath}/resolutions`).push(resolutionData)
   }
 
