@@ -93,8 +93,10 @@ export const SHOW_TEMPLATE = {
   live: false,
   contamination: {
     min: 10,
-    max: 100,
+    max: 90,
     current: 10,
+    start: 0,
+    end: 90,
     formula: 'linear'
   },
   content: {},

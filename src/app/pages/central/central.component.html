@@ -167,16 +167,48 @@
 
       <br/>
 
-      <ng-container *ngIf="$contamination | async as contam">
-        Global Contamination Level (%):
-        <ng-number-picker
+      <div class="central-contamination-controls" *ngIf="$contamination | async as contam">
+        <h2>Global Contamination Level: {{contam?.current}}%</h2>
+        <!-- <ng-number-picker
          class="number-picker"
          (valueChange)="onContaminationChange($event)" 
          [min]="0"
          [max]="100"
          [value]="contam?.current">
+        </ng-number-picker> -->
+
+        Min Contamination (%)
+        <ng-number-picker
+         class="number-picker"
+         (valueChange)="onChangeContamMin($event)" 
+         [min]="0"
+         [value]="contam?.min">
         </ng-number-picker>
-      </ng-container>
+
+        Max Contamination (%)
+        <ng-number-picker
+         class="number-picker"
+         (valueChange)="onChangeContamMax($event)" 
+         [min]="0"
+         [value]="contam?.max">
+        </ng-number-picker>
+
+        Start Increasing (minute)
+        <ng-number-picker
+         class="number-picker"
+         (valueChange)="onChangeContamStart($event)" 
+         [min]="0"
+         [value]="contam?.start">
+        </ng-number-picker>
+
+        Stop Increasing (minute)
+        <ng-number-picker
+         class="number-picker"
+         (valueChange)="onChangeContamEnd($event)" 
+         [min]="0"
+         [value]="contam?.end">
+        </ng-number-picker>
+      </div>
 
       <hr/>
       
@@ -213,8 +245,8 @@
         <ng-container *ngIf="$time | async as timer">
           <ng-container *ngIf="timer.live">
             <button (click)="stopClock()">Stop</button>
-            <div>START: {{ timer.start | date: 'hh:mm:ss a' }}</div>
-            <div>TIME: {{ timer.clock | date: 'hh:mm:ss a' }}</div>
+            <h2>START: {{ timer.start | date: 'hh:mm:ss a' }}</h2>
+            <h2>TIME: {{ timer.clock | date: 'hh:mm:ss a' }}</h2>
           </ng-container>
           <hr/>
           <div 

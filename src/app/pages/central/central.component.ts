@@ -1,7 +1,7 @@
 import { Component, OnInit, AfterViewInit, ViewChild, ViewChildren, TemplateRef, ElementRef, QueryList } from '@angular/core';
 import { AngularFireDatabase } from '@angular/fire/database';
-import { take } from 'rxjs/operators';
-import { timer, combineLatest, Observable } from 'rxjs';
+import { take, tap, takeUntil } from 'rxjs/operators';
+import { timer, combineLatest, Observable, Subject, forkJoin, pipe } from 'rxjs';
 import { trim, keyBy, range, capitalize, toNumber, find, differenceWith, sortBy, includes } from 'lodash';
 import * as Papa from 'papaparse';
 import { DIVISION_TEMPLATE, SHOW_TEMPLATE } from './templates';
@@ -60,7 +60,10 @@ export class CentralComponent implements OnInit, AfterViewInit {
   $contamination: Observable<any>;
   $unseenMessages: Observable<any>;
 
+  private destroy$ = new Subject<boolean>();
+
   currentTab;
+  time;
   modalContent: TemplateRef<any>;
   showKey: string;
   divisions;
@@ -106,18 +109,43 @@ export class CentralComponent implements OnInit, AfterViewInit {
     this.$contamination = this.db.object(`shows/${this.showKey}/contamination`).valueChanges();
     this.$timeline = this.db.list('timeline').valueChanges();
     this.$unseenMessages = this.db.object(`shows/${this.showKey}/centralUnseen`).valueChanges();
+    
     this.$time = combineLatest(
       this.db.object(`shows/${this.showKey}/startTime`).valueChanges(),
       timer(0, 1000).pipe(map(() => new Date())),
       this.db.object(`shows/${this.showKey}/live`).valueChanges()
     ).pipe(
+      takeUntil(this.destroy$),
       map(([start, clock, live]) => {
         const a = moment(start);
         const b = moment(clock.getTime());
         const time = Math.floor(moment.duration(b.diff(a)).asMinutes());
         return { start, clock, time, live }
+      }),
+      tap((timer) => {
+        this.time = timer.time;
       })
     )
+
+    timer(0, 1000).pipe(
+      takeUntil(this.destroy$)
+    ).pipe(takeUntil(this.destroy$)).subscribe(() => {
+      console.log("clock: ", this.time);
+      this.db.object(`shows/${this.showKey}/contamination`).query.ref.transaction((contam) => {
+        if (contam && this.time > 0) {
+          const timeFraction = Math.min(1, this.time / (contam.end - contam.start));
+          const range = contam.max - contam.min;
+          const newLevel = contam.start > this.time
+            ? contam.min
+            : Math.round((timeFraction * range) + contam.min);
+          console.log({timeFraction, range, newLevel})
+          return { ...contam, current: newLevel }
+        }
+
+        return contam
+      })
+    })
+
     this.divisions = DIVISIONS;
   }
 
@@ -135,6 +163,11 @@ export class CentralComponent implements OnInit, AfterViewInit {
         })
       ]
     })
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next(true);
+    this.destroy$.unsubscribe();
   }
 
   onTabChange(tab) {
@@ -254,6 +287,28 @@ export class CentralComponent implements OnInit, AfterViewInit {
     })
     data.shift();
     return data;
+  }
+
+
+  onChangeContamMin(value) {
+    console.log('contam end: ', value);
+    this.db.object(`shows/${this.showKey}/contamination/min`).set(value);
+  }
+
+
+  onChangeContamMax(value) {
+    console.log('contam end: ', value);
+    this.db.object(`shows/${this.showKey}/contamination/max`).set(value);
+  }
+
+  onChangeContamStart(value) {
+    console.log("contam start: ", value);
+    this.db.object(`shows/${this.showKey}/contamination/start`).set(value);
+  }
+
+  onChangeContamEnd(value) {
+    console.log('contam end: ', value);
+    this.db.object(`shows/${this.showKey}/contamination/end`).set(value);
   }
 
   parseEventsData(_data) {

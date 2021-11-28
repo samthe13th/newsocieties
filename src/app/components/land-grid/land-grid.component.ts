@@ -107,10 +107,11 @@ export class LandGridComponent implements OnInit {
     if (this.isHost) {
       combineLatest(
         this.db.object(`shows/${this.showKey}/contamination/current`).valueChanges(),
-        this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/contaminationLevel`).valueChanges()
+        this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/contaminantLevel`).valueChanges()
       ).pipe(
         takeUntil(this.destroy$)
       ).subscribe(([percent, level]) => {
+        console.log({percent, level})
         this.adjustContamination(percent, level);
         this.updateDB();
       })
@@ -129,6 +130,7 @@ export class LandGridComponent implements OnInit {
   }
 
   private adjustContamination(percent, level) {
+    console.log("adjust contams: ", level)
     this.contamination = percent;
     if (this.landTiles) {
       const harvestable = this.landTiles
@@ -146,8 +148,17 @@ export class LandGridComponent implements OnInit {
         );
         contaminate.forEach((i) => {
           if (!this.landTiles[i].harvested) {
+            const random = getRandomInt(1, 10);
+            let contamValue = 1;
+            if (random > 5 && level > 1) {
+              contamValue = 2;
+            }
+            if (random > 8 && level > 2) {
+              contamValue = 3
+            }
+            console.log({level, contamValue, random})
             this.landTiles[i].type =  LandCardTypes.C;
-            this.landTiles[i].value = getRandomInt(1, level);
+            this.landTiles[i].value = contamValue;
           }
         })
       } else if (adjustment < 0) {
