@@ -4,7 +4,7 @@ import { AngularFireDatabase } from '@angular/fire/database';
 import { getRandomInt, pluckRandom } from 'src/app/utilties';
 import { LandTile, LandCardTypes } from 'src/app/interfaces';
 import * as _ from 'lodash';
-import { isNumber, includes, trim, find, differenceBy, toNumber, each, partition } from 'lodash';
+import { isNumber, includes, trim, find, difference, differenceBy, toNumber, each, partition } from 'lodash';
 import { take, map, tap, filter } from 'rxjs/operators'
 import { Subject, combineLatest } from 'rxjs';
 import { BankService } from 'src/app/services/bank.service';
@@ -958,10 +958,10 @@ export class HostComponent implements OnInit, OnDestroy {
   }
 
   async startSeason(division, newSeason) {
-    console.log('start season', division);
-    await this.divisionService.validateThreshold(this.showKey, this.divisionKey);
+    const level = await this.divisionService.getThresholdLevel(this.showKey, this.divisionKey);
+    console.log('start season', division, level);
     const landTiles = await this.divisionService.setLandTiles(this.showKey, this.divisionKey)
-    this.harvest = this.generateHarvest(landTiles, newSeason?.harvest, newSeason?.contaminantLevel);
+    this.harvest = this.generateHarvest(landTiles, level, newSeason?.harvest, newSeason?.contaminantLevel);
 
     if (division.season > 0) {
       await this.db.object(`shows/${this.showKey}/global`).query.ref.transaction((global) => { 
@@ -970,7 +970,7 @@ export class HostComponent implements OnInit, OnDestroy {
           capacity: toNumber(division?.capacity)
          } : { 
            actual: toNumber(global?.actual) + toNumber(division?.actions),
-           capacity:  toNumber(global?.capacity) + toNumber(division?.capacity),
+           capacity: toNumber(global?.capacity) + toNumber(division?.capacity),
          }
         console.log({result})
         return result
@@ -985,7 +985,6 @@ export class HostComponent implements OnInit, OnDestroy {
       contaminantLevel: newSeason.contaminantLevel,
       capacity: newSeason.capacity,
       harvest: newSeason.harvest,
-      highThresholdMet: false,
       reserveThresholds: {
         low: newSeason.thresholds[0],
         mid: newSeason.thresholds[1],
@@ -1051,25 +1050,30 @@ export class HostComponent implements OnInit, OnDestroy {
     )
   }
 
-  private generateHarvest(landTiles, harvestableCards, contaminantLevel = 1): Array<LandTile> {
+  private generateHarvest(landTiles, thresholdLevel, harvestableCards, contaminantLevel = 1): Array<LandTile> {
     const tiles: LandTile[] = [ ...this.resetLandTiles(landTiles) ];
     const [owned, open]: LandTile[][] = partition(tiles, (tile) => tile.owner !== undefined);
     const harvestableCount = harvestableCards - owned.length;
+    console.log('harvestable count: ', harvestableCards, harvestableCount, owned, open)
     const harvestIndexes = [
       ...owned.map((tile: any) => tile.index),
-      ...pluckRandom(open.map((tile: any) => tile.index), harvestableCount > 0 ? harvestableCount : 0)
+      ...pluckRandom(open.map(
+        (tile: any) => tile.index), harvestableCount > 0 ? harvestableCount : 0
+      )
     ]
-    const contaminantsCount = Math.ceil((this.contamination / 100) * harvestableCards);
-    const contaminants: number[] = pluckRandom(harvestIndexes, contaminantsCount);
-
+    let highResources = thresholdLevel;
+    let midResources = thresholdLevel * 2;
     harvestIndexes.forEach((i) => {
-      if (includes(contaminants, i)) {
-        tiles[i].value = getRandomInt(1, contaminantLevel)
-        tiles[i].type =  LandCardTypes.C
-      } else {
-        tiles[i].value = getRandomInt(1, 3)
-        tiles[i].type =  LandCardTypes.R
+      let value = 1;
+      if (highResources > 0) {
+        value = 3;
+        highResources--;
+      } else if (midResources > 0) {
+        value = 2;
+        midResources--
       }
+      tiles[i].value = value
+      tiles[i].type =  LandCardTypes.R
     })
 
     return tiles;

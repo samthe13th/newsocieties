@@ -12,35 +12,35 @@ const SCORE = {
     capacity: 12,
     harvest: 18,
     landCost: 4,
-    thresholds: [5, 10, 15]
+    thresholds: [5, 10, 15],
   },
   midLow: {
     VP: 6,
     capacity: 18,
     harvest: 25,
     landCost: 5,
-    thresholds: [7, 12, 17]
+    thresholds: [7, 12, 17],
   },
   mid: {
     VP: 12,
     capacity: 24,
     harvest: 34,
     landCost: 6,
-    thresholds: [9, 14, 19]
+    thresholds: [9, 14, 19],
   },
   midHigh: {
     VP: 18,
     capacity: 30,
     harvest: 42,
     landCost: 8,
-    thresholds: [11, 16, 21]
+    thresholds: [11, 16, 21],
   },
   high: {
     VP: 24,
     capacity: 36,
-    harvest: 50,
+    harvest: 49,
     landCost: 10,
-    thresholds: [13, 18, 23]
+    thresholds: [13, 18, 23],
   }
 }
 
@@ -121,7 +121,7 @@ export class DivisionService {
     })
   }
 
-  async validateThreshold(showKey, divisionKey) {
+  async getThresholdLevel(showKey, divisionKey) {
     console.log('validate')
     const divisionPath = `shows/${showKey}/divisions/${divisionKey}`;
 
@@ -131,19 +131,22 @@ export class DivisionService {
         this.db.object(`${divisionPath}/reserveThresholds`).valueChanges()
       ).pipe(
         take(1),
-        map(([
-          reserve,
-          reserveThresholds
-        ]: [number,any]) => {
+        map(([reserve,reserveThresholds]: [number,any]) => {
           console.log({reserve, reserveThresholds});
+          this.db.object(`${divisionPath}/highThresholdMet`).set(false);
           if (reserveThresholds.high <= reserve) {
             console.log("raise threshold");
+            this.db.object(`${divisionPath}/highThresholdMet`).set(true);
             this.db.object(`${divisionPath}/highThresholdsMet`).query
               .ref.transaction(met => met ? ++met : 1).then(() => {
-                resolve();
+                resolve(4);
               })
+          } else if (reserveThresholds.mid <= reserve) {
+            resolve(3);
+          } else if (reserveThresholds.low <= reserve) {
+            resolve(2);
           } else {
-            resolve();
+            resolve(1);
           }
         })
       ).subscribe();
@@ -254,12 +257,18 @@ export class DivisionService {
       .valueChanges()
       .pipe(take(1))
       .subscribe((division: any) => {
+        const updates = SCORE[division?.score];
+        const capacity = division?.highThresholdMet
+          ? division?.capacity + 1
+          : division?.capacity;
+        console.log('capacity: ', capacity, updates.capacity)
         this.db.object(`${divisionPath}/nextSeason`).set({
           season: division?.season + 1,
           contaminantLevel: division?.contaminantLevel < 3
             ? division?.contaminantLevel + 1
             : division?.contaminantLevel,
-          ...SCORE[division?.score]
+          ...updates,
+          capacity: Math.max(updates.capacity, capacity)
         })
       })
   }

@@ -15,6 +15,7 @@ export function getRandomInt(min, max) {
 }
 
 export function pluckRandom(array, total) {
+  console.log('pluck: ', array, total)
   const plucked = [];
   if (total > array.length) {
     console.error('pluck random: "total" cannot be greater than length of array to pluck from');
