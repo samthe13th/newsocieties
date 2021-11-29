@@ -237,9 +237,9 @@ export class HostComponent implements OnInit, OnDestroy {
       .pipe(
         map((citizens: any) => citizens.map((c, index) => ({ id: c.id, label: index + 1 })))
       )
-    this.$focus.subscribe((focus) => {
-      this.focus = focus;
-    })
+    // this.$focus.subscribe((focus) => {
+    //   this.focus = focus;
+    // })
     this.$playerView = combineLatest(
       this.db.object(`${this.divisionPath}/playerViewHighlight`).valueChanges(),
       this.db.object(`${this.divisionPath}/playerViews`).valueChanges()

@@ -11,6 +11,16 @@ import { ActivatedRoute } from '@angular/router';
 import { pluckRandom, getRandomInt } from 'src/app/utilties';
 
 const DIVISIONS = ['N', 'S', 'E', 'W', 'NE', 'SE', 'SW', 'NW'];
+const DIVISION_NAMES = {
+  N: 'North Division',
+  S: 'South Division',
+  E: 'East Division',
+  W: 'West Division',
+  NW: 'NorthWest Division',
+  NE: 'NorthEast Division',
+  SW: 'SouthWest Division',
+  SE: 'SouthEast Division'
+}
 const COLORS = {
   E: '#3A84FF',
   NE: '#660000',
@@ -549,6 +559,7 @@ export class CentralComponent implements OnInit, AfterViewInit {
         ...DIVISION_TEMPLATE,
         color: COLORS[abv],
         code: abv, 
+        name: DIVISION_NAMES[abv],
         divisionReview: abv,
         landTiles: this.generateLandTiles(),
         // citizens: this.generateCitizens(abv)

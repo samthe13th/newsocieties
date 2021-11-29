@@ -62,7 +62,7 @@ export const DIVISION_TEMPLATE = {
   },
   nextSeason: {
     season: 1,
-    capacity: 18,
+    capacity: 12,
     harvest: 25
   },
   exports: {
