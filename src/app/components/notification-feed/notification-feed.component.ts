@@ -4,6 +4,7 @@ import { map } from 'rxjs/operators';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { NotificationService } from 'src/app/services/notification-service.service';
 import { NotificationType } from 'src/app/shared/types';
+import * as moment from 'moment';
 
 @Component({
   selector: 'app-notification-feed',
@@ -78,6 +79,7 @@ export class NotificationFeedComponent {
       header: notificationHeader,
       sender: this.divisionKey,
       reciever: notification.sender,
+      timestamp: moment().format('h:mm:ss'),
       resolved: false
     });
     await this.db.list(`shows/${this.showKey}/divisions/${notification.sender}/unseenNotifications`).push(this.divisionKey);
@@ -98,6 +100,7 @@ export class NotificationFeedComponent {
       header: notificationHeader,
       sender: this.divisionKey,
       reciever: notification.sender,
+      timestamp: moment().format('h:mm:ss'),
       resolved: false
     });
     await this.db.list(`shows/${this.showKey}/divisions/${notification.sender}/unseenNotifications`).push(this.divisionKey);

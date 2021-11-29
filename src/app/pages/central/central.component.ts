@@ -520,7 +520,8 @@ export class CentralComponent implements OnInit, AfterViewInit {
       resolved: false,
       requiresAction: true,
       type: 'event', 
-      value
+      value,
+      timestamp: moment().format('h:mm:ss')
     };
     this.db.object(`shows/${this.showKey}/divisions/${division}/unseenNews`)
       .query.ref.transaction((unseen) => unseen ? ++unseen : 1)

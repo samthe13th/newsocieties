@@ -3,6 +3,7 @@
   class="notification-feed"
   #feedWrapper>
   <ng-container *ngFor="let notification of ($notifications | async)">
+    <em class="timestamp">{{notification?.timestamp}}</em>
     <div
       *ngIf="!(showResolved == false && notification?.resolved)"
       class="notification-bubble">

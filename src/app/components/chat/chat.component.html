@@ -12,11 +12,12 @@
     [class.resolution]="feedItem.type === 'resolution'"
     [class.broadcast]="feedItem.type === 'broadcast'"
     >
+    <em class="timestamp">{{feedItem?.timestamp}}</em>
     <div *ngIf="feedItem.type === 'broadcast'">
       INCOMING BROADCAST from Central in 1 min
     </div>
-    <div *ngIf="feedItem.type === 'resolution'">
-     <strong>RESOLUTION</strong>
+    <div *ngIf="feedItem.type === 'vote'">
+     <strong>VOTE</strong>
     </div>
     <div class="chat-bubble-header" *ngIf="feedItem.header">{{feedItem.header}}</div>
     <div [innerHTML]="feedItem?.value"></div>

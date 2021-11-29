@@ -14,6 +14,7 @@ import { DivisionService } from 'src/app/services/division-service.service';
 import { faPen, faGavel, faScroll, faLandmark, faBullseye, faEyeSlash, faGlobe, faLeaf, faCartPlus, faEye, faShoppingBag } from '@fortawesome/free-solid-svg-icons';
 import { LandGridComponent } from 'src/app/components/land-grid/land-grid.component';
 import * as fa from '@fortawesome/free-solid-svg-icons';
+import * as moment from 'moment';
 
 const DIVISIONS = ["N", "NE", "W", "NW", "E", "SW", "S", "SE"];
 
@@ -366,6 +367,11 @@ export class HostComponent implements OnInit, OnDestroy {
     if (this.rightTab === 'notifications' || tab.id === 'notifications') {
       this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/unseenNotifications`).remove();
     }
+
+    if (this.leftTab === 'central' || tab.id === 'central') {
+      console.log('CLEAR CHAT NOTIFICATIONS')
+      this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/unseenChat`).set(0)
+    }
     
     if (this.rightTab === 'news' || tab.id === 'news') {
       console.log('clear unseen news')
@@ -375,9 +381,6 @@ export class HostComponent implements OnInit, OnDestroy {
   }
 
   async onLeftTabChange(tab) {
-    if (this.leftTab === 'central' || tab.id === 'central') {
-      await this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/unseenChat`).set(0)
-    }
     this.leftTab = tab.id;
   }
 
@@ -844,6 +847,15 @@ export class HostComponent implements OnInit, OnDestroy {
       title: this.divisionVote.vote.title,
       value: scenario
     })
+
+    this.db.list(`shows/${this.showKey}/feeds/${this.divisionKey}`).push({
+      from: this.divisionKey,
+      type: 'vote',
+      header: this.divisionVote.vote.title,
+      value: scenario,
+      timestamp: moment().format('h:mm:ss')
+    })
+    this.db.object(`shows/${this.showKey}/centralUnseen/${this.divisionKey}`).query.ref.transaction((unseen) => ++unseen)
   }
 
   setPrinciple(selection) {
@@ -859,6 +871,15 @@ export class HostComponent implements OnInit, OnDestroy {
       title: this.divisionVote.vote.title,
       value: principle
     })
+
+    this.db.list(`shows/${this.showKey}/feeds/${this.divisionKey}`).push({
+      from: this.divisionKey,
+      type: 'vote',
+      header: this.divisionVote.vote.title,
+      value: principle,
+      timestamp: moment().format('h:mm:ss')
+    })
+    this.db.object(`shows/${this.showKey}/centralUnseen/${this.divisionKey}`).query.ref.transaction((unseen) => ++unseen)
   }
 
   setResolution(selection) {
@@ -877,7 +898,15 @@ export class HostComponent implements OnInit, OnDestroy {
     })
     this.db.object(`${this.divisionPath}/lastResolution`).set(resolutionData)
     console.log("set resolution: ", resolutionData)
-    this.db.list(`${this.divisionPath}/resolutions`).push(resolutionData)
+    this.db.list(`${this.divisionPath}/resolutions`).push(resolutionData);
+    this.db.list(`shows/${this.showKey}/feeds/${this.divisionKey}`).push({
+      from: this.divisionKey,
+      type: 'vote',
+      header: resolutionData.title,
+      value: resolution,
+      timestamp: moment().format('h:mm:ss')
+    })
+    this.db.object(`shows/${this.showKey}/centralUnseen/${this.divisionKey}`).query.ref.transaction((unseen) => ++unseen)
   }
 
   clearVote() {

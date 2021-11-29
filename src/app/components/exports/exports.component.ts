@@ -7,7 +7,7 @@ import { BankService } from 'src/app/services/bank.service';
 import { NumberPickerComponent } from 'ng-number-picker';
 import { NotificationType } from 'src/app/shared/types';
 import { DivisionService } from 'src/app/services/division-service.service';
-
+import * as moment from 'moment';
 
 const DROPDOWN_SETTINGS = {
   selectAllText: 'Select All',
@@ -163,6 +163,7 @@ export class ExportsComponent implements OnInit {
       rejectable: true,
       acceptable: true,
       sender: this.divisionKey,
+      timestamp: moment().format('h:mm:ss'),
       reciever: this.selectedDivision.select_id,
       data: { total: resourceTotal, fromReserve: this.fromReserve ?? 0, senders }
     }
@@ -178,6 +179,7 @@ export class ExportsComponent implements OnInit {
       value: this.messageInput,
       resolved: false,
       sender: this.divisionKey,
+      timestamp: moment().format('h:mm:ss'),
       reciever: this.selectedDivision?.select_id
     }
     await this.logExport(data);
