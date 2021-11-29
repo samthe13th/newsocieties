@@ -1,13 +1,13 @@
 import { Output, Component, OnInit, Input, EventEmitter } from '@angular/core';
-import { range, chunk, isEqual, each, filter, toNumber, difference } from 'lodash';
+import { range, chunk, isEqual, each, difference } from 'lodash';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { Subject, combineLatest } from 'rxjs';
-import { takeUntil, tap, take, isEmpty } from 'rxjs/operators';
+import { takeUntil } from 'rxjs/operators';
 import { LandCardValues, LandTile, LandCardTypes } from 'src/app/interfaces';
 import { BankService } from 'src/app/services/bank.service';
 import { pluckRandom, getRandomInt } from 'src/app/utilties';
-import { RandomHash } from 'random-hash';
+import { Howl, Howler } from 'howler';
 
 const MAX_HARVEST = 49;
 const HARVEST_ROW_LENGTH = 7;
@@ -30,6 +30,7 @@ export class LandGridComponent implements OnInit {
   positions;
   contamination;
   harvestColumns;
+  Sounds;
 
   private _turn;
   private _player;
@@ -70,6 +71,12 @@ export class LandGridComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.Sounds = {
+      contamination: new Howl({ src: 'assets/Contamination.mp3' }),
+      resource1: new Howl({ src: 'assets/gather1.mp3' }),
+      resource2: new Howl({ src: 'assets/gather2.mp3' }),
+      resource3: new Howl({ src: 'assets/gather3.mp3' }),
+    }
     this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/positions`)
       .valueChanges()
       .pipe(takeUntil(this.destroy$))
@@ -232,6 +239,7 @@ export class LandGridComponent implements OnInit {
   }
 
   selectTile(card) {
+    console.log('play sound')
     if (this.turn !== this.player?.id) {
       console.log('cannot make move', this.turn, this.turn !== this.player?.id, this.player?.actions < 1, this.player?.id)
       return
@@ -268,6 +276,18 @@ export class LandGridComponent implements OnInit {
     this.updateDB();
   }
 
+  playGatherSound(type, value) {
+    if (type ===  LandCardTypes.C) {
+      this.Sounds.contamination.play();
+    } else if (value === 1) {
+      this.Sounds.resource1.play();
+    } else if (value === 2) {
+      this.Sounds.resource2.play();
+    } else if (value === 3) {
+      this.Sounds.resource3.play();
+    }
+  }
+
   takeAction(playerId) {
     this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/actions`)
       .query.ref.transaction(actions => actions ? ++actions : 1);
@@ -277,6 +297,7 @@ export class LandGridComponent implements OnInit {
 
   gather(card, playerId, safe=false) {
     if (playerId===null) return;
+    this.playGatherSound(card.type, card.value)
     this.gatherResource.emit({ tile: card, playerId, safe });
     this.landTiles[card.index].value = -1;
     this.clearSelection(card.index);
@@ -308,7 +329,7 @@ export class LandGridComponent implements OnInit {
 
   async process(i, safe=false) {
     const tile = this.landTiles[i];
-    console.log('process: ', tile)
+    console.log('process: ', tile);
     if (!safe && tile.type === LandCardTypes.C && tile.harvested && !tile.owner) {
       await this.contaminateAdjacentTiles(tile);
     }
