@@ -1,9 +1,9 @@
 import { Component, ViewChild, OnInit, TemplateRef, HostListener } from '@angular/core';
 import { AngularFireDatabase } from '@angular/fire/database';
-import { PlayerDeckComponent } from 'src/app/components/player-deck/player-deck.component';
+import { PlayerDeckComponent } from 'src/app/components/player/player-deck/player-deck.component';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
-import { LandGridComponent } from 'src/app/components/land-grid/land-grid.component';
+import { LandGridComponent } from 'src/app/components/shared/land-grid/land-grid.component';
 import { tap, take, map } from 'rxjs/operators';
 import { Subject, combineLatest } from 'rxjs';
 import { LandCardValues } from 'src/app/interfaces';
@@ -213,22 +213,6 @@ export class PlayerComponent implements OnInit {
       );
     this.$focus = this.db.object(`${this.divisionPath}/focus`).valueChanges();
     this.$vote = this.db.object(`${this.divisionPath}/vote`).valueChanges();
-    // this.$focus.subscribe((focus) => {
-    //   this.focus = focus;
-    //   if (focus === 'principles' || focus === 'resolutions' || focus === 'scenario') {
-    //     this.db.object(`${this.divisionPath}/vote`)
-    //       .valueChanges()
-    //       .pipe(take(1))
-    //       .subscribe((vote: any) => {
-    //         this.vote = { ...vote };
-    //         if (includes(JSON.parse(this.vote?.voted), this.id)) {
-    //           this.hasVoted = true;
-    //         } else {
-    //           this.hasVoted = false;
-    //         }
-    //       })
-    //   }
-    // })
   }
 
   hasVoted(voted) {

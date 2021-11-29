@@ -5,14 +5,14 @@ import { getRandomInt, pluckRandom } from 'src/app/utilties';
 import { LandTile, LandCardTypes } from 'src/app/interfaces';
 import * as _ from 'lodash';
 import { isNumber, includes, trim, find, difference, differenceBy, toNumber, each, partition } from 'lodash';
-import { take, map, tap, filter } from 'rxjs/operators'
+import { take, map, tap, filter, takeUntil } from 'rxjs/operators'
 import { Subject, combineLatest } from 'rxjs';
 import { BankService } from 'src/app/services/bank.service';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
-import { ButtonGroupComponent } from 'src/app/components/button-group/button-group.component';
+import { ButtonGroupComponent } from 'src/app/components/shared/button-group/button-group.component';
 import { DivisionService } from 'src/app/services/division-service.service';
 import { faPen, faGavel, faScroll, faLandmark, faBullseye, faEyeSlash, faGlobe, faLeaf, faCartPlus, faEye, faShoppingBag } from '@fortawesome/free-solid-svg-icons';
-import { LandGridComponent } from 'src/app/components/land-grid/land-grid.component';
+import { LandGridComponent } from 'src/app/components/shared/land-grid/land-grid.component';
 import * as fa from '@fortawesome/free-solid-svg-icons';
 import * as moment from 'moment';
 
@@ -254,11 +254,14 @@ export class HostComponent implements OnInit, OnDestroy {
         this.divisions = this.getDivisionObservables(show);
       })
 
-    this.divisionService.calculateDivisionScore$(this.showKey, this.divisionKey).subscribe();
+    this.divisionService.calculateDivisionScore$(this.showKey, this.divisionKey)
+    .pipe(takeUntil(this.destroy$))
+    .subscribe();
     // this.divisionService.thresholdListener$(this.showKey, this.divisionKey).subscribe();
 
     this.db.object(`shows/${this.showKey}/contamination/current`)
       .valueChanges()
+      .pipe(takeUntil(this.destroy$))
       .subscribe((level) => {
         this.contamination = level;
       })

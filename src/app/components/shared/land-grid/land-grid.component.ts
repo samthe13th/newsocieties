@@ -85,15 +85,10 @@ export class LandGridComponent implements OnInit {
     })
 
     combineLatest(
-      this.db.object(this.updatePath)
-        .valueChanges()
-        .pipe(takeUntil(this.destroy$)
-      ),
-      this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/selection`)
-        .valueChanges()
-        .pipe(
-          takeUntil(this.destroy$)
-      )
+      this.db.object(this.updatePath).valueChanges(),
+      this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/selection`).valueChanges()
+    ).pipe(
+      takeUntil(this.destroy$)
     ).subscribe(([tiles, selection]: [any[], any]) => {
         this.selection = selection;
         if (!this.landTiles) {
@@ -125,7 +120,8 @@ export class LandGridComponent implements OnInit {
     }
 
     this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/harvestColumn`)
-      .valueChanges().pipe(takeUntil(this.destroy$))
+      .valueChanges()
+      .pipe(takeUntil(this.destroy$))
       .subscribe((columns: any) => {
         columns.forEach((showColumn: boolean, i: string) => {
           if (this.harvestColumns?.[i] !== showColumn) {
@@ -277,7 +273,7 @@ export class LandGridComponent implements OnInit {
   }
 
   playGatherSound(type, value) {
-    if (type ===  LandCardTypes.C) {
+    if (type === LandCardTypes.C) {
       this.Sounds.contamination.play();
     } else if (value === 1) {
       this.Sounds.resource1.play();
