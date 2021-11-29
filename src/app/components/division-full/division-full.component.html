@@ -2,20 +2,16 @@
   <div class="division-full__body">
     <div class="division-stats">
       <h2>STATS</h2>
+      <p>Score: {{ division?.score }} ({{ division?.VP }})</p>
+      <p>Season: {{ division?.season }}</p>
       <p>Actions: {{ division?.actions }}</p>
       <p>Capacity: {{ division?.capacity }}</p>
 
       <hr/>
 
-      <p>Season: {{ division?.season }}</p>
-      <p>Score: {{ division?.score }} ({{ division?.VP }})</p>
       <p>Reserve: {{ division?.reserve }}</p>
       <p>Harvest: {{ division?.harvest ? division.harvest : 0 }}</p>
-      <p>Capacity: {{ division?.capacity ? division.capacity : 0 }}</p>
       <p>Land cost: {{ division?.landCost }}</p>
-
-      <hr/>
-      
       <p>Safety: {{division?.advancements?.safety.communal + division?.advancements?.safety.individual }}</p>
       <p>Health: {{division?.advancements?.health.communal + division?.advancements?.health.individual}}</p>
       <p>Arts and Culture: {{division?.advancements?.arts.communal + division?.advancements?.arts.individual}}</p>
