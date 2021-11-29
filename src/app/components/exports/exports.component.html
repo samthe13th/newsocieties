@@ -75,12 +75,12 @@ Send:
   <br/>
   To:
   <select
-    *ngIf="$divisions | async as divisions"
+    *ngIf="divisionList"
     [(ngModel)]="selectedDivision"
     name="vote-options"
     id="vote-options">
     <option
-      *ngFor="let option of divisions"
+      *ngFor="let option of divisionList"
       [ngValue]="option">
       {{option?.select_text}}
     </option>

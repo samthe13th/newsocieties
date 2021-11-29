@@ -35,6 +35,8 @@ export class ExportsComponent implements OnInit {
   $divisions: Observable<any>;
   $reserve: Observable<any>;
 
+  divisionList;
+
   fromReserve;
   citizenData;
   selectedDivision;
@@ -95,6 +97,20 @@ export class ExportsComponent implements OnInit {
 
   ngOnInit() {
     this.setCitizenData();
+
+    this.db.list(`shows/${this.showKey}/divisions`)
+      .valueChanges()
+      .pipe(
+        take(1),
+        map((divisions: any) => {
+          console.log('divisions: ', divisions)
+          this.divisionList = _.filter(divisions.map((division) => ({
+            landCost: division.landCost,
+            select_id: division.code,
+            select_text: `${division.code} (Land cost: ${division.landCost} Reserve: ${division.reserve})`
+          })), (division) => { return division.select_id !== this.divisionKey })
+        })
+      ).subscribe()
 
     this.$divisions = this.db.list(`shows/${this.showKey}/divisions`)
       .valueChanges()
