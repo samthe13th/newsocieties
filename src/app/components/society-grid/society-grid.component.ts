@@ -14,6 +14,7 @@ const DIVISIONS = ["NW", "N", "NE", "W", "C", "E", "SW", "S", "SE"];
 })
 export class SocietyGridComponent {
   divisions;
+  Math = Math;
 
   constructor(private db: AngularFireDatabase) {}
 
