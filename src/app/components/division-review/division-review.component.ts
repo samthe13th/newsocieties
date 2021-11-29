@@ -26,13 +26,18 @@ export class DivisionReviewComponent implements OnInit {
       .pipe(
         switchMap((toReview) => combineLatest(
           of(toReview),
+          this.db.object(`shows/${this.showKey}/divisions/${toReview}/score`).valueChanges(),
+          this.db.object(`shows/${this.showKey}/divisions/${toReview}/reserve`).valueChanges(),
+          this.db.object(`shows/${this.showKey}/divisions/${toReview}/advancements`).valueChanges(),
+          this.db.list(`shows/${this.showKey}/divisions/${toReview}/localLand`).valueChanges(),
+          this.db.list(`shows/${this.showKey}/divisions/${toReview}/globalLand`).valueChanges(),
           this.db.list(`shows/${this.showKey}/divisions/${toReview}/principles`).valueChanges(),
           this.db.list(`shows/${this.showKey}/divisions/${toReview}/resolutions`).valueChanges(),
           this.db.list(`shows/${this.showKey}/divisions/${toReview}/scenarios`).valueChanges()
         )
       ),
-      map(([code, principles, resolutions, scenarios]) => ({
-        code, principles, resolutions, scenarios
+      map(([code, score, reserve, advancements, localLand, globalLand, principles, resolutions, scenarios]) => ({
+        code, score, reserve, advancements, localLand, globalLand, principles, resolutions, scenarios
       }))
     )
   }

@@ -10,9 +10,10 @@
   </ng-container>
   <ng-container *ngIf="slot.code == 'C'">
     <div class="grid-center" *ngIf="(slot.listener | async) as summary">
-      <img src="/assets/globe.jpeg"/>
-      <!-- <div>Capacity {{ summary.actual }} / {{ summary.capacity }}</div>
-      <div>Exceeded {{ (summary.actual / summary.capacity) * 100 }}%</div> -->
+      <!-- <img src="/assets/globe.jpeg"/> -->
+      <div>Global Capacity</div>
+      <div>{{ summary.actual }} / {{ summary.capacity }}</div>
+      <div *ngIf="summary.actual > 0 && summary.capacity > 0">{{ (summary.actual / summary.capacity) * 100 }}%</div>
     </div>
   </ng-container>
 </ng-container>
