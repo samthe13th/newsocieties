@@ -84,8 +84,8 @@ export const DIVISION_TEMPLATE = {
   },
   actions: 0,
   focus: "none",
-  capacity: 18,
-  harvest: 25,
+  capacity: 12,
+  harvest: 18,
 }
 
 export const SHOW_TEMPLATE = {

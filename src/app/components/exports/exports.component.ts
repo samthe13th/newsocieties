@@ -100,6 +100,7 @@ export class ExportsComponent implements OnInit {
       .valueChanges()
       .pipe(
         map((divisions: any) => {
+          console.log('divisions: ', divisions)
           return _.filter(divisions.map((division) => ({
             landCost: division.landCost,
             select_id: division.code,
