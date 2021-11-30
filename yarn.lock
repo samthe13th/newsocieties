@@ -1548,6 +1548,11 @@
     "@types/minimatch" "*"
     "@types/node" "*"
 
+"@types/google.visualization@0.0.58":
+  version "0.0.58"
+  resolved "https://registry.yarnpkg.com/@types/google.visualization/-/google.visualization-0.0.58.tgz#eb2aa3cf05d63a9b42ff5cfcab1fc0594fb45a0e"
+  integrity sha512-ldwrhRvqSlrCYjHELGZNNMP8m5oPLBb6iU7CfKF2C/YpgRTlHihqsrL5M293u0GL7mKfjm0AjSIgEE2LU8fuTw==
+
 "@types/jasmine@*":
   version "3.8.2"
   resolved "https://registry.yarnpkg.com/@types/jasmine/-/jasmine-3.8.2.tgz#27ab0aaac29581bcbde5774e1843f90df977078e"
@@ -1919,6 +1924,14 @@ alphanum-sort@^1.0.0:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/alphanum-sort/-/alphanum-sort-1.0.2.tgz#97a1119649b211ad33691d9f9f486a8ec9fbe0a3"
   integrity sha1-l6ERlkmyEa0zaR2fn0hqjsn74KM=
+
+angular-google-charts@^2.2.2:
+  version "2.2.2"
+  resolved "https://registry.yarnpkg.com/angular-google-charts/-/angular-google-charts-2.2.2.tgz#fd26a78a0c44f8bc686832116e7ced9751b46987"
+  integrity sha512-dbNDqhSfqxv1rMMph2xV55+nsXSREClm03bTRpq4nRjpVghC1hVwsqfeg6p/cngB7WgamQmWj5ExTwN6vBzVAg==
+  dependencies:
+    "@types/google.visualization" "0.0.58"
+    tslib "^2.2.0"
 
 ansi-align@^3.0.0:
   version "3.0.0"

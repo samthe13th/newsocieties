@@ -1,0 +1,22 @@
+.chart-legend {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+
+  .key-block {
+    height: 15px; 
+    width: 15px;
+    display: inline-block;
+    border: solid 1px white;
+    margin: 4px;
+  
+    &.blue {
+      background: blue;
+    }
+  
+    &.red {
+      background: red;
+    }
+  }
+}

@@ -25,6 +25,7 @@
     "@fortawesome/angular-fontawesome": "0.6",
     "@fortawesome/fontawesome-svg-core": "^1.2.36",
     "@fortawesome/free-solid-svg-icons": "^5.15.4",
+    "angular-google-charts": "^2.2.2",
     "crypto": "^1.0.1",
     "firebase": "^7.0 || ^8.0",
     "howler": "^2.2.3",

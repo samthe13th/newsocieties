@@ -1,12 +1,18 @@
 <ng-container *ngIf="division">
-  <h1><strong>{{ division?.code }}</strong></h1>
+  <!-- <h1><strong>{{ division?.code }}</strong></h1>
   <div><strong>Score: </strong>{{ division.score }}</div>
-  <div><strong>Land cost: </strong>{{ division.landCost }}</div>
-  <ng-container *ngIf="details === 'full'">
+  <div><strong>Land cost: </strong>{{ division.landCost }}</div> -->
+  <app-division-chart 
+    [height]="120"
+    [width]="200"
+    [divisionKey]="division.code" 
+    [showKey]="showKey">
+  </app-division-chart>
+  <!-- <ng-container *ngIf="details === 'full'">
     <div><strong>Season:</strong>{{ division.season }}</div>
     <div><strong>Reserve:</strong>{{ division.reserve }}</div>
     <div><strong>Actions:</strong>{{ division.actions }}</div>
     <div><strong>Capacity:</strong>{{ division.capacity }}</div>
     <div><strong>Harvest:</strong>{{ division.harvest }}</div>
-  </ng-container>
+  </ng-container> -->
 </ng-container>

@@ -23,7 +23,7 @@ export class DivisionFullComponent {
   showDecisions = 'principles';
 
   @Input() showKey;
-  @Input() division;
+  @Input() divisionKey;
   @Output() clickNewEvent = new EventEmitter<any>();
 
   divisionDecisionsButtons = [
@@ -34,11 +34,11 @@ export class DivisionFullComponent {
   ]
 
   clickNewEventBtn() {
-    this.clickNewEvent.emit(this.division);
+    this.clickNewEvent.emit(this.divisionKey);
   }
 
   ngOnInit() {
-    const divisionPath = `shows/${this.showKey}/divisions/${this.division}`;
+    const divisionPath = `shows/${this.showKey}/divisions/${this.divisionKey}`;
     this.$division = this.db.object(divisionPath).valueChanges();
     this.$principles = this.db.list(`${divisionPath}/principles`).valueChanges();
     this.$resolutions = this.db.list(`${divisionPath}/resolutions`).valueChanges();

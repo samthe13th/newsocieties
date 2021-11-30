@@ -148,6 +148,14 @@ select {
   left: 0
 }
 
+.app-division-chart {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
 .app-division-review {
   padding: 20px;
   height: 100%; 
@@ -1145,12 +1153,10 @@ select {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: 5px;
+  width: 100%;
   border: solid 1px white;
   font-size: 16px;
   font-weight: 100;
-  border-radius: 10px;
-  padding: 10px;
   color: white;
 }
 
@@ -1160,6 +1166,8 @@ select {
   height: 100%;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
+  background: black; 
+  color: white;
 }
 
 .vote {

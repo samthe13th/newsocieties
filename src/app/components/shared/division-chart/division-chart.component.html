@@ -1,0 +1,15 @@
+<ng-container *ngIf="$chartData | async as data">
+  <google-chart
+    [width]="width"
+    [height]="height"
+    [type]="chart.type"
+    [data]="data"
+    [columns]="chart.columns"
+    [options]="chart.options"
+  >
+  </google-chart>
+  <div class="chart-legend">
+    Actions <span class="key-block red"></span>
+    vs Capacity <span class="key-block blue"></span>
+  </div>
+</ng-container>

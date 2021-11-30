@@ -4,6 +4,7 @@
       *ngIf="(slot.listener | async) as division"
       class="division-summary"
       [details]="details"
+      [showKey]="showKey"
       [division]="division">
     </app-society-summary>
     <div *ngIf="!slot.listener"></div>

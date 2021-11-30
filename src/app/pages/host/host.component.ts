@@ -996,6 +996,12 @@ export class HostComponent implements OnInit, OnDestroy {
     this.harvest = this.generateHarvest(landTiles, level, newSeason?.harvest, newSeason?.contaminantLevel);
 
     if (division.season > 0) {
+      console.log('update chart data')
+      await this.db.list(`shows/${this.showKey}/divisions/${this.divisionKey}/chartData`).push([
+        division.season,
+        division.capacity,
+        division.actions
+      ])
       await this.db.object(`shows/${this.showKey}/global`).query.ref.transaction((global) => { 
         const result = global === null ? { 
           actual: toNumber(division?.actions),

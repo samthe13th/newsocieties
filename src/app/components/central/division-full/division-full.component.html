@@ -1,23 +1,33 @@
 <ng-container *ngIf="($division | async) as division">
   <div class="division-full__body">
     <div class="division-stats">
-      <h2>STATS</h2>
-      <p>Score: {{ division?.score }} ({{ division?.VP }})</p>
-      <p>Season: {{ division?.season }}</p>
-      <p>Actions: {{ division?.actions }}</p>
-      <p>Capacity: {{ division?.capacity }}</p>
 
-      <hr/>
+      <app-division-chart
+        [showKey]="showKey"
+        [divisionKey]="divisionKey">
+      </app-division-chart>
 
-      <p>Reserve: {{ division?.reserve }}</p>
-      <p>Harvest: {{ division?.harvest ? division.harvest : 0 }}</p>
-      <p>Land cost: {{ division?.landCost }}</p>
-      <p>Safety: {{division?.advancements?.safety.communal + division?.advancements?.safety.individual }}</p>
-      <p>Health: {{division?.advancements?.health.communal + division?.advancements?.health.individual}}</p>
-      <p>Arts and Culture: {{division?.advancements?.arts.communal + division?.advancements?.arts.individual}}</p>
-      <p>Knowledge: {{division?.advancements?.knowledge.communal + division?.advancements?.knowledge.individual}}</p>
-      <p>Infrastructure: {{division?.advancements?.infrastructure.communal + division?.advancements?.infrastructure.individual}}</p>
+      <div class="flex-column">
+        <br/>
+        
+        <p>Score: {{ division?.score }} ({{ division?.VP }})</p>
+        <p>Season: {{ division?.season }}</p>
+        <p>Actions: {{ division?.actions }}</p>
+        <p>Capacity: {{ division?.capacity }}</p>
 
+        <hr/>
+
+        <p>Reserve: {{ division?.reserve }}</p>
+        <p>Harvest: {{ division?.harvest ? division.harvest : 0 }}</p>
+        <p>Land cost: {{ division?.landCost }}</p>
+        <p>Safety: {{division?.advancements?.safety.communal + division?.advancements?.safety.individual }}</p>
+        <p>Health: {{division?.advancements?.health.communal + division?.advancements?.health.individual}}</p>
+        <p>Arts and Culture: {{division?.advancements?.arts.communal + division?.advancements?.arts.individual}}</p>
+        <p>Knowledge: {{division?.advancements?.knowledge.communal + division?.advancements?.knowledge.individual}}</p>
+        <p>Infrastructure: {{division?.advancements?.infrastructure.communal + division?.advancements?.infrastructure.individual}}</p>
+
+      </div>
+      <br/>
     </div>
     <div class="division-decisions-wrap">
       <div class="division-decisions__button-group-wrap">

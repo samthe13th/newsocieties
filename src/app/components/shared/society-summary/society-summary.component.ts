@@ -12,6 +12,7 @@ import { Component, Input } from '@angular/core';
 })
 export class SocietySummaryComponent {
   @Input() division;
+  @Input() showKey;
   @Input() details: 'full' | 'brief';
 
   calculateReserve(reserve) {

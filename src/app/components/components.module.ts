@@ -36,7 +36,8 @@ import { AdvancementSummaryComponent } from './shared/market/advancement-summary
 import { MarketComponent } from './shared/market/market.component';
 import { DivisionReviewComponent } from './shared/division-review/division-review.component';
 import { StateComponent } from './shared/state/state.component';
-
+import { GoogleChartsModule } from 'angular-google-charts';
+import { DivisionChartComponent } from './shared/division-chart/division-chart.component';
 
 const components = [
   AdvancementTrackComponent,
@@ -45,6 +46,7 @@ const components = [
   BannerComponent,
   CardComponent,
   ChatComponent,
+  DivisionChartComponent,
   DivisionFullComponent,
   DivisionPopupsComponent,
   DivisionReviewComponent,
@@ -84,6 +86,7 @@ const ngMaterial = [
     FormsModule,
     ReactiveFormsModule,
     CommonModule,
+    GoogleChartsModule,
     FontAwesomeModule,
     NumberPickerModule,
     NgMultiSelectDropDownModule.forRoot(),
