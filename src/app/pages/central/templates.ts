@@ -41,7 +41,7 @@ export const DIVISION_TEMPLATE = {
       communal: 0,
       reward: {
         name: 'ExtraAction',
-        text: '+1 action.'
+        text: 'Player can use 1 extra action (does not affect Capacity).'
       }
     }
   },

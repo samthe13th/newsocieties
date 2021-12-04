@@ -7,21 +7,23 @@
   </tr>
   <tr class="division-details__number">
     <td>
-      <fa-icon size="sm" [icon]="aIcon"></fa-icon>
-      A
+      <i class="ns-icon">
+        <img src="../assets/safety_white.png"/>
+      </i>
     </td>
     <td>
-      <app-adv-track [color]="data?.color" [contributions]="data?.adv?.arts"></app-adv-track>
+      <app-adv-track [color]="data?.color" [contributions]="data?.adv?.safety"></app-adv-track>
     </td>
     <td>
-      {{advCost(data?.adv?.arts, data.costs)}}
+      {{advCost(data?.adv?.safety, data.costs)}}
     </td>
-    <td><em>Immeasurable</em></td>
+    <td><em>Safe explore</em></td>
   </tr>
   <tr class="division-details__number">
     <td>
-      <fa-icon size="sm" [icon]="hIcon"></fa-icon>
-      H
+      <i class="ns-icon">
+        <img src="../assets/health_white.png"/>
+      </i>
     </td>
     <td>
       <app-adv-track [color]="data?.color" [contributions]="data?.adv?.health"></app-adv-track>
@@ -33,21 +35,23 @@
   </tr>
   <tr class="division-details__number">
     <td>
-      <fa-icon size="sm" [icon]="iIcon"></fa-icon>
-      I
+      <i class="ns-icon">
+        <img src="../assets/arts_white.png"/>
+      </i>
     </td>
     <td>
-      <app-adv-track [color]="data?.color" [contributions]="data?.adv?.infrastructure"></app-adv-track>
+      <app-adv-track [color]="data?.color" [contributions]="data?.adv?.arts"></app-adv-track>
     </td>
     <td>
-      {{advCost(data?.adv?.infrastructure, data.costs)}}
+      {{advCost(data?.adv?.arts, data.costs)}}
     </td>
-    <td><em>Player can use 1 extra action (does not affect Capacity)</em></td>
+    <td><em>Immeasurable</em></td>
   </tr>
   <tr class="division-details__number">
     <td>
-      <fa-icon size="sm" [icon]="kIcon"></fa-icon>
-      K
+      <i class="ns-icon">
+        <img src="../assets/knowledge_white.png"/>
+      </i>
     </td>
     <td>
       <app-adv-track [color]="data?.color" [contributions]="data?.adv?.knowledge"></app-adv-track>
@@ -59,15 +63,16 @@
   </tr>
   <tr class="division-details__number">
     <td>
-      <fa-icon size="sm" [icon]="sIcon"></fa-icon>
-      S
+      <i class="ns-icon">
+        <img src="../assets/infrastructure_white.png"/>
+      </i>
     </td>
     <td>
-      <app-adv-track [color]="data?.color" [contributions]="data?.adv?.safety"></app-adv-track>
+      <app-adv-track [color]="data?.color" [contributions]="data?.adv?.infrastructure"></app-adv-track>
     </td>
     <td>
-      {{advCost(data?.adv?.safety, data.costs)}}
+      {{advCost(data?.adv?.infrastructure, data.costs)}}
     </td>
-    <td><em>Safe explore</em></td>
+    <td><em>+1 Action</em></td>
   </tr>
 </table>

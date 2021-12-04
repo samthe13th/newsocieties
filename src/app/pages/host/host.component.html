@@ -537,7 +537,7 @@
             <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
           </button>
           <button (click)="updateAdvancement('arts', citizen, division?.advancementCosts)">Buy</button>
-          Arts: {{ citizen?.advancements?.arts }}
+          Arts and Culture: {{ citizen?.advancements?.arts }}
         </div>
         <div class="editable-item">
           <button (click)="changeCitizenProperty(citizen, 'advancements/knowledge', 'advancement', 'knowledge')">

@@ -1,30 +1,25 @@
-
-// Custom Theming for Angular Material
-// For more information: https://material.angular.io/guide/theming
 @import '~@angular/material/theming';
-// Plus imports for other components in your app.
-
-// Include the common styles for Angular Material. We include this here so that you only
-// have to load a single css file for Angular Material in your app.
-// Be sure that you only ever include this mixin once!
 @include mat-core();
 
-// Define the palettes for your theme using the Material Design palettes available in palette.scss
-// (imported above). For each palette, you can optionally specify a default, lighter, and darker
-// hue. Available color palettes: https://material.io/design/color/
 $new-societies-primary: mat-palette($mat-indigo);
 $new-societies-accent: mat-palette($mat-pink, A200, A100, A400);
-
-// The warn palette is optional (defaults to red).
 $new-societies-warn: mat-palette($mat-red);
-
-// Create the theme object (a Sass map containing all of the palettes).
 $new-societies-theme: mat-light-theme($new-societies-primary, $new-societies-accent, $new-societies-warn);
 
-// Include theme styles for core and each component used in your app.
-// Alternatively, you can import and @include the theme mixins for each component
-// that you are using.
 @include angular-material-theme($new-societies-theme);
+@font-face {
+  font-family: "Lovelo";
+  src: local("Lovelo"), url(/assets/fonts/Lovelo-Black.woff) format("woff");
+}
+// $custom-typography: mat-typography-config(
+
+// );
+// @include angular-material-typography($custom-typography);
+
+.mat-typography h1 {
+  font-family: 'Lovelo';
+  margin-bottom: 0;
+}
 
 table, th, td {
   border:1px solid black;
@@ -252,6 +247,7 @@ select {
   flex-direction: column;
   font-size: 18px;
   height: 100%;
+  margin-top: 5px;
 
   table {
     border: none;
@@ -832,24 +828,24 @@ select {
 
   &:not(.contaminated) {
     &[data-division="N"] {
-      &.one { background: #A30164 }
+      &.three { background: #A30164 }
       &.two { background: #C62486 }
-      &.three { background: #EB49AB }
+      &.one { background: #EB49AB }
     }
     &[data-division="NE"] {
-      &.one { background: #771111 }
+      &.three { background: #771111 }
       &.two { background: #932D2D }
-      &.three { background: #B14B4B }
+      &.one { background: #B14B4B }
     }
     &[data-division="E"] {
-      &.one { background: #0044B0 }
+      &.three { background: #0044B0 }
       &.two { background: #1E68E3 }
-      &.three { background: #478CFF }
+      &.one { background: #478CFF }
     }
     &[data-division="SE"] {
-      &.one { background: #4020C4 }
+      &.three { background: #4020C4 }
       &.two { background: #6344E8 }
-      &.three { background: #876DFF }
+      &.two { background: #876DFF }
     }
     &[data-division="S"] {
       &.one { background: #7F4200 }
@@ -857,19 +853,19 @@ select {
       &.three { background: #D67D22 }
     }
     &[data-division="SW"] {
-      &.one { background: #00555E }
+      &.three { background: #00555E }
       &.two { background: #008592 }
-      &.three { background: #1AAFBE }
+      &.one { background: #1AAFBE }
     }
     &[data-division="W"] {
-      &.one { background: #816000 }
+      &.three { background: #816000 }
       &.two { background: #AC8000 }
-      &.three { background: #DAA400 }
+      &.one { background: #DAA400 }
     }
     &[data-division="NW"] {
-      &.one { background: #006119 }
+      &.three { background: #006119 }
       &.two { background: #03982B }
-      &.three { background: #28BD51 }
+      &.one { background: #28BD51 }
     }
   }
 
@@ -1196,5 +1192,18 @@ select {
   }
 }
 
+.ns-icon {
+  color: white;
+  font-size: 16px;
+  display: flex; 
+  align-items: center;
+  justify-content: center;
+
+  > img {
+    height: 24px;
+    width: 24px;
+  }
+}
+
 html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+body { margin: 0 }
