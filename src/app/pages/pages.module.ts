@@ -7,12 +7,15 @@ import { CommonModule } from '@angular/common';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NumberPickerModule } from 'ng-number-picker';
+import { AdminComponent } from './admin/admin.component';
+import { GoogleChartsModule } from 'angular-google-charts';
 
 
 const pages = [
   CentralComponent,
   HostComponent,
-  PlayerComponent
+  PlayerComponent, 
+  AdminComponent,
 ]
 
 @NgModule({
@@ -22,7 +25,8 @@ const pages = [
     CommonModule,
     FormsModule,
     NumberPickerModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    GoogleChartsModule,
   ],
   declarations: [
     ...pages

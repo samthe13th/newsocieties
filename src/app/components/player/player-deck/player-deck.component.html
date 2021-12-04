@@ -22,14 +22,18 @@
   </div>
   <div class="player-hand">
     <div class="local-resources">
-      <app-harvest-image
-        *ngFor="let resource of citizen?.resources"
-        class="resource"
-        [contaminated]="false"
-        [division]="resource.division"
-        type="R"
-        [value]="resource.value">
-      </app-harvest-image>
+      <ng-container  *ngFor="let resource of citizen?.resources; let i = index">
+        <app-harvest-image
+          *ngIf="i < 17"
+          class="resource"
+          [contaminated]="false"
+          [division]="resource.division"
+          type="R"
+          [value]="resource.value">
+        </app-harvest-image>
+        <span class="resource-overflow" *ngIf="i == 17">...</span>
+      </ng-container>
+      
       <!-- <div 
         class="resource" 
         *ngFor="let resource of citizen?.resources"

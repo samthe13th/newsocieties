@@ -7,7 +7,7 @@ import { LandGridComponent } from 'src/app/components/shared/land-grid/land-grid
 import { tap, take, map } from 'rxjs/operators';
 import { Subject, combineLatest } from 'rxjs';
 import { LandCardValues } from 'src/app/interfaces';
-import { toArray, includes, findIndex, filter, find } from 'lodash';
+import { capitalize, toArray, includes, findIndex, filter, find } from 'lodash';
 import { faLeaf, faFlag, faEye, faArchway, faBriefcaseMedical, faShieldAlt, faShoppingBag, faBrain, faTheaterMasks, faBuilding } from '@fortawesome/free-solid-svg-icons';
 import { DivisionService } from 'src/app/services/division-service.service';
 
@@ -260,6 +260,7 @@ export class PlayerComponent implements OnInit {
   }
 
   onSelect(card) {
+    console.log('select for ', this.user)
     this.selectedCard = card;
     // this.actionSheet = this._bottomSheet.open(this.sheetTemplate);
     // this.selectedResourceStatus = this.getResourceStatus(card);
@@ -267,7 +268,7 @@ export class PlayerComponent implements OnInit {
       selection: {
         type: 'harvest-tile',
         value: card?.index,
-        mark : this.user ? this.user?.name[0] : ''
+        mark : this.user ? `${this.position}${capitalize(this.user?.name[0])}` : ''
       }
     })
     // this.actionSheet.afterDismissed()

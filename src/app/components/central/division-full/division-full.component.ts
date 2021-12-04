@@ -23,6 +23,7 @@ export class DivisionFullComponent {
   showDecisions = 'principles';
 
   @Input() showKey;
+  @Input() user;
   @Input() divisionKey;
   @Output() clickNewEvent = new EventEmitter<any>();
 

@@ -162,13 +162,99 @@
 
 <ng-template #showBody>
   <div class="flex-row" style="overflow: hidden">
+    <div>
+      <button (click)="resetShow()">Reset Show</button>
+
+      <br/>
+
+      <div class="central-contamination-controls" *ngIf="$contamination | async as contam">
+        <google-chart
+          width="300px"
+          height="200px"
+          [type]="chart.type"
+          [data]="$contamData | async"
+          [columns]="chart.columns"
+          [options]="chart.options"
+        >
+        </google-chart>
+
+        <h2>Global Contamination Level: {{contam?.current}}%</h2>
+        <!-- <ng-number-picker
+         class="number-picker"
+         (valueChange)="onContaminationChange($event)" 
+         [min]="0"
+         [max]="100"
+         [value]="contam?.current">
+        </ng-number-picker> -->
+
+        Min Contamination (%)
+        <ng-number-picker
+         class="number-picker"
+         (valueChange)="onChangeContamMin($event)" 
+         [min]="0"
+         [value]="contam?.min">
+        </ng-number-picker>
+
+        Max Contamination (%)
+        <ng-number-picker
+         class="number-picker"
+         (valueChange)="onChangeContamMax($event)" 
+         [min]="0"
+         [value]="contam?.max">
+        </ng-number-picker>
+
+        Start Increasing (minute)
+        <ng-number-picker
+         class="number-picker"
+         (valueChange)="onChangeContamStart($event)" 
+         [min]="0"
+         [value]="contam?.start">
+        </ng-number-picker>
+
+        Stop Increasing (minute)
+        <ng-number-picker
+         class="number-picker"
+         (valueChange)="onChangeContamEnd($event)" 
+         [min]="0"
+         [value]="contam?.end">
+        </ng-number-picker>
+      </div>
+
+      <hr/>
+      
+      <div class="vote-data">
+        Principles
+        <input [(ngModel)]="csvFileData.principles" (change)="uploadPrinciplesData($event)" type="file" #fileUpload/>
+      </div>
+    
+      <div class="vote-data">
+        Resolutions
+        <input [(ngModel)]="csvFileData.resolutions" (change)="uploadResolutionsData($event)" type="file" #fileUpload/>
+      </div>
+    
+      <div class="vote-data">
+        Scenarios
+        <input [(ngModel)]="csvFileData.scenarios" (change)="uploadScenariosData($event)" type="file" #fileUpload/>
+      </div>
+    
+      <div class="vote-data">
+        Events
+        <input [(ngModel)]="csvFileData.events" (change)="uploadEventsData($event)" type="file" #fileUpload/>
+      </div>
+    
+      <div class="vote-data">
+        Timeline
+        <input [(ngModel)]="csvFileData.timeline" (change)="uploadTimelineData($event)" type="file" #fileUpload/>
+      </div>
+
+      <hr/>
+    </div>
     <div class="timeline">
-      <h2>Global Contamination Level: {{($contamination | async)?.current}}%</h2>
       <div>
-        <!-- <button (click)="startClock()">Start</button> -->
+        <button (click)="startClock()">Start</button>
         <ng-container *ngIf="$time | async as timer">
           <ng-container *ngIf="timer.live">
-            <!-- <button (click)="stopClock()">Stop</button> -->
+            <button (click)="stopClock()">Stop</button>
             <h2>START: {{ timer.start | date: 'hh:mm:ss a' }}</h2>
             <h2>TIME: {{ timer.clock | date: 'hh:mm:ss a' }}</h2>
           </ng-container>
@@ -193,6 +279,7 @@
 <ng-template #usersBody>
   <div class="vote-data">
     Users
+    <input [(ngModel)]="csvFileData.users" (change)="uploadUsersData($event)" type="file" #fileUpload/>
     <button (click)="newUserCode()">Add User Code</button>
   </div>
   <br/>
@@ -202,11 +289,6 @@
 <ng-container *ngFor="let div of divisions">
   <ng-template #tab>
     {{ div }}
-    <ng-container *ngIf="$unseenMessages | async as unseen">
-      <span *ngIf="unseen[div] > 0 && currentTab !== div">
-        ({{ unseen[div] }})
-      </span>
-    </ng-container>
   </ng-template>
   <ng-template #division>
     <div class="central__division">
@@ -246,7 +328,7 @@
         </div>
       </div>
       <div class="central__division-main">
-        <app-division-full user="central" (clickNewEvent)="onClickNewEvent($event)" [showKey]="showKey" [divisionKey]="div"></app-division-full>
+        <app-division-full user="admin" (clickNewEvent)="onClickNewEvent($event)" [showKey]="showKey" [divisionKey]="div"></app-division-full>
       </div>
     </div>
   </ng-template>
