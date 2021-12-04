@@ -67,6 +67,15 @@
   margin-right: 5px;
 }
 
+@keyframes slide-in {
+  0% {
+    transform: translateY(-100%)
+  }
+  100% {
+    transform: translateY(0)
+  }
+}
+
 @keyframes grow {
   0% {
     transform: scale(0)

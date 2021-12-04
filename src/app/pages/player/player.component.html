@@ -248,8 +248,11 @@
                         <fa-icon size="sm" [icon]="resourceIcon"></fa-icon>
                         {{calculateWealth(citizen?.resources)}}
                       </span> -->
-                      <span>
-                        <fa-icon size="sm" [icon]="landIcon"></fa-icon>
+                      <span class="citizen-list__stats" title="Land plots owned">
+                        <i class="ns-icon">
+                          <img src='/assets/land_white.png'/>
+                        </i>
+                        <!-- <fa-icon size="sm" [icon]="landIcon"></fa-icon> -->
                         {{ citizen?.land ? citizen?.land : 0 }}
                       </span>
                     </div>

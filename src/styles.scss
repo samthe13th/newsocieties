@@ -317,12 +317,12 @@ select {
     box-sizing: border-box;
     justify-content: center;
     border-radius: 10px;
-    background: #8a1c2a;
+    background: #62141e;
     display: flex;
     flex-direction: column;
     transition: transform 300ms ease-in;
     transform: scale(0);
-    animation: grow 400ms ease-in forwards;
+    animation: slide-in 400ms ease-in forwards;
   }
 }
 

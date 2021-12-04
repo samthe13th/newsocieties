@@ -2,17 +2,20 @@
   <div class="player-deck__summary">
     <div class="citizen-header">
       <div class="citizen-name" [class.player-turn-indicator]="myTurn">
-        <strong>{{position}}:</strong>{{citizen?.name}}
+        <strong>{{position}}: </strong> {{citizen?.name}}
         <!-- <app-player-turn 
           [showLabel]="false"
           [divisionPath]="divisionPath">
         </app-player-turn> -->
        
       </div>
-      <div class="citizen-stats">
+      <div class="citizen-stats" title="Land plots owned">
         <!-- <fa-icon size="sm" [icon]="resourceIcon"></fa-icon>
         {{ wealth }} -->
-        <fa-icon size="sm" [icon]="landIcon"></fa-icon>
+        <i class="ns-icon">
+          <img src='/assets/land_white.png'/>
+        </i>
+        <!-- <fa-icon size="sm" [icon]="landIcon"></fa-icon> -->
         {{ citizen?.land ? citizen?.land : 0 }}
       </div>
     </div>

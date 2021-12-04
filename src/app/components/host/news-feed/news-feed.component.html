@@ -15,10 +15,11 @@
   class="event-feed"
   #feedWrapper>
   <ng-container *ngFor="let event of ($events | async)">
-    <em class="timestamp">{{event?.timestamp}}</em>
     <div
       *ngIf="!(showResolved == false && event?.resolved)"
       class="event-bubble">
+
+      <em class="timestamp">{{event?.timestamp}}</em>
 
       <div 
         class="event-header"

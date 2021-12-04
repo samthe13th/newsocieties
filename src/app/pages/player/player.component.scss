@@ -140,6 +140,19 @@
   flex-direction: column;
   flex: 1;
 
+  .citizen-list__stats {
+    display: flex; 
+    align-items: center; 
+
+    > .ns-icon {
+      margin-right: 5px;
+    }
+
+    * > {
+      margin-left: 5px;
+    }
+  }
+
   .citizen-list {
     display: flex;
     margin: 5px 0;
