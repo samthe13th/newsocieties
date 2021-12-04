@@ -27,7 +27,6 @@ const KEY_CODE = {
 })
 export class PlayerComponent implements OnInit {
   $division;
-  $focus; 
   $turn;
   $citizens;
   $player;
@@ -133,7 +132,9 @@ export class PlayerComponent implements OnInit {
       .pipe(
         map(focus => focus !== 'new-season' ? 'main' : 'newSeason')
       )
-    this.$focusState = this.db.object(`${this.divisionPath}/focus`).valueChanges()
+    this.$focusState = this.db.object(`${this.divisionPath}/focus`)
+      .valueChanges()
+      .pipe(tap((f) => console.log("FOCUS: ", f)))
     this.db.object(`shows/${show}/divisions`)
       .valueChanges()
       .pipe(take(1))
@@ -211,7 +212,6 @@ export class PlayerComponent implements OnInit {
         tap((citizens) => this.position = find(citizens, ['id', this.id])?.position ),
         map((citizens) => filter(citizens, c => c.id !== this.id))
       );
-    this.$focus = this.db.object(`${this.divisionPath}/focus`).valueChanges();
     this.$vote = this.db.object(`${this.divisionPath}/vote`).valueChanges();
   }
 

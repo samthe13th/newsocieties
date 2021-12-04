@@ -10,7 +10,7 @@ import { Component, Input, OnInit } from '@angular/core';
     '[class.two]': 'value === 2',
     '[class.three]': 'value === 3',
     '[class.contaminated]': 'contaminated',
-    '[class.contamination]': 'type === "C"',
+    '[class.contaminant]': 'type === "C"',
     '[attr.data-division]': 'division'
   }
 })

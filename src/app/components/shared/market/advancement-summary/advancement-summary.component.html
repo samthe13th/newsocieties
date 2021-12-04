@@ -1,7 +1,10 @@
 <div *ngFor="let adv of ($advSummary | async)" class="advancement-summary">
   <div class="flex-row">
     <div class="adv-summary-segment--L">
-      <h2>{{adv?.type}}: {{adv?.total}}</h2>
+      <h2 class="advancement-header">
+        <i class="ns-icon"><img [src]="adv.icon"/></i>
+        {{adv?.type}}: {{adv?.total}}
+      </h2>
       <strong>Benefit:</strong> {{adv?.benefit}}
     </div>
     <div class="adv-summary-contributors"><strong>Contributors</strong>

@@ -20,6 +20,14 @@
   }
 }
 
+.advancement-header {
+  display: flex;
+
+  .ns-icon {
+    margin-right: 5px;
+  }
+}
+
 .advancement-summary {
   font-size: 16px;
   width: 100%;

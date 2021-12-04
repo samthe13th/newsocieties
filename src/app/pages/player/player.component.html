@@ -66,9 +66,9 @@
                 harvest: harvestTemplate,
                 misc: marketTemplate,
                 resolutionReview: resolutionReviewTemplate,
-                resolutions: voteTemplate, 
-                principles: voteTemplate,
-                scenario: voteTemplate,
+                resolutions: resolutionsTemplate, 
+                principles: principlesTemplate,
+                scenario: scenariosTemplate,
                 review: reviewTemplate
               }"
               [templateName]="$focusState | async"
@@ -114,8 +114,8 @@
             <ng-template #resolutionReviewTemplate>
               <div class="player-vote-wrap">
                 <div class="relative-position">
-                  <div class="tab-background voting blur" >
-                    <img src="assets/hex.jpg"/>
+                  <div class="tab-background voting blur">
+                    <img src="assets/resolution_backgrounds/{{divisionKey}}.jpg"/>
                   </div>
             
                   <div class="tab-foreground player-vote">
@@ -128,41 +128,73 @@
                 </div>
               </div>
             </ng-template>
+
+            <!-- RESOLUTION -->
+            <ng-template #resolutionsTemplate>
+              <div class="player-vote-wrap">
+                <div class="relative-position">
+                  <div class="tab-background voting blur">
+                    <img src="assets/resolution_backgrounds/{{divisionKey}}.jpg"/>
+                  </div>
             
-            <!-- VOTE -->
-            <ng-template #voteTemplate>
+                  <ng-container *ngTemplateOutlet="voteTemplate"></ng-container>
+                </div>
+              </div>
+            </ng-template>
+            
+            <!-- PRINCIPLE -->
+            <ng-template #principlesTemplate>
               <div class="player-vote-wrap">
                 <div class="relative-position">
                   <div class="tab-background voting blur" >
-                    <img src="assets/hex.jpg"/>
+                    <img
+                      src="assets/principle_backgrounds/{{divisionKey}}.jpg"/>
                   </div>
-            
-                  <div *ngIf="$vote | async as vote" class="tab-foreground player-vote">
-                      <div *ngIf="(vote?.state === 'voting' && hasVoted(vote?.voted)) else playerVoteTemplate" style="text-align: center">
-                        <p>Thanks for voting!</p>
-                        <p>Waiting for polls to close...</p>
-                      </div>
 
-                      <ng-template #playerVoteTemplate>
-                        <app-vote
-                          (selectionChange)="onSelectionChange($event)"
-                          [showVotes]="vote?.state === 'review'"
-                          [allowSelection]="vote?.state === 'voting'"
-                          [showKey]="showKey"
-                          role="citizen"
-                          hideOption="last"
-                          [divisionId]="division.code"
-                        ></app-vote>
-                        <button
-                          *ngIf="vote?.state === 'voting'"
-                          class="action-button"
-                          (click)="castVote()">
-                          Vote
-                        </button>
-                      </ng-template>
-                  </div>
+                  <ng-container *ngTemplateOutlet="voteTemplate"></ng-container>
+
                 </div>
               </div>
+            </ng-template>
+            
+            <!-- SCENARIO -->
+            <ng-template #scenariosTemplate>
+              <div class="player-vote-wrap">
+                <div class="relative-position">
+                  <div class="tab-background voting blur">
+                    <img
+                      src="assets/resolution_backgrounds/{{divisionKey}}.jpg"/>
+                  </div>
+                  <ng-container *ngTemplateOutlet="voteTemplate"></ng-container>
+                </div>
+              </div>
+            </ng-template>
+
+            <ng-template #voteTemplate>
+              <div *ngIf="$vote | async as vote" class="tab-foreground player-vote">
+                <div *ngIf="(vote?.state === 'voting' && hasVoted(vote?.voted)) else playerVoteTemplate" style="text-align: center">
+                  <p>Thanks for voting!</p>
+                  <p>Waiting for polls to close...</p>
+                </div>
+
+                <ng-template #playerVoteTemplate>
+                  <app-vote
+                    (selectionChange)="onSelectionChange($event)"
+                    [showVotes]="vote?.state === 'review'"
+                    [allowSelection]="vote?.state === 'voting'"
+                    [showKey]="showKey"
+                    role="citizen"
+                    hideOption="last"
+                    [divisionId]="division.code"
+                  ></app-vote>
+                  <button
+                    *ngIf="vote?.state === 'voting'"
+                    class="action-button"
+                    (click)="castVote()">
+                    Vote
+                  </button>
+                </ng-template>
+            </div>
             </ng-template>
 
             <!-- MARKET -->

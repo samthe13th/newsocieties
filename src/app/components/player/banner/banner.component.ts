@@ -21,6 +21,7 @@ export class BannerComponent {
   $global: Observable<any>;
   $playerViews: Observable<any>;
   $playerViewHighlight: Observable<any>;
+  $divisionName: Observable<any>;
 
   divisionsLoaded = new Subject<boolean>();
   reserveLoaded = new Subject<boolean>();
@@ -40,6 +41,7 @@ export class BannerComponent {
       tap((x) => console.log("highlight: ", x))
     )
     this.$playerViews = this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/playerViews`).valueChanges();
+    this.$divisionName = this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/name`).valueChanges();
     this.$global = this.db.object(`shows/${this.showKey}/global`).valueChanges();
     this.$loaded = combineLatest(
       of(this.reserveLoaded),

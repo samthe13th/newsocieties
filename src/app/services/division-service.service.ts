@@ -184,15 +184,15 @@ export class DivisionService {
 
   getScore(VP) {
     if (VP < SCORE.midLow.VP) {
-      return 'low'
+      return 'Low'
     } else if (VP < SCORE.mid.VP) {
-      return 'midLow'
+      return 'Mid-Low'
     } else if (VP < SCORE.midHigh.VP) {
-      return 'mid'
+      return 'Mid'
     } else if (VP < SCORE.high.VP) {
-      return 'midHigh'
+      return 'Mid-High'
     }
-    return 'high'
+    return 'High'
   }
 
   async contaminateResources(showKey, divisionKey, playerId) {

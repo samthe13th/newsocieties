@@ -42,7 +42,7 @@ export class ToastComponent implements OnInit {
   show() {
     this.animateIn = true;
     setTimeout(() => {
-     this.dismiss();
+      this.dismiss();
     }, this.data?.duration ?? this.duration)
   }
 

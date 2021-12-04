@@ -28,6 +28,7 @@ export class AdvancementSummaryComponent {
       map(([adv, citizens]) => {
         return Object.keys(adv).map((key) => ({
           type: capitalize(key),
+          icon: `/assets/${key}.png`,
           total: adv[key].communal + adv[key].individual,
           benefit: adv[key].reward.text,
           contributors: citizens
