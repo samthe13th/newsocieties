@@ -1038,6 +1038,17 @@ export class HostComponent implements OnInit, OnDestroy {
         division.capacity,
         division.actions
       ])
+      console.log('update exceeding cap: ', this.divisionKey);
+      await this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/exceedingCapacity`).query.ref.transaction((global) => { 
+        const result = global === null ? { 
+          actual: toNumber(division?.actions),
+          capacity: toNumber(division?.capacity)
+         } : { 
+           actual: toNumber(global?.actual) + toNumber(division?.actions),
+           capacity: toNumber(global?.capacity) + toNumber(division?.capacity),
+         }
+        return result
+      })
       await this.db.object(`shows/${this.showKey}/global`).query.ref.transaction((global) => { 
         const result = global === null ? { 
           actual: toNumber(division?.actions),

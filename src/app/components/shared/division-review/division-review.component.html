@@ -9,6 +9,8 @@
   <div><strong>Arts and Culture:</strong>{{division?.advancements?.arts.communal + division?.advancements?.arts.individual}}</div>
   <div><strong>Knowledge:</strong>{{division?.advancements?.knowledge.communal + division?.advancements?.knowledge.individual}}</div>
   <div><strong>Infrastructure:</strong>{{division?.advancements?.infrastructure.communal + division?.advancements?.infrastructure.individual}}</div>
+  <div><strong>Exceeded Capacity: </strong>{{division?.exceededCapacity }}</div>
+  <div><strong>Resources In-Hand: </strong>{{division?.inHand }}</div>
   <br/>
   <h2>Principles</h2>
   <p *ngFor="let p of division.principles">{{p.value}}</p>

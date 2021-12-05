@@ -2,6 +2,8 @@ import { Component, Input, OnInit } from '@angular/core';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { switchMap, map, tap } from 'rxjs/operators';
 import { of, combineLatest } from 'rxjs';
+import { BankService } from 'src/app/services/bank.service';
+import { each } from 'lodash';
 
 @Component({
   selector: 'app-division-review',
@@ -19,6 +21,7 @@ export class DivisionReviewComponent implements OnInit {
 
   constructor(
     private db: AngularFireDatabase,
+    private bankService: BankService,
   ) {}
 
   ngOnInit() {
@@ -29,15 +32,29 @@ export class DivisionReviewComponent implements OnInit {
           this.db.object(`shows/${this.showKey}/divisions/${toReview}/score`).valueChanges(),
           this.db.object(`shows/${this.showKey}/divisions/${toReview}/reserve`).valueChanges(),
           this.db.object(`shows/${this.showKey}/divisions/${toReview}/advancements`).valueChanges(),
+          this.db.object(`shows/${this.showKey}/divisions/${toReview}/exceedingCapacity`).valueChanges().pipe(
+            map(({ actual, capacity }: any) => `${Math.round(((actual / capacity) * 100)) - 100}%`),
+            tap((exceeded) => console.log("EXCEEDED: ", exceeded))
+          ),
+          this.db.object(`shows/${this.showKey}/divisions/${toReview}/citizens`).valueChanges().pipe(
+            map((citizens) => {
+              let inHand = 0;
+              each(citizens, (c) => {
+                inHand += this.bankService.calculateWealth(c.resources);
+              })
+              return inHand;
+            }),
+            tap((hand) => console.log({hand}))
+          ),
           this.db.list(`shows/${this.showKey}/divisions/${toReview}/localLand`).valueChanges(),
           this.db.list(`shows/${this.showKey}/divisions/${toReview}/globalLand`).valueChanges(),
           this.db.list(`shows/${this.showKey}/divisions/${toReview}/principles`).valueChanges(),
           this.db.list(`shows/${this.showKey}/divisions/${toReview}/resolutions`).valueChanges(),
-          this.db.list(`shows/${this.showKey}/divisions/${toReview}/scenarios`).valueChanges()
+          this.db.list(`shows/${this.showKey}/divisions/${toReview}/scenarios`).valueChanges(),
         )
       ),
-      map(([code, score, reserve, advancements, localLand, globalLand, principles, resolutions, scenarios]) => ({
-        code, score, reserve, advancements, localLand, globalLand, principles, resolutions, scenarios
+      map(([code, score, reserve, advancements, exceededCapacity, inHand, localLand, globalLand, principles, resolutions, scenarios]) => ({
+        code, score, reserve, advancements, exceededCapacity, inHand, localLand, globalLand, principles, resolutions, scenarios
       }))
     )
   }
