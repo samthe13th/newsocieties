@@ -1,0 +1,9 @@
+<div *ngFor="let row of tiles" class="flex-row">
+  <div 
+    *ngFor="let tile of row"
+    [class.contaminated]="tile === 'X' || tile === 'C'"
+    [class.default]="tile === 'O'"
+    class="demo-tile-image resource">
+    <app-harvest-image [type]="tile" [value]="centerTileValue"></app-harvest-image>
+  </div>
+</div>

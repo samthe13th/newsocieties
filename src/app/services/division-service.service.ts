@@ -7,35 +7,35 @@ import { pluckRandom } from '../utilties';
 const ADVANCEMENTS = ["safety", "health", "arts", "knowledge", "infrastructure"];
 
 const SCORE = {
-  low:  {
+  Low:  {
     VP: 0,
     capacity: 12,
     harvest: 18,
     landCost: 4,
     thresholds: [5, 10, 15],
   },
-  midLow: {
+  "Mid-Low": {
     VP: 6,
     capacity: 18,
     harvest: 25,
     landCost: 5,
     thresholds: [7, 12, 17],
   },
-  mid: {
+  Mid: {
     VP: 12,
     capacity: 24,
     harvest: 34,
     landCost: 6,
     thresholds: [9, 14, 19],
   },
-  midHigh: {
+  "Mid-High": {
     VP: 18,
     capacity: 30,
     harvest: 42,
     landCost: 8,
     thresholds: [11, 16, 21],
   },
-  high: {
+  "High": {
     VP: 24,
     capacity: 36,
     harvest: 49,
@@ -183,13 +183,13 @@ export class DivisionService {
   }
 
   getScore(VP) {
-    if (VP < SCORE.midLow.VP) {
+    if (VP < SCORE["Mid-Low"].VP) {
       return 'Low'
-    } else if (VP < SCORE.mid.VP) {
+    } else if (VP < SCORE["Mid"].VP) {
       return 'Mid-Low'
-    } else if (VP < SCORE.midHigh.VP) {
+    } else if (VP < SCORE["Mid-High"].VP) {
       return 'Mid'
-    } else if (VP < SCORE.high.VP) {
+    } else if (VP < SCORE["High"].VP) {
       return 'Mid-High'
     }
     return 'High'
@@ -257,6 +257,7 @@ export class DivisionService {
       .valueChanges()
       .pipe(take(1))
       .subscribe((division: any) => {
+        console.log('SCORE: ', division?.score, SCORE)
         const updates = SCORE[division?.score];
         const capacity = division?.highThresholdMet
           ? division?.capacity + 1

@@ -38,6 +38,9 @@ import { DivisionReviewComponent } from './shared/division-review/division-revie
 import { StateComponent } from './shared/state/state.component';
 import { GoogleChartsModule } from 'angular-google-charts';
 import { DivisionChartComponent } from './shared/division-chart/division-chart.component';
+import { LargePopupComponent } from './shared/large-popup/large-popup.component';
+import { DemoTilesComponent } from './shared/demo-tiles/demo-tiles.component';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 const components = [
   AdvancementTrackComponent,
@@ -46,6 +49,7 @@ const components = [
   BannerComponent,
   CardComponent,
   ChatComponent,
+  DemoTilesComponent,
   DivisionChartComponent,
   DivisionFullComponent,
   DivisionPopupsComponent,
@@ -54,6 +58,7 @@ const components = [
   GlobalLandComponent,
   HarvestImageComponent,
   LandGridComponent,
+  LargePopupComponent,
   MarketComponent,
   NotificationFeedComponent,
   NewsFeedComponent,
@@ -83,6 +88,7 @@ const ngMaterial = [
 
 @NgModule({
   imports: [
+    BrowserAnimationsModule,
     FormsModule,
     ReactiveFormsModule,
     CommonModule,

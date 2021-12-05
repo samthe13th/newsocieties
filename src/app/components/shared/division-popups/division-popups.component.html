@@ -1,6 +1,8 @@
-<ng-container *ngIf="divisionEvent">
+<ng-container>
   <app-toast
-     (afterDismiss)="afterToastHide()" [data]="divisionEvent">
+    *ngIf="divisionEvent && type === 'toast'"
+    (afterDismiss)="afterToastHide()"
+    [data]="divisionEvent">
     <app-harvest-image
       class="resource toast-event-resource"
       [contaminated]="false"
@@ -9,4 +11,16 @@
       [value]="divisionEvent.value">
     </app-harvest-image>
   </app-toast>
+  <app-large-popup
+    *ngIf="divisionEvent && type === 'large-popup'"
+    (afterDismiss)="afterLargePopupHide()"
+    @fadeInOut
+    [data]="divisionEvent"
+    [canDismiss]="user !== 'player'"
+  >
+    <app-demo-tiles
+      [centerTileValue]="divisionEvent?.value"
+      [tiles]="divisionEvent?.data">
+    </app-demo-tiles>
+  </app-large-popup>
 </ng-container>

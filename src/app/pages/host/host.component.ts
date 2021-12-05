@@ -176,6 +176,8 @@ export class HostComponent implements OnInit, OnDestroy {
   citizens;
   positions;
   lockColumns;
+  divisionScore;
+  landmarks;
 
 
   constructor(
@@ -196,7 +198,6 @@ export class HostComponent implements OnInit, OnDestroy {
       .pipe(take(1)).subscribe((color) =>{
         this.divisionColor = color;
       })
-
     this.$pageState = this.db.object(`${this.divisionPath}/focus`).valueChanges()
       .pipe(
         map(focus => focus !== 'new-season' ? 'main' : 'newSeason')
@@ -204,8 +205,24 @@ export class HostComponent implements OnInit, OnDestroy {
     this.$vote = this.db.object(`${this.divisionPath}/vote`).valueChanges().pipe(
       tap((vote: any) => { console.log('VOTE: ', vote); this.voteState = vote?.state })
     )
+    this.db.object(`${this.divisionPath}/landmarks`).valueChanges().pipe(
+      takeUntil(this.destroy$)
+    ).subscribe((landmarks) => {
+      this.landmarks = landmarks;
+    })
     this.$division = this.db.object(this.divisionPath).valueChanges().pipe(
-      filter((x) => x !== null && x !== undefined)
+      filter((x) => x !== null && x !== undefined),
+      tap((div: any) => {
+        if (this.divisionScore !== div.score && !this.landmarks[div.score]) {
+          this.divisionScore = div.score;
+          this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/divisionLargePopup`).set({
+            type: 'Rating',
+            header: `Things are changing`,
+            message: `The ${div.name} is now at a ${div.score} rating`,
+          })
+          this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/landmarks/${div.score}`).set(true)
+        }
+      })
     );
     this.$citizens = this.db.list(`${this.divisionPath}/citizens`).valueChanges()
       .pipe(
@@ -215,6 +232,7 @@ export class HostComponent implements OnInit, OnDestroy {
             this.citizens = citizens;
           }
           this.citizenCount = citizens.length;
+
       })
     )
     this.$actions = this.db.object(`${this.divisionPath}/actions`).valueChanges();

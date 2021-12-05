@@ -31,6 +31,7 @@ export class LandGridComponent implements OnInit {
   contamination;
   harvestColumns;
   Sounds;
+  landmarks;
 
   private _turn;
   private _player;
@@ -82,6 +83,13 @@ export class LandGridComponent implements OnInit {
       .pipe(takeUntil(this.destroy$))
       .subscribe((positions) => {
       this.positions = positions;
+    })
+
+    this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/landmarks`).valueChanges().pipe(
+      takeUntil(this.destroy$)
+    ).subscribe((lm) => {
+      this.landmarks = lm;
+      console.log("update landmarks: ", this.landmarks)
     })
 
     combineLatest(
@@ -328,8 +336,42 @@ export class LandGridComponent implements OnInit {
     console.log('process: ', tile);
     if (!safe && tile.type === LandCardTypes.C && tile.harvested && !tile.owner) {
       await this.contaminateAdjacentTiles(tile);
+      this.checkDiscoveries(tile);
     }
     this.updateDB();
+  }
+
+  checkDiscoveries(tile) {
+    console.log('compare: ', tile, this.landmarks)
+    if (tile.value === 2 && !this.landmarks?.doubleContam) {
+      console.log('new contam')
+      this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/divisionLargePopup`).set({
+        type: 'Contaminant',
+        value: 2,
+        data: [
+          ['O', 'X', 'O'],
+          ['X', 'C', 'X'],
+          ['O', 'X', 'O']
+        ],
+        header: `A new type of contaminant has been uncovered`,
+        message: `This contaminant can spread in two directions`,
+      })
+      this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/landmarks/doubleContam`).set(true);
+    } else if (tile.value === 3 && !this.landmarks?.tripleContam) {
+      console.log('new contam')
+      this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/divisionLargePopup`).set({
+        type: 'Contaminant',
+        value: 3,
+        data: [
+          ['X', 'X', 'X'],
+          ['X', 'C', 'X'],
+          ['X', 'X', 'X']
+        ],
+        header: `A new type of contaminant has been uncovered`,
+        message: `This contaminant can spread in ALL directions`,
+      })
+      this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/landmarks/tripleContam`).set(true);
+    }
   }
 
   toggleColumn(n, enable) {

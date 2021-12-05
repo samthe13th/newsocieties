@@ -1,7 +1,9 @@
-import { Component, OnInit, Input, OnDestroy } from '@angular/core';
+import { Component, ViewChild, OnInit, Input, OnDestroy } from '@angular/core';
 import { AngularFireDatabase } from '@angular/fire/database';
-import { Observable, Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { Subject } from 'rxjs';
+import { takeUntil, tap } from 'rxjs/operators';
+import { LargePopupComponent } from '../large-popup/large-popup.component';
+import { trigger, transition, animate, style } from '@angular/animations';
 
 
 @Component({
@@ -10,16 +12,31 @@ import { takeUntil } from 'rxjs/operators';
   styleUrls: ['./division-popups.component.scss'],
   host: {
     '[class.app-division-popups]': 'true',
-    '[class.hide]': '!divisionEvent'
-  }
+    '[class.hide]': '!divisionEvent',
+  },
+  animations: [
+    trigger('fadeInOut', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateY(10px)' }),
+        animate('500ms', style({ opacity: 1, transform: 'translateY(0)' })),
+      ]),
+      transition(':leave', [
+        animate('500ms', style({ opacity: 0, transform: 'translateY(10px)' })),
+      ]),
+    ]),
+  ]
 })
 export class DivisionPopupsComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<boolean>();
 
+  @ViewChild("largePopup") largePopup: LargePopupComponent;
+
   divisionEvent;
 
+  @Input() type = 'toast';
   @Input() showKey;
   @Input() divisionKey;
+  @Input() user = 'player';
 
   constructor(
     private db: AngularFireDatabase,
@@ -27,13 +44,25 @@ export class DivisionPopupsComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     const popupUrl = `shows/${this.showKey}/divisions/${this.divisionKey}/divisionPopup`;
-    this.db.object(popupUrl)
+
+    if (this.type === 'large-popup') {
+      console.log('listen to large popup events')
+      this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/divisionLargePopup`)
+        .valueChanges()
+        .pipe(
+          takeUntil(this.destroy$),
+        ).subscribe((largeEvent) => {
+          this.divisionEvent = largeEvent;
+        })
+    } else {
+      this.db.object(popupUrl)
       .valueChanges()
       .pipe(
         takeUntil(this.destroy$)
-      ).subscribe((popup) => {
-        this.divisionEvent = popup;
+      ).subscribe((smallEvent) => {
+        this.divisionEvent = smallEvent;
       })
+    }
   }
 
   ngOnDestroy() {
@@ -45,5 +74,11 @@ export class DivisionPopupsComponent implements OnInit, OnDestroy {
     setTimeout(() => {
       this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/divisionPopup`).remove()
     }, 1000)
+  }
+
+  afterLargePopupHide() {
+    setTimeout(() => {
+      this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/divisionLargePopup`).remove()
+    })
   }
 }

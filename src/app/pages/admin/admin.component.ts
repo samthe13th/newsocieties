@@ -143,7 +143,8 @@ chart = {
       map((data:any) => ([
         [0, data?.min],
         [data?.start, data?.min],
-        [data?.end, data?.max]
+        [data?.end, data?.max],
+        [130, data?.max]
       ]))
     )
     this.$time = combineLatest(
@@ -492,7 +493,7 @@ chart = {
       }, {}) : null,
       contamination: {
         ...contamination,
-        current: 0
+        current: 10
       }
     }).then((res) => {
       this.buildShow(this.showKey)

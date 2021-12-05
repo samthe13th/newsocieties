@@ -857,4 +857,10 @@
   </div>
 </ng-template>
 
-<app-division-popups [showKey]="showKey" [divisionKey]="divisionKey"></app-division-popups>
+<app-division-popups type="toast" [showKey]="showKey" [divisionKey]="divisionKey"></app-division-popups>
+<app-division-popups
+  type="large-popup"
+  [showKey]="showKey"
+  user="host"
+  [divisionKey]="divisionKey">
+</app-division-popups>

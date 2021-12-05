@@ -1,8 +1,23 @@
+import { faLeaf } from '@fortawesome/free-solid-svg-icons'
+
 export const DIVISION_TEMPLATE = {
   events: [],
   harvestColumn: [true, true, true, true, true, true, true],
   lockHarvestColumns: false,
   marketView: 'localLand',
+  landmarks: {
+    doubleContam: false,
+    tripleContam: false,
+    artsAchieved: false,
+    safetyAchieved: false,
+    infrastructureAchieved: false,
+    healthAchieved: false,
+    knowledgeAchieved: false,
+    "Mid-Low": false,
+    "Mid": false,
+    "Mid-High": false,
+    "High": false
+  },
   advancements: {
     safety: {
       communal: 0,
