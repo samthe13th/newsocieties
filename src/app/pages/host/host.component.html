@@ -253,6 +253,7 @@
           <div>
             <button *ngIf="voteState === 'voting'" (click)="closePolls()">Close Polls</button>
             <button *ngIf="focus === 'principles' && voteState === 'review'" (click)="noDecision()">No Decision</button>
+            <button *ngIf="focus === 'resolutions' && voteState === 'review'" (click)="doNotAct()">Do not act</button>
             <button *ngIf="voteState === 'review'" (click)="customVoteOption()">Custom</button>
             <button *ngIf="voteState === 'review' && divisionVote" (click)="implement()">Implement</button>
           </div>

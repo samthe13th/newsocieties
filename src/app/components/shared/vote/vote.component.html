@@ -1,7 +1,8 @@
 <ng-container *ngIf="$vote | async as vote">
   <div class="vote-wrapper">
     <div *ngIf="vote?.state === 'final' && vote?.noDecision">
-      <em>The Society could not come to a decision</em>
+      <em *ngIf="vote?.type === 'principle'">The Society could not come to a decision</em>
+      <em *ngIf="vote?.type === 'resolution'">The Society did not act</em>
     </div>
 
     <div *ngIf="vote?.selected" class="vote-recap">

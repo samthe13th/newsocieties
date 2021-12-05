@@ -1,10 +1,10 @@
 import { Component, HostListener, OnInit, OnDestroy, ViewChild, TemplateRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AngularFireDatabase } from '@angular/fire/database';
-import { getRandomInt, pluckRandom } from 'src/app/utilties';
+import { pluckRandom } from 'src/app/utilties';
 import { LandTile, LandCardTypes } from 'src/app/interfaces';
 import * as _ from 'lodash';
-import { isNumber, includes, trim, find, difference, differenceBy, toNumber, each, partition } from 'lodash';
+import { trim, find, findIndex, differenceBy, toNumber, each, partition } from 'lodash';
 import { take, map, tap, filter, takeUntil } from 'rxjs/operators'
 import { Subject, combineLatest } from 'rxjs';
 import { BankService } from 'src/app/services/bank.service';
@@ -601,7 +601,7 @@ export class HostComponent implements OnInit, OnDestroy {
   }
 
   autoPick(focus) {
-    const untouched = this.voteDropdown.filter((option) => !option.noDecision);
+    const untouched = this.voteDropdown.filter((option) => !option.votedOn);
     console.log('untouched: ', untouched)
     this.voteDropdownSelect = pluckRandom(untouched, 1)[0];
     this.startVote(focus)
@@ -737,16 +737,22 @@ export class HostComponent implements OnInit, OnDestroy {
     }
   }
 
-  noDecision() {
+  doNotAct() {
+    console.log("implement do not act")
     this.db.object(`${this.divisionPath}/vote`).update({
       state: 'final',
       noDecision: true,
     });
-    this.db.list(`${this.divisionPath}/undecided-principles`).push({
-      title: this.divisionVote.vote.title,
-      value: 'No decision',
-      noDecision: true
+    this.pushToCentral('resolutions', `${this.divisionVote.vote.result} did not act`);
+  }
+
+  noDecision() {
+    console.log("implements no decision")
+    this.db.object(`${this.divisionPath}/vote`).update({
+      state: 'final',
+      noDecision: true,
     });
+    this.pushToCentral('principles', "The division did not make a decision");
   }
 
   customVoteOption() {
@@ -759,7 +765,9 @@ export class HostComponent implements OnInit, OnDestroy {
     const selection = customVote
       ? { result: customVote }
       : this.divisionVote.selection;
+
     console.log("IMPLEMENT: ", selection)
+
     if (!this.divisionVote) return;
     if (this.divisionVote.vote.type === 'resolution') {
       this.setResolution(selection);
@@ -768,6 +776,7 @@ export class HostComponent implements OnInit, OnDestroy {
     } else if (this.divisionVote.vote.type === 'scenario') {
       this.setScenario(selection);
     }
+
     this.showModal = false;
   }
 
@@ -822,29 +831,25 @@ export class HostComponent implements OnInit, OnDestroy {
     this.voteDropdownSelect = null;
     
     if (type === 'resolutions') {
-      this.db.list(`${divisionPath}/resolutions`)
-        .valueChanges()
-        .pipe(take(1))
-        .subscribe((resolutions) => {
+      this.db.list(`${divisionPath}/resolutions`).valueChanges().pipe(take(1))
+      .subscribe((resolutions) => {
           this.voteType = 'resolution';
-          this.voteDropdown = differenceBy(this.globalResolutions, resolutions, 'title');
+          this.voteDropdown = this.globalResolutions.map((resolution) => {
+            return (find(resolutions, ['title', resolution.title])) 
+              ? { ...resolution, votedOn: true }
+              : resolution
+          });
         });
     } else if (type === 'principles') {
-
-      combineLatest(
-        this.db.list(`${divisionPath}/principles`).valueChanges().pipe(take(1)),
-        this.db.list(`${divisionPath}/undecided-principles`).valueChanges().pipe(take(1))
-      ).pipe(take(1))
-      .subscribe(([principles, undecided]) => {
-        this.voteType = 'principle';
-        this.voteDropdown = differenceBy(this.globalPrinciples, principles, 'title').map((principle) => {
-          console.log('find ', principle, undecided, find(undecided, ['title', principle.title]));
-          return (find(undecided, ['title', principle.title])) 
-            ? { ...principle, noDecision: true }
-            : principle
-        });
-        console.log("set dropdown: ", principles, undecided, this.voteDropdown)
-      })
+      this.db.list(`${divisionPath}/principles`).valueChanges().pipe(take(1))
+        .subscribe((principles) => {
+          this.voteType = 'principle';
+          this.voteDropdown = this.globalPrinciples.map((principle) => {
+            return (find(principles, ['title', principle.title])) 
+              ? { ...principle, votedOn: true }
+              : principle
+          });
+        })
     } else if (type === 'scenarios') {
       this.db.list(`${divisionPath}/scenarios`)
         .valueChanges()
@@ -888,19 +893,7 @@ export class HostComponent implements OnInit, OnDestroy {
       noDecision: false
     })
 
-    this.db.list(`${this.divisionPath}/principles`).push({
-      title: this.divisionVote.vote.title,
-      value: principle
-    })
-
-    this.db.list(`shows/${this.showKey}/feeds/${this.divisionKey}`).push({
-      from: this.divisionKey,
-      type: 'vote',
-      header: this.divisionVote.vote.title,
-      value: principle,
-      timestamp: moment().format('h:mm:ss')
-    })
-    this.db.object(`shows/${this.showKey}/centralUnseen/${this.divisionKey}`).query.ref.transaction((unseen) => ++unseen)
+    this.pushToCentral('principles', principle);
   }
 
   setResolution(selection) {
@@ -917,17 +910,41 @@ export class HostComponent implements OnInit, OnDestroy {
       state: 'final',
       selected: selection
     })
+
     this.db.object(`${this.divisionPath}/lastResolution`).set(resolutionData)
-    console.log("set resolution: ", resolutionData)
-    this.db.list(`${this.divisionPath}/resolutions`).push(resolutionData);
+    this.pushToCentral('resolutions', resolution);
+  }
+
+  async pushToCentral(type, message) {
+    console.log("push to central: ", type, message)
+    const entries = await this.db.list(`${this.divisionPath}/${type}`)
+      .valueChanges()
+      .pipe(take(1))
+      .toPromise()
+
+    const indexOfEntry = findIndex(entries, ['title', this.divisionVote.vote.title]);
+    const update = {
+      title: this.divisionVote.vote.title,
+      value: message
+    }
+
+    if (indexOfEntry !== -1) {
+      entries[indexOfEntry] = update;
+      this.db.object(`${this.divisionPath}/${type}`).set(entries);
+    } else {
+      this.db.list(`${this.divisionPath}/${type}`).push(update)
+    }
+
     this.db.list(`shows/${this.showKey}/feeds/${this.divisionKey}`).push({
       from: this.divisionKey,
       type: 'vote',
-      header: resolutionData.title,
-      value: resolution,
+      header: this.divisionVote.vote.title,
+      value: message,
       timestamp: moment().format('h:mm:ss')
     })
-    this.db.object(`shows/${this.showKey}/centralUnseen/${this.divisionKey}`).query.ref.transaction((unseen) => ++unseen)
+
+    this.db.object(`shows/${this.showKey}/centralUnseen/${this.divisionKey}`)
+      .query.ref.transaction((unseen) => ++unseen)
   }
 
   clearVote() {
