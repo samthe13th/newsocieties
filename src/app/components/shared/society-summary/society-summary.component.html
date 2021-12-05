@@ -1,7 +1,16 @@
 <ng-container *ngIf="division">
-  <!-- <h1><strong>{{ division?.code }}</strong></h1>
-  <div><strong>Score: </strong>{{ division.score }}</div>
-  <div><strong>Land cost: </strong>{{ division.landCost }}</div> -->
+    <h1 class="flex-row">
+      <strong>{{ division?.code }}</strong>
+      <i class="ns-icon">
+        <img src="/assets/season_white.png"/>
+      </i>
+      <div>{{division.season}}</div>
+    </h1>
+  <div class="flex-row flex-center">
+    <strong>Score: </strong> {{ division.score }}
+   </div>
+  <div><strong>Land cost: </strong>{{ division.landCost }}</div>
+  <br/>
   <app-division-chart 
     [height]="120"
     [width]="200"

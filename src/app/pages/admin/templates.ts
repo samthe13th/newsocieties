@@ -74,7 +74,7 @@ export const DIVISION_TEMPLATE = {
   contaminantLevel: 0,
   landCost: 5,
   VP: 0,
-  score: 'low',
+  score: 'Low',
   season: 0,
   reserve: 0,
   reserveThresholds: {
