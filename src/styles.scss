@@ -138,6 +138,7 @@ select {
   height: 100%;
   width: 100%;
   display: flex; 
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   color: white;
@@ -393,6 +394,22 @@ select {
   //   animation-duration: 0.3s;
   //   animation-fill-mode: forwards;
   // }
+}
+
+.season-loading {
+  animation: spin 2s ease-in-out infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0)
+  }
+  49% {
+    transform: rotate(179deg)
+  }
+  100% {
+    transform: rotate(360deg)
+  }
 }
 
 .app-toast {
