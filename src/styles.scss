@@ -661,6 +661,15 @@ select {
    }
  }
 
+ .ns-fade-in {
+  opacity: 0;
+  animation-name: fade-in;
+  animation-timing-function: ease-out;
+  animation-delay: 0.5s;
+  animation-duration: 0.5s;
+  animation-fill-mode: forwards;
+}
+
  @keyframes fade-in {
    0% {
      opacity: 0;
@@ -669,7 +678,6 @@ select {
      opacity: 1;
    }
  }
-
 
  .tab-foreground {
    position: absolute;

@@ -7,10 +7,11 @@
         [class.app-pulse--md]="($playerViewHighlight | async) === 'resources'"
         class="division-details reserve">
         <ng-container *ngIf="playerViews?.resources">
-          <div class="reserve-header">
+          <div class="reserve-header ns-fade-in">
             RESERVE: {{reserveData?.reserve.value}}
           </div>
           <app-reserve-bar 
+            class="ns-fade-in"
             [percent]="reserveData?.reserve?.percent"
             [thresholds]="reserveData?.thresholds"
             [color]="reserveData?.color">
@@ -26,7 +27,7 @@
       <ng-container *ngIf="playerViews?.divisions; else divisionHeader">
         <ng-container *ngFor="let $division of DivisionSummaries">
           <div 
-            class="division-summary" 
+            class="division-summary ns-fade-in" 
             *ngIf="($division | async) as division">
             <div class="division-summary-header" [style.background]="division.color">
               <span class="division-summary-code">{{division.code}}</span>
@@ -49,12 +50,12 @@
 
     <!-- GLOBAL CAPACITY -->
     <div class="division-details reserve" [class.app-pulse--md]="($playerViewHighlight | async) === 'global'">
-      <ng-container *ngIf="playerViews?.global">
+      <div class="ns-fade-in" *ngIf="playerViews?.global">
         <span>GLOBAL CAPACITY</span>
         <span *ngIf="$global | async as global">
           {{global?.actual}} / {{global?.capacity}}
         </span>
-      </ng-container>
+      </div>
     </div>
   </ng-container>
 </div>
