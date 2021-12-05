@@ -12,14 +12,14 @@ import { pluckRandom, getRandomInt } from 'src/app/utilties';
 
 const DIVISIONS = ['N', 'S', 'E', 'W', 'NE', 'SE', 'SW', 'NW'];
 const DIVISION_NAMES = {
-  N: 'North Division',
-  S: 'South Division',
-  E: 'East Division',
-  W: 'West Division',
-  NW: 'NorthWest Division',
-  NE: 'NorthEast Division',
-  SW: 'SouthWest Division',
-  SE: 'SouthEast Division'
+  N: 'North',
+  S: 'South',
+  E: 'East',
+  W: 'West',
+  NW: 'NorthWest',
+  NE: 'NorthEast',
+  SW: 'SouthWest',
+  SE: 'SouthEast'
 }
 const COLORS = {
   E: '#3A84FF',

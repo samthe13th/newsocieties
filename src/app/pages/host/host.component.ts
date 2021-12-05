@@ -213,7 +213,7 @@ export class HostComponent implements OnInit, OnDestroy {
     this.$division = this.db.object(this.divisionPath).valueChanges().pipe(
       filter((x) => x !== null && x !== undefined),
       tap((div: any) => {
-        if (this.divisionScore !== div.score && !this.landmarks[div.score]) {
+        if (div.score !== 'Low' && this.divisionScore !== div.score && !this.landmarks?.[div.score]) {
           this.divisionScore = div.score;
           this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/divisionLargePopup`).set({
             type: 'Rating',

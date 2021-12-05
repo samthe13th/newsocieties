@@ -1,39 +1,13 @@
 import { Component, OnInit, AfterViewInit, ViewChild, ViewChildren, TemplateRef, ElementRef, QueryList } from '@angular/core';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { take, tap, takeUntil } from 'rxjs/operators';
-import { timer, combineLatest, Observable, Subject, forkJoin, pipe } from 'rxjs';
-import { trim, keyBy, range, capitalize, toNumber, find, differenceWith, sortBy, includes } from 'lodash';
-import * as Papa from 'papaparse';
-import { DIVISION_TEMPLATE, SHOW_TEMPLATE } from './templates';
+import { timer, combineLatest, Observable, Subject } from 'rxjs';
+import { trim, find, differenceWith, sortBy, includes } from 'lodash';
 import { map } from 'rxjs/operators';
 import * as moment from 'moment';
 import { ActivatedRoute } from '@angular/router';
-import { pluckRandom, getRandomInt } from 'src/app/utilties';
 
 const DIVISIONS = ['N', 'S', 'E', 'W', 'NE', 'SE', 'SW', 'NW'];
-const DIVISION_NAMES = {
-  N: 'North Division',
-  S: 'South Division',
-  E: 'East Division',
-  W: 'West Division',
-  NW: 'NorthWest Division',
-  NE: 'NorthEast Division',
-  SW: 'SouthWest Division',
-  SE: 'SouthEast Division'
-}
-const COLORS = {
-  E: '#3A84FF',
-  NE: '#660000',
-  N: '#C82687',
-  NW: '#25BA4D',
-  S: '#CA7216',
-  SE: '#6C4EF2',
-  SW: '#30C6D4',
-  W: '#EEB201'
-}
-const MAX_HARVEST = 49;
-const CITIZEN_NAMES = ['Sam', 'Mark', 'Mandy', 'Sarah', 'Kimmy', 'Zed'];
-const ADVANCEMENTS = ["safety", "health", "arts", "knowledge", "infrastructure"];
 
 @Component({
   selector: 'app-central',
@@ -50,13 +24,9 @@ export class CentralComponent implements OnInit, AfterViewInit {
   @ViewChild('showBody') showBody: TemplateRef<any>;
   @ViewChild('summaryBody') summaryBody: TemplateRef<any>;
   @ViewChild('usersBody') usersBody: TemplateRef<any>;
-
   @ViewChild('fileUpload') fileUpload: ElementRef;
-
-
   @ViewChild('eventTemplate') eventTemplate: TemplateRef<any>;
   @ViewChild('addUserCodeTemplate') addUserCodeTemplate: TemplateRef<any>;
-
   @ViewChildren('division') bodyTemplates: QueryList<TemplateRef<any>>;
   @ViewChildren('tab') tabTemplates: QueryList<TemplateRef<any>>;
 
@@ -74,22 +44,6 @@ export class CentralComponent implements OnInit, AfterViewInit {
   divisions;
   chatInput = "";
   tabs;
-  csvFileData = {
-    resolutions: '', 
-    principles: '',
-    scenarios: '',
-    events: '', 
-    users: '',
-    timeline: '',
-  }
-  csvData = {
-    resolutions: undefined,
-    principles: undefined,
-    scenarios: undefined,
-    events: undefined, 
-    users: undefined,
-    timeline: undefined,
-  }
   showModal = false; 
   globalEvents;
   selectedDivision;
@@ -166,37 +120,6 @@ export class CentralComponent implements OnInit, AfterViewInit {
     this.currentTab = tab.id;
   }
 
-  cancelUpdate(type) {
-    this.showModal = false;
-    this.csvFileData[type] = '';
-  }
-
-  async resetShow() {
-    if (!confirm("This will reset all show data. Are you sure you want to do this?")) {
-      return
-    }
-    let users = await this.db.object(`shows/${this.showKey}/users`)
-      .valueChanges()
-      .pipe(take(1))
-      .toPromise()
-
-    const divisions = this.generateDivisions();
-    await this.db.object(`shows/${this.showKey}`).remove();
-    this.db.object(`shows/${this.showKey}`).set({
-      divisions,
-      ...SHOW_TEMPLATE,
-      users: users ? Object.keys(users).reduce((acc, key) => {
-        return { ...acc, [key]: {
-          ...users[key],
-          division: null,
-          name: null
-        }}
-      }, {}) : null
-    }).then((res) => {
-      this.buildShow(this.showKey)
-    })
-  }
-
   wipeShows() {
     this.db.object('shows').remove();
   }
@@ -270,30 +193,6 @@ export class CentralComponent implements OnInit, AfterViewInit {
     this.db.list(`shows/${this.showKey}/divisions/${division}/events`).push(event);
   }
 
-  buildShow(key) {
-    this.db.object(`shows/${key}`).valueChanges()
-      .pipe(take(1))
-      .subscribe((show) => {
-        this.showKey = key;
-      })
-  }
-
-  generateDivisions() {
-    return DIVISIONS.reduce((acc, abv) => ({ 
-      ...acc, 
-      [abv]: { 
-        ...DIVISION_TEMPLATE,
-        color: COLORS[abv],
-        code: abv, 
-        name: DIVISION_NAMES[abv],
-        divisionReview: abv,
-        landTiles: this.generateLandTiles(),
-        // citizens: this.generateCitizens(abv)
-      } 
-    }), {});
-  }
-
-
   newUserCode() {
     this.modalContent = this.addUserCodeTemplate;
     this.showModal = true;
@@ -303,42 +202,5 @@ export class CentralComponent implements OnInit, AfterViewInit {
     this.db.object(`shows/${this.showKey}/users/${code}`).set({
       code
     }).then(() => this.showModal = false )
-  }
-
-  generateCitizens(division) {
-    const users = CITIZEN_NAMES.reduce((acc, name, index) => ({
-      ...acc,
-      [`${division}${index + 1}${name}`]: {
-        name,
-        actions: 0,
-        id: `${division}${index + 1}${name}`,
-        position: index + 1,
-        advancements: ADVANCEMENTS.reduce((acc, type) => ({
-          ...acc,
-          [type]: 0
-        }), {})
-      }
-    }), {})
-    return users;
-  }
-
-  generateLandTiles() {
-    const slots = range(MAX_HARVEST);
-    const tiles = slots.map((_, index) => ({ 
-      value: -1, 
-      owner: null, 
-      harvested: false,
-      type: 'R',
-      contaminated: false,
-      mark: null, 
-      index
-     }))
-     const plucked = pluckRandom(tiles, 18);
-     plucked.forEach((x, i) => {
-       let value = 1;
-       if (i > 5) { value += (i > 11) ? 2 : 1 }
-       tiles[x.index].value = value;
-     })
-    return tiles;
   }
 }
