@@ -1,7 +1,7 @@
 import { Component, OnInit, AfterViewInit, ViewChild, ViewChildren, TemplateRef, ElementRef, QueryList } from '@angular/core';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { take, tap, takeUntil } from 'rxjs/operators';
-import { timer, combineLatest, Observable, Subject, forkJoin, pipe } from 'rxjs';
+import { timer, combineLatest, Observable, Subject } from 'rxjs';
 import { trim, keyBy, range, capitalize, toNumber, find, differenceWith, sortBy, includes } from 'lodash';
 import * as Papa from 'papaparse';
 import { DIVISION_TEMPLATE, SHOW_TEMPLATE } from './templates';

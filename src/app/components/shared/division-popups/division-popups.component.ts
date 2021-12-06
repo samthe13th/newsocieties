@@ -4,7 +4,8 @@ import { Subject } from 'rxjs';
 import { takeUntil, tap } from 'rxjs/operators';
 import { LargePopupComponent } from '../large-popup/large-popup.component';
 import { trigger, transition, animate, style } from '@angular/animations';
-
+import { Howl } from 'howler';
+import { LandCardTypes } from 'src/app/interfaces';
 
 @Component({
   selector: 'app-division-popups',
@@ -32,6 +33,7 @@ export class DivisionPopupsComponent implements OnInit, OnDestroy {
   @ViewChild("largePopup") largePopup: LargePopupComponent;
 
   divisionEvent;
+  Sounds;
 
   @Input() type = 'toast';
   @Input() showKey;
@@ -43,6 +45,12 @@ export class DivisionPopupsComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
+    this.Sounds = {
+      contamination: new Howl({ src: 'assets/Contamination.mp3' }),
+      resource1: new Howl({ src: 'assets/gather1.mp3' }),
+      resource2: new Howl({ src: 'assets/gather2.mp3' }),
+      resource3: new Howl({ src: 'assets/gather3.mp3' }),
+    }
     const popupUrl = `shows/${this.showKey}/divisions/${this.divisionKey}/divisionPopup`;
 
     if (this.type === 'large-popup') {
@@ -59,9 +67,26 @@ export class DivisionPopupsComponent implements OnInit, OnDestroy {
       .valueChanges()
       .pipe(
         takeUntil(this.destroy$)
-      ).subscribe((smallEvent) => {
+      ).subscribe((smallEvent: any) => {
+        console.log("Small Event: ", smallEvent)
+        if (smallEvent?.type === 'C' || smallEvent?.type === 'R') {
+          this.playGatherSound(smallEvent?.type, smallEvent?.value)
+        }
         this.divisionEvent = smallEvent;
       })
+    }
+  }
+
+  playGatherSound(type, value) {
+    console.log("play gather sound: ", type, value)
+    if (type === LandCardTypes.C) {
+      this.Sounds.contamination.play();
+    } else if (value === 1) {
+      this.Sounds.resource1.play();
+    } else if (value === 2) {
+      this.Sounds.resource2.play();
+    } else if (value === 3) {
+      this.Sounds.resource3.play();
     }
   }
 

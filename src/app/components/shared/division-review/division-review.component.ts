@@ -34,7 +34,6 @@ export class DivisionReviewComponent implements OnInit {
           this.db.object(`shows/${this.showKey}/divisions/${toReview}/advancements`).valueChanges(),
           this.db.object(`shows/${this.showKey}/divisions/${toReview}/exceedingCapacity`).valueChanges().pipe(
             map(({ actual, capacity }: any) => `${Math.round(((actual / capacity) * 100)) - 100}%`),
-            tap((exceeded) => console.log("EXCEEDED: ", exceeded))
           ),
           this.db.object(`shows/${this.showKey}/divisions/${toReview}/citizens`).valueChanges().pipe(
             map((citizens) => {
