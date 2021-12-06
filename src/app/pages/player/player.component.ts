@@ -268,7 +268,7 @@ export class PlayerComponent implements OnInit {
       selection: {
         type: 'harvest-tile',
         value: card?.index,
-        mark : this.user ? `${this.position}${capitalize(this.user?.name[0])}` : ''
+        mark : this.user ? `${this.position}${capitalize(this.name?.[0])}` : ''
       }
     })
     // this.actionSheet.afterDismissed()
