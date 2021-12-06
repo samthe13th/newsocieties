@@ -28,13 +28,16 @@
             <h2>TIME: {{ timer.clock | date: 'hh:mm:ss a' }}</h2>
           </ng-container>
           <hr/>
-          <div 
-            class="timeline-row" *ngFor="let row of ($timeline | async); let index = index"
-            [class.time-highlight]="timer.live && timer.time > index"
-            >
-            <div class="cell">{{ row.time }}</div>
-            <div class="cell">{{ row.action }}</div>
-          </div>
+          <table>
+            <tr
+              *ngFor="let row of ($timeline | async); let index = index"
+              [class.time-highlight]="timer.live && timer.time > index"
+              >
+            <td class="cell">{{ row.time }}</td>
+            <td class="cell">{{ row.action }}</td>
+            <td class="cell">{{ row.action2 }}</td>
+          </tr>
+          </table>
         </ng-container>
       </div>
     </div>
