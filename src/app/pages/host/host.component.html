@@ -347,7 +347,9 @@
 
 <ng-template #miscTemplate>
   Open market
-  <button (click)="startMisc()">Continue</button>
+  <button (click)="startMisc(); marketView('localLand')">Local Land</button>
+  <button (click)="startMisc(); marketView('globalLand')">Global Land</button>
+  <button (click)="startMisc(); marketView('advancements')">Advancements</button>
 </ng-template>
 
 <ng-template #reviewTemplate>
