@@ -7,7 +7,6 @@ import { takeUntil } from 'rxjs/operators';
 import { LandCardValues, LandTile, LandCardTypes } from 'src/app/interfaces';
 import { BankService } from 'src/app/services/bank.service';
 import { pluckRandom, getRandomInt } from 'src/app/utilties';
-import { Howl } from 'howler';
 
 const MAX_HARVEST = 49;
 const HARVEST_ROW_LENGTH = 7;

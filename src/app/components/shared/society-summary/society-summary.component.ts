@@ -13,7 +13,7 @@ import { Component, Input } from '@angular/core';
 export class SocietySummaryComponent {
   @Input() division;
   @Input() showKey;
-  @Input() details: 'full' | 'brief';
+  @Input() details: 'full' | 'brief' | 'endgame';
 
   calculateReserve(reserve) {
     return reserve ? reserve.reduce((acc, R) => acc + R, 0) : undefined

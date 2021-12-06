@@ -9,6 +9,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NumberPickerModule } from 'ng-number-picker';
 import { AdminComponent } from './admin/admin.component';
 import { GoogleChartsModule } from 'angular-google-charts';
+import { SummaryComponent } from './summary/summary.component';
 
 
 const pages = [
@@ -16,6 +17,7 @@ const pages = [
   HostComponent,
   PlayerComponent, 
   AdminComponent,
+  SummaryComponent
 ]
 
 @NgModule({

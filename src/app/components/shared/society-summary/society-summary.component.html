@@ -12,6 +12,7 @@
   <div><strong>Land cost: </strong>{{ division.landCost }}</div>
   <br/>
   <app-division-chart 
+    *ngIf="details === 'full'"
     [height]="120"
     [width]="200"
     [divisionKey]="division.code" 
