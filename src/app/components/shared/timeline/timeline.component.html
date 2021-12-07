@@ -1,0 +1,17 @@
+<table>
+  <tr>
+    <th>Min</th>
+    <th>Time</th>
+    <th>Action 1</th>
+    <th>Action 2</th>
+  </tr>
+  <tr
+    *ngFor="let row of ($timeline | async); let index = index"
+    [class.time-highlight]="timer.live && timer.time > index"
+    >
+    <td class="cell">{{ row.time }}</td>
+    <td class="cell">{{ row.timestamp }}</td>
+    <td class="cell">{{ row.action }}</td>
+    <td class="cell">{{ row.action2 }}</td>
+  </tr>
+</table>

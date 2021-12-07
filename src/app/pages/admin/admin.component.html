@@ -167,11 +167,11 @@
 
       <br/>
 
-      <div class="central-contamination-controls" *ngIf="$contamination | async as contam">
+      <div class="admin-section" *ngIf="$contamination | async as contam">
         <google-chart
           width="300px"
           height="200px"
-          [type]="chart.type"
+          type="LineChart"
           [data]="$contamData | async"
           [columns]="chart.columns"
           [options]="chart.options"
@@ -220,55 +220,48 @@
         </ng-number-picker>
       </div>
 
-      <hr/>
+      <div class="admin-section">
+        <div class="vote-data">
+          Principles
+          <input [(ngModel)]="csvFileData.principles" (change)="uploadPrinciplesData($event)" type="file" #fileUpload/>
+        </div>
       
-      <div class="vote-data">
-        Principles
-        <input [(ngModel)]="csvFileData.principles" (change)="uploadPrinciplesData($event)" type="file" #fileUpload/>
-      </div>
-    
-      <div class="vote-data">
-        Resolutions
-        <input [(ngModel)]="csvFileData.resolutions" (change)="uploadResolutionsData($event)" type="file" #fileUpload/>
-      </div>
-    
-      <div class="vote-data">
-        Scenarios
-        <input [(ngModel)]="csvFileData.scenarios" (change)="uploadScenariosData($event)" type="file" #fileUpload/>
-      </div>
-    
-      <div class="vote-data">
-        Events
-        <input [(ngModel)]="csvFileData.events" (change)="uploadEventsData($event)" type="file" #fileUpload/>
-      </div>
-    
-      <div class="vote-data">
-        Timeline
-        <input [(ngModel)]="csvFileData.timeline" (change)="uploadTimelineData($event)" type="file" #fileUpload/>
+        <div class="vote-data">
+          Resolutions
+          <input [(ngModel)]="csvFileData.resolutions" (change)="uploadResolutionsData($event)" type="file" #fileUpload/>
+        </div>
+      
+        <div class="vote-data">
+          Scenarios
+          <input [(ngModel)]="csvFileData.scenarios" (change)="uploadScenariosData($event)" type="file" #fileUpload/>
+        </div>
+      
+        <div class="vote-data">
+          Events
+          <input [(ngModel)]="csvFileData.events" (change)="uploadEventsData($event)" type="file" #fileUpload/>
+        </div>
+      
+        <div class="vote-data">
+          Timeline
+          <input [(ngModel)]="csvFileData.timeline" (change)="uploadTimelineData($event)" type="file" #fileUpload/>
+        </div>
       </div>
 
-      <hr/>
     </div>
-    <div class="timeline">
-      <div>
-        <button (click)="startClock()">Start</button>
-        <ng-container *ngIf="$time | async as timer">
-          <ng-container *ngIf="timer.live">
-            <button (click)="stopClock()">Stop</button>
-            <h2>START: {{ timer.start | date: 'hh:mm:ss a' }}</h2>
-            <h2>TIME: {{ timer.clock | date: 'hh:mm:ss a' }}</h2>
-          </ng-container>
-          <hr/>
-          <div 
-            class="timeline-row" *ngFor="let row of ($timeline | async); let index = index"
-            [class.time-highlight]="timer.live && timer.time > index"
-            >
-            <div class="cell">{{ row.time }}</div>
-            <div class="cell">{{ row.action }}</div>
-          </div>
+
+    <div class="timeline-wrapper">
+      <button (click)="startClock()">Start</button>
+      <ng-container *ngIf="$time | async as timer">
+        <ng-container *ngIf="timer.live">
+          <button (click)="stopClock()">Stop</button>
+          <h2>START: {{ timer.start | date: 'hh:mm:ss a' }}</h2>
+          <h2>TIME: {{ timer.clock | date: 'hh:mm:ss a' }}</h2>
         </ng-container>
-      </div>
+        <hr/>
+        <app-timeline [timer]="timer" [showKey]="showKey"></app-timeline>
+      </ng-container>
     </div>
+
   </div>
 </ng-template>
 

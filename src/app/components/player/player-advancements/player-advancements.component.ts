@@ -1,6 +1,6 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { Observable, combineLatest } from 'rxjs';
-import { tap, map } from 'rxjs/operators';
+import { Observable, combineLatest, Subject } from 'rxjs';
+import { tap, map, takeUntil } from 'rxjs/operators';
 import { each } from 'lodash';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { faArchway, faBriefcaseMedical, faShieldAlt, faBrain, faTheaterMasks } from '@fortawesome/free-solid-svg-icons';
@@ -18,6 +18,8 @@ export class PlayerAdvancementsComponent implements OnInit {
   $costs: Observable<any>;
   $data: Observable<any>;
 
+  private destroy$ = new Subject<boolean>();
+
   @Input() divisionKey: string;
   @Input() showKey: string;
   @Input() playerId: string;
@@ -33,9 +35,11 @@ export class PlayerAdvancementsComponent implements OnInit {
   constructor(private db: AngularFireDatabase) {}
 
   ngOnInit() {
-    this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/landmarks`).valueChanges().subscribe((LM) => {
-      this.landmarks = LM
-    })
+    this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/landmarks`).valueChanges()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((LM) => {
+        this.landmarks = LM
+      })
     this.$data = combineLatest(
       this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/advancementCosts`).valueChanges(),
       this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/citizens/${this.playerId}`).valueChanges(),
@@ -62,6 +66,11 @@ export class PlayerAdvancementsComponent implements OnInit {
         })
       })
     )
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.unsubscribe();
   }
 
   advCost(adv, costs) {

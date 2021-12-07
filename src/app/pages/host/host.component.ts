@@ -256,9 +256,6 @@ export class HostComponent implements OnInit, OnDestroy {
       .pipe(
         map((citizens: any) => citizens.map((c, index) => ({ id: c.id, label: index + 1 })))
       )
-    // this.$focus.subscribe((focus) => {
-    //   this.focus = focus;
-    // })
     this.$playerView = combineLatest(
       this.db.object(`${this.divisionPath}/playerViewHighlight`).valueChanges(),
       this.db.object(`${this.divisionPath}/playerViews`).valueChanges()
@@ -464,11 +461,7 @@ export class HostComponent implements OnInit, OnDestroy {
         id: citizen?.id,
         color: this.divisionColor,
         name: this.positions.indexOf(citizen?.id) + 1
-      }]).then(() => {
-        // this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/divisionPopup`).set({
-        //   header: `${citizen?.name} acquired a new plot of land!`,
-        // })
-      });
+      }]);
       this.dismissSheet();
     })
   }
@@ -1173,6 +1166,7 @@ export class HostComponent implements OnInit, OnDestroy {
       hash: Date.now().toString()
     }))
   }
+  
   ngOnDestroy() {
     this.destroy$.next(true);
     this.destroy$.unsubscribe();

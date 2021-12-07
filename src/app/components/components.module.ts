@@ -41,6 +41,7 @@ import { DivisionChartComponent } from './shared/division-chart/division-chart.c
 import { LargePopupComponent } from './shared/large-popup/large-popup.component';
 import { DemoTilesComponent } from './shared/demo-tiles/demo-tiles.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { TimelineComponent } from './shared/timeline/timeline.component';
 
 const components = [
   AdvancementTrackComponent,
@@ -74,6 +75,7 @@ const components = [
   StateComponent,
   TabsComponent,
   ToastComponent,
+  TimelineComponent,
   UsersGridComponent,
   VoteComponent
 ]

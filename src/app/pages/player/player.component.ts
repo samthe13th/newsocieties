@@ -262,8 +262,6 @@ export class PlayerComponent implements OnInit {
   onSelect(card) {
     console.log('select for ', this.user)
     this.selectedCard = card;
-    // this.actionSheet = this._bottomSheet.open(this.sheetTemplate);
-    // this.selectedResourceStatus = this.getResourceStatus(card);
     this.db.object(this.divisionPath).update({
       selection: {
         type: 'harvest-tile',
@@ -271,13 +269,6 @@ export class PlayerComponent implements OnInit {
         mark : this.user ? `${this.position}${capitalize(this.name?.[0])}` : ''
       }
     })
-    // this.actionSheet.afterDismissed()
-    //   .pipe(takeUntil(this.destroy$))
-    //   .subscribe(() => {
-    //     if (this.selectedCard) {
-    //       this.landGrid.clearSelection(this.selectedCard.index)
-    //     }
-    //   })
   }
 
   calculateWealth(resources) {

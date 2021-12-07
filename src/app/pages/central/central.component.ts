@@ -1,7 +1,7 @@
 import { Component, OnInit, AfterViewInit, ViewChild, ViewChildren, TemplateRef, ElementRef, QueryList } from '@angular/core';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { take, tap, takeUntil } from 'rxjs/operators';
-import { timer, combineLatest, Observable, Subject } from 'rxjs';
+import { timer, combineLatest, Observable, Subject, forkJoin, pipe } from 'rxjs';
 import { trim, find, differenceWith, sortBy, includes } from 'lodash';
 import { map } from 'rxjs/operators';
 import * as moment from 'moment';

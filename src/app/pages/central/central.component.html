@@ -17,29 +17,16 @@
 
 <ng-template #showBody>
   <div class="flex-row" style="overflow: hidden">
-    <div class="timeline">
+    <div class="timeline-wrapper">
       <h2>Global Contamination Level: {{($contamination | async)?.current}}%</h2>
-      <div>
-        <!-- <button (click)="startClock()">Start</button> -->
-        <ng-container *ngIf="$time | async as timer">
-          <ng-container *ngIf="timer.live">
-            <!-- <button (click)="stopClock()">Stop</button> -->
-            <h2>START: {{ timer.start | date: 'hh:mm:ss a' }}</h2>
-            <h2>TIME: {{ timer.clock | date: 'hh:mm:ss a' }}</h2>
-          </ng-container>
-          <hr/>
-          <table>
-            <tr
-              *ngFor="let row of ($timeline | async); let index = index"
-              [class.time-highlight]="timer.live && timer.time > index"
-              >
-            <td class="cell">{{ row.time }}</td>
-            <td class="cell">{{ row.action }}</td>
-            <td class="cell">{{ row.action2 }}</td>
-          </tr>
-          </table>
+      <ng-container *ngIf="$time | async as timer">
+        <ng-container *ngIf="timer.live">
+          <h2>START: {{ timer.start | date: 'hh:mm:ss a' }}</h2>
+          <h2>TIME: {{ timer.clock | date: 'hh:mm:ss a' }}</h2>
         </ng-container>
-      </div>
+        <hr/>
+        <app-timeline [showKey]="showKey" [timer]="timer"></app-timeline>
+      </ng-container>
     </div>
   </div>
 </ng-template>

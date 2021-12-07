@@ -1,14 +1,14 @@
 import { Component, OnInit, AfterViewInit, ViewChild, ViewChildren, TemplateRef, ElementRef, QueryList } from '@angular/core';
 import { AngularFireDatabase } from '@angular/fire/database';
-import { take, tap, takeUntil } from 'rxjs/operators';
-import { timer, combineLatest, Observable, Subject } from 'rxjs';
+import { take, takeUntil, tap } from 'rxjs/operators';
+import { timer, Observable, Subject, combineLatest } from 'rxjs';
 import { trim, keyBy, range, capitalize, toNumber, find, differenceWith, sortBy, includes } from 'lodash';
 import * as Papa from 'papaparse';
 import { DIVISION_TEMPLATE, SHOW_TEMPLATE } from './templates';
 import { map } from 'rxjs/operators';
 import * as moment from 'moment';
 import { ActivatedRoute } from '@angular/router';
-import { pluckRandom, getRandomInt } from 'src/app/utilties';
+import { pluckRandom } from 'src/app/utilties';
 
 const DIVISIONS = ['N', 'S', 'E', 'W', 'NE', 'SE', 'SW', 'NW'];
 const DIVISION_NAMES = {
@@ -65,33 +65,33 @@ export class AdminComponent implements OnInit, AfterViewInit {
   @ViewChildren('division') bodyTemplates: QueryList<TemplateRef<any>>;
   @ViewChildren('tab') tabTemplates: QueryList<TemplateRef<any>>;
 
-  $timeline: Observable<any>;
+  $contamData: Observable<any>;
   $time: Observable<any>;
   $contamination: Observable<any>;
-  $contamData: Observable<any>;
 
   private destroy$ = new Subject<boolean>();
 
-data = [
-  [0, 0],
-  [20, 10],
-]
-chart = {
-  type: "AreaChart",
-  columns: [
-    ['number', 'Time'],
-    ['number', 'Capacity'],
-  ],
-  options: {
-    lineWidth: [4, 8],
-    chartArea: {
-      left: 30,
-      right: 20,
-      bottom: 25,
-      top: 10
+  data = [
+    [0, 0],
+    [20, 10],
+    [40, 30],
+  ]
+
+  chart = {
+    columns: [
+      ['number', 'Time'],
+      ['number', 'Path'],
+    ],
+    options: {
+      lineWidth: 4,
+      chartArea: {
+        left: 30,
+        right: 20,
+        bottom: 25,
+        top: 10
+      }
     }
   }
-}
 
   currentTab;
   time;
@@ -137,16 +137,17 @@ chart = {
       .subscribe((events) => {
         this.globalEvents = events;
       })
+
     this.$contamination = this.db.object(`shows/${this.showKey}/contamination`).valueChanges();
-    this.$timeline = this.db.list('timeline').valueChanges();
     this.$contamData = this.db.object(`shows/${this.showKey}/contamination`).valueChanges().pipe(
       map((data:any) => ([
         [0, data?.min],
         [data?.start, data?.min],
         [data?.end, data?.max],
-        [130, data?.max]
+        [118, data?.max]
       ]))
     )
+
     this.$time = combineLatest(
       this.db.object(`shows/${this.showKey}/startTime`).valueChanges(),
       timer(0, 1000).pipe(map(() => new Date())),
@@ -167,15 +168,14 @@ chart = {
     timer(0, 1000).pipe(
       takeUntil(this.destroy$)
     ).pipe(takeUntil(this.destroy$)).subscribe(() => {
-      console.log("clock: ", this.time);
       this.db.object(`shows/${this.showKey}/contamination`).query.ref.transaction((contam) => {
         if (contam && this.time > 0) {
-          const timeFraction = Math.min(1, this.time / (contam.end - contam.start));
+          const timeRange = (contam.end - contam.start)
+          const timeFraction = Math.min(1, (this.time - contam.start) / timeRange);
           const range = contam.max - contam.min;
           const newLevel = contam.start > this.time
             ? contam.min
             : Math.round((timeFraction * range) + contam.min);
-          console.log({timeFraction, range, newLevel})
           return { ...contam, current: newLevel }
         }
 
@@ -493,7 +493,7 @@ chart = {
       }, {}) : null,
       contamination: {
         ...contamination,
-        current: 10
+        current: contamination.min
       }
     }).then((res) => {
       this.buildShow(this.showKey)
@@ -525,16 +525,19 @@ chart = {
   getEvent(division) {
     this.showModal = true;
     this.selectedDivision = division;
-    this.db.list(`shows/${this.showKey}/divisions/${division}/events`).valueChanges().pipe(take(1)).subscribe((events) => {
-      this.divisionDropdownOptions = differenceWith(
-        this.globalEvents,
-        events,
-        (g, e) => g.title === e.header
-      );
-      this.divisionDropdownOptions = sortBy(this.divisionDropdownOptions, ['level']);
-    })
-    this.modalContent = this.eventTemplate;
-  }
+    this.db.list(`shows/${this.showKey}/divisions/${division}/events`)
+      .valueChanges()
+      .pipe(take(1))
+      .subscribe((events) => {
+        this.divisionDropdownOptions = differenceWith(
+          this.globalEvents,
+          events,
+          (g, e) => g.title === e.header
+        );
+        this.divisionDropdownOptions = sortBy(this.divisionDropdownOptions, ['level']);
+      })
+      this.modalContent = this.eventTemplate;
+    }
 
   onClickNewEvent(div) {
     this.getEvent(div);

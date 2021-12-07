@@ -83,7 +83,6 @@ select {
 .tab-card {
   background: white;
   padding: 10px; 
-  border-radius: 10px;
   line-height: 24px;
   font-size: 16px;
   color: black;
@@ -201,7 +200,7 @@ select {
   align-items: center;
   justify-content: center;
   padding: 10px;
-  background: #6c6c6c;
+  background: #19252b;
   display: flex;
   width: 100%;
   color: rgb(194, 194, 194);
@@ -541,6 +540,27 @@ select {
   align-items: flex-start;
 }
 
+.app-timeline {
+  overflow: auto;
+}
+
+.timeline-wrapper {
+  display: flex;
+  overflow: auto;
+  background: white;
+  padding: 10px;
+  margin-left: 10px;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+  box-sizing: border-box;
+  align-items: flex-start;
+
+  h2 {
+    margin-bottom: 0;
+  }
+}
+
 .app-central {
   @extend %app-page;
   padding-top: 5px;
@@ -712,7 +732,7 @@ select {
 }
 
 .host-selected-tab {
-  background: #255876;
+  background: #22597a;
   color: white;
 }
 
