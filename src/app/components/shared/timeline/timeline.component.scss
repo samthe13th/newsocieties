@@ -8,4 +8,8 @@
 
 .time-highlight {
   background: lightgreen;
+
+  &.time-pause {
+    background: rgb(253, 253, 161)
+  }
 }

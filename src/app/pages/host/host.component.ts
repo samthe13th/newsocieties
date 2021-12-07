@@ -1,7 +1,7 @@
 import { Component, HostListener, OnInit, OnDestroy, ViewChild, TemplateRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AngularFireDatabase } from '@angular/fire/database';
-import { pluckRandom } from 'src/app/utilties';
+import { pluckRandom, promiseOne } from 'src/app/utilties';
 import { LandTile, LandCardTypes } from 'src/app/interfaces';
 import * as _ from 'lodash';
 import { trim, find, findIndex, differenceBy, toNumber, each, partition } from 'lodash';
@@ -289,9 +289,7 @@ export class HostComponent implements OnInit, OnDestroy {
 
   async updatePositions() {
     const divisionPath = `shows/${this.showKey}/divisions/${this.divisionKey}`;
-    const citizens = await this.db.list(`${divisionPath}/citizens`).valueChanges().pipe(
-      take(1)
-    ).toPromise();
+    const citizens = await promiseOne(this.db.list(`${divisionPath}/citizens`))
     this.positions = citizens.map((c: any) => c?.id);
     this.db.object(`${divisionPath}/positions`).set(this.positions);
   }
@@ -382,18 +380,15 @@ export class HostComponent implements OnInit, OnDestroy {
   }
 
   onRightTabChange(tab) {
-    console.log('tab change: ', tab, this.rightTab);
     if (this.rightTab === 'notifications' || tab.id === 'notifications') {
       this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/unseenNotifications`).remove();
     }
 
     if (this.leftTab === 'central' || tab.id === 'central') {
-      console.log('CLEAR CHAT NOTIFICATIONS')
       this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/unseenChat`).set(0)
     }
     
     if (this.rightTab === 'news' || tab.id === 'news') {
-      console.log('clear unseen news')
       this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/unseenNews`).remove();
     }
     this.rightTab = tab.id;
@@ -623,10 +618,7 @@ export class HostComponent implements OnInit, OnDestroy {
   }
 
   async setFocus(type) {
-    const lastResolution = await this.db.object(`${this.divisionPath}/lastResolution`)
-      .valueChanges()
-      .pipe(take(1))
-      .toPromise();
+    const lastResolution = await promiseOne(this.db.object(`${this.divisionPath}/lastResolution`))
 
     if (type === 'principles') {
       this.setVoteDropdown('principles');
@@ -911,11 +903,7 @@ export class HostComponent implements OnInit, OnDestroy {
 
   async pushToCentral(type, message) {
     console.log("push to central: ", type, message)
-    const entries = await this.db.list(`${this.divisionPath}/${type}`)
-      .valueChanges()
-      .pipe(take(1))
-      .toPromise()
-
+    const entries = await promiseOne(this.db.list(`${this.divisionPath}/${type}`));
     const indexOfEntry = findIndex(entries, ['title', this.divisionVote.vote.title]);
     const update = {
       title: this.divisionVote.vote.title,
@@ -1092,10 +1080,7 @@ export class HostComponent implements OnInit, OnDestroy {
   }
 
   private async resetCitizenActions() {
-    const citizens: any = await this.db.list(`${this.divisionPath}/citizens`)
-      .valueChanges()
-      .pipe(take(1))
-      .toPromise();
+    const citizens: any = await promiseOne(this.db.list(`${this.divisionPath}/citizens`));
 
     if (!citizens[0]?.id) return;
 
@@ -1106,7 +1091,7 @@ export class HostComponent implements OnInit, OnDestroy {
     })
 
     this.db.object(`${this.divisionPath}/turn`).set(
-     citizens[0].id
+      citizens[0].id
     )
   }
 

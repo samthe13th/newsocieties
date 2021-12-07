@@ -4,6 +4,7 @@ import { AngularFireDatabase } from '@angular/fire/database';
 import { take } from 'rxjs/operators';
 import { toNumber, map, range } from 'lodash';
 import { ActivatedRoute } from '@angular/router';
+import { promiseOne } from '../utilties';
 
 @Injectable({ providedIn: 'root' })
 export class BankService {
@@ -20,10 +21,7 @@ export class BankService {
 
   async removeFromReserve(divisionPath, amount) {
     const reservePath = `${divisionPath}/reserve`;
-    const reserve = await this.db.object(reservePath).valueChanges()
-      .pipe(take(1))
-      .toPromise();
-
+    const reserve = await promiseOne(this.db.object(reservePath));
     const difference = Math.max(0, toNumber(reserve) - amount)
 
     console.log('remove from reserve: ', reserve, amount);
@@ -35,9 +33,7 @@ export class BankService {
 
   async addToReserve(divisionPath, amount) {
     const reservePath = `${divisionPath}/reserve`;
-    const reserve = await this.db.object(reservePath).valueChanges()
-      .pipe(take(1))
-      .toPromise();
+    const reserve = await promiseOne(this.db.object(reservePath));
 
     return new Promise((resolve) => {
       this.db.object(reservePath).set(toNumber(reserve) + amount).then(() => resolve(true));
@@ -60,9 +56,7 @@ export class BankService {
 
   async depositResources(showKey, divisionKey, id, newResources): Promise<boolean> {
     const path = `shows/${showKey}/divisions/${divisionKey}/citizens/${id}/resources`;
-    const resources: any[] = await this.db.list(path).valueChanges()
-      .pipe(take(1))
-      .toPromise();
+    const resources: any[] = await promiseOne(this.db.list(path));
 
     return new Promise((resolve) => {
       this.db.object(path).set([
@@ -89,11 +83,7 @@ export class BankService {
     let spend = 0;
     let transactions = 0;
     const resourcePath = `shows/${showKey}/divisions/${divisionKey}/citizens/${id}/resources`
-    const resources: any[] = await this.db.list(resourcePath)
-      .valueChanges()
-      .pipe(take(1))
-      .toPromise();
-
+    const resources: any[] = await promiseOne(this.db.list(resourcePath));
     const maxTransactions = resources.length;
 
     while (spend < cost && transactions <= maxTransactions) {

@@ -61,9 +61,6 @@ export class GlobalCapacityComponent implements OnInit {
         })
 
         global.exceeding = `${Math.round(((global.actual / global.capacity) ?? 0) * 100) - 100}%`;
-
-        console.log("GLC DATA (final): ", global);
-
         return global
       }),
     )

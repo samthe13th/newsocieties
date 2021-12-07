@@ -22,7 +22,8 @@
       <ng-container *ngIf="$time | async as timer">
         <ng-container *ngIf="timer.live">
           <h2>START: {{ timer.start | date: 'hh:mm:ss a' }}</h2>
-          <h2>TIME: {{ timer.clock | date: 'hh:mm:ss a' }}</h2>
+          <h2 *ngIf="!timer.paused">TIME: {{ timer.clock | date: 'hh:mm:ss a' }}</h2>
+          <em *ngIf="timer.paused">PAUSED {{ timer.clock | date: 'hh:mm:ss a' }}</em>
         </ng-container>
         <hr/>
         <app-timeline [showKey]="showKey" [timer]="timer"></app-timeline>

@@ -1,4 +1,6 @@
 import { includes } from 'lodash';
+import { take } from 'rxjs/operators';
+import { pipe } from 'rxjs';
 
 export function shuffle(a) {
   for (let i = a.length - 1; i > 0; i--) {
@@ -28,4 +30,8 @@ export function pluckRandom(array, total) {
     }
   }
   return plucked;
+}
+
+export function promiseOne(dbCall) {
+  return dbCall.valueChanges().pipe(take(1)).toPromise();
 }

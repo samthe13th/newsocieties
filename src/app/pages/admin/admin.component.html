@@ -252,13 +252,17 @@
     <div class="timeline-wrapper">
       <button (click)="startClock()">Start</button>
       <ng-container *ngIf="$time | async as timer">
+        <button (click)="resetTimeline()">Reset</button>
         <ng-container *ngIf="timer.live">
-          <button (click)="stopClock()">Stop</button>
           <h2>START: {{ timer.start | date: 'hh:mm:ss a' }}</h2>
-          <h2>TIME: {{ timer.clock | date: 'hh:mm:ss a' }}</h2>
+          <ng-container *ngIf="!timer.paused">
+            <h2>TIME: {{ timer.clock | date: 'hh:mm:ss a' }}</h2>
+            <button (click)="pauseClock(timer?.time)">Pause</button>
+          </ng-container>
+          <ng-container *ngIf="timer.paused"><em>PAUSED {{ timer.clock | date: 'hh:mm:ss a' }}</em><button (click)="resumeClock()">Resume</button></ng-container>
         </ng-container>
         <hr/>
-        <app-timeline [timer]="timer" [showKey]="showKey"></app-timeline>
+        <app-timeline #timeline [timer]="timer" [showKey]="showKey"></app-timeline>
       </ng-container>
     </div>
 

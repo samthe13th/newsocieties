@@ -21,13 +21,21 @@ export class TimelineComponent implements OnInit {
   constructor(private db: AngularFireDatabase) {
   }
 
+  insertPause(min) {
+    this.db.list(`shows/${this.showKey}/timeline`).query.ref.transaction((_timeline) => {
+      console.log("TIMELINE TRANSACTION ", min, _timeline)
+      const timeline = _timeline;
+      timeline.splice(min, 0, { paused: true, time: min, action: "PAUSE" })
+      return timeline
+    })
+  }
+
   ngOnInit() {
     this.$timeline = combineLatest(
       this.db.object(`shows/${this.showKey}/startTime`).valueChanges(),
-      this.db.list('timeline').valueChanges()
+      this.db.list(`shows/${this.showKey}/timeline`).valueChanges()
     ).pipe(
-      map(([startTime, timeline]) => timeline.map((entry: any) => ({ ...entry, timestamp: moment(startTime).add(entry.time, 'minutes').format('h:mm:ss') }))),
-      tap((timeline) => console.log({timeline}))
+      map(([startTime, timeline]) => timeline.map((entry: any, index) => ({ ...entry, timestamp: moment(startTime).add(index + 1, 'minutes').format('h:mm:ss') }))),
     )
   }
 }

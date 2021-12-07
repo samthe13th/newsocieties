@@ -51,10 +51,11 @@
     <!-- GLOBAL CAPACITY -->
     <div class="division-details reserve" [class.app-pulse--md]="($playerViewHighlight | async) === 'global'">
       <div class="ns-fade-in" *ngIf="playerViews?.global">
-        <span>GLOBAL CAPACITY</span>
+        <!-- <span>GLOBAL CAPACITY</span>
         <span *ngIf="$global | async as global">
           {{global?.actual}} / {{global?.capacity}}
-        </span>
+        </span> -->
+        <app-global-capacity [showExceeding]="false" [showKey]="showKey"></app-global-capacity>
       </div>
     </div>
   </ng-container>

@@ -18,7 +18,6 @@ export class BannerComponent {
   $flashNews: Observable<any>;
   $loaded: Observable<any>;
   $reserveData: Observable<any>;
-  $global: Observable<any>;
   $playerViews: Observable<any>;
   $playerViewHighlight: Observable<any>;
   $divisionName: Observable<any>;
@@ -42,7 +41,6 @@ export class BannerComponent {
     )
     this.$playerViews = this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/playerViews`).valueChanges();
     this.$divisionName = this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/name`).valueChanges();
-    this.$global = this.db.object(`shows/${this.showKey}/global`).valueChanges();
     this.$loaded = combineLatest(
       of(this.reserveLoaded),
       of(this.divisionsLoaded)

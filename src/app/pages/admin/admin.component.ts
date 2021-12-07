@@ -8,7 +8,8 @@ import { DIVISION_TEMPLATE, SHOW_TEMPLATE } from './templates';
 import { map } from 'rxjs/operators';
 import * as moment from 'moment';
 import { ActivatedRoute } from '@angular/router';
-import { pluckRandom } from 'src/app/utilties';
+import { pluckRandom, promiseOne } from 'src/app/utilties';
+import { TimelineComponent } from 'src/app/components/shared/timeline/timeline.component';
 
 const DIVISIONS = ['N', 'S', 'E', 'W', 'NE', 'SE', 'SW', 'NW'];
 const DIVISION_NAMES = {
@@ -65,9 +66,12 @@ export class AdminComponent implements OnInit, AfterViewInit {
   @ViewChildren('division') bodyTemplates: QueryList<TemplateRef<any>>;
   @ViewChildren('tab') tabTemplates: QueryList<TemplateRef<any>>;
 
+  @ViewChild('timeline') timeline: TimelineComponent;
+
   $contamData: Observable<any>;
   $time: Observable<any>;
   $contamination: Observable<any>;
+  $pauseAtMinute: Observable<any>;
 
   private destroy$ = new Subject<boolean>();
 
@@ -95,6 +99,7 @@ export class AdminComponent implements OnInit, AfterViewInit {
 
   currentTab;
   time;
+  pauseAtMinute = null;
   modalContent: TemplateRef<any>;
   showKey: string;
   divisions;
@@ -148,17 +153,27 @@ export class AdminComponent implements OnInit, AfterViewInit {
       ]))
     )
 
+    this.$pauseAtMinute = this.db.object(`shows/${this.showKey}/pauseAtMinute`).valueChanges(),
+
     this.$time = combineLatest(
       this.db.object(`shows/${this.showKey}/startTime`).valueChanges(),
+      this.$pauseAtMinute,
       timer(0, 1000).pipe(map(() => new Date())),
       this.db.object(`shows/${this.showKey}/live`).valueChanges()
     ).pipe(
       takeUntil(this.destroy$),
-      map(([start, clock, live]) => {
+      map(([start, pauseAtMinute, clock, live]) => {
+        console.log({pauseAtMinute})
         const a = moment(start);
         const b = moment(clock.getTime());
         const time = Math.floor(moment.duration(b.diff(a)).asMinutes());
-        return { start, clock, time, live }
+        if (this.timeline && pauseAtMinute !== null && time > pauseAtMinute) {
+          console.log("INSERT PAUSE")
+          this.timeline.insertPause(pauseAtMinute);
+          this.db.object(`shows/${this.showKey}/pauseAtMinute`).set(time)
+        }
+        this.pauseAtMinute = pauseAtMinute;
+        return { start, paused: pauseAtMinute !== null, clock, live, time }
       }),
       tap((timer) => {
         this.time = timer.time;
@@ -211,8 +226,21 @@ export class AdminComponent implements OnInit, AfterViewInit {
     this.currentTab = tab.id;
   }
 
-  stopClock() {
-    this.db.object(`shows/${this.showKey}/live`).set(false);
+  pauseClock(min) {
+    console.log("pause mr clock", min);
+    this.db.object(`shows/${this.showKey}/pauseAtMinute`).set(min);
+  }
+
+  resumeClock() {
+    this.db.object(`shows/${this.showKey}/pauseAtMinute`).remove();
+  }
+
+  async resetTimeline() {
+    if (!confirm("Are you sure you want to reset the timeline?")) return;
+    await this.db.object(`shows/${this.showKey}/live`).set(false);
+    await this.db.object(`shows/${this.showKey}/pauseAtMinute`).remove();
+    const timeline = await promiseOne(this.db.object(`timeline`));
+    await this.db.object(`shows/${this.showKey}/timeline`).set(timeline)
   }
 
   startClock() {
@@ -470,20 +498,16 @@ export class AdminComponent implements OnInit, AfterViewInit {
     if (!confirm("This will reset all show data. Are you sure you want to do this?")) {
       return
     }
-    let users = await this.db.object(`shows/${this.showKey}/users`)
-      .valueChanges()
-      .pipe(take(1))
-      .toPromise()
-    const contamination: any = await this.db.object(`shows/${this.showKey}/contamination`)
-      .valueChanges()
-      .pipe(take(1))
-      .toPromise();
+    let users = await promiseOne(this.db.object(`shows/${this.showKey}/users`));
+    const contamination: any = await promiseOne(this.db.object(`shows/${this.showKey}/contamination`));
+    const timeline = await promiseOne(this.db.object('timeline'));
 
     const divisions = this.generateDivisions();
     await this.db.object(`shows/${this.showKey}`).remove();
     this.db.object(`shows/${this.showKey}`).set({
       divisions,
       ...SHOW_TEMPLATE,
+      timeline,
       users: users ? Object.keys(users).reduce((acc, key) => {
         return { ...acc, [key]: {
           ...users[key],

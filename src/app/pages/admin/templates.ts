@@ -99,9 +99,5 @@ export const SHOW_TEMPLATE = {
     end: 90,
     formula: 'linear'
   },
-  content: {},
-  global: {
-    actual: 0,
-    capacity: 0
-  }
+  content: {}
 }

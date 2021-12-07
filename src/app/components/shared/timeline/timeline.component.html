@@ -7,9 +7,10 @@
   </tr>
   <tr
     *ngFor="let row of ($timeline | async); let index = index"
+    [class.time-pause]="timer.paused"
     [class.time-highlight]="timer.live && timer.time > index"
     >
-    <td class="cell">{{ row.time }}</td>
+    <td class="cell">{{ index + 1 }}</td>
     <td class="cell">{{ row.timestamp }}</td>
     <td class="cell">{{ row.action }}</td>
     <td class="cell">{{ row.action2 }}</td>

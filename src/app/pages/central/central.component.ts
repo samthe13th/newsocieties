@@ -71,15 +71,16 @@ export class CentralComponent implements OnInit, AfterViewInit {
     
     this.$time = combineLatest(
       this.db.object(`shows/${this.showKey}/startTime`).valueChanges(),
+      this.db.object(`shows/${this.showKey}/pauseAtMinute`).valueChanges(),
       timer(0, 1000).pipe(map(() => new Date())),
       this.db.object(`shows/${this.showKey}/live`).valueChanges()
     ).pipe(
       takeUntil(this.destroy$),
-      map(([start, clock, live]) => {
+      map(([start, pauseAtMinute, clock, live]) => {
         const a = moment(start);
         const b = moment(clock.getTime());
         const time = Math.floor(moment.duration(b.diff(a)).asMinutes());
-        return { start, clock, time, live }
+        return { start, clock, time, live, paused: pauseAtMinute !== null }
       }),
       tap((timer) => {
         this.time = timer.time;
