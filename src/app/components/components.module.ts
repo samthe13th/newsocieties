@@ -42,6 +42,7 @@ import { LargePopupComponent } from './shared/large-popup/large-popup.component'
 import { DemoTilesComponent } from './shared/demo-tiles/demo-tiles.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { TimelineComponent } from './shared/timeline/timeline.component';
+import { DivisionAdvComponent } from './shared/division-adv/division-adv.component';
 
 const components = [
   AdvancementTrackComponent,
@@ -51,6 +52,7 @@ const components = [
   CardComponent,
   ChatComponent,
   DemoTilesComponent,
+  DivisionAdvComponent,
   DivisionChartComponent,
   DivisionFullComponent,
   DivisionPopupsComponent,

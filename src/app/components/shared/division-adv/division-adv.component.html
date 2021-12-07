@@ -1,0 +1,32 @@
+<ng-container *ngIf="$advancements | async as adv">
+  <div class="div-adv">
+    <i title="Safety" class="ns-icon">
+      <img [src]="color === 'black' ? '../assets/safety.png' : '../assets/safety_white.png'"/>
+    </i>
+    {{ adv.safety }}
+  </div>
+  <div class="div-adv">
+    <i title="Health" class="ns-icon">
+      <img [src]="color === 'black' ? '../assets/health.png' : '../assets/health_white.png'"/>
+    </i>
+    {{ adv.health }}
+  </div>
+  <div class="div-adv">
+    <i title="Arts and Culture" class="ns-icon">
+      <img [src]="color === 'black' ? '../assets/arts.png' : '../assets/arts_white.png'"/>
+    </i>
+    {{ adv.arts }}
+  </div>
+  <div class="div-adv">
+    <i title="Knowledge" class="ns-icon">
+      <img [src]="color === 'black' ? '../assets/knowledge.png' : '../assets/knowledge_white.png'"/>
+    </i>
+    {{ adv.knowledge }}
+  </div>
+  <div class="div-adv">
+    <i title="infrastructure" class="ns-icon">
+      <img [src]="color === 'black' ? '../assets/infrastructure.png' : '../assets/infrastructure_white.png'"/>
+    </i>
+    {{ adv.infrastructure }}
+  </div>
+</ng-container>

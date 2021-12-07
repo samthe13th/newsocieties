@@ -1,7 +1,17 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { Observable } from 'rxjs';
-import { faGavel, faFire, faLandmark, faGlobe, faLeaf, faCartPlus } from '@fortawesome/free-solid-svg-icons';
+import { map } from 'rxjs/operators';
+import { sortBy } from 'lodash';
+import { faGavel, faFire, faLandmark, faGlobe } from '@fortawesome/free-solid-svg-icons';
+
+const SHAKI = {
+  safety: 1,
+  health: 2,
+  arts: 3,
+  knowledge: 4,
+  infrastructure: 5
+}
 
 @Component({
   selector: 'app-division-full',
@@ -19,6 +29,8 @@ export class DivisionFullComponent {
   $scenarios: Observable<any>;
   $events: Observable<any>;
   $division: Observable<any>;
+  $citizens: Observable<any>;
+  $advancements: Observable<any>;
 
   showDecisions = 'principles';
 
@@ -45,10 +57,22 @@ export class DivisionFullComponent {
     this.$resolutions = this.db.list(`${divisionPath}/resolutions`).valueChanges();
     this.$events = this.db.list(`${divisionPath}/events`).valueChanges();
     this.$scenarios = this.db.list(`${divisionPath}/scenarios`).valueChanges();
+    this.$citizens = this.db.list(`${divisionPath}/citizens`).valueChanges();
+    this.$advancements = this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/advancements`).valueChanges()
+      .pipe(
+        map((advs: any) => {
+          const array = Object.keys(advs).map((key) => {
+            return { 
+              order: SHAKI[key],
+              name: key,
+              value: (advs[key].individual + advs[key].communal) }
+          })
+          return sortBy(array, ['order']);
+        }),
+      )
   }
 
   onDivisionDecisionSelect(button) {
     this.showDecisions = button.id;
-    console.log('change view: ', this.showDecisions)
   }
 }

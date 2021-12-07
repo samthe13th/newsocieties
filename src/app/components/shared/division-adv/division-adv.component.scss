@@ -1,0 +1,12 @@
+.div-adv {
+  display: flex; 
+  align-items: center;
+
+  > .ns-icon {
+    margin-right: 5px;
+  }
+
+  &:not(:last-child) {
+    margin-right: 10px;
+  }
+}

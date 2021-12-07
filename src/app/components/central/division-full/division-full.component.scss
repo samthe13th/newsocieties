@@ -1,3 +1,38 @@
+.division-adv-table {
+  background: transparent;
+  tr {
+    background: transparent;
+  }
+
+  .adv-header {
+    display: flex; 
+    border: none;
+  }
+
+  [data-adv] {
+    &::after {
+      display: block;
+      content: attr(data-adv);
+    }
+  }
+
+  [data-adv] {
+    background: #fcc107;
+    color: black;
+  }
+
+  [data-adv="0"] {
+    background: transparent;
+    color: white;
+  }
+
+  [data-adv="1"],
+  [data-adv="2"] {
+    background: #6ec2dc;
+    color: black;
+  }
+}
+
 .division-full__header {
   display: flex; 
   justify-content: space-between;
@@ -16,6 +51,12 @@
   border-bottom: solid lightgrey 1px;
 }
 
+.division-full__main {
+  background: white;
+  display: flex; 
+  flex-direction: column;
+}
+
 .division-full__body {
   height: 100%;
   width: 100%; 
@@ -26,21 +67,27 @@
     background: rgb(29, 47, 75);
     color: white;
     width: 100%;
-    max-width: 300px;
+    max-width: 350px;
     padding: 10px;
 
     h2 {
       font-weight: 200;
     }
   }
-  > .division-decisions-wrap {
-    background: white;
-    color: black;
-    width: 100%;
-    margin-right: 10px;
-    display: flex; 
-    flex-direction: column;
-  }
+}
+
+.division-full__citizen-adv {
+  padding: 10px;
+}
+
+.division-decisions-wrap {
+  background: white;
+  color: black;
+  width: 100%;
+  margin-right: 10px;
+  overflow: hidden;
+  display: flex; 
+  flex-direction: column;
 }
 
 .division-decisions {
@@ -48,6 +95,7 @@
   flex-direction: column;
   width: 100%; 
   height: 100%; 
+  min-height: 300px;
   overflow: auto;
   padding: 20px;
   box-sizing: border-box;

@@ -2,72 +2,92 @@
   <div class="division-full__body">
     <div class="division-stats">
 
-      <app-division-chart
-        [showKey]="showKey"
-        [divisionKey]="divisionKey">
-      </app-division-chart>
+      <h1>{{division.name}}</h1>
+      <br/>
 
       <div class="flex-column">
-        <br/>
-        
         <p>Score: {{ division?.score }} ({{ division?.VP }})</p>
         <p>Season: {{ division?.season }}</p>
         <p>Actions: {{ division?.actions }}</p>
         <p>Capacity: {{ division?.capacity }}</p>
-
-        <hr/>
-
         <p>Reserve: {{ division?.reserve }}</p>
         <p>Harvest: {{ division?.harvest ? division.harvest : 0 }}</p>
         <p>Land cost: {{ division?.landCost }}</p>
-        <p>Safety: {{division?.advancements?.safety.communal + division?.advancements?.safety.individual }}</p>
-        <p>Health: {{division?.advancements?.health.communal + division?.advancements?.health.individual}}</p>
-        <p>Arts and Culture: {{division?.advancements?.arts.communal + division?.advancements?.arts.individual}}</p>
-        <p>Knowledge: {{division?.advancements?.knowledge.communal + division?.advancements?.knowledge.individual}}</p>
-        <p>Infrastructure: {{division?.advancements?.infrastructure.communal + division?.advancements?.infrastructure.individual}}</p>
+      </div>
 
+      <div>
+        <table class="division-adv-table" *ngIf="($advancements | async) as advancements">
+          <tr>
+            <th></th>
+            <th *ngFor="let adv of advancements">
+              <i class="ns-icon">
+                <img src="../assets/{{adv.name}}_white.png"/>
+              </i>
+            </th>
+          </tr>
+          <tr *ngFor="let citizen of ($citizens | async)">
+            <td>{{citizen?.name}}</td>
+            <td [attr.data-adv]="citizen?.advancements.safety"></td>
+            <td [attr.data-adv]="citizen?.advancements.health"></td>
+            <td [attr.data-adv]="citizen?.advancements.arts"></td>
+            <td [attr.data-adv]="citizen?.advancements.knowledge"></td>
+            <td [attr.data-adv]="citizen?.advancements.infrastructure"></td>
+          </tr>
+          <tr>
+            <td>DIVISION</td>
+            <td *ngFor="let adv of advancements">
+              {{adv.value}}
+            </td>
+          </tr>
+        </table>
       </div>
-      <br/>
+
     </div>
-    <div class="division-decisions-wrap">
-      <div class="division-decisions__button-group-wrap">
-        <app-button-group
-          #divisionDecision
-          (select)="onDivisionDecisionSelect($event)"
-          selectById="principles"
-          [buttons]="divisionDecisionsButtons">
-        </app-button-group>
-      </div>
-      <div class="division-decisions">
-        <ng-container *ngIf="showDecisions === 'principles'">
-          <div *ngFor="let principle of ($principles | async)">
-            <h3 style="margin: 0"><strong>{{ principle.title }}</strong></h3>
-            <div [innerHtml]="principle.value"></div>
-          </div>
-        </ng-container>
-        <ng-container *ngIf="showDecisions === 'resolutions'">
-          <div *ngFor="let resolution of ($resolutions | async)">
-            <h3 style="margin: 0"><strong>{{ resolution.title }}</strong></h3>
-            <div [innerHtml]="resolution.value"></div>
-          </div>
-        </ng-container>
-        <ng-container *ngIf="showDecisions === 'events'">
-          <button 
-            (click)="clickNewEventBtn()">
-            NEW EVENT
-          </button>
-          <div *ngFor="let event of ($events | async)">
-            <h3 style="margin: 0"><strong>{{ event.header }}</strong></h3>
-            <div [innerHtml]="event.value"></div>
-            <br/>
-          </div>
-        </ng-container>
-        <ng-container *ngIf="showDecisions === 'scenarios'">
-          <div *ngFor="let scenario of ($scenarios | async)">
-            <h3 style="margin: 0"><strong>{{ scenario.title }}</strong></h3>
-            <div [innerHtml]="scenario.value"></div>
-          </div>
-        </ng-container>
+    <div class="division-full__main">
+      <app-division-chart
+        [showKey]="showKey"
+        [divisionKey]="divisionKey">
+      </app-division-chart>
+      <div class="division-decisions-wrap">
+        <div class="division-decisions__button-group-wrap">
+          <app-button-group
+            #divisionDecision
+            (select)="onDivisionDecisionSelect($event)"
+            selectById="principles"
+            [buttons]="divisionDecisionsButtons">
+          </app-button-group>
+        </div>
+        <div class="division-decisions">
+          <ng-container *ngIf="showDecisions === 'principles'">
+            <div *ngFor="let principle of ($principles | async)">
+              <h3 style="margin: 0"><strong>{{ principle.title }}</strong></h3>
+              <div [innerHtml]="principle.value"></div>
+            </div>
+          </ng-container>
+          <ng-container *ngIf="showDecisions === 'resolutions'">
+            <div *ngFor="let resolution of ($resolutions | async)">
+              <h3 style="margin: 0"><strong>{{ resolution.title }}</strong></h3>
+              <div [innerHtml]="resolution.value"></div>
+            </div>
+          </ng-container>
+          <ng-container *ngIf="showDecisions === 'events'">
+            <button 
+              (click)="clickNewEventBtn()">
+              NEW EVENT
+            </button>
+            <div *ngFor="let event of ($events | async)">
+              <h3 style="margin: 0"><strong>{{ event.header }}</strong></h3>
+              <div [innerHtml]="event.value"></div>
+              <br/>
+            </div>
+          </ng-container>
+          <ng-container *ngIf="showDecisions === 'scenarios'">
+            <div *ngFor="let scenario of ($scenarios | async)">
+              <h3 style="margin: 0"><strong>{{ scenario.title }}</strong></h3>
+              <div [innerHtml]="scenario.value"></div>
+            </div>
+          </ng-container>
+        </div>
       </div>
     </div>
   </div>
