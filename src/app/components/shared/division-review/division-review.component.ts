@@ -32,8 +32,13 @@ export class DivisionReviewComponent implements OnInit {
           this.db.object(`shows/${this.showKey}/divisions/${toReview}/score`).valueChanges(),
           this.db.object(`shows/${this.showKey}/divisions/${toReview}/reserve`).valueChanges(),
           this.db.object(`shows/${this.showKey}/divisions/${toReview}/advancements`).valueChanges(),
-          this.db.object(`shows/${this.showKey}/divisions/${toReview}/exceedingCapacity`).valueChanges().pipe(
-            map(({ actual, capacity }: any) => `${Math.round(((actual / capacity) * 100)) - 100}%`),
+          this.db.list(`shows/${this.showKey}/divisions/${toReview}/chartData`).valueChanges().pipe(
+            map((data: any[]) => {
+              console.log({data})
+              const percent = data.reduce((acc, [_, c, a]) => (acc + ((a - c) / c) * 100), 0)
+              console.log({percent})
+              return `${Math.round(percent)}%`
+            }),
           ),
           this.db.object(`shows/${this.showKey}/divisions/${toReview}/citizens`).valueChanges().pipe(
             map((citizens) => {

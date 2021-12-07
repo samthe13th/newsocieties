@@ -34,9 +34,15 @@
             <td [attr.data-adv]="citizen?.advancements.infrastructure"></td>
           </tr>
           <tr>
-            <td>DIVISION</td>
+            <td>COMMUNAL</td>
             <td *ngFor="let adv of advancements">
-              {{adv.value}}
+              {{adv.communal}}
+            </td>
+          </tr>
+          <tr>
+            <td>TOTAL</td>
+            <td *ngFor="let adv of advancements">
+              {{adv.total}}
             </td>
           </tr>
         </table>

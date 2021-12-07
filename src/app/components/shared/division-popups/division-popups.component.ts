@@ -13,6 +13,7 @@ import { LandCardTypes } from 'src/app/interfaces';
   styleUrls: ['./division-popups.component.scss'],
   host: {
     '[class.app-division-popups]': 'true',
+    '[class.dark-background]': 'type === "large-popup"',
     '[class.hide]': '!divisionEvent',
   },
   animations: [

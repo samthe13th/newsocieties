@@ -1031,30 +1031,12 @@ export class HostComponent implements OnInit, OnDestroy {
         division.capacity,
         division.actions
       ])
-      console.log('update exceeding cap: ', this.divisionKey);
-      await this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/exceedingCapacity`).query.ref.transaction((global) => { 
-        const result = global === null ? { 
-          actual: toNumber(division?.actions),
-          capacity: toNumber(division?.capacity)
-         } : { 
-           actual: toNumber(global?.actual) + toNumber(division?.actions),
-           capacity: toNumber(global?.capacity) + toNumber(division?.capacity),
-         }
-        return result
-      })
-      await this.db.object(`shows/${this.showKey}/global`).query.ref.transaction((global) => { 
-        const result = global === null ? { 
-          actual: toNumber(division?.actions),
-          capacity: toNumber(division?.capacity)
-         } : { 
-           actual: toNumber(global?.actual) + toNumber(division?.actions),
-           capacity: toNumber(global?.capacity) + toNumber(division?.capacity),
-         }
-        console.log({result})
-        return result
-      })
     }
-
+    console.log("START SEASON: ", newSeason)
+    await this.db.object(`${this.divisionPath}/highThresholdsMet`).query.ref.transaction((htm) => {
+      console.log('HTM: ', htm)
+      return newSeason.highThresholdMet ? htm + 1 : htm
+    })
     await this.db.object(`${this.divisionPath}`).update({
       harvestColumn: division.lockHarvestColumns
         ? division.harvestColumn

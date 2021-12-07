@@ -58,7 +58,8 @@ export class PlayerAdvancementsComponent implements OnInit {
           if (adv >= 3 && !this.landmarks?.[`${key}Achieved`]) {
             this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/divisionLargePopup`).set({
               type: 'Advancements',
-              header: `Exciting news!`,
+              header: `Advancement`,
+              value: key,
               message: `${data.name} has made 3 contributions to ${key}`,
             })
             this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/landmarks/${key}Achieved`).set(true)

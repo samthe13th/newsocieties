@@ -7,6 +7,7 @@ import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
   styleUrls: ['large-popup.component.scss'],
   host: {
     '[class.app-large-popup]': 'true',
+    '[attr.data-color]': 'divisionKey',
     '[class.animate-in]': 'animateIn',
     '[class.animate-out]': 'animateOut'
   },
@@ -26,10 +27,12 @@ export class LargePopupComponent implements OnInit {
     this.reset();
   }
   @Input() canDismiss = true;
+  @Input() divisionKey;
 
   constructor() {}
 
   ngOnInit() {
+
   }
 
   reset() {

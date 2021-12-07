@@ -3,10 +3,6 @@ export const DIVISION_TEMPLATE = {
   harvestColumn: [true, true, true, true, true, true, true],
   lockHarvestColumns: false,
   marketView: 'localLand',
-  exceedingCapacity: {
-    actual: 0,
-    capacity: 0
-  },
   advancements: {
     safety: {
       communal: 0,

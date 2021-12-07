@@ -133,14 +133,8 @@ export class DivisionService {
         take(1),
         map(([reserve,reserveThresholds]: [number,any]) => {
           console.log({reserve, reserveThresholds});
-          this.db.object(`${divisionPath}/highThresholdMet`).set(false);
           if (reserveThresholds.high <= reserve) {
-            console.log("raise threshold");
-            this.db.object(`${divisionPath}/highThresholdMet`).set(true);
-            this.db.object(`${divisionPath}/highThresholdsMet`).query
-              .ref.transaction(met => met ? ++met : 1).then(() => {
-                resolve(4);
-              })
+            resolve(4);
           } else if (reserveThresholds.mid <= reserve) {
             resolve(3);
           } else if (reserveThresholds.low <= reserve) {
@@ -259,12 +253,13 @@ export class DivisionService {
       .subscribe((division: any) => {
         console.log('SCORE: ', division?.score, SCORE)
         const updates = SCORE[division?.score];
-        const capacity = division?.highThresholdMet
+        const highThresholdMet = division?.reserve >= division.reserveThresholds.high;
+        const capacity = highThresholdMet
           ? division?.capacity + 1
           : division?.capacity;
-        console.log('capacity: ', capacity, updates.capacity)
         this.db.object(`${divisionPath}/nextSeason`).set({
           season: division?.season + 1,
+          highThresholdMet,
           contaminantLevel: division?.contaminantLevel < 3
             ? division?.contaminantLevel + 1
             : division?.contaminantLevel,

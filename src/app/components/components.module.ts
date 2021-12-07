@@ -31,6 +31,7 @@ import { BannerComponent } from './player/banner/banner.component';
 import { ReserveBarComponent } from './player/banner/reserve-bar/reserve-bar.component';
 import { PlayerAdvancementsComponent } from './player/player-advancements/player-advancements.component';
 import { AdvancementTrackComponent } from './player/player-advancements/advancement-track/advancement-track.component';
+import { GlobalCapacityComponent } from './shared/global-capacity/global-capacity.component';
 import { GlobalLandComponent } from './shared/market/global-land/global-land.component';
 import { AdvancementSummaryComponent } from './shared/market/advancement-summary/advancement-summary.component';
 import { MarketComponent } from './shared/market/market.component';
@@ -58,6 +59,7 @@ const components = [
   DivisionPopupsComponent,
   DivisionReviewComponent,
   ExportsComponent,
+  GlobalCapacityComponent,
   GlobalLandComponent,
   HarvestImageComponent,
   LandGridComponent,

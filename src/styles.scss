@@ -289,6 +289,10 @@ select {
   &.hide {
     display: none;
   }
+
+  &.dark-background {
+    background: rgba(#111111, 0.8);
+  }
   
   z-index: 100;
   position: absolute;
@@ -554,8 +558,8 @@ select {
   overflow: auto;
   background: white;
   padding: 10px;
-  margin-left: 10px;
   width: 100%;
+  margin-bottom: 5px;
   height: 100%;
   flex-direction: column;
   box-sizing: border-box;
@@ -1327,6 +1331,31 @@ select {
     height: 24px;
     width: 24px;
   }
+}
+
+[data-color="E"] {
+  background: rgb(117, 170, 255);
+}
+[data-color="NE"] {
+  background: #9b3f3f;
+}
+[data-color="N"] {
+  background: rgb(192, 92, 152)
+}
+[data-color="NW"] {
+  background: rgb(84, 173, 108)
+}
+[data-color="S"] {
+  background: rgb(189, 137, 82)
+}
+[data-color="SE"] {
+  background: #79719b;
+}
+[data-color="SW"] {
+  background: #67a5ab;
+}
+[data-color="W"] {
+  background: rgb(223, 190, 93)
 }
 
 html, body { height: 100%; }

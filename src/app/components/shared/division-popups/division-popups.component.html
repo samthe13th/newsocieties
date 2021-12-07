@@ -16,8 +16,11 @@
     (afterDismiss)="afterLargePopupHide()"
     @fadeInOut
     [data]="divisionEvent"
-    [canDismiss]="user !== 'player'"
-  >
+    [divisionKey]="divisionKey"
+    [canDismiss]="user !== 'player'">
+    <i *ngIf="divisionEvent.type === 'Advancements'">
+      <img src="../assets/{{divisionEvent?.value}}.png"/>
+    </i>
     <app-demo-tiles
       [centerTileValue]="divisionEvent?.value"
       [tiles]="divisionEvent?.data">
