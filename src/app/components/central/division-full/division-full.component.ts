@@ -65,7 +65,8 @@ export class DivisionFullComponent {
             return { 
               order: SHAKI[key],
               name: key,
-              value: (advs[key].individual + advs[key].communal) }
+              value: (advs[key].individual + advs[key].communal)
+            }
           })
           return sortBy(array, ['order']);
         }),
