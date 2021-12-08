@@ -1,5 +1,4 @@
 %glc-summary {
-  margin-bottom: 30px;
   margin-top: 10px;
 }
 
@@ -11,4 +10,5 @@
 .glc-summary--lg {
   @extend %glc-summary;
   font-size: 30px;
+  margin-bottom: 30px;
 }

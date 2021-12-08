@@ -1273,7 +1273,7 @@ select {
   display: flex
 }
 
-.society-summary {
+.app-society-summary {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -1282,6 +1282,22 @@ select {
   font-size: 16px;
   font-weight: 100;
   color: white;
+
+  &.large-text {
+    .ns-icon > img {
+      height: 30px;
+      width: 30px;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+      font-size: 1.6em;
+    }
+    * {
+      font-size: 30px;
+      line-height: 30px;
+    }
+  }
 }
 
 .society-grid {

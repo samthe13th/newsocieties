@@ -5,7 +5,8 @@ import { Component, Input } from '@angular/core';
   templateUrl: './society-summary.component.html',
   styleUrls: ['./society-summary.component.scss'],
   host: {
-    '[class.society-summary]': 'true',
+    '[class.app-society-summary]': 'true',
+    '[class.large-text]': 'details === "endgame"',
     '[class.flex-column]': 'true',
     '[style.background]': 'division?.color'
   }

@@ -1,15 +1,21 @@
 <ng-container *ngIf="division">
   <h1 class="flex-row">
-    <strong>{{ division?.code }}</strong>
-    <i class="ns-icon">
-      <img src="/assets/season_white.png"/>
-    </i>
-    <div>{{division.season}}</div>
+    <strong>{{ division?.name }}</strong>
   </h1>
-  <div class="flex-row flex-center">
-    <strong>Score: </strong> {{ division.score }}
-   </div>
-  <div><strong>Land cost: </strong>{{ division.landCost }}</div>
+  <div class="season-score">
+    <div class="flex-row">
+      <i class="ns-icon">
+        <img src="/assets/season_white.png"/>
+      </i>
+      <strong>{{ division.season }}</strong>
+    </div>
+    <div>
+      <strong>{{ division.score }}</strong>
+    </div>
+  </div>
+  <div>
+    Land cost: <strong>{{ division.landCost }}</strong>
+  </div>
   <br/>
   <app-division-chart 
     *ngIf="details === 'full'"
@@ -18,11 +24,4 @@
     [divisionKey]="division.code" 
     [showKey]="showKey">
   </app-division-chart>
-  <!-- <ng-container *ngIf="details === 'full'">
-    <div><strong>Season:</strong>{{ division.season }}</div>
-    <div><strong>Reserve:</strong>{{ division.reserve }}</div>
-    <div><strong>Actions:</strong>{{ division.actions }}</div>
-    <div><strong>Capacity:</strong>{{ division.capacity }}</div>
-    <div><strong>Harvest:</strong>{{ division.harvest }}</div>
-  </ng-container> -->
 </ng-container>
