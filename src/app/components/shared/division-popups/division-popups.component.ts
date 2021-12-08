@@ -4,7 +4,7 @@ import { Subject } from 'rxjs';
 import { takeUntil, tap } from 'rxjs/operators';
 import { LargePopupComponent } from '../large-popup/large-popup.component';
 import { trigger, transition, animate, style } from '@angular/animations';
-import { Howl } from 'howler';
+import { Howl, Howler } from 'howler';
 import { LandCardTypes } from 'src/app/interfaces';
 
 @Component({
@@ -47,10 +47,10 @@ export class DivisionPopupsComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.Sounds = {
-      contamination: new Howl({ src: 'assets/Contamination.mp3' }),
-      resource1: new Howl({ src: 'assets/gather1.mp3' }),
-      resource2: new Howl({ src: 'assets/gather2.mp3' }),
-      resource3: new Howl({ src: 'assets/gather3.mp3' }),
+      contamination: new Howl({ src: 'assets/Contamination.mp3' }).volume(0.4),
+      resource1: new Howl({ src: 'assets/gather1.mp3' }).volume(0.2),
+      resource2: new Howl({ src: 'assets/gather2.mp3' }).volume(0.2),
+      resource3: new Howl({ src: 'assets/gather3.mp3' }).volume(0.2),
     }
     const popupUrl = `shows/${this.showKey}/divisions/${this.divisionKey}/divisionPopup`;
 
