@@ -728,6 +728,7 @@ export class HostComponent implements OnInit, OnDestroy {
     if (type === 'scenario') {
       this.pushToCentral('scenarios', `${this.divisionVote.vote.result} did not act`);
     } else {
+      this.db.object(`${this.divisionPath}/lastResolution`).remove();
       this.pushToCentral('resolutions', `${this.divisionVote.vote.result} did not act`);
     }
   }
@@ -887,7 +888,11 @@ export class HostComponent implements OnInit, OnDestroy {
       selected: selection
     })
 
-    this.db.object(`${this.divisionPath}/lastResolution`).set(resolutionData)
+    if (consequence.trim() === 'none') {
+      this.db.object(`${this.divisionPath}/lastResolution`).remove();
+    } else {
+      this.db.object(`${this.divisionPath}/lastResolution`).set(resolutionData)
+    }
     this.pushToCentral('resolutions', resolution);
   }
 
