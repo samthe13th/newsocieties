@@ -9,10 +9,11 @@ import { AngularFireDatabase } from '@angular/fire/database';
   template: `
   <div *ngIf="$globalCapacity | async as glc">
     <h1>Global Capacity</h1>
-    {{ glc.actual }} / {{ glc.capacity }}
-    <span *ngIf="showExceeding">
-      Exceeding Capacity: {{ glc.exceeding }}
-    </span>
+    <div class="glc-summary--lg">{{ glc.actual }} / {{ glc.capacity }}</div>
+    <ng-container *ngIf="showExceeding">
+      Exceeding Capacity
+      <div class="glc-summary--sm">{{ glc.exceeding }}</div>
+    </ng-container>
   </div>
   `,
   styleUrls: ['./global-capacity.component.scss'],
