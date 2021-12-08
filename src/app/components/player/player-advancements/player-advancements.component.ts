@@ -4,6 +4,8 @@ import { tap, map, takeUntil } from 'rxjs/operators';
 import { each } from 'lodash';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { faArchway, faBriefcaseMedical, faShieldAlt, faBrain, faTheaterMasks } from '@fortawesome/free-solid-svg-icons';
+import * as moment from 'moment';
+
 
 @Component({
   selector: 'app-player-advancements',
@@ -56,6 +58,15 @@ export class PlayerAdvancementsComponent implements OnInit {
         console.log('!!change: ', data, this.landmarks);
         each(data?.adv, (adv: any, key: string) => {
           if (adv >= 3 && !this.landmarks?.[`${key}Achieved`]) {
+            this.db.list(`shows/${this.showKey}/feeds/${this.divisionKey}`).push({
+              from: this.divisionKey,
+              type: 'advancement',
+              header: 'Advancement',
+              value: `${data.name} has made 3 contributions to ${key}`,
+              timestamp: moment().format('h:mm:ss')
+            })
+            this.db.object(`shows/${this.showKey}/centralUnseen/${this.divisionKey}`)
+              .query.ref.transaction((unseen) => ++unseen)
             this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/divisionLargePopup`).set({
               type: 'Advancements',
               header: `Advancement`,
