@@ -7,9 +7,9 @@
         [class.app-pulse--md]="($playerViewHighlight | async) === 'resources'"
         class="division-details reserve">
         <ng-container *ngIf="playerViews?.resources">
-          <div class="reserve-header ns-fade-in">
-            RESERVE: {{reserveData?.reserve.value}}
-          </div>
+          <h2 class="reserve-header ns-fade-in">
+            Reserve: {{reserveData?.reserve.value}}
+          </h2>
           <app-reserve-bar 
             class="ns-fade-in"
             [percent]="reserveData?.reserve?.percent"
@@ -49,7 +49,8 @@
     </ng-template>
 
     <!-- GLOBAL CAPACITY -->
-    <div class="division-details reserve" [class.app-pulse--md]="($playerViewHighlight | async) === 'global'">
+    <div class="division-details reserve"
+      [class.app-pulse--md]="($playerViewHighlight | async) === 'global'">
       <div class="ns-fade-in" *ngIf="playerViews?.global">
         <!-- <span>GLOBAL CAPACITY</span>
         <span *ngIf="$global | async as global">

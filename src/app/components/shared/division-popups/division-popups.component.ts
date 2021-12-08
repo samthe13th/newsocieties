@@ -47,7 +47,7 @@ export class DivisionPopupsComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.Sounds = {
-      contamination: new Howl({ src: 'assets/Contamination.mp3' }).volume(0.4),
+      contamination: new Howl({ src: 'assets/Contamination.mp3' }).volume(0.2),
       resource1: new Howl({ src: 'assets/gather1.mp3' }).volume(0.2),
       resource2: new Howl({ src: 'assets/gather2.mp3' }).volume(0.2),
       resource3: new Howl({ src: 'assets/gather3.mp3' }).volume(0.2),

@@ -157,13 +157,6 @@ export class HostComponent implements OnInit, OnDestroy {
   divisionVote;
   voteNotes = "";
   voteType;
-  resPrompt = 'Your citizens are addicted to a newly discovered vegetation. Resolve to:';
-  resOptions = [
-    { id: 'A', value: 'Set-up places for safe consumption and rehabilitation.', selected: false, votes: 0 },
-    { id: 'B', value: 'Prohibit the use of the plant.', selected: false, votes: 0  },
-    { id: 'C', value: 'Made it their main export and sent it to other divisions.', selected: false, votes: 0 },
-    { id: 'D', value: 'Do nothing.', selected: false, votes: 0  },
-  ]
   fontSize = 16;
   globalResolutions;
   globalPrinciples; 
@@ -726,13 +719,17 @@ export class HostComponent implements OnInit, OnDestroy {
     }
   }
 
-  doNotAct() {
+  doNotAct(type) {
     console.log("implement do not act")
     this.db.object(`${this.divisionPath}/vote`).update({
       state: 'final',
       noDecision: true,
     });
-    this.pushToCentral('resolutions', `${this.divisionVote.vote.result} did not act`);
+    if (type === 'scenario') {
+      this.pushToCentral('scenarios', `${this.divisionVote.vote.result} did not act`);
+    } else {
+      this.pushToCentral('resolutions', `${this.divisionVote.vote.result} did not act`);
+    }
   }
 
   noDecision() {
@@ -840,12 +837,14 @@ export class HostComponent implements OnInit, OnDestroy {
           });
         })
     } else if (type === 'scenarios') {
-      this.db.list(`${divisionPath}/scenarios`)
-        .valueChanges()
-        .pipe(take(1))
+      this.db.list(`${divisionPath}/scenarios`).valueChanges().pipe(take(1))
         .subscribe((scenarios) => {
           this.voteType = 'scenario';
-          this.voteDropdown = differenceBy(this.globalScenarios, scenarios, 'title');
+          this.voteDropdown = this.globalScenarios.map((scenario) => {
+            return (find(scenarios, ['title', scenario.title]))
+              ? { ...scenario, votedOn: true }
+              : scenario
+          })
         })
     }
   }
@@ -858,24 +857,12 @@ export class HostComponent implements OnInit, OnDestroy {
       selected: selection
     })
 
-    this.db.list(`${this.divisionPath}/scenarios`).push({
-      title: this.divisionVote.vote.title,
-      value: scenario
-    })
-
-    this.db.list(`shows/${this.showKey}/feeds/${this.divisionKey}`).push({
-      from: this.divisionKey,
-      type: 'vote',
-      header: this.divisionVote.vote.title,
-      value: scenario,
-      timestamp: moment().format('h:mm:ss')
-    })
-    this.db.object(`shows/${this.showKey}/centralUnseen/${this.divisionKey}`).query.ref.transaction((unseen) => ++unseen)
+    this.pushToCentral('scenarios', scenario)
   }
 
   setPrinciple(selection) {
     const principle = `${this.divisionVote.vote.result} ${selection.result}`;
-    console.log('SET PRINCIPLE: ', this.divisionVote)
+
     this.db.object(`${this.divisionPath}/vote`).update({
       state: 'final',
       selected: selection,

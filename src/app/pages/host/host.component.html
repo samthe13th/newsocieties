@@ -208,7 +208,7 @@
               [highlight]="playerView?.highlight === 'otherPlayers'"
               [show]="playerView?.views?.otherPlayers"
               (highlightChange)="onPlayerDataButtonClick('otherPlayers', 'highlight')"
-              (visibilityChange)="onPlayerDataButtonClick('otherPlayers', 'visible')">
+              (visibilityCghange)="onPlayerDataButtonClick('otherPlayers', 'visible')">
             </app-player-view-control>
             <app-player-view-control
               [class.app-pulse--sm]="playerView?.views?.advancements && playerView?.highlight === 'advancements'"
@@ -253,7 +253,11 @@
           <div>
             <button *ngIf="voteState === 'voting'" (click)="closePolls()">Close Polls</button>
             <button *ngIf="focus === 'principles' && voteState === 'review'" (click)="noDecision()">No Decision</button>
-            <button *ngIf="focus === 'resolutions' && voteState === 'review'" (click)="doNotAct()">Do not act</button>
+            <button 
+              *ngIf="(focus === 'scenario' || focus === 'resolutions') && voteState === 'review'"
+              (click)="doNotAct(focus)">
+              Do not act
+            </button>
             <button *ngIf="voteState === 'review'" (click)="customVoteOption()">Custom</button>
             <button *ngIf="voteState === 'review' && divisionVote" (click)="implement()">Implement</button>
           </div>
