@@ -55,7 +55,6 @@ export class PlayerAdvancementsComponent implements OnInit {
           color
         })), 
       tap((data) => {
-        console.log('!!change: ', data, this.landmarks);
         each(data?.adv, (adv: any, key: string) => {
           if (adv >= 3 && !this.landmarks?.[`${key}Achieved`]) {
             this.db.list(`shows/${this.showKey}/feeds/${this.divisionKey}`).push({

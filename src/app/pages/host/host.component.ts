@@ -302,6 +302,9 @@ export class HostComponent implements OnInit, OnDestroy {
     } else if (property === 'highlight') {
       this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/playerViewHighlight`)
         .query.ref.transaction(value => component !== value ? component : null)
+      setTimeout(() => {
+        this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/playerViewHighlight`).remove();
+      }, 2400)
     }
   }
 
