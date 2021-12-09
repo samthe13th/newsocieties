@@ -132,7 +132,7 @@ export class LandGridComponent implements OnInit {
       })
   }
 
-  private adjustContamination(percent, level) {
+  adjustContamination(percent, level) {
     console.log("adjust contams: ", level)
     this.contamination = percent;
     if (this.landTiles) {

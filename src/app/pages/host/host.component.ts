@@ -1017,7 +1017,6 @@ export class HostComponent implements OnInit, OnDestroy {
     }
     console.log("START SEASON: ", newSeason)
     await this.db.object(`${this.divisionPath}/highThresholdsMet`).query.ref.transaction((htm) => {
-      console.log('HTM: ', htm)
       return newSeason.highThresholdMet ? htm + 1 : htm
     })
     await this.db.object(`${this.divisionPath}`).update({
@@ -1051,6 +1050,31 @@ export class HostComponent implements OnInit, OnDestroy {
     this.divisionService.newSeason(this.showKey, this.divisionKey);
     this.modalContent = this.newSeasonModal;
     this.showModal = true;
+  }
+
+  async resetSeason(division) {
+    console.log('reset')
+    if (!division) return;
+    if (!confirm("Are you sure you want to reset this season?")) return;
+    const level = await this.divisionService.getThresholdLevel(this.showKey, this.divisionKey);
+    const landTiles = await this.divisionService.setLandTiles(this.showKey, this.divisionKey);
+    this.harvest = this.generateHarvest(landTiles, level, division.harvest, division.contaminantLevel);
+    await this.db.object(`${this.divisionPath}`).update({
+      landTiles: this.harvest,
+      actions: 0,
+      selection: null
+    })
+
+    combineLatest(
+      this.db.object(`shows/${this.showKey}/contamination/current`).valueChanges(),
+      this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/contaminantLevel`).valueChanges()
+    ).pipe(
+      take(1)
+    ).subscribe(([percent, level]) => {
+      console.log({percent, level})
+      this.landGrid.adjustContamination(percent, level);
+      this.landGrid.updateDB();
+    })
   }
 
   getDivisionObservables(show) {
