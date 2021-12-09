@@ -81,7 +81,6 @@ export class LandGridComponent implements OnInit {
       takeUntil(this.destroy$)
     ).subscribe((lm) => {
       this.landmarks = lm;
-      console.log("update landmarks: ", this.landmarks)
     })
 
     combineLatest(
@@ -113,7 +112,6 @@ export class LandGridComponent implements OnInit {
       ).pipe(
         takeUntil(this.destroy$)
       ).subscribe(([percent, level]) => {
-        console.log({percent, level})
         this.adjustContamination(percent, level);
         this.updateDB();
       })
@@ -133,7 +131,6 @@ export class LandGridComponent implements OnInit {
   }
 
   adjustContamination(percent, level) {
-    console.log("adjust contams: ", level)
     this.contamination = percent;
     if (this.landTiles) {
       const harvestable = this.landTiles
@@ -159,7 +156,6 @@ export class LandGridComponent implements OnInit {
             if (random > 8 && level > 2) {
               contamValue = 3
             }
-            console.log({level, contamValue, random})
             this.landTiles[i].type =  LandCardTypes.C;
             this.landTiles[i].value = contamValue;
           }
@@ -290,7 +286,6 @@ export class LandGridComponent implements OnInit {
   }
 
   updateDB() {
-    console.log('update db')
     this.db.object(this.updatePath).set(this.landTiles);
   }
 
@@ -311,7 +306,6 @@ export class LandGridComponent implements OnInit {
 
   async process(i, safe=false) {
     const tile = this.landTiles[i];
-    console.log('process: ', tile);
     if (!safe && tile.type === LandCardTypes.C && tile.harvested && !tile.owner) {
       await this.contaminateAdjacentTiles(tile);
       this.checkDiscoveries(tile);
@@ -320,9 +314,7 @@ export class LandGridComponent implements OnInit {
   }
 
   checkDiscoveries(tile) {
-    console.log('compare: ', tile, this.landmarks)
     if (tile.value === 2 && !this.landmarks?.doubleContam) {
-      console.log('new contam')
       this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/divisionLargePopup`).set({
         type: 'Contaminant',
         value: 2,
@@ -336,7 +328,6 @@ export class LandGridComponent implements OnInit {
       })
       this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/landmarks/doubleContam`).set(true);
     } else if (tile.value === 3 && !this.landmarks?.tripleContam) {
-      console.log('new contam')
       this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/divisionLargePopup`).set({
         type: 'Contaminant',
         value: 3,
@@ -362,7 +353,6 @@ export class LandGridComponent implements OnInit {
   }
 
   async contaminateAdjacentTiles(tile) {
-    console.log('contam adj: ', tile)
     let placements;
     if (tile.value === 1) {
       placements = ['left', 'right'];
@@ -380,7 +370,6 @@ export class LandGridComponent implements OnInit {
         tiles.forEach((tile, index) => {
           if (tile && !tile.owner && !tile.contaminated) {
             this.landTiles[tile.index].contaminated = true;
-            console.log('contaminate tile: ', this.landTiles[index])
           }
         })
         resolve();

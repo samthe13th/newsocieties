@@ -4,11 +4,9 @@
   <div><strong>Reserve:</strong>{{division?.reserve}}</div>
   <div><strong>Land Acquired (local):</strong>{{division?.localLand.length}}</div>
   <div><strong>Land Acquired (global):</strong>{{division?.globalLand.length}}</div>
-  <div><strong>Safety:</strong>{{division?.advancements?.safety.communal + division?.advancements?.safety.individual }}</div>
-  <div><strong>Health:</strong>{{division?.advancements?.health.communal + division?.advancements?.health.individual}}</div>
-  <div><strong>Arts and Culture:</strong>{{division?.advancements?.arts.communal + division?.advancements?.arts.individual}}</div>
-  <div><strong>Knowledge:</strong>{{division?.advancements?.knowledge.communal + division?.advancements?.knowledge.individual}}</div>
-  <div><strong>Infrastructure:</strong>{{division?.advancements?.infrastructure.communal + division?.advancements?.infrastructure.individual}}</div>
+  <div *ngFor="let adv of division.advancements">
+    <strong>{{adv.name}}: </strong>{{ adv.individual + adv.communal }}
+  </div>
   <div><strong>Exceeded Capacity: </strong>{{division?.exceededCapacity }}</div>
   <div><strong>Resources In-Hand: </strong>{{division?.inHand }}</div>
   <br/>

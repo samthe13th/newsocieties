@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { sortBy } from 'lodash';
 import { faGavel, faFire, faLandmark, faGlobe } from '@fortawesome/free-solid-svg-icons';
+import { DivisionService } from 'src/app/services/division-service.service';
 
 const SHAKI = {
   safety: 1,
@@ -22,7 +23,10 @@ const SHAKI = {
   }
 })
 export class DivisionFullComponent {
-  constructor(private db: AngularFireDatabase) {}
+  constructor(
+    private db: AngularFireDatabase,
+    private divisionService: DivisionService,
+  ) {}
 
   $principles: Observable<any>;
   $resolutions: Observable<any>;
@@ -58,20 +62,7 @@ export class DivisionFullComponent {
     this.$events = this.db.list(`${divisionPath}/events`).valueChanges();
     this.$scenarios = this.db.list(`${divisionPath}/scenarios`).valueChanges();
     this.$citizens = this.db.list(`${divisionPath}/citizens`).valueChanges();
-    this.$advancements = this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/advancements`).valueChanges()
-      .pipe(
-        map((advs: any) => {
-          const array = Object.keys(advs).map((key) => {
-            return { 
-              order: SHAKI[key],
-              name: key,
-              communal: advs[key].communal,
-              total: (advs[key].individual + advs[key].communal)
-            }
-          })
-          return sortBy(array, ['order']);
-        }),
-      )
+    this.$advancements = this.divisionService.$advancements(this.showKey, this.divisionKey);
   }
 
   onDivisionDecisionSelect(button) {

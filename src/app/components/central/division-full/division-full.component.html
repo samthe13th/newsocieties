@@ -20,8 +20,8 @@
           <tr>
             <th></th>
             <th *ngFor="let adv of advancements">
-              <i class="ns-icon">
-                <img src="../assets/{{adv.name}}_white.png"/>
+              <i class="ns-icon" title="{{adv.name}}">
+                <img src="../assets/{{adv.key}}_white.png"/>
               </i>
             </th>
           </tr>
@@ -42,7 +42,7 @@
           <tr>
             <td>TOTAL</td>
             <td *ngFor="let adv of advancements">
-              {{adv.total}}
+              {{adv.individual + adv.communal}}
             </td>
           </tr>
         </table>

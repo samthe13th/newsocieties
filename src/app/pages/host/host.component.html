@@ -474,22 +474,8 @@
 
       <hr/>
 
-      <div>
-        <strong>Safety: </strong>
-        {{ division?.advancements.safety.individual + division?.advancements.safety.communal }}
-      </div>
-      <div>
-        <strong>Health: </strong>
-        {{ division?.advancements.health.individual + division?.advancements?.health.communal }}
-      </div>
-      <div>
-        <strong>Arts and Culture: </strong>{{ division?.advancements.arts.individual + division?.advancements.arts.communal }}
-      </div>
-      <div>
-        <strong>Knowledge: </strong>{{ division?.advancements.knowledge.individual + division?.advancements.knowledge.communal }}
-      </div>
-      <div>
-        <strong>Infrastructure: </strong>{{ division?.advancements.infrastructure.individual + division?.advancements.infrastructure.communal }}
+      <div *ngFor="let adv of ($advancements | async)">
+        <strong>{{adv?.name}}</strong> (total): {{ adv?.communal + adv?.individual }}
       </div>
 
     </div>

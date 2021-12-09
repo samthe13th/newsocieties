@@ -41,7 +41,6 @@ export class ButtonGroupComponent implements OnInit {
   }
 
   setButton() {
-    console.log('set button')
     if (this.buttons) {
       this.currentButton = this.selectById
         ? find(this.buttons, ['id', this.selectById])

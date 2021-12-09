@@ -34,23 +34,16 @@ export class StateComponent implements OnInit {
   get templateName() { return this._templateName }
   set templateName(name) {
     if (name !== this._templateName) {
-      console.log('change: ', name);
       this.fadeState = 'out'
     }
     this._templateName = name;
-
-    console.log('template: ', this.templates[this.templateName])
-    // console.log("set.... ", name, this.templates, this.templates[name])
   }
 
   ngOnInit() {
-    //this.fadeState = 'in';
     this.template = this.templates[this.templateName];
-    console.log('init: ', this.templates, this.templateName, this.templates[this.templateName])
   }
 
   onDone(event) {
-    console.log('on done: ', this.templateName);
     if (this.templates[this.templateName]) {
       this.template = this.templates[this.templateName];
       this.fadeState = 'in';

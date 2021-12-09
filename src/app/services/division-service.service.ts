@@ -3,8 +3,8 @@ import { AngularFireDatabase } from '@angular/fire/database';
 import { combineLatest } from 'rxjs';
 import { map, tap, take } from 'rxjs/operators';
 import { reduce, filter, slice } from 'lodash';
+import * as _ from 'lodash';
 import { pluckRandom } from '../utilties';
-const ADVANCEMENTS = ["safety", "health", "arts", "knowledge", "infrastructure"];
 
 const SCORE = {
   Low:  {
@@ -101,6 +101,26 @@ export class DivisionService {
     })
   }
 
+  $advancements(showKey, divisionKey) {
+    return combineLatest(
+      this.db.object(`shows/${showKey}/divisions/${divisionKey}/advancements`).valueChanges(),
+      this.db.list(`shows/${showKey}/divisions/${divisionKey}/citizens`).valueChanges()
+    ).pipe(
+      map(([adv, citizens]: [any, any]) => {
+        const individualAdvancements = _.map(citizens, c => _.toArray(c.advancements));
+        const [iArts, iHealth, iInfrastructure, iKnowledge, iSafety] = _.map(
+          _.zip(...individualAdvancements), counts => _.sum(counts)
+        )
+        return [
+          { key: 'safety', name: 'Safety', reward: adv.safety.reward, communal: adv.arts.communal, individual: iSafety ?? 0 },
+          { key: 'health', name: 'Health', reward: adv.health.reward, communal: adv.health.communal, individual: iHealth ?? 0 },
+          { key: 'arts', name: 'Arts and Culture', reward: adv.arts.reward, communal: adv.arts.communal, individual: iArts ?? 0 },
+          { key: 'knowledge', name: 'Knowledge', reward: adv.knowledge.reward, communal: adv.knowledge.communal, individual: iKnowledge ?? 0 },
+          { key: 'infrastructure', name: 'Infrastructure', reward: adv.infrastructure.reward, communal: adv.infrastructure.communal, individual: iInfrastructure ?? 0 },
+        ]
+      })
+    )
+  }
 
   acquireLand(showKey, divisionKey, data) {
     return new Promise((resolve) => {

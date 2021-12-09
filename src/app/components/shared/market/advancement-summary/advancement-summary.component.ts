@@ -3,6 +3,7 @@ import { AngularFireDatabase } from '@angular/fire/database';
 import { map, tap } from 'rxjs/operators';
 import { Observable, combineLatest } from 'rxjs';
 import { capitalize } from 'lodash';
+import { DivisionService } from 'src/app/services/division-service.service';
 
 @Component({
   selector: 'app-advancement-summary',
@@ -15,28 +16,30 @@ import { capitalize } from 'lodash';
 export class AdvancementSummaryComponent {
   $advSummary: Observable<any>;
 
-  constructor(private db: AngularFireDatabase) {}
+  constructor(
+    private db: AngularFireDatabase,
+    private divisionService: DivisionService
+  ) {}
 
   @Input() showKey;
   @Input() divisionKey;
 
   ngOnInit() {
     this.$advSummary = combineLatest(
-      this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/advancements`).valueChanges(),
+      this.divisionService.$advancements(this.showKey, this.divisionKey),
       this.db.list(`shows/${this.showKey}/divisions/${this.divisionKey}/citizens`).valueChanges(),
     ).pipe(
-      map(([adv, citizens]) => {
-        return Object.keys(adv).map((key) => ({
-          type: capitalize(key),
-          icon: `/assets/${key}.png`,
-          total: adv[key].communal + adv[key].individual,
-          benefit: adv[key].reward.text,
+      map(([advancements, citizens]) => {
+        return advancements.map((adv) => ({
+          type: adv.name,
+          icon: `/assets/${adv.key}.png`,
+          total: adv.communal + adv.individual,
+          benefit: adv.reward.text,
           contributors: citizens
-            .map((c: any) => ({ name: c?.name, contributions: c.advancements[key] }))
+            .map((c: any) => ({ name: c?.name, contributions: c.advancements[adv.key] }))
             .filter((c:any) => c.contributions !== 0)
         }))
-      }),
-      tap((data) => console.log({data}))
+      })
     )
   }
 }

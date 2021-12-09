@@ -109,6 +109,7 @@ export class HostComponent implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<boolean>();
   
+  $advancements;
   $vote;
   $division;
   $citizens;
@@ -185,7 +186,12 @@ export class HostComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.divisionKey = this.route.snapshot.params.division;
     this.showKey = this.route.snapshot.params.show;
+
+    this.$advancements = this.divisionService.$advancements(this.showKey, this.divisionKey).pipe(
+      tap((n) => console.log({n}))
+    )
     this.divisionPath = `shows/${this.showKey}/divisions/${this.divisionKey}`;
+    console.log("DIVISION PATH: ", this.divisionPath)
     this.landTilesPath = `${this.divisionPath}/landTiles`;
     this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/color`).valueChanges()
       .pipe(take(1)).subscribe((color) =>{
@@ -206,7 +212,6 @@ export class HostComponent implements OnInit, OnDestroy {
     this.$division = this.db.object(this.divisionPath).valueChanges().pipe(
       filter((x) => x !== null && x !== undefined),
       tap((div: any) => {
-        console.log("check div score: ", div.score)
         if (div.score !== 'Low' && this.divisionScore !== div.score && !this.landmarks?.[div.score]) {
           this.divisionScore = div.score;
           this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/divisionLargePopup`).set({
@@ -425,16 +430,12 @@ export class HostComponent implements OnInit, OnDestroy {
   }
 
   async buyAdvancement(advancement, price, updatePath) {
-    console.log('buy adv for ', this.selectedCitizen?.name)
     if (advancement > 3 || !this.selectedCitizen?.id) return;
     const wealth = this.bankService.calculateWealth(this.selectedCitizen.resources);
     if (wealth >= price) {
       this.db.object(updatePath).query.ref.transaction(adv => ++adv ?? 1)
       this.bankService.spendResources(this.showKey, this.divisionKey, this.selectedCitizen?.id, price);
     }
-    const individualPath = `${this.divisionPath}/advancements/${advancement}/individual`;
-    await this.db.object(individualPath).query.ref.transaction((ind) => ind ? ind + 1 : 1)
-
     this.dismissSheet();
   }
 

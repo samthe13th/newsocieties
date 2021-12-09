@@ -4,6 +4,7 @@ import { switchMap, map, tap } from 'rxjs/operators';
 import { of, combineLatest } from 'rxjs';
 import { BankService } from 'src/app/services/bank.service';
 import { each } from 'lodash';
+import { DivisionService } from 'src/app/services/division-service.service';
 
 @Component({
   selector: 'app-division-review',
@@ -22,6 +23,7 @@ export class DivisionReviewComponent implements OnInit {
   constructor(
     private db: AngularFireDatabase,
     private bankService: BankService,
+    private divisionService: DivisionService
   ) {}
 
   ngOnInit() {
@@ -31,7 +33,7 @@ export class DivisionReviewComponent implements OnInit {
           of(toReview),
           this.db.object(`shows/${this.showKey}/divisions/${toReview}/score`).valueChanges(),
           this.db.object(`shows/${this.showKey}/divisions/${toReview}/reserve`).valueChanges(),
-          this.db.object(`shows/${this.showKey}/divisions/${toReview}/advancements`).valueChanges(),
+          this.divisionService.$advancements(this.showKey, this.divisionKey),
           this.db.list(`shows/${this.showKey}/divisions/${toReview}/chartData`).valueChanges().pipe(
             map((data: any[]) => {
               console.log({data})

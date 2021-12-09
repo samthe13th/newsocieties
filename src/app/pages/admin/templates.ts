@@ -6,7 +6,6 @@ export const DIVISION_TEMPLATE = {
   advancements: {
     safety: {
       communal: 0,
-      individual: 0,
       reward: {
         name: 'SafeExplore',
         text: 'Exploring a contamination will not affect the harvest line.'
@@ -14,14 +13,12 @@ export const DIVISION_TEMPLATE = {
     },
     health: {
       communal: 0,
-      individual: 0,
       reward: {
         name: 'SafeGather',
         text: 'Gathering a contamination will not affect your hand.'
       }
     },
     arts: {
-      individual: 0,
       communal: 0,
       reward: {
         name: 'None',
@@ -29,7 +26,6 @@ export const DIVISION_TEMPLATE = {
       }
     },
     knowledge: {
-      individual: 0,
       communal: 0,
       reward: {
         name: 'Peak',
@@ -37,7 +33,6 @@ export const DIVISION_TEMPLATE = {
       }
     },
     infrastructure: {
-      individual: 0,
       communal: 0,
       reward: {
         name: 'ExtraAction',
