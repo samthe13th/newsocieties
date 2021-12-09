@@ -1038,6 +1038,7 @@ export class HostComponent implements OnInit, OnDestroy {
       selection: null
     })
 
+    this.setNewContamination();
     this.resetCitizenActions();
     this.showModal = false;
     setTimeout(() => {
@@ -1064,7 +1065,10 @@ export class HostComponent implements OnInit, OnDestroy {
       actions: 0,
       selection: null
     })
+    this.setNewContamination();
+  }
 
+  setNewContamination() {
     combineLatest(
       this.db.object(`shows/${this.showKey}/contamination/current`).valueChanges(),
       this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/contaminantLevel`).valueChanges()
