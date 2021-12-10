@@ -891,7 +891,7 @@ export class HostComponent implements OnInit, OnDestroy {
       selected: selection
     })
 
-    if (consequence.trim() === 'none') {
+    if (consequence === null || consequence?.trim() === 'none') {
       this.db.object(`${this.divisionPath}/lastResolution`).remove();
     } else {
       this.db.object(`${this.divisionPath}/lastResolution`).set(resolutionData)

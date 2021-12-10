@@ -48,7 +48,7 @@ const SCORE = {
 export class DivisionService {
   
   constructor(
-    private db: AngularFireDatabase,
+    private db: AngularFireDatabase
   ) {}
 
   addCitizen(showKey, divisionKey, id, name) {
@@ -107,12 +107,13 @@ export class DivisionService {
       this.db.list(`shows/${showKey}/divisions/${divisionKey}/citizens`).valueChanges()
     ).pipe(
       map(([adv, citizens]: [any, any]) => {
+        console.log("calc: ", adv, citizens)
         const individualAdvancements = _.map(citizens, c => _.toArray(c.advancements));
         const [iArts, iHealth, iInfrastructure, iKnowledge, iSafety] = _.map(
           _.zip(...individualAdvancements), counts => _.sum(counts)
         )
         return [
-          { key: 'safety', name: 'Safety', reward: adv.safety.reward, communal: adv.arts.communal, individual: iSafety ?? 0 },
+          { key: 'safety', name: 'Safety', reward: adv.safety.reward, communal: adv.safety.communal, individual: iSafety ?? 0 },
           { key: 'health', name: 'Health', reward: adv.health.reward, communal: adv.health.communal, individual: iHealth ?? 0 },
           { key: 'arts', name: 'Arts and Culture', reward: adv.arts.reward, communal: adv.arts.communal, individual: iArts ?? 0 },
           { key: 'knowledge', name: 'Knowledge', reward: adv.knowledge.reward, communal: adv.knowledge.communal, individual: iKnowledge ?? 0 },
@@ -174,7 +175,7 @@ export class DivisionService {
       this.db.list(`${divisionPath}/globalLand`).valueChanges(),
       this.db.list(`${divisionPath}/localLand`).valueChanges(),
       this.db.object(`${divisionPath}/highThresholdsMet`).valueChanges(),
-      this.db.object(`${divisionPath}/advancements`).valueChanges()
+      this.$advancements(showKey, divisionKey)
     ).pipe(
       map(([
         globalLand,
