@@ -29,8 +29,10 @@ export class PlayerViewControlComponent {
 
   toggleHighlight() {
     console.log('highlight');
-    this.highlight = !this.highlight;
     this.highlightChange.emit(this.highlight);
+    setTimeout(() => {
+      this.highlight = false;
+    }, 2000)
   }
 
   toggleView() {

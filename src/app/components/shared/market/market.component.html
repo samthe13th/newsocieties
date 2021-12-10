@@ -1,17 +1,19 @@
 <ng-container *ngIf="$marketView | async as marketView">
   <ng-container *ngIf="marketView === 'localLand'">
-    <div class="harvest-header" *ngIf="showHeader">
+    <div class="harvest-header">
       <div><h1>Land Plots</h1></div>
       <div class="harvest-details">
         <div>Cost {{ landCost }}</div>
       </div>
     </div>
-    <app-land-grid
-      [showKey]="showKey"
-      [showHarvest]="false"
-      [divisionKey]="divisionKey"
-      [updatePath]="landTilesPath"> 
-    </app-land-grid>
+    <div class="market-grid-wrapper">
+      <app-land-grid
+        [showKey]="showKey"
+        [showHarvest]="false"
+        [divisionKey]="divisionKey"
+        [updatePath]="landTilesPath"> 
+      </app-land-grid>
+    </div>
   </ng-container>
   <app-advancement-summary
     *ngIf="marketView === 'advancements'"

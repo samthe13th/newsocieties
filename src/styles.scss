@@ -17,7 +17,8 @@ $new-societies-theme: mat-light-theme($new-societies-primary, $new-societies-acc
 // @include angular-material-typography($custom-typography);
 
 .mat-typography {
-  & h1 {
+  & h1,
+  & h2 {
     font-family: 'Lovelo';
     margin-bottom: 0;
     margin-top: 5px;
@@ -179,6 +180,13 @@ select {
   flex-wrap: wrap;
   overflow: hidden;
   border-radius: 10px;
+}
+
+.app-global-capacity {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
 }
 
 .app-global-land {
@@ -488,12 +496,10 @@ select {
 
 .app-pulse {
   &--sm {
-    animation: pulse-sm 400ms ease-in-out infinite;
-    animation-direction: alternate;
+    animation: pulse-sm 1.8s ease-in-out forwards;
   }
   &--md {
-    animation: pulse-md 400ms ease-in-out infinite;
-    animation-direction: alternate;
+    animation: pulse-md 1.8s ease-in-out forwards;
   }
 }
 
@@ -502,9 +508,29 @@ select {
     transform: scale(1);
     filter: brightness(1);
   }
-  100% {
+  15% {
     transform: scale(1.1);
     filter: brightness(1.2);
+  }
+  30% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  45% {
+    transform: scale(1.1);
+    filter: brightness(1.2);
+  }
+  60% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  80% {
+    transform: scale(1.1);
+    filter: brightness(1.2);
+  }
+  100% {
+    transform: scale(1);
+    filter: brightness(1);
   }
 }
 
@@ -513,9 +539,29 @@ select {
     transform: scale(1);
     filter: brightness(1);
   }
-  100% {
+  15% {
     transform: scale(1.02);
     filter: brightness(1.2)
+  }
+  30% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  45% {
+    transform: scale(1.02);
+    filter: brightness(1.2)
+  }
+  60% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  80% {
+    transform: scale(1.02);
+    filter: brightness(1.2)
+  }
+  100% {
+    transform: scale(1);
+    filter: brightness(1);
   }
 }
 

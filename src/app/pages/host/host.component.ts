@@ -134,6 +134,7 @@ export class HostComponent implements OnInit, OnDestroy {
   $overlay;
   $pageState;
 
+  landCost;
   customVoteInput;
   voteState;
   selectedCitizen;
@@ -212,6 +213,7 @@ export class HostComponent implements OnInit, OnDestroy {
     this.$division = this.db.object(this.divisionPath).valueChanges().pipe(
       filter((x) => x !== null && x !== undefined),
       tap((div: any) => {
+        this.landCost = div.landCost;
         if (div.score !== 'Low' && this.divisionScore !== div.score && !this.landmarks?.[div.score]) {
           this.divisionScore = div.score;
           this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/divisionLargePopup`).set({
@@ -302,7 +304,7 @@ export class HostComponent implements OnInit, OnDestroy {
         .query.ref.transaction(value => component !== value ? component : null)
       setTimeout(() => {
         this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/playerViewHighlight`).remove();
-      }, 2400)
+      }, 2000)
     }
   }
 

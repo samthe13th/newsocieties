@@ -186,6 +186,7 @@
             *ngIf="focus === 'misc'"
             [showHeader]="false"
             [showKey]="showKey" 
+            [landCost]="landCost"
             [divisionKey]="divisionKey">
           </app-market>
   
@@ -615,7 +616,10 @@
     *ngIf="contamination !== undefined"
     class="tab-card"
   >
-    Contamination Level: {{contamination}}%
+    <app-global-capacity [showKey]="showKey" [showExceeding]="false"></app-global-capacity>
+    <div class="flex-row" style="justify-content: center">
+      Global Contamination: {{contamination}}%
+    </div>
     <div *ngFor="let div of divisions">
       <hr/>
       <app-society-summary

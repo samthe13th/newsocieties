@@ -10,5 +10,7 @@
 .glc-summary--lg {
   @extend %glc-summary;
   font-size: 30px;
+  line-height: 30px; 
+  white-space: nowrap;
   margin-bottom: 30px;
 }
