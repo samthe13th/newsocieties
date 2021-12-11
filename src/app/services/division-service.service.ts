@@ -6,6 +6,44 @@ import { reduce, filter, slice } from 'lodash';
 import * as _ from 'lodash';
 import { pluckRandom } from '../utilties';
 
+const SMALL_GAME_SCORE = {
+  Low:  {
+    VP: 0,
+    capacity: 6,
+    harvest: 18,
+    landCost: 4,
+    thresholds: [5, 10, 15],
+  },
+  "Mid-Low": {
+    VP: 6,
+    capacity: 10,
+    harvest: 25,
+    landCost: 5,
+    thresholds: [7, 12, 17],
+  },
+  Mid: {
+    VP: 12,
+    capacity: 14,
+    harvest: 34,
+    landCost: 6,
+    thresholds: [9, 14, 19],
+  },
+  "Mid-High": {
+    VP: 18,
+    capacity: 18,
+    harvest: 42,
+    landCost: 8,
+    thresholds: [11, 16, 21],
+  },
+  "High": {
+    VP: 24,
+    capacity: 22,
+    harvest: 49,
+    landCost: 10,
+    thresholds: [13, 18, 23],
+  }
+}
+
 const SCORE = {
   Low:  {
     VP: 0,
@@ -49,7 +87,8 @@ export class DivisionService {
   
   constructor(
     private db: AngularFireDatabase
-  ) {}
+  ) {
+  }
 
   addCitizen(showKey, divisionKey, id, name) {
     return new Promise((resolve) => {
@@ -181,7 +220,7 @@ export class DivisionService {
         globalLand,
         localLand,
         highthresholdsMet,
-        advancements,
+        advancements
       ]: [ any, any, number, any ]) => {
         const VP = (
           + (globalLand.length * 0.8)
@@ -189,6 +228,7 @@ export class DivisionService {
           + highthresholdsMet
           + (0.35 * reduce(advancements, (acc, A) => A.individual + A.communal + acc, 0))
         );
+        console.log('calc VP ', round(VP))
         return { VP: round(VP), score: this.getScore(VP) }
       }),
       tap((updates) => {
@@ -266,14 +306,16 @@ export class DivisionService {
     })
   }
 
-  async newSeason(showKey, divisionKey) {
+  async newSeason(showKey, divisionKey, showSize = 'normal') {
     const divisionPath = `shows/${showKey}/divisions/${divisionKey}`;
     this.db.object(divisionPath)
       .valueChanges()
       .pipe(take(1))
       .subscribe((division: any) => {
-        console.log('SCORE: ', division?.score, SCORE)
-        const updates = SCORE[division?.score];
+        const updates = showSize === 'small'
+          ? SMALL_GAME_SCORE[division?.score]
+          : SCORE[division?.score]
+        console.log("UPDATES: ", showSize, updates)
         const highThresholdMet = division?.reserve >= division.reserveThresholds.high;
         const capacity = highThresholdMet
           ? division?.capacity + 1

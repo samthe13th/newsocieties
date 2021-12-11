@@ -4,7 +4,7 @@ import { take, takeUntil, tap } from 'rxjs/operators';
 import { timer, Observable, Subject, combineLatest } from 'rxjs';
 import { trim, keyBy, range, capitalize, toNumber, find, differenceWith, sortBy, includes } from 'lodash';
 import * as Papa from 'papaparse';
-import { DIVISION_TEMPLATE, SHOW_TEMPLATE } from './templates';
+import { DIVISION_TEMPLATE, SHOW_TEMPLATE, SMALL_SHOW_DEFAULTS, SHOW_DEFAULTS } from './templates';
 import { map } from 'rxjs/operators';
 import * as moment from 'moment';
 import { ActivatedRoute } from '@angular/router';
@@ -499,11 +499,14 @@ export class AdminComponent implements OnInit, AfterViewInit {
       return
     }
     let users = await promiseOne(this.db.object(`shows/${this.showKey}/users`));
+    const showSize = await promiseOne(this.db.object(`showSize`));
     const contamination: any = await promiseOne(this.db.object(`shows/${this.showKey}/contamination`));
     const timeline = await promiseOne(this.db.object('timeline'));
+    const divisions = this.generateDivisions(showSize);
 
-    const divisions = this.generateDivisions();
+    console.log("RESET: ", showSize)
     await this.db.object(`shows/${this.showKey}`).remove();
+
     this.db.object(`shows/${this.showKey}`).set({
       divisions,
       ...SHOW_TEMPLATE,
@@ -603,11 +606,17 @@ export class AdminComponent implements OnInit, AfterViewInit {
       })
   }
 
-  generateDivisions() {
+  generateDivisions(showSize = 'normal') {
+    console.log("gen divisions: ", showSize)
+    const DEFAULTS = showSize === 'small'
+      ? SMALL_SHOW_DEFAULTS
+      : SHOW_DEFAULTS;
+
     return DIVISIONS.reduce((acc, abv) => ({ 
       ...acc, 
       [abv]: { 
         ...DIVISION_TEMPLATE,
+        ...DEFAULTS,
         color: COLORS[abv],
         code: abv, 
         name: DIVISION_NAMES[abv],

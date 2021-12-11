@@ -1,3 +1,25 @@
+export const SHOW_DEFAULTS = {
+  reserveThresholds: {
+    low: 5, 
+    mid: 10,
+    high: 15
+  },
+  capacity: 12,
+  harvest: 18,
+  landCost: 4
+}
+
+export const SMALL_SHOW_DEFAULTS = {
+  reserveThresholds: {
+    low: 5, 
+    mid: 10,
+    high: 15
+  },
+  capacity: 6,
+  harvest: 18,
+  landCost: 4
+}
+
 export const DIVISION_TEMPLATE = {
   events: [],
   harvestColumn: [true, true, true, true, true, true, true],
@@ -8,7 +30,7 @@ export const DIVISION_TEMPLATE = {
       communal: 0,
       reward: {
         name: 'SafeExplore',
-        text: 'Exploring a contamination will not affect the harvest line.'
+        text: 'Exploring a contamination will not affect the harvest.'
       }
     },
     health: {
@@ -29,7 +51,7 @@ export const DIVISION_TEMPLATE = {
       communal: 0,
       reward: {
         name: 'Peak',
-        text: 'Peek at one resource on the harvest line without exploring.'
+        text: 'Peek at one resource on the harvest without exploring.'
       }
     },
     infrastructure: {
@@ -67,25 +89,18 @@ export const DIVISION_TEMPLATE = {
     players: []
   },
   contaminantLevel: 0,
-  landCost: 5,
   VP: 0,
   score: 'Low',
   season: 0,
   reserve: 0,
-  reserveThresholds: {
-    low: 7, 
-    mid: 12,
-    high: 17
-  },
   actions: 0,
   focus: "none",
-  capacity: 12,
-  harvest: 18,
 }
 
 export const SHOW_TEMPLATE = {
   clock: 0,
   live: false,
+  centralAdjustment: 0,
   contamination: {
     min: 10,
     max: 90,

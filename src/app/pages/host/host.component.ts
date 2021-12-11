@@ -69,6 +69,8 @@ export class HostComponent implements OnInit, OnDestroy {
   
   modalContent: TemplateRef<any>;
 
+  showSize = 'normal';
+
   // ICONS
   faPen = faPen;
   fa = fa;
@@ -210,6 +212,14 @@ export class HostComponent implements OnInit, OnDestroy {
     ).subscribe((landmarks) => {
       this.landmarks = landmarks;
     })
+
+    this.db.object(`showSize`).valueChanges().pipe(
+      takeUntil(this.destroy$)
+    ).subscribe((showSize: any) => {
+      console.log("set showsize: ", showSize)
+      this.showSize = showSize;
+    })
+
     this.$division = this.db.object(this.divisionPath).valueChanges().pipe(
       filter((x) => x !== null && x !== undefined),
       tap((div: any) => {
@@ -653,6 +663,7 @@ export class HostComponent implements OnInit, OnDestroy {
     this.showModal = false;
     this.action = 'harvesting';
     this.db.object(`${this.divisionPath}/focus`).set('harvest');
+    // this.setNewContamination();
   }
 
   setReviewDivision(division) {
@@ -760,6 +771,9 @@ export class HostComponent implements OnInit, OnDestroy {
 
     if (!this.divisionVote) return;
     if (this.divisionVote.vote.type === 'resolution') {
+      if (customVote){
+        selection.consequence = 'Make something up!'
+      }
       this.setResolution(selection);
     } else if (this.divisionVote.vote.type === 'principle') {
       this.setPrinciple(selection);
@@ -1041,17 +1055,18 @@ export class HostComponent implements OnInit, OnDestroy {
       selection: null
     })
 
-    this.setNewContamination();
     this.resetCitizenActions();
     this.showModal = false;
     setTimeout(() => {
-      this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/focus`).set('harvest')
+      this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/focus`).set('harvest');
     }, 3000)
   }
 
   newSeason(division) {
+    console.log('NS: ', division)
     if (!division) return;
-    this.divisionService.newSeason(this.showKey, this.divisionKey);
+    console.log('new season... ', this.showSize)
+    this.divisionService.newSeason(this.showKey, this.divisionKey, this.showSize);
     this.modalContent = this.newSeasonModal;
     this.showModal = true;
   }

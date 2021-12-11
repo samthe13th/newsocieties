@@ -269,13 +269,14 @@
 
               <!-- ADVANCEMENTS -->
               <ng-container *ngIf="playerView?.views?.advancements">
-                <app-player-advancements
-                  [showKey]="showKey"
-                  [divisionKey]="divisionKey"
-                  [playerId]="id"
-                  class="ns-fade-in"
-                  [class.app-pulse--sm]="playerView?.highlight === 'advancements'">
-                </app-player-advancements>
+                <div class="player-adv-wrapper ns-fade-in">
+                  <app-player-advancements
+                    [showKey]="showKey"
+                    [divisionKey]="divisionKey"
+                    [playerId]="id"
+                    [class.app-pulse--sm]="playerView?.highlight === 'advancements'">
+                  </app-player-advancements>
+                </div>
               </ng-container>
             </ng-container>
           </div>

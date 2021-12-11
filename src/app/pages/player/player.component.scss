@@ -169,6 +169,14 @@
   }
 }
 
+
+.player-adv-wrapper {
+  display: flex; 
+  flex-direction: column;
+  width: 100%; 
+  height: 100%; 
+}
+
 .player-hints {
   background: #323232;
   padding: 20px;
