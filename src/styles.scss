@@ -1020,12 +1020,12 @@ select {
     &[data-division="SE"] {
       &.three { background: #4020C4 }
       &.two { background: #6344E8 }
-      &.two { background: #876DFF }
+      &.one { background: #876DFF }
     }
     &[data-division="S"] {
-      &.one { background: #7F4200 }
+      &.three { background: #7F4200 }
       &.two { background: #B55D01 }
-      &.three { background: #D67D22 }
+      &.one { background: #D67D22 }
     }
     &[data-division="SW"] {
       &.three { background: #00555E }
