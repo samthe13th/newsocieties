@@ -73,7 +73,6 @@ export class PlayerComponent implements OnInit {
   selectedCard;
   voteSelection;
   focus = 'harvest';
-  //hasVoted = false;
 
   // DB PATHS
   landTilesPath;
@@ -215,11 +214,9 @@ export class PlayerComponent implements OnInit {
     this.$vote = this.db.object(`${this.divisionPath}/vote`).valueChanges();
   }
 
-  hasVoted(voted) {
-    console.log({voted})
-    const hasVoted = includes(JSON.parse(voted), this.id);
-    console.log({hasVoted})
-    return hasVoted;
+  hasVoted(votes) {
+    console.log(votes)
+    return votes?.[this.id];
   }
 
   navigateToPlayerPage(code) {
@@ -234,13 +231,11 @@ export class PlayerComponent implements OnInit {
   castVote() {
     if (this.voteSelection !== undefined) {
       this.vote.options[this.voteSelection].votes += 1;
-      const voted = JSON.parse(this.vote.voted)
-      voted.push(this.id);
-      this.db.object(`${this.divisionPath}/vote`).set({
-        ...this.vote,
-        voted: JSON.stringify(voted)
-      }).then(() => {
-        // this.hasVoted = true;
+      this.db.object(`${this.divisionPath}/vote/votes`).update({
+        [this.id]: true
+      });
+      this.db.object(`${this.divisionPath}/vote/options`).update({
+        ...this.vote.options,
       })
     }
   }

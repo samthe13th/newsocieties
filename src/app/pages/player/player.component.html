@@ -175,7 +175,7 @@
 
             <ng-template #voteTemplate>
               <div *ngIf="$vote | async as vote" class="tab-foreground player-vote">
-                <div *ngIf="(vote?.state === 'voting' && hasVoted(vote?.voted)) else playerVoteTemplate" style="text-align: center">
+                <div *ngIf="(vote?.state === 'voting' && hasVoted(vote?.votes)) else playerVoteTemplate" style="text-align: center">
                   <p>Thanks for voting!</p>
                   <p>Waiting for polls to close...</p>
                 </div>

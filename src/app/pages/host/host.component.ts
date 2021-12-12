@@ -615,7 +615,7 @@ export class HostComponent implements OnInit, OnDestroy {
         type: this.voteType,
         ...this.voteDropdownSelect,
         state: 'voting',
-        voted: "[]"
+        votes: {}
       })
     }, 1000)
   }
