@@ -71,7 +71,7 @@ export class GlobalCapacityComponent implements OnInit {
           lastSeasonCapacity = seasonCapacity;
         })
 
-        global.exceeding = `${Math.round((((global.actual + <number>centralAdjustment) / global.capacity) ?? 0) * 100) - 100}%`;
+        global.exceeding = `${Math.round(((global.actual / global.capacity) ?? 0) * 100) - 100}%`;
         
         return global
       }),
