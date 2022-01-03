@@ -1,6 +1,7 @@
 
 <ng-container *ngIf="($division | async) as division">
   <app-state 
+    class="flex-column"
     [templates]="{
       newSeason: newSeasonTemplate,
       main: mainTemplate
@@ -59,8 +60,8 @@
         <div class="player-page-layout">
       
           <div class="player-focus">
-
             <app-state
+              class="flex-column"
               style="width: 100%"
               [templates]="{
                 none: welcomeTemplate,
@@ -87,14 +88,14 @@
         
             <!-- HARVEST -->
             <ng-template #harvestTemplate>
-              <div class="flex-row" style="width: 100%">
+              <div class="flex-row" style="height: 100%; width: 100%">
                 <div class="player-folder__body-harvest">
                   <div class="harvest-header">
                     <div>
                       <h1>Harvest</h1>
                     </div>
                     <div class="harvest-details">
-                      <div>Capacity: {{ division?.capacity }}</div>
+                      <div class="xlarge">Capacity: {{ division?.capacity }}</div>
                     </div>
                   </div>
                   <app-land-grid 
@@ -116,7 +117,7 @@
             <!-- RESOLUTION REVIEW -->
             <ng-template #resolutionReviewTemplate>
               <div class="player-vote-wrap">
-                <div class="relative-position">
+                <div class="relative-position" style="width: 100%">
                   <div class="tab-background voting blur">
                     <img src="assets/resolution_backgrounds/{{divisionKey}}.jpg"/>
                   </div>
@@ -135,7 +136,7 @@
             <!-- RESOLUTION -->
             <ng-template #resolutionsTemplate>
               <div class="player-vote-wrap">
-                <div class="relative-position">
+                <div class="relative-position" style="width: 100%">
                   <div class="tab-background voting blur">
                     <img src="assets/resolution_backgrounds/{{divisionKey}}.jpg"/>
                   </div>
@@ -148,7 +149,7 @@
             <!-- PRINCIPLE -->
             <ng-template #principlesTemplate>
               <div class="player-vote-wrap">
-                <div class="relative-position">
+                <div class="relative-position" style="width: 100%">
                   <div class="tab-background voting blur" >
                     <img
                       src="assets/principle_backgrounds/{{divisionKey}}.jpg"/>
@@ -163,7 +164,7 @@
             <!-- SCENARIO -->
             <ng-template #scenariosTemplate>
               <div class="player-vote-wrap">
-                <div class="relative-position">
+                <div class="relative-position" style="width: 100%">
                   <div class="tab-background voting blur">
                     <img
                       src="assets/resolution_backgrounds/{{divisionKey}}.jpg"/>
@@ -202,7 +203,7 @@
 
             <!-- MARKET -->
             <ng-template #marketTemplate>
-              <div class="flex-row" style="width: 100%">
+              <div class="flex-row" style="width: 100%; height: 100%">
                 <app-market
                   [showKey]="showKey"
                   [divisionKey]="divisionKey"
@@ -214,8 +215,11 @@
 
           <!-- REVIEW -->
             <ng-template #reviewTemplate>
-              <div style="max-height: 500px; width: 100%">
-                <app-division-review [showKey]="showKey" [divisionKey]="divisionKey"></app-division-review>
+              <div style="height: 100%; width: 100%">
+                <app-division-review
+                  [showKey]="showKey"
+                  [divisionKey]="divisionKey">
+                </app-division-review>
               </div>
             </ng-template>
 

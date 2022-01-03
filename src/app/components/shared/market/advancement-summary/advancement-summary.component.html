@@ -1,13 +1,18 @@
 <div *ngFor="let adv of ($advSummary | async)" class="advancement-summary">
   <div class="flex-row">
+
     <div class="adv-summary-segment--L">
       <h2 class="advancement-header">
         <i class="ns-icon"><img [src]="adv.icon"/></i>
-        {{adv?.type}}: {{adv?.total}}
+        <span style="margin-top: 5px">{{adv?.type}}: {{adv?.total}}</span>
       </h2>
       <strong>Benefit:</strong> {{adv?.benefit}}
     </div>
-    <div class="adv-summary-contributors"><strong>Contributors</strong>
+
+    <div class="adv-summary-contributors">
+      <div>
+        Contributors
+      </div>
       <span *ngIf="adv?.contributors.length == 0">
         <em> None</em>
       </span>
@@ -15,5 +20,6 @@
         {{citizen?.name}} ({{citizen?.contributions}})
       </span>
     </div>
+
   </div>
 </div>

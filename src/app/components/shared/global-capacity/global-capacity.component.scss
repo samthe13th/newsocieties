@@ -1,15 +1,9 @@
-%glc-summary {
-  margin-top: 10px;
-}
-
 .glc-summary--sm {
-  @extend %glc-summary;
   font-size: 24px;
 }
 
 .glc-summary--lg {
-  @extend %glc-summary;
-  font-size: 30px;
+  font-size: 24px;
   line-height: 30px; 
   white-space: nowrap;
 }

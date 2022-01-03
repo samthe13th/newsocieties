@@ -229,14 +229,18 @@ export class PlayerComponent implements OnInit {
   }
 
   castVote() {
+    console.log('cast vote')
     if (this.voteSelection !== undefined) {
-      this.vote.options[this.voteSelection].votes += 1;
       this.db.object(`${this.divisionPath}/vote/votes`).update({
         [this.id]: true
       });
-      this.db.object(`${this.divisionPath}/vote/options`).update({
-        ...this.vote.options,
-      })
+
+      this.db.object(`${this.divisionPath}/vote/options/${this.voteSelection}/votes`).query.ref.transaction(
+        (votes) => { 
+          console.log('update vote... ', votes, this.voteSelection)
+          return votes ? ++votes : 1
+        }
+      )
     }
   }
 

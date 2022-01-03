@@ -117,6 +117,7 @@ export class HostComponent implements OnInit, OnDestroy {
   $citizens;
   $capacity;
   $resolutions;
+  $divisionReview;
   $principles;
   $scenarios;
   $turn;
@@ -251,6 +252,7 @@ export class HostComponent implements OnInit, OnDestroy {
     this.$exports = this.db.list(`${this.divisionPath}/exports`).valueChanges().pipe(map((exports) => exports.reverse()));
     this.$lastResolution = this.db.object(`${this.divisionPath}/lastResolution`).valueChanges()
     this.$resolutions = this.db.list(`${this.divisionPath}/resolutions`).valueChanges();
+    this.$divisionReview = this.db.object(`${this.divisionPath}/divisionReview`).valueChanges();
     this.$principles = this.db.list(`${this.divisionPath}/principles`).valueChanges();
     this.$scenarios = this.db.list(`${this.divisionPath}/scenarios`).valueChanges();
     this.$focus = this.db.object(`${this.divisionPath}/focus`).valueChanges();

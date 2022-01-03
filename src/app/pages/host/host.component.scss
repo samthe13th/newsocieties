@@ -4,7 +4,7 @@
   justify-content: space-around;
   align-items: flex-start;
   flex-direction: column;
-  background: white;
+  background: #fdf4c5;
   border-radius: 10px;
   overflow: hidden;
 
@@ -13,7 +13,6 @@
     justify-content: space-between;
     align-items: center;
     margin: 10px;
-
   }
 
   button {
@@ -63,6 +62,7 @@
   padding: 10px;
   height: 100%;
   flex-direction: column;
+  min-height: 0;
 
   .player-data {
     margin-left: 5px;
@@ -158,8 +158,6 @@
 
 .host-division-review-wrap {
   width: 100%;
-  height: 400px;
-  
 }
 
 .host-main {
@@ -169,6 +167,7 @@
   width: 100%;
   position: relative;
   height: 100%;
+  min-height: 0;
 
   > .app-button-group {
     margin: 10px 5px 0 5px;

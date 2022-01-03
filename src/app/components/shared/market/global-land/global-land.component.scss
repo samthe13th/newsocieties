@@ -11,4 +11,10 @@
   border: solid;
   min-height: 80px;
   border-radius: 15px;
+
+  .division-gla-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+  }
 }

@@ -24,14 +24,14 @@
     <div class="local-resources">
       <ng-container  *ngFor="let resource of citizen?.resources; let i = index">
         <app-harvest-image
-          *ngIf="i < 17"
+          *ngIf="i < 21"
           class="resource"
           [contaminated]="false"
           [division]="resource.division"
           type="R"
           [value]="resource.value">
         </app-harvest-image>
-        <span class="resource-overflow" *ngIf="i == 17">...</span>
+        <span class="resource-overflow" *ngIf="i == 21">...</span>
       </ng-container>
       
       <!-- <div 

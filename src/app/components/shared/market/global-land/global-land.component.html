@@ -1,6 +1,6 @@
 <ng-container *ngFor="let slot of divisions">
   <div class="division-gla" *ngIf="(slot.listener | async) as division">
-    <div>
+    <div class="division-gla-row">
       <span
         class="division-summary-code"
         [style.background]="division?.color">{{division?.code}}</span> 
