@@ -13,8 +13,8 @@
         <p>Capacity: {{ division?.capacity }}</p>
         <p>Harvest: {{ division?.harvest ? division.harvest : 0 }}</p>
         <p>Land cost: {{ division?.landCost }}</p>
-        <p>Local land: {{ division?.localLand?.length }}</p>
-        <p>Global land: {{ division?.globalLand?.length }}</p>
+        <p>Local land: {{ ($localLand | async)?.length }}</p>
+        <p>Global land: {{ ($globalLand | async)?.length }}</p>
       </div>
 
       <div>

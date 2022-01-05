@@ -35,6 +35,8 @@ export class DivisionFullComponent {
   $division: Observable<any>;
   $citizens: Observable<any>;
   $advancements: Observable<any>;
+  $localLand: Observable<any>;
+  $globalLand: Observable<any>;
 
   showDecisions = 'principles';
 
@@ -62,6 +64,8 @@ export class DivisionFullComponent {
     this.$events = this.db.list(`${divisionPath}/events`).valueChanges();
     this.$scenarios = this.db.list(`${divisionPath}/scenarios`).valueChanges();
     this.$citizens = this.db.list(`${divisionPath}/citizens`).valueChanges();
+    this.$localLand = this.db.list(`${divisionPath}/localLand`).valueChanges();
+    this.$globalLand = this.db.list(`${divisionPath}/globalLand`).valueChanges();
     this.$advancements = this.divisionService.$advancements(this.showKey, this.divisionKey);
   }
 
