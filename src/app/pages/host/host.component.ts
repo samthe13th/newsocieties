@@ -225,7 +225,9 @@ export class HostComponent implements OnInit, OnDestroy {
       filter((x) => x !== null && x !== undefined),
       tap((div: any) => {
         this.landCost = div.landCost;
+        console.log({div})
         if (div.score !== 'Low' && this.divisionScore !== div.score && !this.landmarks?.[div.score]) {
+          console.log("new score")
           this.divisionScore = div.score;
           this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/divisionLargePopup`).set({
             type: 'Rating',
@@ -244,7 +246,6 @@ export class HostComponent implements OnInit, OnDestroy {
             this.citizens = citizens;
           }
           this.citizenCount = citizens.length;
-
       })
     )
     this.$actions = this.db.object(`${this.divisionPath}/actions`).valueChanges();
@@ -283,8 +284,8 @@ export class HostComponent implements OnInit, OnDestroy {
       })
 
     this.divisionService.calculateDivisionScore$(this.showKey, this.divisionKey)
-    .pipe(takeUntil(this.destroy$))
-    .subscribe();
+      .pipe(takeUntil(this.destroy$))
+      .subscribe();
     // this.divisionService.thresholdListener$(this.showKey, this.divisionKey).subscribe();
 
     this.db.object(`shows/${this.showKey}/contamination/current`)
@@ -1022,7 +1023,7 @@ export class HostComponent implements OnInit, OnDestroy {
 
   async startSeason(division, newSeason) {
     const level = await this.divisionService.getThresholdLevel(this.showKey, this.divisionKey);
-    console.log('start season', division, level);
+    console.log('start season', newSeason, division, level);
     const landTiles = await this.divisionService.setLandTiles(this.showKey, this.divisionKey)
     this.harvest = this.generateHarvest(landTiles, level, newSeason?.harvest, newSeason?.contaminantLevel);
 
@@ -1039,6 +1040,7 @@ export class HostComponent implements OnInit, OnDestroy {
       return newSeason.highThresholdMet ? htm + 1 : htm
     })
     await this.db.object(`${this.divisionPath}`).update({
+      score: newSeason.score,
       harvestColumn: division.lockHarvestColumns
         ? division.harvestColumn
         : _.range(7).map(() => true),

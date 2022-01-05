@@ -7,6 +7,7 @@ import { takeUntil } from 'rxjs/operators';
 import { LandCardValues, LandTile, LandCardTypes } from 'src/app/interfaces';
 import { BankService } from 'src/app/services/bank.service';
 import { pluckRandom, getRandomInt } from 'src/app/utilties';
+import { Howl } from 'howler';
 
 const MAX_HARVEST = 49;
 const HARVEST_ROW_LENGTH = 7;
@@ -30,6 +31,8 @@ export class LandGridComponent implements OnInit {
   contamination;
   harvestColumns;
   landmarks;
+
+  Sounds;
 
   private _turn;
   private _player;
@@ -70,6 +73,13 @@ export class LandGridComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.Sounds = {
+      explore1: new Howl({ src: 'assets/explore1.wav' }).volume(0.1),
+      explore2: new Howl({ src: 'assets/explore2.wav' }).volume(0.1),
+      explore3: new Howl({ src: 'assets/explore3.wav' }).volume(0.1),
+      ex_contamination: new Howl({ src: 'assets/ex_contamination.wav' }).volume(0.1),
+    }
+
     this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/positions`)
       .valueChanges()
       .pipe(takeUntil(this.destroy$))
@@ -259,12 +269,25 @@ export class LandGridComponent implements OnInit {
     if (!card.harvested && card.value !== LandCardValues.EMPTY) {
       this.landTiles[card.index].harvested = true;
       await this.process(card.index, safe);
+      this.playExploreSound(card.value);
       if (playerId) {
         this.takeAction(playerId);
       }
     }
     this.clearSelection(card.index);
     this.updateDB();
+  }
+
+  playExploreSound(value) {
+    console.log("PLAY SOUND: ", value); 
+    if (value == 1) {
+      console.log('play explore sound: ', this.Sounds)
+      this.Sounds.explore1.play();
+    } else if (value == 2) {
+      this.Sounds.explore2.play();
+    } else if (value == 3) {
+      this.Sounds.explore3.play();
+    }
   }
 
   takeAction(playerId) {
@@ -307,6 +330,7 @@ export class LandGridComponent implements OnInit {
   async process(i, safe=false) {
     const tile = this.landTiles[i];
     if (!safe && tile.type === LandCardTypes.C && tile.harvested && !tile.owner) {
+      this.Sounds.ex_contamination.play();
       await this.contaminateAdjacentTiles(tile);
       this.checkDiscoveries(tile);
     }

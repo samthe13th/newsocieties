@@ -4,7 +4,7 @@ import { Subject } from 'rxjs';
 import { takeUntil, tap } from 'rxjs/operators';
 import { LargePopupComponent } from '../large-popup/large-popup.component';
 import { trigger, transition, animate, style } from '@angular/animations';
-import { Howl, Howler } from 'howler';
+import { Howl } from 'howler';
 import { LandCardTypes } from 'src/app/interfaces';
 
 @Component({
@@ -51,6 +51,7 @@ export class DivisionPopupsComponent implements OnInit, OnDestroy {
       resource1: new Howl({ src: 'assets/gather1.mp3' }).volume(0.1),
       resource2: new Howl({ src: 'assets/gather2.mp3' }).volume(0.1),
       resource3: new Howl({ src: 'assets/gather3.mp3' }).volume(0.1),
+      ratingAdvancement: new Howl({ src: 'assets/advancement.wav' }).volume(0.1),
     }
     const popupUrl = `shows/${this.showKey}/divisions/${this.divisionKey}/divisionPopup`;
 
@@ -61,7 +62,13 @@ export class DivisionPopupsComponent implements OnInit, OnDestroy {
         .pipe(
           takeUntil(this.destroy$),
         ).subscribe((largeEvent) => {
+          console.log({largeEvent})
           this.divisionEvent = largeEvent;
+          if (this.divisionEvent?.type === 'Rating') {
+            console.log("play rating sound")
+            this.Sounds.ratingAdvancement.play();
+          }
+          console.log("EVENT: ", this.divisionEvent)
         })
     } else {
       this.db.object(popupUrl)

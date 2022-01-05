@@ -229,7 +229,7 @@ export class DivisionService {
           + (0.35 * reduce(advancements, (acc, A) => A.individual + A.communal + acc, 0))
         );
         console.log('calc VP ', round(VP))
-        return { VP: round(VP), score: this.getScore(VP) }
+        return { VP: round(VP) }
       }),
       tap((updates) => {
         this.db.object(divisionPath).update(updates)
@@ -312,21 +312,23 @@ export class DivisionService {
       .valueChanges()
       .pipe(take(1))
       .subscribe((division: any) => {
+        console.log({division})
         const updates = showSize === 'small'
           ? SMALL_GAME_SCORE[division?.score]
           : SCORE[division?.score]
-        console.log("UPDATES: ", showSize, updates)
         const highThresholdMet = division?.reserve >= division.reserveThresholds.high;
         const capacity = highThresholdMet
           ? division?.capacity + 1
           : division?.capacity;
         this.db.object(`${divisionPath}/nextSeason`).set({
+          ...updates,
+          VP: division?.VP,
+          score: this.getScore(division?.VP),
           season: division?.season + 1,
           highThresholdMet,
           contaminantLevel: division?.contaminantLevel < 3
             ? division?.contaminantLevel + 1
             : division?.contaminantLevel,
-          ...updates,
           capacity: Math.max(updates.capacity, capacity)
         })
       })
