@@ -1,6 +1,6 @@
 <ng-container *ngIf="$globalCapacity | async as glc">
   <h2>Global Capacity</h2>
-  <div class="glc-summary--lg">{{glc.actual}} / {{glc.capacity}}</div>
+  <div [class.glc-summary--lg]="!large" [class.jumbo]="large">{{glc.actual}} / {{glc.capacity}}</div>
   <div *ngIf="isAdmin" class="flex-row">
     <button style="margin-top: 10px" (click)="dirtyMagic()">
       <span *ngIf="centralAdjustment !== undefined">
@@ -10,9 +10,12 @@
       Dirty Magic
     </button>
   </div>
-  <div style="margin-top: 20px" *ngIf="showExceeding">
-    Exceeding Capacity
-    <div class="glc-summary--sm">{{ glc.exceeding }}</div>
+  <div style="margin-top: 20px" *ngIf="!large && showExceeding">
+    Exceeding: 
+    <span [class.glc-summary--sm]="!large">{{ glc.exceeding }}</span>
+  </div>
+  <div style="margin-top: 20px" *ngIf="large && showExceeding">
+    <span>({{ glc.exceeding }})</span>
   </div>
 </ng-container>
 <ng-template #dirtyMagicSheet>

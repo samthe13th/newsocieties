@@ -10,7 +10,8 @@ import { MatBottomSheet } from '@angular/material/bottom-sheet';
   templateUrl: './global-capacity.component.html',
   styleUrls: ['./global-capacity.component.scss'],
   host: {
-    '[class.app-global-capacity]': 'true'
+    '[class.app-global-capacity]': 'true',
+    '[class.large]': 'large'
   }
 })
 export class GlobalCapacityComponent implements OnInit {
@@ -26,6 +27,7 @@ export class GlobalCapacityComponent implements OnInit {
   @Input() showKey: string;
   @Input() showExceeding = true;
   @Input() isAdmin = false;
+  @Input() large = false;
 
   constructor(
     private db: AngularFireDatabase,

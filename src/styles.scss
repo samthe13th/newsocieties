@@ -204,6 +204,15 @@ select {
   justify-content: center;
   align-items: center;
   flex-direction: column;
+
+  &.large {
+    font-size: 2em;
+    line-height: 1em;
+
+    h2 {
+      font-size: 1em
+    }
+  }
 }
 
 .app-global-land {
@@ -1374,17 +1383,19 @@ select {
 
   &.large-text {
     .ns-icon > img {
-      height: 30px;
-      width: 30px;
+      height: 70px;
+      width: 70px;
+      margin-left: 20px;
+      margin-top: -20px;
     }
 
     h1 {
-      margin-bottom: 10px;
-      font-size: 1.6em;
+      margin-bottom: 30px;
+      font-size: 60px;
     }
     * {
-      font-size: 30px;
-      line-height: 30px;
+      font-size: 60px;
+      line-height: 60px;
     }
   }
 }
@@ -1461,4 +1472,9 @@ select {
 }
 [data-color="W"] {
   background: rgb(223, 190, 93)
+}
+
+.jumbo, .jumbo * {
+  font-size: 70px !important;
+  line-height: 80px !important;
 }

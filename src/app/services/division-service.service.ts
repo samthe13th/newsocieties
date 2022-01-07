@@ -15,29 +15,67 @@ const SMALL_GAME_SCORE = {
     thresholds: [5, 10, 15],
   },
   "Mid-Low": {
-    VP: 6,
+    VP: 4,
     capacity: 10,
     harvest: 25,
     landCost: 5,
     thresholds: [7, 12, 17],
   },
   Mid: {
-    VP: 12,
+    VP: 8,
     capacity: 14,
     harvest: 34,
     landCost: 6,
     thresholds: [9, 14, 19],
   },
   "Mid-High": {
-    VP: 18,
+    VP: 12,
     capacity: 18,
     harvest: 42,
     landCost: 8,
     thresholds: [11, 16, 21],
   },
   "High": {
-    VP: 24,
+    VP: 16,
     capacity: 22,
+    harvest: 49,
+    landCost: 10,
+    thresholds: [13, 18, 23],
+  }
+}
+
+const MEDIUM_GAME_SCORE = {
+  Low:  {
+    VP: 0,
+    capacity: 9,
+    harvest: 18,
+    landCost: 4,
+    thresholds: [5, 10, 15],
+  },
+  "Mid-Low": {
+    VP: 4,
+    capacity: 14,
+    harvest: 25,
+    landCost: 5,
+    thresholds: [7, 12, 17],
+  },
+  Mid: {
+    VP: 8,
+    capacity: 19,
+    harvest: 34,
+    landCost: 6,
+    thresholds: [9, 14, 19],
+  },
+  "Mid-High": {
+    VP: 12,
+    capacity: 24,
+    harvest: 42,
+    landCost: 8,
+    thresholds: [11, 16, 21],
+  },
+  "High": {
+    VP: 16,
+    capacity: 29,
     harvest: 49,
     landCost: 10,
     thresholds: [13, 18, 23],
@@ -314,7 +352,7 @@ export class DivisionService {
       .subscribe((division: any) => {
         console.log({division})
         const updates = showSize === 'small'
-          ? SMALL_GAME_SCORE[division?.score]
+          ? MEDIUM_GAME_SCORE[division?.score]
           : SCORE[division?.score]
         const highThresholdMet = division?.reserve >= division.reserveThresholds.high;
         const capacity = highThresholdMet

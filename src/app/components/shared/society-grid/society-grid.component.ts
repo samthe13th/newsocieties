@@ -21,6 +21,7 @@ export class SocietyGridComponent {
   @Input() showKey;
   @Input() details = 'full';
   @Input() isAdmin = false;
+  @Input() large = false;
 
   ngOnInit() {
     this.db.object(`shows/${this.showKey}`)

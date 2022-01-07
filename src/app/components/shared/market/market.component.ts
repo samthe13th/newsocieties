@@ -20,6 +20,7 @@ export class MarketComponent {
   @Input() divisionKey;
   @Input() showHeader = true;
   @Input() landCost;
+  @Input() role: 'citizen' | 'host';
 
   ngOnInit() {
     this.landTilesPath = `shows/${this.showKey}/divisions/${this.divisionKey}/landTiles`;

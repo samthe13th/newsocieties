@@ -4,7 +4,7 @@ import { take, takeUntil, tap } from 'rxjs/operators';
 import { timer, Observable, Subject, combineLatest } from 'rxjs';
 import { trim, keyBy, range, capitalize, toNumber, find, differenceWith, sortBy, includes } from 'lodash';
 import * as Papa from 'papaparse';
-import { DIVISION_TEMPLATE, SHOW_TEMPLATE, SMALL_SHOW_DEFAULTS, SHOW_DEFAULTS } from './templates';
+import { DIVISION_TEMPLATE, SHOW_TEMPLATE, MEDIUM_SHOW_DEFAULTS, SHOW_DEFAULTS } from './templates';
 import { map } from 'rxjs/operators';
 import * as moment from 'moment';
 import { ActivatedRoute } from '@angular/router';
@@ -609,7 +609,7 @@ export class AdminComponent implements OnInit, AfterViewInit {
   generateDivisions(showSize = 'normal') {
     console.log("gen divisions: ", showSize)
     const DEFAULTS = showSize === 'small'
-      ? SMALL_SHOW_DEFAULTS
+      ? MEDIUM_SHOW_DEFAULTS
       : SHOW_DEFAULTS;
 
     return DIVISIONS.reduce((acc, abv) => ({ 

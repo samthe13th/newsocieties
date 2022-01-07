@@ -4,6 +4,8 @@
       *ngIf="(slot.listener | async) as division"
       class="division-summary"
       [details]="details"
+      [isAdmin]="isAdmin"
+      [large]="large"
       [showKey]="showKey"
       [division]="division">
     </app-society-summary>
@@ -11,7 +13,7 @@
   </ng-container>
   <ng-container *ngIf="slot.code == 'C'">
     <div class="grid-center">
-      <app-global-capacity [isAdmin]="isAdmin" [showKey]="showKey" [showExceeding]="true"></app-global-capacity>
+      <app-global-capacity [large]="large" [isAdmin]="isAdmin" [showKey]="showKey" [showExceeding]="true"></app-global-capacity>
     </div>
   </ng-container>
 </ng-container>

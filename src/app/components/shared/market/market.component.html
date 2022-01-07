@@ -18,6 +18,7 @@
   <app-advancement-summary
     *ngIf="marketView === 'advancements'"
     [showKey]="showKey"
+    [role]="role"
     [divisionKey]="divisionKey">
   </app-advancement-summary>
   <app-global-land *ngIf="marketView == 'globalLand'" [showKey]="showKey"></app-global-land>

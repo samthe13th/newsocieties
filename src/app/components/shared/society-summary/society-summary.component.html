@@ -1,16 +1,16 @@
 <ng-container *ngIf="division">
-  <h1 class="flex-row">
-    <strong>{{ division?.name }}</strong>
-  </h1>
-  <div class="season-score">
-    <div class="flex-row">
+  <h1 class="flex-row" [class.jumbo]="large">
+    <strong>{{ division?.code}}</strong>
+    <div class="flex-row" style="margin-left: 10px">
       <i class="ns-icon">
         <img src="/assets/season_white.png"/>
       </i>
       <strong>{{ division.season }}</strong>
     </div>
+  </h1>
+  <div class="season-score">
     <div>
-      <strong>{{ division.score }} ({{ division.VP }})</strong>
+      <strong>{{ division.score }} <span *ngIf="isAdmin">({{ division.VP }})</span></strong>
     </div>
   </div>
   <div>

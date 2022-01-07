@@ -1,8 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { AngularFireDatabase } from '@angular/fire/database';
-import { map, tap } from 'rxjs/operators';
-import { Observable, combineLatest } from 'rxjs';
-import { capitalize } from 'lodash';
+import { map, takeUntil } from 'rxjs/operators';
+import { Observable, combineLatest, Subject } from 'rxjs';
 import { DivisionService } from 'src/app/services/division-service.service';
 
 @Component({
@@ -15,6 +14,10 @@ import { DivisionService } from 'src/app/services/division-service.service';
 })
 export class AdvancementSummaryComponent {
   $advSummary: Observable<any>;
+  
+  showBenefits: boolean | null = false;
+
+  private destroy$ = new Subject<boolean>();
 
   constructor(
     private db: AngularFireDatabase,
@@ -23,8 +26,16 @@ export class AdvancementSummaryComponent {
 
   @Input() showKey;
   @Input() divisionKey;
+  @Input() role: 'citizen' | 'host';
 
   ngOnInit() {
+    this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/showBenefit`)
+      .valueChanges()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((showBenefits: boolean | null) => {
+        this.showBenefits = showBenefits;
+      })
+
     this.$advSummary = combineLatest(
       this.divisionService.$advancements(this.showKey, this.divisionKey),
       this.db.list(`shows/${this.showKey}/divisions/${this.divisionKey}/citizens`).valueChanges(),
@@ -41,5 +52,14 @@ export class AdvancementSummaryComponent {
         }))
       })
     )
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.unsubscribe();
+  }
+
+  toggleShowBenefit() {
+    this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/showBenefit`).query.ref.transaction(show => show ? false : true)
   }
 }
