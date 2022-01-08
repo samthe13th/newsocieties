@@ -269,7 +269,7 @@ export class LandGridComponent implements OnInit {
     if (!card.harvested && card.value !== LandCardValues.EMPTY) {
       this.landTiles[card.index].harvested = true;
       await this.process(card.index, safe);
-      if (card.type === LandCardTypes.R) {
+      if (!this.isHost && card.type === LandCardTypes.R) {
         this.playExploreSound(card.value);
       }
       if (playerId) {

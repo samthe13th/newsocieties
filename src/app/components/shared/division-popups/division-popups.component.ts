@@ -64,7 +64,8 @@ export class DivisionPopupsComponent implements OnInit, OnDestroy {
         ).subscribe((largeEvent) => {
           console.log({largeEvent})
           this.divisionEvent = largeEvent;
-          if (this.divisionEvent?.type === 'Rating') {
+          console.log("USER: ", this.user)
+          if (this.user === 'player' && this.divisionEvent?.type === 'Rating') {
             console.log("play rating sound")
             this.Sounds.ratingAdvancement.play();
           }
@@ -77,7 +78,7 @@ export class DivisionPopupsComponent implements OnInit, OnDestroy {
         takeUntil(this.destroy$)
       ).subscribe((smallEvent: any) => {
         console.log("Small Event: ", smallEvent)
-        if (smallEvent?.type === 'C' || smallEvent?.type === 'R') {
+        if (this.user === 'player' && smallEvent?.type === 'C' || smallEvent?.type === 'R') {
           this.playGatherSound(smallEvent?.type, smallEvent?.value)
         }
         this.divisionEvent = smallEvent;

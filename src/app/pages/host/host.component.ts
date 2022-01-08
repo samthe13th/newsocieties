@@ -5,7 +5,7 @@ import { pluckRandom, promiseOne } from 'src/app/utilties';
 import { LandTile, LandCardTypes } from 'src/app/interfaces';
 import * as _ from 'lodash';
 import { trim, find, findIndex, differenceBy, toNumber, each, partition } from 'lodash';
-import { take, map, tap, filter, takeUntil } from 'rxjs/operators'
+import { take, delay, map, tap, filter, takeUntil } from 'rxjs/operators'
 import { Subject, combineLatest } from 'rxjs';
 import { BankService } from 'src/app/services/bank.service';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
@@ -223,6 +223,7 @@ export class HostComponent implements OnInit, OnDestroy {
 
     this.$division = this.db.object(this.divisionPath).valueChanges().pipe(
       filter((x) => x !== null && x !== undefined),
+      delay(3000),
       tap((div: any) => {
         this.landCost = div.landCost;
         console.log({div})
@@ -1018,7 +1019,12 @@ export class HostComponent implements OnInit, OnDestroy {
 
   nextSeason(division, newSeason) {
     this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/focus`).set('new-season');
-    this.startSeason(division, newSeason);
+    this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}`).valueChanges().pipe(
+      take(1)
+    ).subscribe((data: any) => {
+      console.log('start new season with data: ', data)
+      this.startSeason(data, data?.nextSeason);
+    })
   }
 
   async startSeason(division, newSeason) {

@@ -358,7 +358,7 @@ export class DivisionService {
           ? MEDIUM_GAME_SCORE[score]
           : SCORE[score]
 
-        console.log("UPDATES: ", updates)
+        console.log("UPDATES: ", updates, score)
         const highThresholdMet = division?.reserve >= division.reserveThresholds.high;
         const capacity = highThresholdMet
           ? division?.capacity + 1

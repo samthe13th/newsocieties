@@ -26,6 +26,9 @@ export class CardComponent implements OnInit {
   @Input() 
   set side(val) {
     this._side = val;
+    if (val === 'front') {
+      this.sideChange.emit(val)
+    }
   }
   get side() { return this._side }
   @Input() width: number = 50;
