@@ -606,11 +606,12 @@ export class AdminComponent implements OnInit, AfterViewInit {
       })
   }
 
-  generateDivisions(showSize = 'normal') {
+  generateDivisions(showSize = 'full') {
     console.log("gen divisions: ", showSize)
-    const DEFAULTS = showSize === 'small'
-      ? MEDIUM_SHOW_DEFAULTS
-      : SHOW_DEFAULTS;
+    const DEFAULTS = SHOW_DEFAULTS?.[showSize]
+    // const DEFAULTS = showSize === 'small'
+    //   ? MEDIUM_SHOW_DEFAULTS
+    //   : SHOW_DEFAULTS;
 
     return DIVISIONS.reduce((acc, abv) => ({ 
       ...acc, 

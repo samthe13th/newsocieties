@@ -1,12 +1,30 @@
-export const SHOW_DEFAULTS = {
+const COMMON_DEFAULTS = {
   reserveThresholds: {
     low: 5, 
     mid: 10,
     high: 15
   },
-  capacity: 12,
   harvest: 18,
   landCost: 4
+}
+
+export const SHOW_DEFAULTS = {
+  small: {
+    ...COMMON_DEFAULTS,
+    capacity: 6,
+  }, 
+  medium: {
+    ...COMMON_DEFAULTS,
+    capacity: 9,
+  },
+  large: {
+    ...COMMON_DEFAULTS,
+    capacity: 12,
+  },
+  full: {
+    ...COMMON_DEFAULTS,
+    capacity: 12
+  }
 }
 
 export const SMALL_SHOW_DEFAULTS = {
