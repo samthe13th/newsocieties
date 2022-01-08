@@ -351,12 +351,14 @@ export class DivisionService {
       .pipe(take(1))
       .subscribe((division: any) => {
         console.log({division})
-        const updates = showSize === 'small'
-          ? MEDIUM_GAME_SCORE[division?.score]
-          : SCORE[division?.score]
         const score = showSize === 'small'
-          ? this.getScore(MEDIUM_GAME_SCORE, division?.VP)
-          : this.getScore(SCORE, division?.VP)
+        ? this.getScore(MEDIUM_GAME_SCORE, division?.VP)
+        : this.getScore(SCORE, division?.VP)
+        const updates = showSize === 'small'
+          ? MEDIUM_GAME_SCORE[score]
+          : SCORE[score]
+
+        console.log("UPDATES: ", updates)
         const highThresholdMet = division?.reserve >= division.reserveThresholds.high;
         const capacity = highThresholdMet
           ? division?.capacity + 1
