@@ -145,8 +145,10 @@
   flex: 1;
 
   .citizen-list__stats {
-    display: flex; 
-    align-items: center; 
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 40px;
 
     > .ns-icon {
       margin-right: 5px;

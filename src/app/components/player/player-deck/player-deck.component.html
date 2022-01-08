@@ -2,7 +2,7 @@
   <div class="player-deck__summary">
     <div class="citizen-header">
       <div class="citizen-name" [class.player-turn-indicator]="myTurn">
-        <strong>{{position}}: </strong> {{citizen?.name}}
+        <strong>{{position}}: </strong><span> {{citizen?.name}}</span>
         <!-- <app-player-turn 
           [showLabel]="false"
           [divisionPath]="divisionPath">

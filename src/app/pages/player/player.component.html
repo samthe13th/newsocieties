@@ -94,6 +94,7 @@
                     <div>
                       <h1>Harvest</h1>
                     </div>
+                    <span class="v-div"></span>
                     <div class="harvest-details">
                       <div class="xlarge">Capacity: {{ division?.capacity }}</div>
                     </div>
@@ -250,7 +251,7 @@
                   class="citizen-summary flex-row space-between"
                   *ngFor="let citizen of ($citizens | async)">
                     <span [class.player-turn-indicator]="citizen.id == turn">
-                      <strong>{{ citizen?.position }}:</strong> {{citizen.name}}
+                      <strong>{{ citizen?.position }}:</strong><span> {{citizen.name}}</span> 
                     </span>
                     <div>
                       <!-- <span style="margin-right: 5px">

@@ -43,6 +43,13 @@ table, th, td {
   border:1px solid black;
 }
 
+.v-div {
+  display: block;
+  height: calc(100% - 40px);
+  width: 2px;
+  background: white;
+}
+
 table {
   background: white;
   font-family: arial, sans-serif;
@@ -1093,11 +1100,6 @@ select {
   display: flex;
 }
 
-.player-turn-indicator {
-  display: flex; 
-  align-items: center;
-}
-
 .player-turn-indicator::before {
   content: "";
   border: solid 8px transparent;
@@ -1326,7 +1328,7 @@ select {
   background: #0f2631;
   height: 100%;
   width: 100%;
-  justify-content: space-between;
+  justify-content: space-around;
   box-sizing: border-box;
   align-items: center;
   min-height: 60px;
@@ -1346,17 +1348,13 @@ select {
   border-radius: 10px; 
   line-height: 25px;
 
-  > * {
-    padding: 10px; 
-  }
-
   .large {
     font-size: 18px; 
     margin-bottom: 10px;
   }
 
   .xlarge {
-    font-size: 22px;
+    font-size: 26px;
   }
 }
 

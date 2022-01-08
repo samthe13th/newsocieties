@@ -495,7 +495,7 @@ export class HostComponent implements OnInit, OnDestroy {
         header: `${this.selectedCitizen?.name} gathered a contaminant!`,
         message: contaminateCallback,
         value: tileValue,
-        duration: 2500
+        duration: 3000
       })
     } else if (tile.value && id && divisionKey) {
       this.bank.depositResources(
