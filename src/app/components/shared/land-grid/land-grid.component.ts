@@ -2,8 +2,8 @@ import { Output, Component, OnInit, Input, EventEmitter } from '@angular/core';
 import { range, chunk, isEqual, each, difference } from 'lodash';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
-import { Subject, combineLatest } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { BehaviorSubject, Subject, combineLatest } from 'rxjs';
+import { takeUntil, tap, throttleTime } from 'rxjs/operators';
 import { LandCardValues, LandTile, LandCardTypes } from 'src/app/interfaces';
 import { BankService } from 'src/app/services/bank.service';
 import { pluckRandom, getRandomInt } from 'src/app/utilties';
@@ -39,6 +39,7 @@ export class LandGridComponent implements OnInit {
   private destroy$ = new Subject<boolean>();
 
   @Output() gatherResource: EventEmitter<any> = new EventEmitter();
+  @Output() exploreResource: EventEmitter<any> = new EventEmitter();
   @Output() select: EventEmitter<LandTile> = new EventEmitter();
 
   @Input() markCards: boolean;
@@ -59,6 +60,8 @@ export class LandGridComponent implements OnInit {
     this._turn = value;
   }
 
+  SoundCue: BehaviorSubject<any> = new BehaviorSubject<any>(null);
+
   constructor(
     private db: AngularFireDatabase,
     private bankService: BankService,
@@ -72,7 +75,25 @@ export class LandGridComponent implements OnInit {
     return '';
   }
 
+  onCardFlip(card) {
+    if (!this.isHost) {
+      this.SoundCue.next(card)
+    }
+  }
+
   ngOnInit() {
+    this.SoundCue.pipe(
+      takeUntil(this.destroy$),
+      throttleTime(1000)
+    ).subscribe((cue) => {
+      if (cue?.type === 'R') {
+        this.playExploreSound(cue.value)
+      } else if (cue?.type === 'C') {
+        this.Sounds.ex_contamination.play();
+      }
+      console.log("PLAY CUE: ", cue)
+    })
+
     this.Sounds = {
       explore1: new Howl({ src: 'assets/explore1.wav' }).volume(0.1),
       explore2: new Howl({ src: 'assets/explore2.wav' }).volume(0.1),

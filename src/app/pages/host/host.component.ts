@@ -223,19 +223,19 @@ export class HostComponent implements OnInit, OnDestroy {
 
     this.$division = this.db.object(this.divisionPath).valueChanges().pipe(
       filter((x) => x !== null && x !== undefined),
-      delay(3000),
       tap((div: any) => {
         this.landCost = div.landCost;
-        console.log({div})
         if (div.score !== 'Low' && this.divisionScore !== div.score && !this.landmarks?.[div.score]) {
           console.log("new score")
           this.divisionScore = div.score;
-          this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/divisionLargePopup`).set({
-            type: 'Rating',
-            header: `Things are changing`,
-            message: `The ${div.name} is now at a ${div.score} rating`,
-          })
-          this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/landmarks/${div.score}`).set(true)
+          setTimeout(() => {
+            this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/divisionLargePopup`).set({
+              type: 'Rating',
+              header: `Things are changing`,
+              message: `The ${div.name} is now at a ${div.score} rating`,
+            })
+            this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/landmarks/${div.score}`).set(true)
+          }, 3500)
         }
       })
     );
@@ -757,7 +757,7 @@ export class HostComponent implements OnInit, OnDestroy {
       state: 'final',
       noDecision: true,
     });
-    this.pushToCentral('principles', "The division did not make a decision");
+    this.pushToCentral('principles', `Regarding ${this.divisionVote.vote.title}, the division did not make a decision`);
   }
 
   customVoteOption() {
@@ -1017,34 +1017,33 @@ export class HostComponent implements OnInit, OnDestroy {
     this.resourceType = toNumber(x?.id);
   }
 
-  nextSeason(division, newSeason) {
+  nextSeason() {
     this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/focus`).set('new-season');
     this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}`).valueChanges().pipe(
       take(1)
     ).subscribe((data: any) => {
-      console.log('start new season with data: ', data)
-      this.startSeason(data, data?.nextSeason);
+      this.loadSeason(data, data?.nextSeason);
     })
   }
 
-  async startSeason(division, newSeason) {
+  async loadSeason(division, newSeason) {
+    this.showModal = false;
     const level = await this.divisionService.getThresholdLevel(this.showKey, this.divisionKey);
-    console.log('start season', newSeason, division, level);
     const landTiles = await this.divisionService.setLandTiles(this.showKey, this.divisionKey)
     this.harvest = this.generateHarvest(landTiles, level, newSeason?.harvest, newSeason?.contaminantLevel);
 
     if (division.season > 0) {
-      console.log('update chart data')
       await this.db.list(`shows/${this.showKey}/divisions/${this.divisionKey}/chartData`).push([
         division.season,
         division.capacity,
         division.actions
       ])
     }
-    console.log("START SEASON: ", newSeason)
+
     await this.db.object(`${this.divisionPath}/highThresholdsMet`).query.ref.transaction((htm) => {
       return newSeason.highThresholdMet ? htm + 1 : htm
     })
+
     await this.db.object(`${this.divisionPath}`).update({
       score: newSeason.score,
       harvestColumn: division.lockHarvestColumns
@@ -1066,16 +1065,14 @@ export class HostComponent implements OnInit, OnDestroy {
     })
 
     this.resetCitizenActions();
-    this.showModal = false;
+
     setTimeout(() => {
       this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/focus`).set('harvest');
     }, 3000)
   }
 
   newSeason(division) {
-    console.log('NS: ', division)
     if (!division) return;
-    console.log('new season... ', this.showSize)
     this.divisionService.newSeason(this.showKey, this.divisionKey, this.showSize);
     this.modalContent = this.newSeasonModal;
     this.showModal = true;
@@ -1152,7 +1149,6 @@ export class HostComponent implements OnInit, OnDestroy {
     const tiles: LandTile[] = [ ...this.resetLandTiles(landTiles) ];
     const [owned, open]: LandTile[][] = partition(tiles, (tile) => tile.owner !== undefined);
     const harvestableCount = harvestableCards - owned.length;
-    console.log('harvestable count: ', harvestableCards, harvestableCount, owned, open)
     const harvestIndexes = [
       ...owned.map((tile: any) => tile.index),
       ...pluckRandom(open.map(

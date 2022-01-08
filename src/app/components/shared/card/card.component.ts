@@ -22,12 +22,13 @@ export class CardComponent implements OnInit {
   @Input() mark = null
   @Input() xray = false;
   @Input() playerId;
+  @Input() data;
   @Input() contaminated = false;
   @Input() 
   set side(val) {
     this._side = val;
     if (val === 'front') {
-      this.sideChange.emit(val)
+      this.sideChange.emit(this.data);
     }
   }
   get side() { return this._side }
