@@ -108,10 +108,11 @@ export class PlayerComponent implements OnInit {
     this.db.object('shows').valueChanges().pipe(takeUntil(this.destroy$)).subscribe(
       (shows) => {
         if (!shows[this.showKey]) {
-          this.name = undefined;
+          window.location.reload();
         }
       }
     )
+    
     this.db.object(`shows/${this.showKey}/users`).valueChanges()
       .pipe(take(1))
       .subscribe((users) => {

@@ -191,6 +191,14 @@ export class HostComponent implements OnInit, OnDestroy {
     this.divisionKey = this.route.snapshot.params.division;
     this.showKey = this.route.snapshot.params.show;
 
+    this.db.object('shows').valueChanges().pipe(takeUntil(this.destroy$)).subscribe(
+      (shows) => {
+        if (!shows[this.showKey]) {
+          window.location.reload();
+        }
+      }
+    )
+
     this.$advancements = this.divisionService.$advancements(this.showKey, this.divisionKey).pipe(
       tap((n) => console.log({n}))
     )
