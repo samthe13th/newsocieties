@@ -27,28 +27,6 @@ export const SHOW_DEFAULTS = {
   }
 }
 
-export const SMALL_SHOW_DEFAULTS = {
-  reserveThresholds: {
-    low: 5, 
-    mid: 10,
-    high: 15
-  },
-  capacity: 6,
-  harvest: 18,
-  landCost: 4
-}
-
-export const MEDIUM_SHOW_DEFAULTS = {
-  reserveThresholds: {
-    low: 5, 
-    mid: 10,
-    high: 15
-  },
-  capacity: 9,
-  harvest: 18,
-  landCost: 4
-}
-
 export const DIVISION_TEMPLATE = {
   events: [],
   harvestColumn: [true, true, true, true, true, true, true],

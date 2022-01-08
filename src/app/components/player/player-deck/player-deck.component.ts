@@ -38,7 +38,7 @@ export class PlayerDeckComponent {
   landIcon = faFlag;
 
   @Input() id;
-  @Input() name = "Sam"
+  @Input() name = ""
   @Input() showKey: string;
   @Input() division;
   @Input() myTurn: boolean;

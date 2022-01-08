@@ -4,7 +4,7 @@ import { PlayerDeckComponent } from 'src/app/components/player/player-deck/playe
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { LandGridComponent } from 'src/app/components/shared/land-grid/land-grid.component';
-import { tap, take, map } from 'rxjs/operators';
+import { tap, take, map, takeUntil } from 'rxjs/operators';
 import { Subject, combineLatest } from 'rxjs';
 import { LandCardValues } from 'src/app/interfaces';
 import { capitalize, toArray, includes, findIndex, filter, find } from 'lodash';
@@ -105,6 +105,13 @@ export class PlayerComponent implements OnInit {
     this.id = id;
     this.signedIn = this.id !== undefined;
 
+    this.db.object('shows').valueChanges().pipe(takeUntil(this.destroy$)).subscribe(
+      (shows) => {
+        if (!shows[this.showKey]) {
+          this.name = undefined;
+        }
+      }
+    )
     this.db.object(`shows/${this.showKey}/users`).valueChanges()
       .pipe(take(1))
       .subscribe((users) => {

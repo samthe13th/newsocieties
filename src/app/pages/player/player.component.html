@@ -254,22 +254,13 @@
                       <strong>{{ citizen?.position }}:</strong><span> {{citizen.name}}</span> 
                     </span>
                     <div>
-                      <!-- <span style="margin-right: 5px">
-                        <fa-icon size="sm" [icon]="resourceIcon"></fa-icon>
-                        {{calculateWealth(citizen?.resources)}}
-                      </span> -->
                       <span class="citizen-list__stats" title="Land plots owned">
                         <i class="ns-icon">
                           <img src='/assets/land_white.png'/>
                         </i>
-                        <!-- <fa-icon size="sm" [icon]="landIcon"></fa-icon> -->
                         {{ citizen?.land ? citizen?.land : 0 }}
                       </span>
                     </div>
-                    <!-- <app-player-turn 
-                      [showLabel]="false"
-                      [divisionPath]="divisionPath">
-                    </app-player-turn> -->
                 </div>
               </div>
 

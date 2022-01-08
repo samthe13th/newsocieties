@@ -2,9 +2,9 @@ import { Component, OnInit, AfterViewInit, ViewChild, ViewChildren, TemplateRef,
 import { AngularFireDatabase } from '@angular/fire/database';
 import { take, takeUntil, tap } from 'rxjs/operators';
 import { timer, Observable, Subject, combineLatest } from 'rxjs';
-import { trim, keyBy, range, capitalize, toNumber, find, differenceWith, sortBy, includes } from 'lodash';
+import { trim, keyBy, range, capitalize, toNumber, find, differenceWith, sortBy } from 'lodash';
 import * as Papa from 'papaparse';
-import { DIVISION_TEMPLATE, SHOW_TEMPLATE, MEDIUM_SHOW_DEFAULTS, SHOW_DEFAULTS } from './templates';
+import { DIVISION_TEMPLATE, SHOW_TEMPLATE, SHOW_DEFAULTS } from './templates';
 import { map } from 'rxjs/operators';
 import * as moment from 'moment';
 import { ActivatedRoute } from '@angular/router';
@@ -504,7 +504,7 @@ export class AdminComponent implements OnInit, AfterViewInit {
     const timeline = await promiseOne(this.db.object('timeline'));
     const divisions = this.generateDivisions(showSize);
 
-    console.log("RESET: ", showSize)
+    console.log("RESET: ", showSize, divisions)
     await this.db.object(`shows/${this.showKey}`).remove();
 
     this.db.object(`shows/${this.showKey}`).set({
@@ -609,9 +609,7 @@ export class AdminComponent implements OnInit, AfterViewInit {
   generateDivisions(showSize = 'full') {
     console.log("gen divisions: ", showSize)
     const DEFAULTS = SHOW_DEFAULTS?.[showSize]
-    // const DEFAULTS = showSize === 'small'
-    //   ? MEDIUM_SHOW_DEFAULTS
-    //   : SHOW_DEFAULTS;
+    console.log('set defaults: ', showSize, DEFAULTS)
 
     return DIVISIONS.reduce((acc, abv) => ({ 
       ...acc, 
