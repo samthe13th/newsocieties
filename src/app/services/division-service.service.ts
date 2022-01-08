@@ -275,14 +275,14 @@ export class DivisionService {
     )
   }
 
-  getScore(VP) {
-    if (VP < SCORE["Mid-Low"].VP) {
+  getScore(Data, VP) {
+    if (VP < Data["Mid-Low"].VP) {
       return 'Low'
-    } else if (VP < SCORE["Mid"].VP) {
+    } else if (VP < Data["Mid"].VP) {
       return 'Mid-Low'
-    } else if (VP < SCORE["Mid-High"].VP) {
+    } else if (VP < Data["Mid-High"].VP) {
       return 'Mid'
-    } else if (VP < SCORE["High"].VP) {
+    } else if (VP < Data["High"].VP) {
       return 'Mid-High'
     }
     return 'High'
@@ -354,6 +354,9 @@ export class DivisionService {
         const updates = showSize === 'small'
           ? MEDIUM_GAME_SCORE[division?.score]
           : SCORE[division?.score]
+        const score = showSize === 'small'
+          ? this.getScore(MEDIUM_GAME_SCORE, division?.VP)
+          : this.getScore(SCORE, division?.VP)
         const highThresholdMet = division?.reserve >= division.reserveThresholds.high;
         const capacity = highThresholdMet
           ? division?.capacity + 1
@@ -361,7 +364,7 @@ export class DivisionService {
         this.db.object(`${divisionPath}/nextSeason`).set({
           ...updates,
           VP: division?.VP,
-          score: this.getScore(division?.VP),
+          score,
           season: division?.season + 1,
           highThresholdMet,
           contaminantLevel: division?.contaminantLevel < 3
