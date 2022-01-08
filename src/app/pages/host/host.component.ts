@@ -1098,8 +1098,10 @@ export class HostComponent implements OnInit, OnDestroy {
       take(1)
     ).subscribe(([percent, level]) => {
       console.log({percent, level})
-      this.landGrid.adjustContamination(percent, level);
-      this.landGrid.updateDB();
+      if (this.landGrid) {
+        this.landGrid.adjustContamination(percent, level);
+        this.landGrid.updateDB();
+      }
     })
   }
 
