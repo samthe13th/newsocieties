@@ -103,15 +103,6 @@
   overflow: auto;
 }
 
-.host-side-panel {
-  &.left {
-    max-width: 300px; 
-    margin-right: 10px;
-  }
-  &.right {
-    max-width: 500px;
-  }
-}
 .folder__body.host-selected-tab {
   border-top: solid #7c98a9;
 }

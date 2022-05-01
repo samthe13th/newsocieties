@@ -23,7 +23,8 @@ const DIVISIONS = ["N", "NE", "W", "NW", "E", "SW", "S", "SE"];
   templateUrl: './host.component.html',
   styleUrls: ['./host.component.scss'],
   host: {
-    '[class.app-host]': 'true'
+    '[class.app-host]': '!ipad',
+    '[class.app-ipad-host]': 'ipad'
   }
 })
 export class HostComponent implements OnInit, OnDestroy {
@@ -45,7 +46,7 @@ export class HostComponent implements OnInit, OnDestroy {
 
   @ViewChild('harvestTemplate') harvestTemplate: TemplateRef<any>;
   @ViewChild('principleTemplate') principleTemplate: TemplateRef<any>;
-  @ViewChild('resolutionTemplate') resolutionTemplate: TemplateRef<any>;
+  @ViewChild('') resolutionTemplate: TemplateRef<any>;
   @ViewChild('resolutionReviewTemplate') resolutionReviewTemplate: TemplateRef<any>;
   @ViewChild('scenarioTemplate') scenarioTemplate: TemplateRef<any>;
   @ViewChild('miscTemplate') miscTemplate: TemplateRef<any>;
@@ -70,6 +71,7 @@ export class HostComponent implements OnInit, OnDestroy {
   modalContent: TemplateRef<any>;
 
   showSize = 'normal';
+  ipad = true;
 
   // ICONS
   faPen = faPen;

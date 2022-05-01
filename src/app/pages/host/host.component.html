@@ -21,6 +21,7 @@
 </app-tabs>
 
 <app-tabs 
+  *ngIf="!ipad"
   class="host-side-panel right"
   selectedClass="host-selected-tab"
   (tabChange)="onRightTabChange($event)"
@@ -575,7 +576,7 @@
     </div>
 
     <ng-template #newSeasonTemplate>
-      <div *ngIf="division.nextSeason as next">
+      <div class="modal-content" *ngIf="division.nextSeason as next">
         <h1>New Season: <span class="new-value">{{ next?.season }}</span></h1>
         <div>
           New GLAs:
@@ -677,7 +678,7 @@
 
 <!-- UPDATE SHEET -->
 <ng-template #updateSheet>
-  <div class="action-sheet">
+  <div class="action-sheet" [class.ipad]="ipad">
     {{ changeAttribute?.name }}
     <app-number-change
       (afterUpdate)="onAttributeUpdate($event)"
