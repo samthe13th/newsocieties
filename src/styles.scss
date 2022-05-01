@@ -98,6 +98,18 @@ select {
   align-items: center;
 }
 
+.fab-button {
+  position: absolute;
+  bottom: 40px; 
+  right: 40px; 
+  font-size: 40px;
+  background: #3f9d6c;
+  color: white;
+  padding: 30px;
+  border-radius: 100%;
+  box-shadow: 1px 10px 20px #0000006b;
+}
+
 .justify-center {
   justify-content: center;
 }
@@ -489,12 +501,55 @@ select {
   }
 }
 
+.app-ipad-host {
+  @extend %app-page;
+  padding-bottom: 0;
+  background: black;
+  padding: 10px;
+
+  .modal-wrap {
+    .modal.small {
+      width: 100%;
+    }
+  }
+
+  .modal-content {
+    font-size: 2em;
+    line-height: 1.5em;
+  }
+
+  .folder__tabs .folder__tab {
+    font-size: 2em;
+    padding: 20px;
+  }
+
+  button {
+    font-size: 1.2em;
+    margin-right: 10px;
+  }
+
+  .tab-card {
+    font-size: 1.8em;
+    line-height: 1.8em;
+  }
+}
+
 .app-host {
   @extend %app-page;
   padding: 15px;
   padding-bottom: 0;
   background: black;
   max-width: 1100px;
+
+  .host-side-panel {
+    &.left {
+      max-width: 300px; 
+      margin-right: 10px;
+    }
+    &.right {
+      max-width: 500px;
+    }
+  }
 }
 
 .app-vote {
@@ -900,6 +955,15 @@ select {
   width: 100%;
   font-size: 24px;
   height: 200px;
+
+  &.ipad {
+    font-size: 2.5em;
+
+    button {
+      font-size: 1em;
+      padding: 10px;
+    }
+  }
 }
 
 .large-action-button {
@@ -983,6 +1047,13 @@ select {
 
     &.center {
       justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
       align-items: center;
     }
   }

@@ -11,7 +11,7 @@ import { BankService } from 'src/app/services/bank.service';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { ButtonGroupComponent } from 'src/app/components/shared/button-group/button-group.component';
 import { DivisionService } from 'src/app/services/division-service.service';
-import { faPen, faGavel, faScroll, faLandmark, faBullseye, faEyeSlash, faGlobe, faLeaf, faCartPlus, faEye, faShoppingBag } from '@fortawesome/free-solid-svg-icons';
+import { faPen, faGavel, faScroll, faLandmark, faBullseye, faEyeSlash, faGlobe, faLeaf, faCartPlus, faEye, faShoppingBag, faMicroscope } from '@fortawesome/free-solid-svg-icons';
 import { LandGridComponent } from 'src/app/components/shared/land-grid/land-grid.component';
 import * as fa from '@fortawesome/free-solid-svg-icons';
 import * as moment from 'moment';
@@ -23,7 +23,8 @@ const DIVISIONS = ["N", "NE", "W", "NW", "E", "SW", "S", "SE"];
   templateUrl: './host.component.html',
   styleUrls: ['./host.component.scss'],
   host: {
-    '[class.app-host]': 'true'
+    '[class.app-host]': '!ipad',
+    '[class.app-ipad-host]': 'ipad'
   }
 })
 export class HostComponent implements OnInit, OnDestroy {
@@ -69,7 +70,9 @@ export class HostComponent implements OnInit, OnDestroy {
   
   modalContent: TemplateRef<any>;
 
+  scanMode = false;
   showSize = 'normal';
+  ipad = true;
 
   // ICONS
   faPen = faPen;
@@ -78,6 +81,7 @@ export class HostComponent implements OnInit, OnDestroy {
   gatherIcon = faShoppingBag;
   visibleIcon = faEyeSlash;
   highlightIcon = faBullseye;
+  radarIcon = faMicroscope;
 
   showModal = false;
 
@@ -89,6 +93,9 @@ export class HostComponent implements OnInit, OnDestroy {
     { id: 'misc', label: 'Market', faIcon: faCartPlus },
     { id: 'review', label: 'Review', faIcon: faScroll }
   ]
+
+  ipadTabs;
+  ipadDesktop;
 
   divisionButtons = DIVISIONS.map(d => ({
     id: d,
@@ -190,6 +197,7 @@ export class HostComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.divisionKey = this.route.snapshot.params.division;
     this.showKey = this.route.snapshot.params.show;
+    this.ipad = this.route.snapshot.queryParams.ipad == 'true';
 
     this.db.object('shows').valueChanges().pipe(takeUntil(this.destroy$)).subscribe(
       (shows) => {
@@ -203,7 +211,6 @@ export class HostComponent implements OnInit, OnDestroy {
       tap((n) => console.log({n}))
     )
     this.divisionPath = `shows/${this.showKey}/divisions/${this.divisionKey}`;
-    console.log("DIVISION PATH: ", this.divisionPath)
     this.landTilesPath = `${this.divisionPath}/landTiles`;
     this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/color`).valueChanges()
       .pipe(take(1)).subscribe((color) =>{
@@ -234,7 +241,6 @@ export class HostComponent implements OnInit, OnDestroy {
       tap((div: any) => {
         this.landCost = div.landCost;
         if (div.score !== 'Low' && this.divisionScore !== div.score && !this.landmarks?.[div.score]) {
-          console.log("new score")
           this.divisionScore = div.score;
           setTimeout(() => {
             this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/divisionLargePopup`).set({
@@ -307,6 +313,32 @@ export class HostComponent implements OnInit, OnDestroy {
     this.getResolutions();
     this.getPrinciples();
     this.getScenarios();
+  }
+
+  setFullScreen() {
+    const elem: any = document.documentElement as any;
+    if (elem.requestFullscreen) {
+      elem.requestFullscreen();
+    } else if (elem.mozRequestFullScreen) { /* Firefox */
+      elem.mozRequestFullScreen();
+    } else if (elem.webkitRequestFullscreen) { /* Chrome, Safari and Opera */
+      elem.webkitRequestFullscreen();
+    } else if (elem.msRequestFullscreen) { /* IE/Edge */
+      elem.msRequestFullscreen();
+    }
+  }
+
+  exitFullScreen() {
+    const doc: any = document;
+    if (doc.exitFullscreen) {
+      document.exitFullscreen();
+    } else if (doc.mozCancelFullScreen) { /* Firefox */
+      doc.mozCancelFullScreen();
+    } else if (doc.webkitExitFullscreen) { /* Chrome, Safari and Opera */
+      doc.webkitExitFullscreen();
+    } else if (doc.msExitFullscreen) { /* IE/Edge */
+      doc.msExitFullscreen();
+    }
   }
 
   async updatePositions() {

@@ -13,14 +13,28 @@
   class="host-side-panel left"
   selectedClass="host-selected-tab"
   (tabChange)="onLeftTabChange($event)"
-  [tabs]="[
-    { id: 'division', tabTemplate: division, bodyTemplate: divisionBody },
-    { id: 'global', tabTemplate: global, bodyTemplate: globalBody },
-    { id: 'exports', tabTemplate: exports, bodyTemplate: exportsBody }
+  [tabs]="ipad ? [
+    { id: 'division', tabTemplate: divisionTab, bodyTemplate: divisionBody }
+  ] : [
+    { id: 'division', tabTemplate: divisionTab, bodyTemplate: divisionBody },
+    { id: 'global', tabTemplate: globalTab, bodyTemplate: globalBody },
+    { id: 'exports', tabTemplate: exportsTab, bodyTemplate: exportsBody }
   ]">
 </app-tabs>
 
+<div class="fab-button" (click)="scanMode = true; setFullScreen()">
+  <fa-icon size="fa-2xl" [icon]="radarIcon"></fa-icon>
+</div>
+
+<div *ngIf="scanMode" class="app-fullscreen-overlay">
+  <div class="scanner">
+    <button>Scan</button>
+    <button (click)="scanMode = false; exitFullScreen()">Close</button>
+  </div>
+</div>
+
 <app-tabs 
+  *ngIf="!ipad"
   class="host-side-panel right"
   selectedClass="host-selected-tab"
   (tabChange)="onRightTabChange($event)"
@@ -373,9 +387,9 @@
 </ng-template>
 
 <!-- TABS-->
-<ng-template #division>{{divisionKey}} Division</ng-template>
-<ng-template #global>Global</ng-template>
-<ng-template #exports>Exports</ng-template>
+<ng-template #divisionTab>{{divisionKey}} Division</ng-template>
+<ng-template #globalTab>Global</ng-template>
+<ng-template #exportsTab>Exports</ng-template>
 <ng-template #central>
   Central
   <ng-container *ngIf="($unseenChat | async) as unseenChat">
@@ -575,7 +589,7 @@
     </div>
 
     <ng-template #newSeasonTemplate>
-      <div *ngIf="division.nextSeason as next">
+      <div class="modal-content" *ngIf="division.nextSeason as next">
         <h1>New Season: <span class="new-value">{{ next?.season }}</span></h1>
         <div>
           New GLAs:
@@ -677,7 +691,7 @@
 
 <!-- UPDATE SHEET -->
 <ng-template #updateSheet>
-  <div class="action-sheet">
+  <div class="action-sheet" [class.ipad]="ipad">
     {{ changeAttribute?.name }}
     <app-number-change
       (afterUpdate)="onAttributeUpdate($event)"
