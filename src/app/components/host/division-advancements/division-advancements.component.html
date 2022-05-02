@@ -1,0 +1,22 @@
+<ng-container *ngFor="let adv of advancements">
+    <p *ngIf="!ipad">
+        <span class="box">
+            <span class="division-summary-head">
+                {{adv?.short}}: {{adv?.communal + adv?.individual}}
+            </span>
+        </span> = <fa-icon size="md" [icon]="fa.faUser"></fa-icon> {{adv?.individual}} 
+        + <fa-icon size="md" [icon]="fa.faGlobe"></fa-icon> {{adv?.communal}}
+        <button (click)="editCommunalAdvancement(adv.key, 'communal')">
+            <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
+        </button>
+    </p>
+    <p *ngIf="ipad">
+        <button (click)="editGlobalAdvancement(adv.key)">
+            <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
+        </button>
+        <span class="division-summary-head">
+            {{adv?.name}}: {{adv?.communal + adv?.individual}}
+        </span>
+    </p>
+
+</ng-container>

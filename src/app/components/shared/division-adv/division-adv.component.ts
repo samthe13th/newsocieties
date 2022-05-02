@@ -24,11 +24,11 @@ export class DivisionAdvComponent implements OnInit {
     this.$advancements = this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/advancements`).valueChanges()
       .pipe(
         map((adv: any) => ({
-          safety: adv.safety.individual + adv.safety.communal,
-          health: adv.health.individual + adv.health.communal,
-          arts: adv.arts.individual + adv.arts.communal,
-          knowledge: adv.knowledge.individual + adv.knowledge.communal,
-          infrastructure: adv.infrastructure.individual + adv.infrastructure.communal,
+          safety: adv?.safety?.individual + adv?.safety?.communal,
+          health: adv?.health?.individual + adv?.health?.communal,
+          arts: adv?.arts?.individual + adv?.arts?.communal,
+          knowledge: adv?.knowledge?.individual + adv?.knowledge?.communal,
+          infrastructure: adv?.infrastructure?.individual + adv?.infrastructure?.communal,
         }))
       )
   }

@@ -165,6 +165,7 @@ select {
 }
 
 .app-fullscreen-overlay {
+  overflow: hidden;
   position: absolute;
   z-index: 10000;
   background: black;
@@ -183,6 +184,26 @@ select {
 .app-division-adv {
   display: flex;
   margin: 10px 0 20px 0;
+}
+
+.app-division-advancements {
+  p>*:first-child {
+    margin-right: 5px;
+  }
+
+  &.ipad {
+    .box {
+      padding: 10px;
+    } 
+    p {
+      margin-bottom: 20px;
+      line-height: 20px;
+    }
+  }
+  p {
+    line-height: 10px;
+    margin-bottom: 10px;
+  }
 }
 
 .app-division-chart {
@@ -524,7 +545,8 @@ select {
   }
 
   button {
-    font-size: 1.2em;
+    font-size: 0.9em;
+    padding: 5px 10px;
     margin-right: 10px;
   }
 
@@ -769,6 +791,14 @@ select {
   }
 }
 
+.box {
+  white-space: nowrap;
+  padding: 2px;
+  border: solid 1px;
+  border-radius: 10px;
+  background: white;
+}
+
 .button-row {
   display: flex; 
   flex-direction: row;
@@ -883,6 +913,19 @@ select {
   background: black;
   color: white;
   max-width: 800px;
+}
+
+.tab-block {
+  width: 100%;
+  padding: 20px;
+  box-sizing: border-box;
+  background: #eeeeee;
+  border-radius: 10px;
+  border: solid white;
+
+  &.wrap-block {
+    max-width: 50%;
+  }
 }
 
 .host-selected-tab {

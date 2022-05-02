@@ -65,6 +65,8 @@ export class HostComponent implements OnInit, OnDestroy {
   @ViewChild('advancementSheet') advancementSheet: TemplateRef<any>;
   @ViewChild('localLandSheet') localLandSheet: TemplateRef<any>;
   @ViewChild('disableColumnsSheet') disableColumnsSheet: TemplateRef<any>;
+  @ViewChild('mockLocalLandSheet') mockLocalLandSheet: TemplateRef<any>;
+  @ViewChild('mockGlobalLandSheet') mockGlobalLandSheet: TemplateRef<any>;
 
   @ViewChild('harvestTileSheet', { static: false }) harvestTileSheet: TemplateRef<any>;
   
@@ -313,6 +315,32 @@ export class HostComponent implements OnInit, OnDestroy {
     this.getResolutions();
     this.getPrinciples();
     this.getScenarios();
+  }
+
+  changeAdvancement({ key, type }) {
+    if (type === 'global') {
+      this.changeDivisionProperty(`advancements/${key}/communal`, key);
+    } else {
+      this.changeDivisionProperty(`advancements/${key}/communal`, `${type} ${key}`);
+    }
+  }
+
+  mockLand(type) {
+    this.actionSheet = (type === 'global') 
+      ? this.bottomSheet.open(this.mockGlobalLandSheet)
+      : this.bottomSheet.open(this.mockLocalLandSheet);
+  }
+
+  async setMockLand(type, value) {
+    console.log('mock land: ', type, value);
+    const mockLand = _.range(value).map((n)=> ({
+      division: this.divisionKey,
+      id: 0,
+      color: this.divisionColor,
+      name: 'X'
+    }))
+    await this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/${type}Land`).set(mockLand);
+    this.dismissSheet();
   }
 
   setFullScreen() {

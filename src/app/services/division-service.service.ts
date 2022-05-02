@@ -265,11 +265,11 @@ export class DivisionService {
           _.zip(...individualAdvancements), counts => _.sum(counts)
         )
         return [
-          { key: 'safety', name: 'Safety', reward: adv.safety.reward, communal: adv.safety.communal, individual: iSafety ?? 0 },
-          { key: 'health', name: 'Health', reward: adv.health.reward, communal: adv.health.communal, individual: iHealth ?? 0 },
-          { key: 'arts', name: 'Arts and Culture', reward: adv.arts.reward, communal: adv.arts.communal, individual: iArts ?? 0 },
-          { key: 'knowledge', name: 'Knowledge', reward: adv.knowledge.reward, communal: adv.knowledge.communal, individual: iKnowledge ?? 0 },
-          { key: 'infrastructure', name: 'Infrastructure', reward: adv.infrastructure.reward, communal: adv.infrastructure.communal, individual: iInfrastructure ?? 0 },
+          { key: 'safety', short: 'S', name: 'Safety', reward: adv.safety.reward, communal: adv.safety.communal, individual: iSafety ?? 0 },
+          { key: 'health', short: 'H', name: 'Health', reward: adv.health.reward, communal: adv.health.communal, individual: iHealth ?? 0 },
+          { key: 'arts', short: 'A', name: 'Arts + Culture', reward: adv.arts.reward, communal: adv.arts.communal, individual: iArts ?? 0 },
+          { key: 'knowledge', short: 'K', name: 'Knowledge', reward: adv.knowledge.reward, communal: adv.knowledge.communal, individual: iKnowledge ?? 0 },
+          { key: 'infrastructure', short: 'I', name: 'Infrastructure', reward: adv.infrastructure.reward, communal: adv.infrastructure.communal, individual: iInfrastructure ?? 0 },
         ]
       })
     )
@@ -290,7 +290,7 @@ export class DivisionService {
           this.assignLocalLand(showKey, divisionKey, request);
         }
       })
-      resolve();
+      resolve(null);
     })
   }
 
