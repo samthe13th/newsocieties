@@ -9,23 +9,36 @@
   </div>
 </div>
 
+
+
 <app-tabs 
+  *ngIf="!ipad"
   class="host-side-panel left"
   selectedClass="host-selected-tab"
   (tabChange)="onLeftTabChange($event)"
-  [tabs]="ipad ? [
-    { id: 'division', tabTemplate: divisionTab, bodyTemplate: divisionBody },
-    { id: 'vote', tabTemplate: voteTab, bodyTemplate: voteBody }
-  ] : [
+  [tabs]="[
     { id: 'division', tabTemplate: divisionTab, bodyTemplate: divisionBody },
     { id: 'global', tabTemplate: globalTab, bodyTemplate: globalBody },
     { id: 'exports', tabTemplate: exportsTab, bodyTemplate: exportsBody }
   ]">
 </app-tabs>
 
-<div *ngIf="ipad" class="fab-button" (click)="scanMode = true">
-  <fa-icon size="fa-2xl" [icon]="radarIcon"></fa-icon>
-</div>
+<ng-container *ngIf="ipad">
+  <app-tabs 
+    class="host-side-panel left"
+    selectedClass="host-selected-tab"
+    (tabChange)="onIpadTabChange($event)"
+    [tabs]="[
+      { id: 'division', tabTemplate: divisionTab, bodyTemplate: divisionBody },
+      { id: 'principles', tabTemplate: principleTab, bodyTemplate: voteBody },
+      { id: 'resolutions', tabTemplate: resolutionTab, bodyTemplate: voteBody }
+    ]">
+  </app-tabs>
+
+  <div *ngIf="ipad" class="fab-button" (click)="scanMode = true">
+    SCAN
+  </div>
+</ng-container>
 
 <div *ngIf="scanMode" class="app-fullscreen-overlay">
   <div class="scanner">
@@ -394,7 +407,8 @@
 <ng-template #divisionTab>{{divisionKey}} Division</ng-template>
 <ng-template #globalTab>Global</ng-template>
 <ng-template #exportsTab>Exports</ng-template>
-<ng-template #voteTab>Vote</ng-template>
+<ng-template #principleTab>Principle</ng-template>
+<ng-template #resolutionTab>Resolution</ng-template>
 <ng-template #central>
   Central
   <ng-container *ngIf="($unseenChat | async) as unseenChat">
@@ -404,6 +418,16 @@
 <ng-template #notes>Notes</ng-template>
 
 <ng-template #voteBody>
+  <select
+    [(ngModel)]="voteDropdownSelect"
+    name="vote-options"
+    id="vote-options">
+    <option
+      *ngFor="let option of voteDropdown"
+      [ngValue]="option">
+      {{option?.title}}
+    </option>
+  </select>
   <app-vote 
     class="ipad"
     [showVotes]="true"

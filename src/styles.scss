@@ -100,14 +100,18 @@ select {
 
 .fab-button {
   position: absolute;
-  bottom: 40px; 
-  right: 40px; 
-  font-size: 40px;
+  top: 10px;
+  right: 10px;
+  font-family: sans-serif;
+  font-size: 30px;
   background: #3f9d6c;
   color: white;
-  padding: 30px;
-  border-radius: 100%;
-  box-shadow: 1px 10px 20px #0000006b;
+  height: 55px;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20px;
 }
 
 .justify-center {

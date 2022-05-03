@@ -483,6 +483,12 @@ export class HostComponent implements OnInit, OnDestroy {
     this.leftTab = tab.id;
   }
 
+  async onIpadTabChange(tab) {
+    if (tab.id === 'principles' || tab.id === 'resolutions') {
+      this.setVoteDropdown(tab.id)
+    }
+  }
+
   onHarvestColumnSelect(select) {
     console.log('select: ', select)
   }
@@ -902,6 +908,7 @@ export class HostComponent implements OnInit, OnDestroy {
   }
 
   setVoteDropdown(type) {
+    console.log('set vote dropdown: ', type)
     const divisionPath = `shows/${this.showKey}/divisions/${this.divisionKey}`;
     this.voteDropdown = null;
     this.voteDropdownSelect = null;
