@@ -195,10 +195,6 @@ select {
     .box {
       padding: 10px;
     } 
-    p {
-      margin-bottom: 20px;
-      line-height: 20px;
-    }
   }
   p {
     line-height: 10px;
@@ -578,6 +574,25 @@ select {
   display: flex; 
   width: 100%;
   align-items: center;
+
+  &.ipad.central {
+    height: 100%;
+    font-size: 24px;
+
+    > .vote-wrapper {
+      font-size: 1em;
+      line-height: 1em;
+      align-items: center;
+      max-width: 100%;
+      border-radius: 0;
+
+      .vote-prompt {
+        font-size: 1.2em;
+        line-height: 1.2em;
+        max-width: 60%;
+      }
+    }
+  }
 
   &.central {
     .vote-wrapper {

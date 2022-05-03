@@ -10,6 +10,7 @@ import { NumberPickerModule } from 'ng-number-picker';
 import { AdminComponent } from './admin/admin.component';
 import { GoogleChartsModule } from 'angular-google-charts';
 import { SummaryComponent } from './summary/summary.component';
+import { ReviewComponent } from './review/review.component';
 
 
 const pages = [
@@ -17,7 +18,8 @@ const pages = [
   HostComponent,
   PlayerComponent, 
   AdminComponent,
-  SummaryComponent
+  SummaryComponent,
+  ReviewComponent
 ]
 
 @NgModule({

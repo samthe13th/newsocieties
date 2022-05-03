@@ -27,6 +27,7 @@ export class DivisionReviewComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    console.log('init division reviw', this.divisionKey, this.showKey)
     this.$divisionReview = this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/divisionReview`).valueChanges()
       .pipe(
         switchMap((toReview) => combineLatest(

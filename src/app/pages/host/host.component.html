@@ -14,7 +14,8 @@
   selectedClass="host-selected-tab"
   (tabChange)="onLeftTabChange($event)"
   [tabs]="ipad ? [
-    { id: 'division', tabTemplate: divisionTab, bodyTemplate: divisionBody }
+    { id: 'division', tabTemplate: divisionTab, bodyTemplate: divisionBody },
+    { id: 'vote', tabTemplate: voteTab, bodyTemplate: voteBody }
   ] : [
     { id: 'division', tabTemplate: divisionTab, bodyTemplate: divisionBody },
     { id: 'global', tabTemplate: globalTab, bodyTemplate: globalBody },
@@ -393,6 +394,7 @@
 <ng-template #divisionTab>{{divisionKey}} Division</ng-template>
 <ng-template #globalTab>Global</ng-template>
 <ng-template #exportsTab>Exports</ng-template>
+<ng-template #voteTab>Vote</ng-template>
 <ng-template #central>
   Central
   <ng-container *ngIf="($unseenChat | async) as unseenChat">
@@ -401,15 +403,57 @@
 </ng-template>
 <ng-template #notes>Notes</ng-template>
 
+<ng-template #voteBody>
+  <app-vote 
+    class="ipad"
+    [showVotes]="true"
+    [allowSelection]="true"
+    [showKey]="showKey"
+    role="central"
+    [divisionId]="divisionKey"
+  ></app-vote>
+</ng-template>
+
 <!-- DIVISION -->
 <ng-template #divisionBody>
   <div class="stack" *ngIf="$division | async as division">
     <div *ngIf="division" class="tab-card">
-      <div><strong>Score: </strong>{{ division.score }} ({{ division.VP }})</div>
-      <div><strong>Season:</strong>
-        {{ division.season }}
-        <button (click)="newSeason(division)">New Season</button>
-        <button (click)="resetSeason(division)">Reset</button>
+      <div class="tab-block">
+        <div><strong>Score: </strong>{{ division.score }} ({{ division.VP }})</div>
+        <div><strong>Season:</strong>
+          {{ division.season }}
+          <button (click)="newSeason(division)">New Season</button>
+          <button (click)="resetSeason(division)">Reset</button>
+        </div>
+      </div>
+
+      <div class="tab-block">
+        <div class="flex-wrap">
+          <div>
+            <div class="editable-item">
+              <strong>Land cost: </strong>
+              {{ division.landCost }}
+            </div>
+            <div class="editable-item">
+              <strong>Capacity: </strong>
+              {{ division?.capacity }}
+            </div>
+            <div class="editable-item">
+              <strong>Harvest:</strong>
+              {{ division?.harvest }}
+            </div>
+          </div>
+          <div>
+            <div class="editable-item">
+              <strong>Thresholds:</strong>
+              {{ division?.reserveThresholds.low }} / {{ division?.reserveThresholds.mid }} / {{ division?.reserveThresholds.high }}
+            </div>
+            <div class="editable-item">
+              <strong>High Thresholds Met: </strong>
+              {{ division.highThresholdsMet }}
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="flex-row flex-wrap">
@@ -444,29 +488,14 @@
             <strong>Global land: </strong>
             {{ ($globalLand | async)?.length }}
           </div>
+          <div class="editable-item">
+            <button *ngIf="ipad" (click)="changeDivisionProperty('reserve')">
+              <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
+            </button>
+            <strong>Reserve: </strong>
+            {{ division?.reserve }}
+          </div>
         </div>
-      </div>
-
-      <div class="editable-item">
-        <strong>Land cost: </strong>
-        {{ division.landCost }}
-      </div>
-
-      <div class="editable-item">
-        <strong>Capacity: </strong>
-        {{ division?.capacity }}
-      </div>
-      <div class="editable-item">
-        <strong>Harvest:</strong>
-        {{ division?.harvest }}
-      </div>
-      <div class="editable-item">
-        <strong>Thresholds:</strong>
-        {{ division?.reserveThresholds.low }} / {{ division?.reserveThresholds.mid }} / {{ division?.reserveThresholds.high }}
-      </div>
-      <div class="editable-item">
-        <strong>High Thresholds Met: </strong>
-        {{ division.highThresholdsMet }}
       </div>
 
     </div>
