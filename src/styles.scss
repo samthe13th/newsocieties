@@ -574,29 +574,46 @@ select {
   }
 }
 
-.app-vote {
-  display: flex; 
-  width: 100%;
+.ipad-vote {
+  display: flex;
+  flex-direction: column;
   align-items: center;
 
-  &.ipad.central {
+  select {
+    width: 50%;
+    height: 2.5em;
+    flex-shrink: 0;
+    border: solid white;
+    margin-top: 10px;
+    border-radius: 10px;
+
+  }
+  .app-vote.central {
     height: 100%;
     font-size: 24px;
 
     > .vote-wrapper {
       font-size: 1em;
       line-height: 1em;
-      align-items: center;
+      align-items: flex-start;
       max-width: 100%;
       border-radius: 0;
+      padding: 2em;
 
       .vote-prompt {
         font-size: 1.2em;
         line-height: 1.2em;
         max-width: 60%;
+        margin-bottom: 1.6em;
       }
     }
   }
+}
+
+.app-vote {
+  display: flex; 
+  width: 100%;
+  align-items: center;
 
   &.central {
     .vote-wrapper {

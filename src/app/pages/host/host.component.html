@@ -418,24 +418,28 @@
 <ng-template #notes>Notes</ng-template>
 
 <ng-template #voteBody>
-  <select
-    [(ngModel)]="voteDropdownSelect"
-    name="vote-options"
-    id="vote-options">
-    <option
-      *ngFor="let option of voteDropdown"
-      [ngValue]="option">
-      {{option?.title}}
-    </option>
-  </select>
-  <app-vote 
-    class="ipad"
-    [showVotes]="true"
-    [allowSelection]="true"
-    [showKey]="showKey"
-    role="central"
-    [divisionId]="divisionKey"
-  ></app-vote>
+  <div class="ipad-vote">
+    <select
+      [(ngModel)]="voteDropdownSelect"
+      name="vote-options"
+      id="vote-options">
+      <option
+        *ngFor="let option of voteDropdown"
+        [ngValue]="option">
+        {{option?.title}}
+      </option>
+    </select>
+    <app-vote
+      (selectionChange)="onSelectionChange($event)"
+      (voteChange)="onVoteChange($event)"
+      [showVotes]="true"
+      [allowSelection]="true"
+      [showKey]="showKey"
+      role="central"
+      [divisionId]="divisionKey"
+    ></app-vote>
+    <button class="large-action-button" (click)="implement()">Implement</button>
+  </div>
 </ng-template>
 
 <!-- DIVISION -->

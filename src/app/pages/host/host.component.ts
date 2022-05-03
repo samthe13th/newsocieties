@@ -146,6 +146,16 @@ export class HostComponent implements OnInit, OnDestroy {
   $overlay;
   $pageState;
 
+  private _voteDropdownSelect;
+  get voteDropdownSelect() { return this._voteDropdownSelect };
+  set voteDropdownSelect(value) {
+    console.log('set: ', value)
+    this._voteDropdownSelect = value;
+    if (value && this.ipad) {
+      this.startVote(this.ipadTab)
+    }
+  }
+
   landCost;
   customVoteInput;
   voteState;
@@ -176,9 +186,9 @@ export class HostComponent implements OnInit, OnDestroy {
   globalPrinciples; 
   globalScenarios;
   voteDropdown;
-  voteDropdownSelect;
   rightTab;
   leftTab;
+  ipadTab;
   citizenCount = 0;
   citizens;
   positions;
@@ -484,9 +494,12 @@ export class HostComponent implements OnInit, OnDestroy {
   }
 
   async onIpadTabChange(tab) {
-    if (tab.id === 'principles' || tab.id === 'resolutions') {
-      this.setVoteDropdown(tab.id)
+    if (tab.id != this.ipadTab && tab.id === 'principles' || tab.id === 'resolutions') {
+      this.voteDropdownSelect = null;
+      this.clearVote();
+      this.setVoteDropdown(tab.id);
     }
+    this.ipadTab = tab.id;
   }
 
   onHarvestColumnSelect(select) {
@@ -683,7 +696,11 @@ export class HostComponent implements OnInit, OnDestroy {
     this.startVote(focus)
   }
 
+  onVoteOptionChange(ev) {
+    console.log("on vote option change: ", ev)
+  }
   startVote(focus) {
+    console.log("vote on : ", focus)
     this.db.object(`${this.divisionPath}/focus`).set(focus);
     this.showModal = false;
     this.action = 'voting';
