@@ -520,7 +520,7 @@ export class AdminComponent implements OnInit, AfterViewInit {
       }, {}) : null,
       contamination: {
         ...contamination,
-        current: contamination.min
+        current: contamination?.min ?? 0
       }
     }).then((res) => {
       this.buildShow(this.showKey)
