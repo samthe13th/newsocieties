@@ -4,7 +4,7 @@ import { AngularFireDatabase } from '@angular/fire/database';
 import { pluckRandom, promiseOne } from 'src/app/utilties';
 import { LandTile, LandCardTypes } from 'src/app/interfaces';
 import * as _ from 'lodash';
-import { trim, find, findIndex, differenceBy, toNumber, each, partition } from 'lodash';
+import { trim, find, findIndex, upperCase, toNumber, each, partition } from 'lodash';
 import { take, delay, map, tap, filter, takeUntil } from 'rxjs/operators'
 import { Subject, combineLatest } from 'rxjs';
 import { BankService } from 'src/app/services/bank.service';
@@ -86,6 +86,7 @@ export class HostComponent implements OnInit, OnDestroy {
   radarIcon = faMicroscope;
 
   showModal = false;
+  _ = _;
 
   focusButtons = [
     { id: 'harvest', label: 'Harvest', faIcon: faLeaf },
@@ -210,6 +211,14 @@ export class HostComponent implements OnInit, OnDestroy {
     this.divisionKey = this.route.snapshot.params.division;
     this.showKey = this.route.snapshot.params.show;
     this.ipad = this.route.snapshot.queryParams.ipad == 'true';
+
+    this.db.object('shows').valueChanges().pipe(takeUntil(this.destroy$)).subscribe(
+      (shows) => {
+        if (!shows[this.showKey]) {
+          window.location.reload();
+        }
+      }
+    )
 
     this.db.object('shows').valueChanges().pipe(takeUntil(this.destroy$)).subscribe(
       (shows) => {
@@ -640,22 +649,28 @@ export class HostComponent implements OnInit, OnDestroy {
     this.dismissSheet();
   }
 
-  getResolutions() {
-    this.db.list(`resolutions`)
+  async getResolutions() {
+    return new Promise((resolve) => {
+      this.db.list(`resolutions`)
       .valueChanges()
       .pipe(take(1))
       .subscribe((resolutions) => {
         this.globalResolutions = resolutions
+        resolve(resolutions);
       });
+    })
   }
 
-  getPrinciples() {
-    this.db.list(`principles`)
+  async getPrinciples() {
+    return new Promise((resolve) => {
+      this.db.list(`principles`)
       .valueChanges()
       .pipe(take(1))
       .subscribe((principles) => {
-        this.globalPrinciples = principles
+        this.globalPrinciples = principles;
+        resolve(principles);
       });
+    })
   }
 
   getScenarios() {
@@ -795,7 +810,7 @@ export class HostComponent implements OnInit, OnDestroy {
 
   closeModal() {
     this.showModal = false;
-    this.focusButtonsComponent.reset();
+    this.focusButtonsComponent?.reset();
   }
 
   collectFunds() {
@@ -862,7 +877,7 @@ export class HostComponent implements OnInit, OnDestroy {
       ? { result: customVote }
       : this.divisionVote.selection;
 
-    console.log("IMPLEMENT: ", selection)
+    console.log("IMPLEMENT: ", selection, this.divisionVote)
 
     if (!this.divisionVote) return;
     if (this.divisionVote.vote.type === 'resolution') {
@@ -871,6 +886,7 @@ export class HostComponent implements OnInit, OnDestroy {
       }
       this.setResolution(selection);
     } else if (this.divisionVote.vote.type === 'principle') {
+      console.log("principle vote... ")
       this.setPrinciple(selection);
     } else if (this.divisionVote.vote.type === 'scenario') {
       this.setScenario(selection);
@@ -932,8 +948,10 @@ export class HostComponent implements OnInit, OnDestroy {
     
     if (type === 'resolutions') {
       this.db.list(`${divisionPath}/resolutions`).valueChanges().pipe(take(1))
-      .subscribe((resolutions) => {
+      .subscribe(async (resolutions) => {
+          console.log({resolutions})
           this.voteType = 'resolution';
+          await this.getResolutions();
           this.voteDropdown = this.globalResolutions.map((resolution) => {
             return (find(resolutions, ['title', resolution.title])) 
               ? { ...resolution, votedOn: true }
@@ -942,8 +960,10 @@ export class HostComponent implements OnInit, OnDestroy {
         });
     } else if (type === 'principles') {
       this.db.list(`${divisionPath}/principles`).valueChanges().pipe(take(1))
-        .subscribe((principles) => {
+        .subscribe(async (principles) => {
+          console.log({principles})
           this.voteType = 'principle';
+          await this.getPrinciples();
           this.voteDropdown = this.globalPrinciples.map((principle) => {
             return (find(principles, ['title', principle.title])) 
               ? { ...principle, votedOn: true }
@@ -975,6 +995,7 @@ export class HostComponent implements OnInit, OnDestroy {
   }
 
   setPrinciple(selection) {
+    console.log("set principle!", selection)
     const principle = `${this.divisionVote.vote.result} ${selection.result}`;
 
     this.db.object(`${this.divisionPath}/vote`).update({

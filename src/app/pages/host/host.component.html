@@ -17,7 +17,7 @@
   selectedClass="host-selected-tab"
   (tabChange)="onLeftTabChange($event)"
   [tabs]="[
-    { id: 'division', tabTemplate: divisionTab, bodyTemplate: divisionBody },
+    { id: 'division', tabTemplate: divisionTab, bodyTemplate: ipadDivisionTemplate },
     { id: 'global', tabTemplate: globalTab, bodyTemplate: globalBody },
     { id: 'exports', tabTemplate: exportsTab, bodyTemplate: exportsBody }
   ]">
@@ -29,15 +29,11 @@
     selectedClass="host-selected-tab"
     (tabChange)="onIpadTabChange($event)"
     [tabs]="[
-      { id: 'division', tabTemplate: divisionTab, bodyTemplate: divisionBody },
-      { id: 'principles', tabTemplate: principleTab, bodyTemplate: voteBody },
-      { id: 'resolutions', tabTemplate: resolutionTab, bodyTemplate: voteBody }
+      { id: 'division', tabTemplate: divisionTab, bodyTemplate: ipadDivisionTemplate },
+      { id: 'principles', tabTemplate: principleTab, bodyTemplate: ipadVoteTemplate },
+      { id: 'resolutions', tabTemplate: resolutionTab, bodyTemplate: ipadVoteTemplate }
     ]">
   </app-tabs>
-
-  <div *ngIf="ipad" class="fab-button" (click)="scanMode = true">
-    SCAN
-  </div>
 </ng-container>
 
 <div *ngIf="scanMode" class="app-fullscreen-overlay">
@@ -404,7 +400,7 @@
 </ng-template>
 
 <!-- TABS-->
-<ng-template #divisionTab>{{divisionKey}} Division</ng-template>
+<ng-template #divisionTab>{{divisionKey}}</ng-template>
 <ng-template #globalTab>Global</ng-template>
 <ng-template #exportsTab>Exports</ng-template>
 <ng-template #principleTab>Principle</ng-template>
@@ -417,33 +413,59 @@
 </ng-template>
 <ng-template #notes>Notes</ng-template>
 
-<ng-template #voteBody>
+<ng-template #ipadVoteTemplate>
   <div class="ipad-vote">
-    <select
-      [(ngModel)]="voteDropdownSelect"
-      name="vote-options"
-      id="vote-options">
-      <option
-        *ngFor="let option of voteDropdown"
-        [ngValue]="option">
-        {{option?.title}}
-      </option>
-    </select>
-    <app-vote
-      (selectionChange)="onSelectionChange($event)"
-      (voteChange)="onVoteChange($event)"
-      [showVotes]="true"
-      [allowSelection]="true"
-      [showKey]="showKey"
-      role="central"
-      [divisionId]="divisionKey"
-    ></app-vote>
-    <button class="large-action-button" (click)="implement()">Implement</button>
+    <div class="ipad-select-wrapper">
+      <select
+        [(ngModel)]="voteDropdownSelect"
+        name="vote-options"
+        id="vote-options">
+        <option
+          *ngFor="let option of voteDropdown"
+          [ngValue]="option">
+          {{option?.title}}
+        </option>
+      </select>
+      <button (click)="autoPick(ipadTab)">Autopick</button>
+    </div>
+    <ng-container *ngIf="($vote | async) as vote">
+      <app-vote
+        (selectionChange)="onSelectionChange($event)"
+        (voteChange)="onVoteChange($event)"
+        [showVotes]="true"
+        [allowSelection]="true"
+        [showKey]="showKey"
+        role="central"
+        [divisionId]="divisionKey"
+      ></app-vote>
+      <div *ngIf="vote?.selected?.remark" class="ipad-principle-remark">
+        {{vote.selected.remark}}
+      </div>
+    </ng-container>
+    <ng-container *ngTemplateOutlet="ipadButtons"></ng-container>
+  </div>
+</ng-template>
+
+<ng-template #ipadButtons>
+  <div class="ipad-buttons">
+    <div class="flex-row">
+      <button *ngIf="voteState === 'review'" (click)="noDecision()">No Decision</button>
+      <button
+        *ngIf="voteDropdownSelect && voteState !== 'final' && ipadTab === 'resolutions'"
+        (click)="doNotAct(focus)">
+        Do not act
+      </button>
+      <button *ngIf="voteDropdownSelect && voteState !== 'final'" (click)="customVoteOption()">Custom</button>
+      <button *ngIf="divisionVote?.selection" (click)="implement()">Implement</button>
+    </div>
+    <div *ngIf="ipad" class="scan-button" (click)="scanMode = true">
+      SCAN
+    </div>
   </div>
 </ng-template>
 
 <!-- DIVISION -->
-<ng-template #divisionBody>
+<ng-template #ipadDivisionTemplate>
   <div class="stack" *ngIf="$division | async as division">
     <div *ngIf="division" class="tab-card">
       <div class="tab-block">
@@ -725,7 +747,7 @@
 <!-- UPDATE SHEET -->
 <ng-template #updateSheet>
   <div class="action-sheet" [class.ipad]="ipad">
-    {{ changeAttribute?.name }}
+    <p>{{ _.upperFirst(changeAttribute?.name) }}</p>
     <app-number-change
       (afterUpdate)="onAttributeUpdate($event)"
       [readPath]="changeAttribute?.dbPath"
@@ -735,8 +757,8 @@
 </ng-template>
 
 <ng-template #changeAdvancementSheet>
-  <div class="action-sheet">
-    {{ changeAttribute?.name }}
+  <div class="action-sheet" [class.ipad]="ipad">
+    <p>{{ _.upperFirst(changeAttribute?.name) }}</p>
     <app-number-change
       (afterUpdate)="onAdvancementUpdate($event, changeAttribute?.name)"
       [readPath]="changeAttribute?.dbPath"
@@ -746,7 +768,7 @@
 </ng-template>
 
 <ng-template #removeResourcesSheet>
-  <div class="action-sheet flex-column">
+  <div class="action-sheet flex-column" [class.ipad]="ipad">
     <div>Remove Resources</div>
     <ng-number-picker
       #removeResourcePicker
@@ -761,7 +783,7 @@
 </ng-template>
 
 <ng-template #changeResourcesSheet>
-  <div class="action-sheet flex-column">
+  <div class="action-sheet flex-column" [class.ipad]="ipad">
     <div>Change Resources</div>
     <ng-number-picker
       #changeResourcePicker
@@ -777,7 +799,7 @@
 </ng-template>
 
 <ng-template #addResourcesSheet>
-  <div class="action-sheet flex-column">
+  <div class="action-sheet flex-column" [class.ipad]="ipad">
     <div>Add Resources</div>
     <ng-number-picker
       #addResourcePicker
@@ -792,7 +814,7 @@
 </ng-template>
 
 <ng-template #transferResourcesSheet>
-  <div class="action-sheet flex-column" *ngIf="bankService?.calculateWealth(selectedCitizen.resources) as wealth">
+  <div class="action-sheet flex-column" [class.ipad]="ipad" *ngIf="bankService?.calculateWealth(selectedCitizen.resources) as wealth">
     <div>Transfer to Reserve</div>
     <ng-number-picker
       #transferResourcePicker
@@ -809,7 +831,7 @@
 </ng-template>
 
 <ng-template #advancementSheet>
-  <div class="action-sheet flex-column">
+  <div class="action-sheet flex-column" [class.ipad]="ipad">
     <div>{{changeAttribute.name}} (cost: {{ changeAttribute?.data.cost }})</div>
 
     <ng-container
@@ -854,8 +876,8 @@
 </ng-template>
 
 <ng-template #mockLocalLandSheet>
-  <div class="action-sheet flex-column">
-    <div>Local Land</div>
+  <div class="action-sheet flex-column" [class.ipad]="ipad">
+    <p>Local Land</p>
     <ng-number-picker
       #numberPicker
       class="number-picker"
@@ -869,8 +891,8 @@
 </ng-template>
 
 <ng-template #mockGlobalLandSheet>
-  <div class="action-sheet flex-column">
-    <div>Global Land</div>
+  <div class="action-sheet flex-column" [class.ipad]="ipad">
+    <p>Global Land</p>
     <ng-number-picker
       #numberPicker
       class="number-picker"
@@ -884,7 +906,7 @@
 </ng-template>
 
 <ng-template #localLandSheet>
-  <div class="action-sheet flex-column">
+  <div class="action-sheet flex-column" [class.ipad]="ipad">
     <ng-container *ngIf="changeAttribute?.data.wealth >= changeAttribute?.data.cost; else noMoney">
       <div>Purchase new land plot for {{selectedCitizen?.name}}? (cost: {{changeAttribute.data.cost}})</div>
       <button 
@@ -900,7 +922,7 @@
 </ng-template>
 
 <ng-template #harvestTileSheet>
-  <div class="action-sheet">
+  <div class="action-sheet" [class.ipad]="ipad">
     <div class="flex-column flex-center">
       <h2>Perform Harvest action for {{ selectedCitizen?.name }}</h2>
 

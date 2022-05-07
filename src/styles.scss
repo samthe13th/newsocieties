@@ -98,24 +98,56 @@ select {
   align-items: center;
 }
 
-.fab-button {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  font-family: sans-serif;
-  font-size: 30px;
-  background: #3f9d6c;
-  color: white;
-  height: 55px;
-  padding: 0 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 20px;
-}
-
 .justify-center {
   justify-content: center;
+}
+
+.ipad-vote {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+
+  .ipad-select-wrapper {
+    display: flex; 
+    width: 100%;
+    flex-direction: column; 
+    justify-content: center;
+    align-items: center;
+    flex: 2;
+    font-size: 24px;
+  }
+
+  select {
+    width: 50%;
+    height: 2.5em;
+    flex-shrink: 0;
+    border: solid white;
+    margin-top: 10px;
+    border-radius: 10px;
+  }
+
+  .app-vote.central {
+    height: 100%;
+    font-size: 24px;
+    flex: 3;
+    align-items: stretch;
+
+    > .vote-wrapper {
+      font-size: 1em;
+      line-height: 1em;
+      align-items: center;
+      max-width: 100%;
+      border-radius: 0;
+      padding: 2em;
+
+      .vote-prompt {
+        font-size: 1.2em;
+        line-height: 1.2em;
+        margin-bottom: 1.6em;
+      }
+    }
+  }
 }
 
 .tab-card {
@@ -540,8 +572,8 @@ select {
   }
 
   .folder__tabs .folder__tab {
-    font-size: 2em;
-    padding: 20px;
+    font-size: 24px;
+    padding: 15px;
   }
 
   button {
@@ -570,42 +602,6 @@ select {
     }
     &.right {
       max-width: 500px;
-    }
-  }
-}
-
-.ipad-vote {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-
-  select {
-    width: 50%;
-    height: 2.5em;
-    flex-shrink: 0;
-    border: solid white;
-    margin-top: 10px;
-    border-radius: 10px;
-
-  }
-  .app-vote.central {
-    height: 100%;
-    font-size: 24px;
-
-    > .vote-wrapper {
-      font-size: 1em;
-      line-height: 1em;
-      align-items: flex-start;
-      max-width: 100%;
-      border-radius: 0;
-      padding: 2em;
-
-      .vote-prompt {
-        font-size: 1.2em;
-        line-height: 1.2em;
-        max-width: 60%;
-        margin-bottom: 1.6em;
-      }
     }
   }
 }
@@ -960,7 +956,9 @@ select {
   border: solid white;
 
   &.wrap-block {
-    max-width: 50%;
+    flex: 1;
+    width: 100%;
+    min-width: 250px;
   }
 }
 
@@ -1031,6 +1029,7 @@ select {
   display: flex; 
   justify-content: center;
   align-items: center;
+  flex-direction: column;
   width: 100%;
   font-size: 24px;
   height: 200px;
@@ -1038,8 +1037,18 @@ select {
   &.ipad {
     font-size: 2.5em;
 
+    .number-picker .input-group.input-md {
+      height: 50px;
+      width: 120px;
+      
+      input {
+        font-size: 30px;
+      }
+    }
+
     button {
-      font-size: 1em;
+      border-radius: 15px;
+      font-size: 0.7em;
       padding: 10px;
     }
   }
