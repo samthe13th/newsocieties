@@ -102,6 +102,10 @@ select {
   justify-content: center;
 }
 
+.ipad-tab-content {
+  height: 100%;
+}
+
 .ipad-vote {
   display: flex;
   flex-direction: column;
@@ -1022,6 +1026,14 @@ select {
 .flex-center {
   justify-content: center;
   align-items: center;
+}
+
+.overflow-hidden {
+  overflow: hidden !important;
+}
+
+.overflow-auto {
+  overflow: auto !important;
 }
 
 /** OBJECTS **/

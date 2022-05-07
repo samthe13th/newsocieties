@@ -20,6 +20,7 @@ export class TabsComponent {
 
   @Input() unselectedClass: string = 'tabs__default-unselected'
   @Input() selectedClass: string = 'tabs__default-selected';
+  @Input() contentClass: string = '';
 
   ngOnInit() {
     if (this.tabs) {

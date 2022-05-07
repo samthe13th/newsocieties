@@ -89,6 +89,15 @@
   }
 }
 
+.ipad-division-wrapper {
+  height: 100%; 
+  display: flex; 
+  flex-direction: column;
+  width: 100%; 
+  overflow: hidden;
+  justify-content: space-between;
+}
+
 .ipad-principle-remark {
   background: black;
   display: flex;
