@@ -29,7 +29,8 @@
     [tabs]="[
       { id: 'division', tabTemplate: divisionTab, bodyTemplate: ipadDivisionTemplate },
       { id: 'principles', tabTemplate: principleTab, bodyTemplate: ipadVoteTemplate },
-      { id: 'resolutions', tabTemplate: resolutionTab, bodyTemplate: ipadVoteTemplate }
+      { id: 'resolutions', tabTemplate: resolutionTab, bodyTemplate: ipadVoteTemplate },
+      { id: 'scenarios', tabTemplate: scenarioTab, bodyTemplate: ipadVoteTemplate }
     ]">
   </app-tabs>
 </ng-container>
@@ -398,11 +399,12 @@
 </ng-template>
 
 <!-- TABS-->
-<ng-template #divisionTab>{{divisionKey}}</ng-template>
+<ng-template #divisionTab>Division</ng-template>
 <ng-template #globalTab>Global</ng-template>
 <ng-template #exportsTab>Exports</ng-template>
 <ng-template #principleTab>Principle</ng-template>
 <ng-template #resolutionTab>Resolution</ng-template>
+<ng-template #scenarioTab>Scenario</ng-template>
 <ng-template #central>
   Central
   <ng-container *ngIf="($unseenChat | async) as unseenChat">
@@ -414,17 +416,23 @@
 <ng-template #ipadVoteTemplate>
   <div class="ipad-vote">
     <div class="ipad-select-wrapper">
-      <select
-        [(ngModel)]="voteDropdownSelect"
-        name="vote-options"
-        id="vote-options">
-        <option
-          *ngFor="let option of voteDropdown"
-          [ngValue]="option">
-          {{option?.title}}
-        </option>
-      </select>
-      <button (click)="autoPick(ipadTab)">Autopick</button>
+      <div *ngIf="voteDropdown === null" class="flex-column flex-center stretch-v">
+        <img class="ipad-loading" src="/assets/season_white.png"/>
+        Loading
+      </div>
+      <ng-container *ngIf="voteDropdown !== null">
+          <select
+            [(ngModel)]="voteDropdownSelect"
+            name="vote-options"
+            id="vote-options">
+            <option
+              *ngFor="let option of voteDropdown"
+              [ngValue]="option">
+              {{option?.title}}
+            </option>
+          </select>
+        <button (click)="autoPick(ipadTab)">Autopick</button>
+      </ng-container>
     </div>
     <ng-container *ngIf="($vote | async) as vote">
       <app-vote
@@ -449,7 +457,7 @@
     <div class="flex-row">
       <button *ngIf="voteState === 'review'" (click)="noDecision()">No Decision</button>
       <button
-        *ngIf="voteDropdownSelect && voteState !== 'final' && ipadTab === 'resolutions'"
+        *ngIf="voteDropdownSelect && voteState !== 'final' && (ipadTab === 'resolutions' || ipadTab === 'scenarios')"
         (click)="doNotAct(focus)">
         Do not act
       </button>
@@ -465,10 +473,11 @@
 <!-- DIVISION -->
 <ng-template #ipadDivisionTemplate>
   <div class="ipad-division-wrapper">
-    <div class="stack overflow-auto">
-      <ng-container *ngIf="$division | async as division">
+    <div class="stack overflow-auto stretch-v">
+      <ng-container *ngIf="($division | async) as division; else loadingTemplate">
         <div *ngIf="division" class="tab-card">
           <div class="tab-block">
+            <div><strong>Division: </strong>{{ division.name }}</div>
             <div><strong>Score: </strong>{{ division.score }} ({{ division.VP }})</div>
             <div><strong>Season:</strong>
               {{ division.season }}
@@ -679,6 +688,12 @@
         </ng-template>
       </ng-container>
     </div>
+    <ng-template #loadingTemplate>
+      <div class="flex-column flex-center stretch-v">
+        <img class="ipad-loading" src="/assets/season_white.png"/>
+        Loading
+      </div>
+    </ng-template>
     <ng-container *ngTemplateOutlet="ipadButtons"></ng-container>
   </div>
 </ng-template>

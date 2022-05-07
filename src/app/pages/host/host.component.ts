@@ -4,7 +4,7 @@ import { AngularFireDatabase } from '@angular/fire/database';
 import { pluckRandom, promiseOne } from 'src/app/utilties';
 import { LandTile, LandCardTypes } from 'src/app/interfaces';
 import * as _ from 'lodash';
-import { trim, find, findIndex, upperCase, toNumber, each, partition } from 'lodash';
+import { trim, find, findIndex, includes, toNumber, each, partition } from 'lodash';
 import { take, delay, map, tap, filter, takeUntil } from 'rxjs/operators'
 import { Subject, combineLatest } from 'rxjs';
 import { BankService } from 'src/app/services/bank.service';
@@ -503,7 +503,8 @@ export class HostComponent implements OnInit, OnDestroy {
   }
 
   async onIpadTabChange(tab) {
-    if (tab.id != this.ipadTab && tab.id === 'principles' || tab.id === 'resolutions') {
+    console.log('ipad tab: ', tab)
+    if (tab.id != this.ipadTab && includes(['principles', 'resolutions', 'scenarios'], tab.id)) {
       this.voteDropdownSelect = null;
       this.clearVote();
       this.setVoteDropdown(tab.id);
@@ -655,7 +656,7 @@ export class HostComponent implements OnInit, OnDestroy {
       .valueChanges()
       .pipe(take(1))
       .subscribe((resolutions) => {
-        this.globalResolutions = resolutions
+        this.globalResolutions = resolutions;
         resolve(resolutions);
       });
     })
@@ -673,13 +674,16 @@ export class HostComponent implements OnInit, OnDestroy {
     })
   }
 
-  getScenarios() {
-    this.db.list(`scenarios`)
+  async getScenarios() {
+    return new Promise((resolve) => {
+      return this.db.list(`scenarios`)
       .valueChanges()
       .pipe(take(1))
       .subscribe((scenarios) => {
-        this.globalScenarios = scenarios
+        this.globalScenarios = scenarios;
+        resolve(scenarios);
       });
+    })
   }
 
   onTurnSelect(id) {
@@ -961,7 +965,6 @@ export class HostComponent implements OnInit, OnDestroy {
     } else if (type === 'principles') {
       this.db.list(`${divisionPath}/principles`).valueChanges().pipe(take(1))
         .subscribe(async (principles) => {
-          console.log({principles})
           this.voteType = 'principle';
           await this.getPrinciples();
           this.voteDropdown = this.globalPrinciples.map((principle) => {
@@ -972,8 +975,9 @@ export class HostComponent implements OnInit, OnDestroy {
         })
     } else if (type === 'scenarios') {
       this.db.list(`${divisionPath}/scenarios`).valueChanges().pipe(take(1))
-        .subscribe((scenarios) => {
+        .subscribe(async (scenarios) => {
           this.voteType = 'scenario';
+          await this.getScenarios();
           this.voteDropdown = this.globalScenarios.map((scenario) => {
             return (find(scenarios, ['title', scenario.title]))
               ? { ...scenario, votedOn: true }
