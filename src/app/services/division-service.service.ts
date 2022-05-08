@@ -267,7 +267,7 @@ export class DivisionService {
         return [
           { key: 'safety', short: 'S', name: 'Safety', reward: adv.safety.reward, communal: adv.safety.communal, individual: iSafety ?? 0 },
           { key: 'health', short: 'H', name: 'Health', reward: adv.health.reward, communal: adv.health.communal, individual: iHealth ?? 0 },
-          { key: 'arts', short: 'A', name: 'Arts + Culture', reward: adv.arts.reward, communal: adv.arts.communal, individual: iArts ?? 0 },
+          { key: 'arts', short: 'A', name: 'Arts', reward: adv.arts.reward, communal: adv.arts.communal, individual: iArts ?? 0 },
           { key: 'knowledge', short: 'K', name: 'Knowledge', reward: adv.knowledge.reward, communal: adv.knowledge.communal, individual: iKnowledge ?? 0 },
           { key: 'infrastructure', short: 'I', name: 'Infrastructure', reward: adv.infrastructure.reward, communal: adv.infrastructure.communal, individual: iInfrastructure ?? 0 },
         ]

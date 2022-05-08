@@ -138,10 +138,137 @@
   }
 }
 
+%ripple {
+  content: '';
+  position: absolute;
+  opacity: 1;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 100%;
+  border: solid rgba(white, 0.5);
+  background: rgba(white, 0.3)
+}
+
+@keyframes color-pulse {
+  0% {
+    background: #3f709d;
+  }
+  50% {
+    background: #3f9d75;
+  }
+  100% {
+    background: #3f709d;
+  }
+}
+
 .scanner {
   width: 100%;
   height: 100%;
-  background: #3f9d6c;
+  background: #3f709d;
+  animation: color-pulse 2s ease-in-out infinite;
+  position: relative;
+
+  .scanner-button {
+    position: absolute;
+
+    &.close {
+      position: absolute; 
+      bottom: 10px;
+      right: 10px;
+      width: 0; 
+      height: 0;
+      border-style: solid;
+      border-color: transparent black black transparent;
+      border-width: 50px;
+      opacity: 0.4;
+    }
+
+    &.scan {
+      bottom: 10%;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 2.5em;
+      font-family: monospace;
+      background: #000000;
+      border-radius: 0;
+      color: white;
+      border-style: none;
+      padding: 30px;
+      box-shadow: 1px 5px 20px #00000080;
+
+      &:active, 
+      &:focus {
+        box-shadow: none;
+      }
+    }
+  }
+
+  .scanning {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%; 
+    height: 100%; 
+    overflow: hidden;
+
+    &.animate {
+      .ripple1::after {
+        animation: ripple-out 1s ease-out forwards;
+      }
+      .ripple2::after {
+        animation: ripple-out 1s ease-out forwards;
+        animation-delay: 0.1s;
+      }
+      .ripple3::after {
+        animation: ripple-out 1s ease-out forwards;
+        animation-delay: 0.2s;
+      }
+    }
+
+    .ripple1 {
+      &::after {
+        @extend %ripple;
+        width: 500px; 
+        height: 500px;
+      }
+    }
+
+    .ripple2 {
+      &::after {
+        @extend %ripple;
+        width: 350px;
+        height: 350px;
+      }
+    }
+
+    .ripple3 {
+      &::after {
+        @extend %ripple;
+        animation-delay: 0.4s;
+        width: 180px;
+        height: 180px;
+      }
+    }
+
+    .ripple-center {
+      &::after {
+        @extend %ripple;
+        animation: none;
+        width: 30px;
+        height: 30px;
+        background: white;
+      }
+    }
+  }
+}
+
+@keyframes ripple-out {
+  100% {
+    width: 2000px;
+    height: 2000px;
+    opacity: 0;
+  }
 }
 
 .review-card {

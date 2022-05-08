@@ -37,8 +37,14 @@
 
 <div *ngIf="scanMode" class="app-fullscreen-overlay">
   <div class="scanner">
-    <button>Scan</button>
-    <button (click)="scanMode = false">Close</button>
+    <div class="scanning" [class.animate]="isScanning">
+      <div class="ripple1"></div>
+      <div class="ripple2"></div>
+      <div class="ripple3"></div>
+      <div *ngIf="!isScanning" class="ripple-center"></div>
+    </div>
+    <button *ngIf="!isScanning" class="scanner-button scan" (click)="scanResource()">SCAN</button>
+    <div class="scanner-button close" (click)="scanMode = false; isScanning = false"></div>
   </div>
 </div>
 
@@ -416,10 +422,10 @@
 <ng-template #ipadVoteTemplate>
   <div class="ipad-vote">
     <div class="ipad-select-wrapper">
-      <div *ngIf="voteDropdown === null" class="flex-column flex-center stretch-v">
+      <!-- <div *ngIf="voteDropdown === null" class="flex-column flex-center stretch-v">
         <img class="ipad-loading" src="/assets/season_white.png"/>
         Loading
-      </div>
+      </div> -->
       <ng-container *ngIf="voteDropdown !== null">
           <select
             [(ngModel)]="voteDropdownSelect"

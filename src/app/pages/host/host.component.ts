@@ -157,6 +157,7 @@ export class HostComponent implements OnInit, OnDestroy {
     }
   }
 
+  isScanning = false;
   landCost;
   customVoteInput;
   voteState;
@@ -360,6 +361,13 @@ export class HostComponent implements OnInit, OnDestroy {
     }))
     await this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/${type}Land`).set(mockLand);
     this.dismissSheet();
+  }
+
+  scanResource() {
+    this.isScanning = true;
+    // setTimeout(() => {
+    //   this.isScanning = false;
+    // }, 1000)
   }
 
   setFullScreen() {
