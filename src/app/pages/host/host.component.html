@@ -1,7 +1,8 @@
 <ng-container *ngIf="{ 
     focus: $focus | async,
     vote: $vote | async,
-    lastResolution: $lastResolution | async
+    lastResolution: $lastResolution | async,
+    reserveData: $reserveData | async
   } as obs">
   <div *ngIf="showModal === true" class="modal-wrap">
     <div class="modal small">
@@ -522,33 +523,32 @@
               <strong>Season:</strong>
               {{ division.season }}
               <button (click)="newSeason(division)">New Season</button>
-              <button (click)="resetSeason(division)">Reset</button>
+              <button (click)="resetSeason(division)">Reset Season</button>
+              <div><strong>Division: </strong>{{ division.name }}</div>
+              <div><strong>Score: </strong>{{ division.score }} ({{ division.VP }})</div>
+              <div class="editable-item">
+                <strong>Land cost: </strong>
+                {{ division.landCost }}
+              </div>
+              <div class="editable-item">
+                <strong>Capacity: </strong>
+                {{ division?.capacity }}
+              </div>
+              <div>
+                <strong>High Thresholds Met: </strong>
+                {{ division.highThresholdsMet }}
+              </div>
             </div>
 
-              
-            <div class="flex-row flex-wrap">
-              <div class="tab-block" [class.wrap-block]="ipad">
-                <div><strong>Division: </strong>{{ division.name }}</div>
-                <div><strong>Score: </strong>{{ division.score }} ({{ division.VP }})</div>
-                <div>
-                  <strong>High Thresholds Met: </strong>
-                  {{ division.highThresholdsMet }}
-                </div>
+            <div class="tab-block">
+              <div class="editable-item">
+                <strong>Harvest Cards:</strong>
+                {{ division?.harvest }}
               </div>
-        
-              <div class="tab-block" [class.wrap-block]="ipad">
-                <div class="editable-item">
-                  <strong>Land cost: </strong>
-                  {{ division.landCost }}
-                </div>
-                <div class="editable-item">
-                  <strong>Capacity: </strong>
-                  {{ division?.capacity }}
-                </div>
-                <div class="editable-item">
-                  <strong>Harvest:</strong>
-                  {{ division?.harvest }}
-                </div>
+              <div *ngIf="obs.reserveData">
+                R1: {{ obs.reserveData?.deck.R1 }}
+                R2: {{ obs.reserveData?.deck.R2 }}
+                R3: {{ obs.reserveData?.deck.R3 }}
               </div>
             </div>
       
@@ -563,6 +563,20 @@
               </app-division-advancements>
       
               <div class="flex--column tab-block" [class.wrap-block]="ipad">
+                <div class="editable-item">
+                  <button *ngIf="ipad" (click)="changeDivisionProperty('reserve')">
+                    <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
+                  </button>
+                  <strong>Reserve: </strong>
+                  {{ division?.reserve }}
+                  <app-reserve-bar 
+                    *ngIf="obs.reserveData"
+                    class="ipad-reserve-bar"
+                    [percent]="obs.reserveData?.reserve?.percent"
+                    [thresholds]="obs.reserveData?.thresholds"
+                    [color]="obs.reserveData?.color">
+                  </app-reserve-bar>
+                </div>
                 <div class="editable-item">
                   <button (click)="changeDivisionProperty('actions')">
                     <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
@@ -583,19 +597,6 @@
                   </button>
                   <strong>Global land: </strong>
                   {{ ($globalLand | async)?.length }}
-                </div>
-                <div class="editable-item">
-                  <button *ngIf="ipad" (click)="changeDivisionProperty('reserve')">
-                    <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
-                  </button>
-                  <strong>Reserve: </strong>
-                  {{ division?.reserve }}
-                  <app-reserve-bar 
-                    *ngIf="($reserveData | async) as reserveData"
-                    [percent]="reserveData?.reserve?.percent"
-                    [thresholds]="reserveData?.thresholds"
-                    [color]="reserveData?.color">
-                  </app-reserve-bar>
                 </div>
               </div>
             </div>

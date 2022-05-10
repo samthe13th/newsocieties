@@ -306,18 +306,30 @@ export class DivisionService {
         take(1),
         map(([reserve,reserveThresholds]: [number,any]) => {
           console.log({reserve, reserveThresholds});
-          if (reserveThresholds.high <= reserve) {
-            resolve(4);
-          } else if (reserveThresholds.mid <= reserve) {
-            resolve(3);
-          } else if (reserveThresholds.low <= reserve) {
-            resolve(2);
-          } else {
-            resolve(1);
-          }
+          const points = this.thresholdPoints(reserve, reserveThresholds);
+          resolve(points)
         })
       ).subscribe();
     })
+  }
+
+  thresholdPoints(reserve, reserveThresholds) {
+    if (reserveThresholds.high <= reserve) {
+      return 4;
+    } else if (reserveThresholds.mid <= reserve) {
+      return 3;
+    } else if (reserveThresholds.low <= reserve) {
+      return 2;
+    } 
+    return 1
+  }
+
+  getDeck(reserve, reserveThresholds, harvest) {
+    console.log("get decK: ", reserve, reserveThresholds, harvest);
+    const thresholdPoints = this.thresholdPoints(reserve, reserveThresholds);
+    const R3 = thresholdPoints;
+    const R2 = R3 * 2;
+    return { R3, R2, R1: Math.max(harvest - (R2 + R3), 0) }
   }
 
   calculateDivisionScore$(showKey, divisionKey) {

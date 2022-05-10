@@ -127,6 +127,7 @@ export class HostComponent implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<boolean>();
   
+  $deck;
   $advancements;
   $vote;
   $division;
@@ -229,13 +230,18 @@ export class HostComponent implements OnInit, OnDestroy {
       }
     )
 
+    this.$deck = combineLatest(
+
+    )
+
     this.$reserveData = combineLatest(
       this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/reserve`).valueChanges(),
       this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/reserveThresholds`).valueChanges(),
-      this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/color`).valueChanges()
+      this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/color`).valueChanges(),
+      this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/harvest`).valueChanges(),
     ).pipe(
-      map(([reserve, thresholds, color]: [any, any, string]) => {
-        console.log('test: ', thresholds, toNumber(reserve), toNumber(thresholds.high), toNumber(reserve) / toNumber(thresholds.high ))
+      map(([reserve, thresholds, color, harvest]: [any, any, string, number]) => {
+        console.log('test: ', harvest, thresholds, toNumber(reserve), toNumber(thresholds.high), toNumber(reserve) / toNumber(thresholds.high ))
         return {
           reserve: {
             value: reserve,
@@ -255,7 +261,8 @@ export class HostComponent implements OnInit, OnDestroy {
               percent: 100
             }
           ],
-          color
+          color,
+          deck: this.divisionService.getDeck(reserve, thresholds, harvest)
         }
       })
     )
@@ -1354,7 +1361,7 @@ export class HostComponent implements OnInit, OnDestroy {
         midResources--
       }
       tiles[i].value = value
-      tiles[i].type =  LandCardTypes.R
+      tiles[i].type = LandCardTypes.R
     })
 
     return tiles;
