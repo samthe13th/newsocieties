@@ -170,6 +170,16 @@ select {
     margin-bottom: 10px;
   }
 }
+.stack-h {
+  > *:not(:last-child) {
+    margin-right: 10px;
+  }
+  &.lg {
+    > *:not(:last-child) {
+      margin-right: 20px;
+    }
+  }
+}
 
 .new-value {
   background: #01a352;
@@ -838,6 +848,18 @@ select {
     align-items: center;
     justify-content: center;
   }
+}
+
+.badge {
+  padding: 10px;
+  background: black;
+  color: white;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 30px;
+  font-family: sans-serif;
 }
 
 .box {

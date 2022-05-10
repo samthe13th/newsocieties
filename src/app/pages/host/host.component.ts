@@ -806,6 +806,7 @@ export class HostComponent implements OnInit, OnDestroy {
     } else if (type === 'scenario') {
       this.setVoteDropdown('scenarios');
     }
+    // this.autoPick(type);
     this.db.object(`${this.divisionPath}/focus`).set(type);
   }
 

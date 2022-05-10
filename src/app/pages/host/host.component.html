@@ -545,10 +545,16 @@
                 <strong>Harvest Cards:</strong>
                 {{ division?.harvest }}
               </div>
-              <div *ngIf="obs.reserveData">
-                R1: {{ obs.reserveData?.deck.R1 }}
-                R2: {{ obs.reserveData?.deck.R2 }}
-                R3: {{ obs.reserveData?.deck.R3 }}
+              <div class="flex-row stack-h lg" *ngIf="obs.reserveData">
+                <div>
+                  R1: <span class="badge">{{ obs.reserveData?.deck.R1 }}</span>
+                </div>
+                <div>
+                  R2: <span class="badge">{{ obs.reserveData?.deck.R2 }}</span>
+                </div>
+                <div>
+                  R3: <span class="badge">{{ obs.reserveData?.deck.R3 }}</span>
+                </div>
               </div>
             </div>
       
