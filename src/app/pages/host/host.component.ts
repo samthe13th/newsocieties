@@ -47,7 +47,7 @@ export class HostComponent implements OnInit, OnDestroy {
   @ViewChild('harvestTemplate') harvestTemplate: TemplateRef<any>;
   @ViewChild('principleTemplate') principleTemplate: TemplateRef<any>;
   @ViewChild('resolutionTemplate') resolutionTemplate: TemplateRef<any>;
-  @ViewChild('resolutionReviewTemplate') resolutionReviewTemplate: TemplateRef<any>;
+  @ViewChild('resolutionReviewModalTemplate') resolutionReviewModalTemplate: TemplateRef<any>;
   @ViewChild('scenarioTemplate') scenarioTemplate: TemplateRef<any>;
   @ViewChild('miscTemplate') miscTemplate: TemplateRef<any>;
   @ViewChild('reviewTemplate') reviewTemplate: TemplateRef<any>;
@@ -69,7 +69,7 @@ export class HostComponent implements OnInit, OnDestroy {
   @ViewChild('mockGlobalLandSheet') mockGlobalLandSheet: TemplateRef<any>;
 
   @ViewChild('harvestTileSheet', { static: false }) harvestTileSheet: TemplateRef<any>;
-  
+
   modalContent: TemplateRef<any>;
 
   scanMode = false;
@@ -95,6 +95,12 @@ export class HostComponent implements OnInit, OnDestroy {
     { id: 'scenario', label: 'Scenario', faIcon: faGlobe },
     { id: 'misc', label: 'Market', faIcon: faCartPlus },
     { id: 'review', label: 'Review', faIcon: faScroll }
+  ]
+
+  ipadFocusButtons = [
+    { id: 'principles', label: 'Principle', faIcon: faLandmark },
+    { id: 'resolutions', label: 'Resolution', faIcon: faGavel },
+    { id: 'scenario', label: 'Scenario', faIcon: faGlobe },
   ]
 
   ipadTabs;
@@ -146,15 +152,17 @@ export class HostComponent implements OnInit, OnDestroy {
   $playerView;
   $overlay;
   $pageState;
+  $reserveData;
 
   private _voteDropdownSelect;
   get voteDropdownSelect() { return this._voteDropdownSelect };
   set voteDropdownSelect(value) {
-    console.log('set: ', value)
+    console.log('set: ', value, this.focus)
     this._voteDropdownSelect = value;
-    if (value && this.ipad) {
-      this.startVote(this.ipadTab)
-    }
+    this.startVote(this.focus);
+    // if (value && this.ipad) {
+    //   this.startVote(this.ipadTab)
+    // }
   }
 
   isScanning = false;
@@ -219,6 +227,37 @@ export class HostComponent implements OnInit, OnDestroy {
           window.location.reload();
         }
       }
+    )
+
+    this.$reserveData = combineLatest(
+      this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/reserve`).valueChanges(),
+      this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/reserveThresholds`).valueChanges(),
+      this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/color`).valueChanges()
+    ).pipe(
+      map(([reserve, thresholds, color]: [any, any, string]) => {
+        console.log('test: ', thresholds, toNumber(reserve), toNumber(thresholds.high), toNumber(reserve) / toNumber(thresholds.high ))
+        return {
+          reserve: {
+            value: reserve,
+            percent: Math.min(100, toPercent(reserve, thresholds.high))
+          },
+          thresholds: [
+            { 
+              value: thresholds.low,
+              percent: toPercent(thresholds.low, thresholds.high),
+            },
+            {
+              value: thresholds.mid,
+              percent: toPercent(thresholds.mid, thresholds.high),
+            },
+            {
+              value: thresholds.high,
+              percent: 100
+            }
+          ],
+          color
+        }
+      })
     )
 
     this.db.object('shows').valueChanges().pipe(takeUntil(this.destroy$)).subscribe(
@@ -293,7 +332,7 @@ export class HostComponent implements OnInit, OnDestroy {
     this.$divisionReview = this.db.object(`${this.divisionPath}/divisionReview`).valueChanges();
     this.$principles = this.db.list(`${this.divisionPath}/principles`).valueChanges();
     this.$scenarios = this.db.list(`${this.divisionPath}/scenarios`).valueChanges();
-    this.$focus = this.db.object(`${this.divisionPath}/focus`).valueChanges();
+    this.$focus = this.db.object(`${this.divisionPath}/focus`).valueChanges().pipe(tap((focus: string) => this.focus = focus));
     this.$turn = this.db.object(`${this.divisionPath}/turn`).valueChanges();
     this.$pendingGLA = this.db.list(`${this.divisionPath}/pendingGLA`).valueChanges();
     this.$localLand = this.db.list(`${this.divisionPath}/localLand`).valueChanges();
@@ -510,14 +549,10 @@ export class HostComponent implements OnInit, OnDestroy {
     this.leftTab = tab.id;
   }
 
-  async onIpadTabChange(tab) {
-    console.log('ipad tab: ', tab)
-    if (tab.id != this.ipadTab && includes(['principles', 'resolutions', 'scenarios'], tab.id)) {
-      this.voteDropdownSelect = null;
-      this.clearVote();
-      this.setVoteDropdown(tab.id);
-    }
+  async onIpadTabChange(tab, focus) {
+    console.log('ipad tab: ', tab, focus)
     this.ipadTab = tab.id;
+    this.setIpadVoteFocus(focus);
   }
 
   onHarvestColumnSelect(select) {
@@ -703,6 +738,10 @@ export class HostComponent implements OnInit, OnDestroy {
     // })
   }
 
+  onIpadVoteFocusSelect(button) {
+    this.setIpadVoteFocus(button?.id);
+  }
+
   onFocusSelect(button) {
     this.setFocus(button.id);
   }
@@ -720,14 +759,13 @@ export class HostComponent implements OnInit, OnDestroy {
     const untouched = this.voteDropdown.filter((option) => !option.votedOn);
     console.log('untouched: ', untouched)
     this.voteDropdownSelect = pluckRandom(untouched, 1)[0];
-    this.startVote(focus)
   }
 
   onVoteOptionChange(ev) {
     console.log("on vote option change: ", ev)
   }
   startVote(focus) {
-    console.log("vote on : ", focus)
+    console.log("vote on : ", focus, this.voteDropdownSelect)
     this.db.object(`${this.divisionPath}/focus`).set(focus);
     this.showModal = false;
     this.action = 'voting';
@@ -748,6 +786,22 @@ export class HostComponent implements OnInit, OnDestroy {
     this.showModal = true;
   }
 
+
+  async setIpadVoteFocus(type) {
+    console.log("set ipad focus: ", type)
+    //this.voteDropdown = null;
+    this.voteDropdownSelect = null;
+    this.clearVote();
+    if (type === 'principles') {
+      this.setVoteDropdown('principles');
+    } else if (type === 'resolutions') {
+      this.setVoteDropdown('resolutions');
+    } else if (type === 'scenario') {
+      this.setVoteDropdown('scenarios');
+    }
+    this.db.object(`${this.divisionPath}/focus`).set(type);
+  }
+
   async setFocus(type) {
     const lastResolution = await promiseOne(this.db.object(`${this.divisionPath}/lastResolution`))
 
@@ -755,8 +809,8 @@ export class HostComponent implements OnInit, OnDestroy {
       this.setVoteDropdown('principles');
       this.modalContent = this.principleTemplate;
     } else if (type === 'resolutions') {
-      if (lastResolution) {
-        this.modalContent = this.resolutionReviewTemplate;
+      if (lastResolution && !this.ipad) {
+        this.modalContent = this.resolutionReviewModalTemplate;
       } else {
         this.setVoteDropdown('resolutions');
         this.modalContent = this.resolutionTemplate;
@@ -809,6 +863,12 @@ export class HostComponent implements OnInit, OnDestroy {
 
   onVoteChange(vote) {
     this.divisionVote = { selection: undefined, vote };
+  }
+
+  onVoteDropdownSelectChange(selection, focus) {
+    console.log("dropdown change: ", selection, focus)
+    this._voteDropdownSelect = selection;
+    this.startVote(focus)
   }
 
   closePolls() {
@@ -955,8 +1015,8 @@ export class HostComponent implements OnInit, OnDestroy {
   setVoteDropdown(type) {
     console.log('set vote dropdown: ', type)
     const divisionPath = `shows/${this.showKey}/divisions/${this.divisionKey}`;
-    this.voteDropdown = null;
-    this.voteDropdownSelect = null;
+    // this.voteDropdown = null;
+    // this.voteDropdownSelect = null;
     
     if (type === 'resolutions') {
       this.db.list(`${divisionPath}/resolutions`).valueChanges().pipe(take(1))
@@ -969,6 +1029,7 @@ export class HostComponent implements OnInit, OnDestroy {
               ? { ...resolution, votedOn: true }
               : resolution
           });
+          console.log("VOTE DROPDOWN: ", this.voteDropdown)
         });
     } else if (type === 'principles') {
       this.db.list(`${divisionPath}/principles`).valueChanges().pipe(take(1))
@@ -980,6 +1041,7 @@ export class HostComponent implements OnInit, OnDestroy {
               ? { ...principle, votedOn: true }
               : principle
           });
+          console.log("VOTE DROPDOWN: ", this.voteDropdown)
         })
     } else if (type === 'scenarios') {
       this.db.list(`${divisionPath}/scenarios`).valueChanges().pipe(take(1))
@@ -1312,4 +1374,8 @@ export class HostComponent implements OnInit, OnDestroy {
     this.destroy$.next(true);
     this.destroy$.unsubscribe();
   }
+}
+
+function toPercent(n, d) {
+  return Math.round((toNumber(n) / toNumber(d)) * 100)
 }

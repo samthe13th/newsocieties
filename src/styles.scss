@@ -116,10 +116,9 @@ select {
     display: flex; 
     width: 100%;
     flex-direction: column; 
-    justify-content: center;
     align-items: center;
-    flex: 2;
     font-size: 24px;
+    margin: 20px;
   }
 
   select {
@@ -132,6 +131,7 @@ select {
   }
 
   .app-vote.central {
+    transition: opacity 1s ease-in-out;
     height: 100%;
     font-size: 24px;
     flex: 3;
@@ -143,7 +143,6 @@ select {
       align-items: center;
       max-width: 100%;
       border-radius: 0;
-      padding: 2em;
 
       .vote-prompt {
         font-size: 1.2em;
@@ -1541,6 +1540,10 @@ select {
   .xlarge {
     font-size: 26px;
   }
+}
+
+.hidden {
+  opacity: 0;
 }
 
 .player-hands {

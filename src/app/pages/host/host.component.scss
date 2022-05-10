@@ -99,9 +99,10 @@
   justify-content: space-between;
 }
 
-.ipad-principle-remark {
+.ipad-remark {
   background: black;
   display: flex;
+  flex-direction: column;
   width: 100%;
   font-size: 24px;
   font-style: italic;
@@ -109,10 +110,15 @@
   align-items: center;
   flex: 3;
   line-height: 40px;
-  padding: 2em;
+  padding: 20px;
   box-sizing: border-box;
   color: white;
   justify-content: center;
+
+  .review-card {
+    background: inherit;
+    color: inherit;
+  }
 }
 
 .ipad-buttons {

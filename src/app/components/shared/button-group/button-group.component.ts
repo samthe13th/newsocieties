@@ -21,6 +21,7 @@ export class ButtonGroupComponent implements OnInit {
     label: string,
     icon: string,
   }[]
+  @Input() size: 'md' | 'lg' = 'md'
 
   private _selectById: string
   @Input()

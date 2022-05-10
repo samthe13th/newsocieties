@@ -2,11 +2,12 @@
   <div 
     *ngFor="let button of buttons; let i = index" 
     class="button-group__button {{ button?.id === currentButton?.id ? selectedClass : unselectedClass }}"
+    [class.lg]="size === 'lg'"
     (click)="selectButton(button)"
   >
     <ng-container *ngIf="button.faIcon else labelOnly">
       <fa-icon size="md" [icon]="button.faIcon"></fa-icon>
-      <span style="font-size: 14px">{{ button.label }}</span>
+      <span class="button-group-label">{{ button.label }}</span>
     </ng-container>
     <ng-template #labelOnly>
       <span>{{ button.label }}</span>

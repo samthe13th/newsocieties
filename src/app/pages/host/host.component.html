@@ -1,500 +1,542 @@
-<div *ngIf="showModal === true" class="modal-wrap">
-  <div class="modal small">
-    <button
-      class="cancel-button"
-      (click)="closeModal()">
-      Cancel
-    </button>
-    <ng-container *ngTemplateOutlet="modalContent"></ng-container>
+<ng-container *ngIf="{ 
+    focus: $focus | async,
+    vote: $vote | async,
+    lastResolution: $lastResolution | async
+  } as obs">
+  <div *ngIf="showModal === true" class="modal-wrap">
+    <div class="modal small">
+      <button
+        class="cancel-button"
+        (click)="closeModal()">
+        Cancel
+      </button>
+      <ng-container *ngTemplateOutlet="modalContent"></ng-container>
+    </div>
   </div>
-</div>
 
-<app-tabs 
-  *ngIf="!ipad"
-  class="host-side-panel left overflow-hidden"
-  selectedClass="host-selected-tab"
-  (tabChange)="onLeftTabChange($event)"
-  [tabs]="[
-    { id: 'division', tabTemplate: divisionTab, bodyTemplate: ipadDivisionTemplate },
-    { id: 'global', tabTemplate: globalTab, bodyTemplate: globalBody },
-    { id: 'exports', tabTemplate: exportsTab, bodyTemplate: exportsBody }
-  ]">
-</app-tabs>
-
-<ng-container *ngIf="ipad">
   <app-tabs 
-    class="host-side-panel left"
+    *ngIf="!ipad"
+    class="host-side-panel left overflow-hidden"
     selectedClass="host-selected-tab"
-    (tabChange)="onIpadTabChange($event)"
+    (tabChange)="onLeftTabChange($event)"
     [tabs]="[
       { id: 'division', tabTemplate: divisionTab, bodyTemplate: ipadDivisionTemplate },
-      { id: 'principles', tabTemplate: principleTab, bodyTemplate: ipadVoteTemplate },
-      { id: 'resolutions', tabTemplate: resolutionTab, bodyTemplate: ipadVoteTemplate },
-      { id: 'scenarios', tabTemplate: scenarioTab, bodyTemplate: ipadVoteTemplate }
+      { id: 'global', tabTemplate: globalTab, bodyTemplate: globalBody },
+      { id: 'exports', tabTemplate: exportsTab, bodyTemplate: exportsBody }
     ]">
   </app-tabs>
-</ng-container>
 
-<div *ngIf="scanMode" class="app-fullscreen-overlay">
-  <div class="scanner">
-    <div class="scanning" [class.animate]="isScanning">
-      <div class="ripple1"></div>
-      <div class="ripple2"></div>
-      <div class="ripple3"></div>
-      <div *ngIf="!isScanning" class="ripple-center"></div>
+  <!-- IPAD TABS -->
+  <app-tabs 
+    *ngIf="ipad"
+    class="host-side-panel left"
+    selectedClass="host-selected-tab"
+    (tabChange)="onIpadTabChange($event, obs.focus)"
+    [tabs]="[
+      { id: 'division', tabTemplate: divisionTab, bodyTemplate: ipadDivisionTemplate },
+      { id: 'vote', tabTemplate: voteTab, bodyTemplate: ipadVoteTemplate },
+      { id: 'review', tabTemplate: reviewTab, bodyTemplate: ipadReviewTemplate },
+      { id: 'chat', tabTemplate: chatTab, bodyTemplate: ipadChatTemplate }
+    ]">
+  </app-tabs>
+
+  <div *ngIf="scanMode" class="app-fullscreen-overlay">
+    <div class="scanner">
+      <div class="scanning" [class.animate]="isScanning">
+        <div class="ripple1"></div>
+        <div class="ripple2"></div>
+        <div class="ripple3"></div>
+        <div *ngIf="!isScanning" class="ripple-center"></div>
+      </div>
+      <button *ngIf="!isScanning" class="scanner-button scan" (click)="scanResource()">SCAN</button>
+      <div class="scanner-button close" (click)="scanMode = false; isScanning = false"></div>
     </div>
-    <button *ngIf="!isScanning" class="scanner-button scan" (click)="scanResource()">SCAN</button>
-    <div class="scanner-button close" (click)="scanMode = false; isScanning = false"></div>
   </div>
-</div>
 
-<app-tabs 
-  *ngIf="!ipad"
-  class="host-side-panel right"
-  selectedClass="host-selected-tab"
-  (tabChange)="onRightTabChange($event)"
-  [tabs]="[
-    { id: 'focus', tabTemplate: focusTab, bodyTemplate: focusBody },
-    { id: 'central', tabTemplate: central, bodyTemplate: centralBody },
-    { id: 'notifications', tabTemplate: notifications, bodyTemplate: notificationsBody },
-    { id: 'news', tabTemplate: news, bodyTemplate: newsBody }
-  ]">
-</app-tabs>
+  <app-tabs 
+    *ngIf="!ipad"
+    class="host-side-panel right"
+    selectedClass="host-selected-tab"
+    (tabChange)="onRightTabChange($event)"
+    [tabs]="[
+      { id: 'focus', tabTemplate: focusTab, bodyTemplate: focusBody },
+      { id: 'central', tabTemplate: central, bodyTemplate: centralBody },
+      { id: 'notifications', tabTemplate: notifications, bodyTemplate: notificationsBody },
+      { id: 'news', tabTemplate: news, bodyTemplate: newsBody }
+    ]">
+  </app-tabs>
 
-<ng-template #notifications>
-  Inbox 
-  <span *ngIf="($unseenNotifications | async) as list">
-    <ng-container *ngIf="list.length > 0 && rightTab !== 'notifications'">
-      ({{ list?.length }})
-    </ng-container>
-  </span>
-</ng-template>
-
-<ng-template #news>
-  News
-  <ng-container *ngIf="($unseenNews | async) as news">
-    <span 
-      *ngIf="news > 0 && rightTab !== 'news'"
-      class="unseen-count events app-pulse--md">
-      {{ news }}
+  <ng-template #notifications>
+    Inbox 
+    <span *ngIf="($unseenNotifications | async) as list">
+      <ng-container *ngIf="list.length > 0 && rightTab !== 'notifications'">
+        ({{ list?.length }})
+      </ng-container>
     </span>
-  </ng-container>
-</ng-template>
+  </ng-template>
 
-<ng-template #focusTab>Focus</ng-template>
+  <ng-template #news>
+    News
+    <ng-container *ngIf="($unseenNews | async) as news">
+      <span 
+        *ngIf="news > 0 && rightTab !== 'news'"
+        class="unseen-count events app-pulse--md">
+        {{ news }}
+      </span>
+    </ng-container>
+  </ng-template>
 
-<ng-template #notificationsBody>
-  <app-notification-feed
-    [showKey]="showKey"
-    [divisionKey]="divisionKey">
-  </app-notification-feed>
-</ng-template>
+  <ng-template #focusTab>Focus</ng-template>
 
-<ng-template #newsBody>
-  <app-news-feed
-    [showKey]="showKey"
-    [divisionKey]="divisionKey">
-  </app-news-feed>
-</ng-template>
+  <ng-template #notificationsBody>
+    <app-notification-feed
+      [showKey]="showKey"
+      [divisionKey]="divisionKey">
+    </app-notification-feed>
+  </ng-template>
 
-<ng-template #focusBody>
-  <div class="host-main" *ngIf="$focus | async as focus">
-    <app-button-group
-      #focusButtonsComponent
-      (select)="onFocusSelect($event)"
-      [selectById]="focus"
-      [buttons]="focusButtons">
-    </app-button-group>
+  <ng-template #newsBody>
+    <app-news-feed
+      [showKey]="showKey"
+      [divisionKey]="divisionKey">
+    </app-news-feed>
+  </ng-template>
 
-    <app-state
-      [templates]="{
-        main: mainTemplate,
-        newSeason: newSeasonOverlayTemplate
-      }"
-      [templateName]="$pageState | async"
-      class="host-main">
-    </app-state>  
+  <ng-template #focusBody>
+    <div class="host-main" *ngIf="obs.focus">
+      <app-button-group
+        #focusButtonsComponent
+        (select)="onFocusSelect($event)"
+        [selectById]="obs.focus"
+        [buttons]="focusButtons">
+      </app-button-group>
 
-    <ng-template #newSeasonOverlayTemplate>
-      <div>
-        A new Season is beginning...
-      </div>
-    </ng-template>
+      <app-state
+        [templates]="{
+          main: mainTemplate,
+          newSeason: newSeasonOverlayTemplate
+        }"
+        [templateName]="$pageState | async"
+        class="host-main">
+      </app-state>  
 
-    <ng-template #mainTemplate>
-      <div class="focus-wrapper" *ngIf="($playerView | async) as playerView">
-        <div class="flex-row" >
-          <app-player-view-control
-            [class.app-pulse--sm]="playerView?.views?.resources && playerView?.highlight === 'resources'"
-            name="resources"
-            label="Reserve"
-            [short]="true"
-            [highlight]="playerView?.highlight === 'resources'"
-            [show]="playerView?.views?.resources"
-            (highlightChange)="onPlayerDataButtonClick('resources', 'highlight')"
-            (visibilityChange)="onPlayerDataButtonClick('resources', 'visible')">
-          </app-player-view-control>
-          <app-player-view-control
-            [class.app-pulse--sm]="playerView?.views?.divisions && playerView?.highlight === 'divisions'"
-            name="divisions"
-            label="Divisions"
-            [short]="true"
-            [highlight]="playerView?.highlight === 'divisions'"
-            [show]="playerView?.views?.divisions"
-            (highlightChange)="onPlayerDataButtonClick('divisions', 'highlight')"
-            (visibilityChange)="onPlayerDataButtonClick('divisions', 'visible')">
-          </app-player-view-control>
-          <app-player-view-control
-            [class.app-pulse--sm]="playerView?.views?.global && playerView?.highlight === 'global'"
-            name="global"
-            label="GLC"
-            [short]="true"
-            [highlight]="playerView?.highlight === 'global'"
-            [show]="playerView?.views?.global"
-            (highlightChange)="onPlayerDataButtonClick('global', 'highlight')"
-            (visibilityChange)="onPlayerDataButtonClick('global', 'visible')">
-          </app-player-view-control>
+      <ng-template #newSeasonOverlayTemplate>
+        <div>
+          A new Season is beginning...
         </div>
-  
-        <div class="flex-row" style="height: 100%; margin-top: 5px; min-height: 0">
-  
-          <div *ngIf="focus === 'none'" style="width: 100%; height: 100%">
-  
+      </ng-template>
+
+      <ng-template #mainTemplate>
+        <div class="focus-wrapper" *ngIf="($playerView | async) as playerView">
+          <div class="flex-row" >
+            <app-player-view-control
+              [class.app-pulse--sm]="playerView?.views?.resources && playerView?.highlight === 'resources'"
+              name="resources"
+              label="Reserve"
+              [short]="true"
+              [highlight]="playerView?.highlight === 'resources'"
+              [show]="playerView?.views?.resources"
+              (highlightChange)="onPlayerDataButtonClick('resources', 'highlight')"
+              (visibilityChange)="onPlayerDataButtonClick('resources', 'visible')">
+            </app-player-view-control>
+            <app-player-view-control
+              [class.app-pulse--sm]="playerView?.views?.divisions && playerView?.highlight === 'divisions'"
+              name="divisions"
+              label="Divisions"
+              [short]="true"
+              [highlight]="playerView?.highlight === 'divisions'"
+              [show]="playerView?.views?.divisions"
+              (highlightChange)="onPlayerDataButtonClick('divisions', 'highlight')"
+              (visibilityChange)="onPlayerDataButtonClick('divisions', 'visible')">
+            </app-player-view-control>
+            <app-player-view-control
+              [class.app-pulse--sm]="playerView?.views?.global && playerView?.highlight === 'global'"
+              name="global"
+              label="GLC"
+              [short]="true"
+              [highlight]="playerView?.highlight === 'global'"
+              [show]="playerView?.views?.global"
+              (highlightChange)="onPlayerDataButtonClick('global', 'highlight')"
+              (visibilityChange)="onPlayerDataButtonClick('global', 'visible')">
+            </app-player-view-control>
           </div>
-  
-          <div *ngIf="focus === 'harvest'" class="harvest-wrapper">
-            <app-land-grid
-              #landGrid
-              *ngIf="action === 'harvesting'"
-              (gatherResource)="onGather($event)"
-              (select)="onSelectLandTile($event)"
-              [markCards]="true"
-              [showKey]="showKey"
-              [isHost]="true"
-              [divisionKey]="divisionKey"
-              [updatePath]="landTilesPath"> 
-            </app-land-grid>
-          </div>
-  
-          <div
-            *ngIf="focus === 'principles' || focus === 'resolutions' || focus === 'scenario'"
-            class="resolution-wrapper">
-            <ng-container *ngIf="($vote | async) as vote">
-              <app-vote 
-                (selectionChange)="onSelectionChange($event)"
-                (voteChange)="onVoteChange($event)"
-                [showVotes]="true"
-                [allowSelection]="vote?.state === 'review'"
+    
+          <div class="flex-row" style="height: 100%; margin-top: 5px; min-height: 0">
+    
+            <div *ngIf="obs.focus === 'none'" style="width: 100%; height: 100%">
+    
+            </div>
+    
+            <div *ngIf="obs.focus === 'harvest'" class="harvest-wrapper">
+              <app-land-grid
+                #landGrid
+                *ngIf="action === 'harvesting'"
+                (gatherResource)="onGather($event)"
+                (select)="onSelectLandTile($event)"
+                [markCards]="true"
                 [showKey]="showKey"
-                role="central"
-                [divisionId]="divisionKey"
-              ></app-vote>
-              <div *ngIf="focus === 'principles' && vote?.state === 'final'">
-                <em>{{vote?.selected?.remark}}</em>
-              </div>
-            </ng-container>
-          </div>
-      
-          <div *ngIf="focus === 'resolutionReview'">
-            <h1>Last Resolution</h1>
-          
-            <div class="review-card" *ngIf="($lastResolution | async) as resolution">
-              <h2>{{ resolution?.title }}</h2>
-              <p>{{ resolution?.value }}</p>
-              <hr/>
-              <p><strong>Consequences: </strong>{{ resolution?.consequence }}</p>
+                [isHost]="true"
+                [divisionKey]="divisionKey"
+                [updatePath]="landTilesPath"> 
+              </app-land-grid>
             </div>
-            <button (click)="newResolution()">New Resolution</button>
-          </div>
-  
-          <div class="host-division-review-wrap" *ngIf="focus === 'review'">
-            <app-division-review
-              [showKey]="showKey"
+    
+            <div
+              *ngIf="obs.focus === 'principles' || obs.focus === 'resolutions' || obs.focus === 'scenario'"
+              class="resolution-wrapper">
+              <ng-container *ngIf="($vote | async) as vote">
+                <app-vote 
+                  (selectionChange)="onSelectionChange($event)"
+                  (voteChange)="onVoteChange($event)"
+                  [showVotes]="true"
+                  [allowSelection]="vote?.state === 'review'"
+                  [showKey]="showKey"
+                  role="central"
+                  [divisionId]="divisionKey"
+                ></app-vote>
+                <div *ngIf="obs.focus === 'principles' && vote?.state === 'final'">
+                  <em>{{vote?.selected?.remark}}</em>
+                </div>
+              </ng-container>
+            </div>
+        
+            <div *ngIf="obs.focus === 'resolutionReview' && obs.lastResolution">
+              <ng-container *ngTemplateOutlet="resolutionReviewTemplate"></ng-container>
+              <button (click)="newResolution()">New Resolution</button>
+            </div>
+    
+            <div class="host-division-review-wrap" *ngIf="obs.focus === 'review'">
+              <app-division-review
+                [showKey]="showKey"
+                [divisionKey]="divisionKey">
+              </app-division-review>
+            </div>
+    
+            <app-market 
+              *ngIf="obs.focus === 'misc'"
+              [showHeader]="false"
+              [showKey]="showKey" 
+              [landCost]="landCost"
+              role="host"
               [divisionKey]="divisionKey">
-            </app-division-review>
-          </div>
-  
-          <app-market 
-            *ngIf="focus === 'misc'"
-            [showHeader]="false"
-            [showKey]="showKey" 
-            [landCost]="landCost"
-            role="host"
-            [divisionKey]="divisionKey">
-          </app-market>
-  
-          <div class="player-data">
-            <app-player-view-control
-              [class.app-pulse--sm]="playerView?.views?.player && playerView?.highlight === 'player'"
-              name="player"
-              label="Player"
-              [constant]="true"
-              [highlight]="playerView?.highlight === 'player'"
-              [show]="playerView?.views?.player"
-              (highlightChange)="onPlayerDataButtonClick('player', 'highlight')"
-              (visibilityChange)="onPlayerDataButtonClick('player', 'visible')">
-            </app-player-view-control>
-            <app-player-view-control
-              [class.app-pulse--sm]="playerView?.views?.otherPlayers && playerView?.highlight === 'otherPlayers'"
-              name="otherPlayers"
-              label="Other Players"
-              [constant]="true"
-              [highlight]="playerView?.highlight === 'otherPlayers'"
-              [show]="playerView?.views?.otherPlayers"
-              (highlightChange)="onPlayerDataButtonClick('otherPlayers', 'highlight')"
-              (visibilityCghange)="onPlayerDataButtonClick('otherPlayers', 'visible')">
-            </app-player-view-control>
-            <app-player-view-control
-              [class.app-pulse--sm]="playerView?.views?.advancements && playerView?.highlight === 'advancements'"
-              name="advancements"
-              label="Adv."
-              [highlight]="playerView?.highlight === 'advancements'"
-              [show]="playerView?.views?.advancements"
-              (highlightChange)="onPlayerDataButtonClick('advancements', 'highlight')"
-              (visibilityChange)="onPlayerDataButtonClick('advancements', 'visible')">
-            </app-player-view-control>
-          </div>
-        </div>
-      </div>
-  
-      <div class="harvest-controls">
-        <ng-container *ngIf="focus === 'harvest'">
-          <div class="harvest-data">
-            <app-player-turn
-              (turnChange)="onTurnChange($event)"
-              [divisionPath]="divisionPath">
-            </app-player-turn>
-            <div class="turn-actions">
-              Actions Taken: {{$actions | async}} / {{ $capacity | async }}
+            </app-market>
+    
+            <div class="player-data">
+              <app-player-view-control
+                [class.app-pulse--sm]="playerView?.views?.player && playerView?.highlight === 'player'"
+                name="player"
+                label="Player"
+                [constant]="true"
+                [highlight]="playerView?.highlight === 'player'"
+                [show]="playerView?.views?.player"
+                (highlightChange)="onPlayerDataButtonClick('player', 'highlight')"
+                (visibilityChange)="onPlayerDataButtonClick('player', 'visible')">
+              </app-player-view-control>
+              <app-player-view-control
+                [class.app-pulse--sm]="playerView?.views?.otherPlayers && playerView?.highlight === 'otherPlayers'"
+                name="otherPlayers"
+                label="Other Players"
+                [constant]="true"
+                [highlight]="playerView?.highlight === 'otherPlayers'"
+                [show]="playerView?.views?.otherPlayers"
+                (highlightChange)="onPlayerDataButtonClick('otherPlayers', 'highlight')"
+                (visibilityCghange)="onPlayerDataButtonClick('otherPlayers', 'visible')">
+              </app-player-view-control>
+              <app-player-view-control
+                [class.app-pulse--sm]="playerView?.views?.advancements && playerView?.highlight === 'advancements'"
+                name="advancements"
+                label="Adv."
+                [highlight]="playerView?.highlight === 'advancements'"
+                [show]="playerView?.views?.advancements"
+                (highlightChange)="onPlayerDataButtonClick('advancements', 'highlight')"
+                (visibilityChange)="onPlayerDataButtonClick('advancements', 'visible')">
+              </app-player-view-control>
             </div>
           </div>
-          <hr/>
-          <div class="harvest-buttons">
+        </div>
+    
+        <div class="harvest-controls">
+          <ng-container *ngIf="obs.focus === 'harvest'">
+            <div class="harvest-data">
+              <app-player-turn
+                (turnChange)="onTurnChange($event)"
+                [divisionPath]="divisionPath">
+              </app-player-turn>
+              <div class="turn-actions">
+                Actions Taken: {{$actions | async}} / {{ $capacity | async }}
+              </div>
+            </div>
+            <hr/>
+            <div class="harvest-buttons">
+              <app-button-group
+                *ngIf="$turnButtons | async as buttons"
+                (select)="onTurnSelect($event.id)"
+                [selectById]="($turn | async)"
+                [buttons]="buttons">
+              </app-button-group>
+              <div class="button-row">
+                <button (click)="exploreOwnedLand(landGrid)">Flip owned</button>
+                <button (click)="gatherGLA(landGrid)">Gather GLA</button>
+                <button (click)="disableColumns()">Disable Columns</button>
+              </div>
+            </div>
+          </ng-container>
+          <ng-container *ngIf="obs.focus === 'principles' || obs.focus === 'resolutions' || obs.focus === 'scenario'">
+            <div>
+              <button *ngIf="voteState === 'voting'" (click)="closePolls()">Close Polls</button>
+              <button *ngIf="obs.focus === 'principles' && voteState === 'review'" (click)="noDecision()">No Decision</button>
+              <button 
+                *ngIf="(obs.focus === 'scenario' || obs.focus === 'resolutions') && voteState === 'review'"
+                (click)="doNotAct(obs.focus)">
+                Do not act
+              </button>
+              <button *ngIf="voteState === 'review'" (click)="customVoteOption()">Custom</button>
+              <button *ngIf="voteState === 'review' && divisionVote" (click)="implement()">Implement</button>
+            </div>
+          </ng-container>
+          <div *ngIf="obs.focus === 'review'">
             <app-button-group
-              *ngIf="$turnButtons | async as buttons"
-              (select)="onTurnSelect($event.id)"
-              [selectById]="($turn | async)"
-              [buttons]="buttons">
+              (select)="setReviewDivision($event)"
+              [selectById]="$divisionReview | async"
+              [buttons]="divisionButtons">
             </app-button-group>
-            <div class="button-row">
-              <button (click)="exploreOwnedLand(landGrid)">Flip owned</button>
-              <button (click)="gatherGLA(landGrid)">Gather GLA</button>
-              <button (click)="disableColumns()">Disable Columns</button>
-            </div>
           </div>
-        </ng-container>
-        <ng-container *ngIf="focus === 'principles' || focus === 'resolutions' || focus === 'scenario'">
-          <div>
-            <button *ngIf="voteState === 'voting'" (click)="closePolls()">Close Polls</button>
-            <button *ngIf="focus === 'principles' && voteState === 'review'" (click)="noDecision()">No Decision</button>
-            <button 
-              *ngIf="(focus === 'scenario' || focus === 'resolutions') && voteState === 'review'"
-              (click)="doNotAct(focus)">
-              Do not act
-            </button>
-            <button *ngIf="voteState === 'review'" (click)="customVoteOption()">Custom</button>
-            <button *ngIf="voteState === 'review' && divisionVote" (click)="implement()">Implement</button>
+          <div *ngIf="obs.focus === 'misc'">
+            <button (click)="marketView('localLand')">Local Land</button>
+            <button (click)="marketView('globalLand')">Global Land</button>
+            <button (click)="marketView('advancements')">Advancements</button>
           </div>
-        </ng-container>
-        <div *ngIf="focus === 'review'">
-          <app-button-group
-            (select)="setReviewDivision($event)"
-            [selectById]="$divisionReview | async"
-            [buttons]="divisionButtons">
-          </app-button-group>
         </div>
-        <div *ngIf="focus === 'misc'">
-          <button (click)="marketView('localLand')">Local Land</button>
-          <button (click)="marketView('globalLand')">Global Land</button>
-          <button (click)="marketView('advancements')">Advancements</button>
-        </div>
-      </div>
-    </ng-template>
+      </ng-template>
 
-  </div>  
-</ng-template>
+    </div>  
+  </ng-template>
 
-<ng-template #harvestTemplate>
-  Go to harvest
-  <button (click)="startHarvest()">Start</button>
-</ng-template>
+  <ng-template #harvestTemplate>
+    Go to harvest
+    <button (click)="startHarvest()">Start</button>
+  </ng-template>
 
-<ng-template #principleTemplate>
-  <h1>Principle</h1>
-  <button (click)="autoPick('principles')">Autopick</button>
-  <br/>
-  <select
-    *ngIf="voteDropdown"
-    [(ngModel)]="voteDropdownSelect"
-    name="vote-options"
-    id="vote-options">
-    <option
-      *ngFor="let option of voteDropdown"
-      [ngValue]="option">
-      {{option?.title}}
-    </option>
-  </select>
+  <ng-template #principleTemplate>
+    <h1>Principle</h1>
+    <ng-container *ngIf="voteDropdown">
+      <select
+        style="background: green"
+        [(ngModel)]="voteDropdownSelect"
+        name="vote-options"
+        id="vote-options">
+        <option
+          style="background-color: yellow"
+          *ngFor="let option of voteDropdown"
+          [ngValue]="option">
+          {{option?.title}}
+        </option>
+      </select>
+      <br/>
+      <button (click)="autoPick('principles')">Autopick</button>
+    </ng-container>
 
-  <button *ngIf="voteDropdownSelect" (click)="startVote('principles')">Select Principle</button>
-</ng-template>
+    <button *ngIf="voteDropdownSelect" (click)="startVote('principles')">Select Principle</button>
+  </ng-template>
 
-<ng-template #resolutionReviewTemplate>
-  Show results of last resolution
-  <button (click)="reviewLastResolution()">Continue</button>
-</ng-template>
+  <ng-template #resolutionReviewModalTemplate>
+    Show results of last resolution
+    <button (click)="reviewLastResolution()">Continue</button>
+  </ng-template>
 
-<ng-template #resolutionTemplate>
-  <h1>Resolution</h1>
-  <button (click)="autoPick('resolutions')">Autopick</button>
-  <br/>
-  <select
-    *ngIf="voteDropdown"
-    [(ngModel)]="voteDropdownSelect"
-    name="vote-options"
-    id="vote-options">
-    <option
-      *ngFor="let option of voteDropdown"
-      [ngValue]="option">
-      {{option?.title}}
-    </option>
-  </select>
+  <ng-template #resolutionTemplate>
+    <h1>Resolution</h1>
+    <ng-container *ngIf="voteDropdown">
+      <select
+        [(ngModel)]="voteDropdownSelect"
+        name="vote-options"
+        id="vote-options">
+        <option
+          *ngFor="let option of voteDropdown"
+          [ngValue]="option">
+          {{option?.title}}
+        </option>
+      </select>
+      <br/>
+      <button (click)="autoPick('resolutions')">Autopick</button>
+    </ng-container>
 
-  <button
-    *ngIf="voteDropdownSelect"
-    (click)="startVote('resolutions')">
-    Vote on Resolution
-  </button>
-</ng-template>
+    <button
+      *ngIf="voteDropdownSelect"
+      (click)="startVote('resolutions')">
+      Vote on Resolution
+    </button>
+  </ng-template>
 
-<ng-template #scenarioTemplate>
-  <h1>Scenario</h1>
-  <select
-    *ngIf="voteDropdown"
-    [(ngModel)]="voteDropdownSelect"
-    name="vote-options"
-    id="vote-options">
-    <option
-      *ngFor="let option of voteDropdown"
-      [ngValue]="option">
-      {{option?.title}}
-    </option>
-  </select>
+  <ng-template #scenarioTemplate>
+    <h1>Scenario</h1>
+    <select
+      *ngIf="voteDropdown"
+      [(ngModel)]="voteDropdownSelect"
+      name="vote-options"
+      id="vote-options">
+      <option
+        *ngFor="let option of voteDropdown"
+        [ngValue]="option">
+        {{option?.title}}
+      </option>
+    </select>
 
-  <button *ngIf="voteDropdownSelect" (click)="startVote('scenario')">Vote on Scenario</button>
-</ng-template>
+    <button *ngIf="voteDropdownSelect" (click)="startVote('scenario')">Vote on Scenario</button>
+  </ng-template>
 
-<ng-template #miscTemplate>
-  Open market
-  <button (click)="startMisc(); marketView('localLand')">Local Land</button>
-  <button (click)="startMisc(); marketView('globalLand')">Global Land</button>
-  <button (click)="startMisc(); marketView('advancements')">Advancements</button>
-</ng-template>
+  <ng-template #miscTemplate>
+    Open market
+    <button (click)="startMisc(); marketView('localLand')">Local Land</button>
+    <button (click)="startMisc(); marketView('globalLand')">Global Land</button>
+    <button (click)="startMisc(); marketView('advancements')">Advancements</button>
+  </ng-template>
 
-<ng-template #reviewTemplate>
-  Start Review
-  <button (click)="startReview()">Continue</button>
-</ng-template>
+  <ng-template #reviewTemplate>
+    Start Review
+    <button (click)="startReview()">Continue</button>
+  </ng-template>
 
-<ng-template #customVoteTemplate>
-  {{ divisionVote?.vote?.result }}
-  <input
-    [(ngModel)]="customVoteInput"
-    class="text-input"
-    name="customVoteInput"/>
-  <button (click)="implement(customVoteInput)">Confirm</button>
-</ng-template>
+  <ng-template #customVoteTemplate>
+    {{ divisionVote?.vote?.result }}
+    <input
+      [(ngModel)]="customVoteInput"
+      class="text-input"
+      name="customVoteInput"/>
+    <button (click)="implement(customVoteInput)">Confirm</button>
+  </ng-template>
 
-<!-- TABS-->
-<ng-template #divisionTab>Division</ng-template>
-<ng-template #globalTab>Global</ng-template>
-<ng-template #exportsTab>Exports</ng-template>
-<ng-template #principleTab>Principle</ng-template>
-<ng-template #resolutionTab>Resolution</ng-template>
-<ng-template #scenarioTab>Scenario</ng-template>
-<ng-template #central>
-  Central
-  <ng-container *ngIf="($unseenChat | async) as unseenChat">
-    <span *ngIf="leftTab !== 'central' && unseenChat > 0">({{unseenChat}})</span>
-  </ng-container>
-</ng-template>
-<ng-template #notes>Notes</ng-template>
+  <ng-template #resolutionReviewTemplate>
+    <div class="review-card" *ngIf="obs?.lastResolution">
+      <h1>Last Resolution</h1>
+      <h2>{{ obs.lastResolution?.title }}</h2>
+      <p>{{ obs.lastResolution?.value }}</p>
+      <hr/>
+      <p><strong>Consequences: </strong>{{ obs.lastResolution?.consequence }}</p>
+    </div>
+  </ng-template>
 
-<ng-template #ipadVoteTemplate>
-  <div class="ipad-vote">
-    <div class="ipad-select-wrapper">
-      <!-- <div *ngIf="voteDropdown === null" class="flex-column flex-center stretch-v">
-        <img class="ipad-loading" src="/assets/season_white.png"/>
-        Loading
-      </div> -->
-      <ng-container *ngIf="voteDropdown !== null">
+  <!-- TABS-->
+  <ng-template #divisionTab>Division</ng-template>
+  <ng-template #globalTab>Global</ng-template>
+  <ng-template #exportsTab>Exports</ng-template>
+  <ng-template #principleTab>Principle</ng-template>
+  <ng-template #resolutionTab>Resolution</ng-template>
+  <ng-template #scenarioTab>Scenario</ng-template>
+  <ng-template #voteTab>Vote</ng-template>
+  <ng-template #reviewTab>Review</ng-template>
+  <ng-template #chatTab>Chat</ng-template>
+  <ng-template #central>
+    Central
+    <ng-container *ngIf="($unseenChat | async) as unseenChat">
+      <span *ngIf="leftTab !== 'central' && unseenChat > 0">({{unseenChat}})</span>
+    </ng-container>
+  </ng-template>
+  <ng-template #notes>Notes</ng-template>
+
+  <ng-template #ipadReviewTemplate>
+    Review
+  </ng-template>
+
+  <ng-template #ipadChatTemplate>
+    Chat
+  </ng-template>
+
+  <ng-template #ipadVoteTemplate>
+    <div class="ipad-vote">
+      <div class="ipad-select-wrapper">
+        <!-- <div *ngIf="voteDropdown === null" class="flex-column flex-center stretch-v">
+          <img class="ipad-loading" src="/assets/season_white.png"/>
+          Loading
+        </div> -->
+        <app-button-group
+          (select)="onIpadVoteFocusSelect($event)"
+          [selectById]="obs.focus"
+          size="lg"
+          [buttons]="ipadFocusButtons">
+        </app-button-group>
+        <ng-container *ngIf="voteDropdown !== null">
           <select
-            [(ngModel)]="voteDropdownSelect"
+            [ngModel]="voteDropdownSelect"
+            (ngModelChange)="onVoteDropdownSelectChange($event, obs.focus)"
             name="vote-options"
             id="vote-options">
             <option
               *ngFor="let option of voteDropdown"
               [ngValue]="option">
-              {{option?.title}}
+              <span *ngIf="option?.votedOn">**</span>{{option?.title}}
             </option>
           </select>
-        <button (click)="autoPick(ipadTab)">Autopick</button>
+        <button (click)="autoPick(focus)">Autopick</button>
       </ng-container>
-    </div>
-    <ng-container *ngIf="($vote | async) as vote">
-      <app-vote
-        (selectionChange)="onSelectionChange($event)"
-        (voteChange)="onVoteChange($event)"
-        [showVotes]="true"
-        [allowSelection]="true"
-        [showKey]="showKey"
-        role="central"
-        [divisionId]="divisionKey"
-      ></app-vote>
-      <div *ngIf="vote?.selected?.remark" class="ipad-principle-remark">
-        {{vote.selected.remark}}
       </div>
-    </ng-container>
-    <ng-container *ngTemplateOutlet="ipadButtons"></ng-container>
-  </div>
-</ng-template>
-
-<ng-template #ipadButtons>
-  <div class="ipad-buttons">
-    <div class="flex-row">
-      <button *ngIf="voteState === 'review'" (click)="noDecision()">No Decision</button>
-      <button
-        *ngIf="voteDropdownSelect && voteState !== 'final' && (ipadTab === 'resolutions' || ipadTab === 'scenarios')"
-        (click)="doNotAct(focus)">
-        Do not act
-      </button>
-      <button *ngIf="voteDropdownSelect && voteState !== 'final'" (click)="customVoteOption()">Custom</button>
-      <button *ngIf="divisionVote?.selection" (click)="implement()">Implement</button>
+      <ng-container>
+        <app-vote
+          [class.hidden]="!voteDropdownSelect"
+          (selectionChange)="onSelectionChange($event)"
+          (voteChange)="onVoteChange($event)"
+          [showVotes]="true"
+          [allowSelection]="true"
+          [showKey]="showKey"
+          role="central"
+          [divisionId]="divisionKey"
+        ></app-vote>
+        <div *ngIf="obs?.vote?.selected?.remark" class="ipad-remark">
+          {{obs?.vote.selected.remark}}
+        </div>
+        <div
+          *ngIf="obs?.focus === 'resolutions'" 
+          class="ipad-remark">
+          <ng-container *ngTemplateOutlet="resolutionReviewTemplate"></ng-container>
+        </div>
+      </ng-container>
+      <ng-container *ngTemplateOutlet="ipadButtons"></ng-container>
     </div>
-    <div *ngIf="ipad" class="scan-button" (click)="scanMode = true">
-      SCAN
-    </div>
-  </div>
-</ng-template>
+  </ng-template>
 
-<!-- DIVISION -->
-<ng-template #ipadDivisionTemplate>
-  <div class="ipad-division-wrapper">
-    <div class="stack overflow-auto stretch-v">
-      <ng-container *ngIf="($division | async) as division; else loadingTemplate">
-        <div *ngIf="division" class="tab-card">
-          <div class="tab-block">
-            <div><strong>Division: </strong>{{ division.name }}</div>
-            <div><strong>Score: </strong>{{ division.score }} ({{ division.VP }})</div>
-            <div><strong>Season:</strong>
+  <ng-template #ipadButtons>
+    <div class="ipad-buttons">
+      <div class="flex-row">
+        <button *ngIf="voteState === 'review'" (click)="noDecision()">No Decision</button>
+        <button
+          *ngIf="voteDropdownSelect && voteState !== 'final' && (obs.focus === 'resolutions' || obs.focus === 'scenarios')"
+          (click)="doNotAct(obs.focus)">
+          Do not act
+        </button>
+        <button *ngIf="voteDropdownSelect && voteState !== 'final'" (click)="customVoteOption()">Custom</button>
+        <button *ngIf="divisionVote?.selection" (click)="implement()">Implement</button>
+      </div>
+      <div *ngIf="ipad" class="scan-button" (click)="scanMode = true">
+        SCAN
+      </div>
+    </div>
+  </ng-template>
+
+  <!-- DIVISION -->
+  <ng-template #ipadDivisionTemplate>
+    <div class="ipad-division-wrapper">
+      <div class="stack overflow-auto stretch-v">
+        <ng-container *ngIf="($division | async) as division; else loadingTemplate">
+          <div *ngIf="division" class="tab-card">
+            <div class="tab-block">
+              <strong>Season:</strong>
               {{ division.season }}
               <button (click)="newSeason(division)">New Season</button>
               <button (click)="resetSeason(division)">Reset</button>
             </div>
-          </div>
-    
-          <div class="tab-block">
-            <div class="flex-wrap">
-              <div>
+
+              
+            <div class="flex-row flex-wrap">
+              <div class="tab-block" [class.wrap-block]="ipad">
+                <div><strong>Division: </strong>{{ division.name }}</div>
+                <div><strong>Score: </strong>{{ division.score }} ({{ division.VP }})</div>
+                <div>
+                  <strong>High Thresholds Met: </strong>
+                  {{ division.highThresholdsMet }}
+                </div>
+              </div>
+        
+              <div class="tab-block" [class.wrap-block]="ipad">
                 <div class="editable-item">
                   <strong>Land cost: </strong>
                   {{ division.landCost }}
@@ -508,476 +550,472 @@
                   {{ division?.harvest }}
                 </div>
               </div>
+            </div>
+      
+            <div class="flex-row flex-wrap">
+              <app-division-advancements
+                (change)="changeAdvancement($event)"
+                [class.ipad]="ipad"
+                [ipad]="ipad"
+                class="tab-block"
+                [class.wrap-block]="ipad"
+                [advancements]="$advancements | async">
+              </app-division-advancements>
+      
+              <div class="flex--column tab-block" [class.wrap-block]="ipad">
+                <div class="editable-item">
+                  <button (click)="changeDivisionProperty('actions')">
+                    <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
+                  </button>
+                  <strong>Actions: </strong>
+                  {{ division.actions }} <span *ngIf="division.actions">({{ capacityUsed(division.actions, division.capacity) }}%)</span>
+                </div>
+                <div class="editable-item">
+                  <button *ngIf="ipad" (click)="mockLand('local')">
+                    <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
+                  </button>
+                  <strong>Local land: </strong>
+                  {{ ($localLand | async)?.length }}
+                </div>
+                <div class="editable-item">
+                  <button *ngIf="ipad" (click)="mockLand('global')">
+                    <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
+                  </button>
+                  <strong>Global land: </strong>
+                  {{ ($globalLand | async)?.length }}
+                </div>
+                <div class="editable-item">
+                  <button *ngIf="ipad" (click)="changeDivisionProperty('reserve')">
+                    <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
+                  </button>
+                  <strong>Reserve: </strong>
+                  {{ division?.reserve }}
+                  <app-reserve-bar 
+                    *ngIf="($reserveData | async) as reserveData"
+                    [percent]="reserveData?.reserve?.percent"
+                    [thresholds]="reserveData?.thresholds"
+                    [color]="reserveData?.color">
+                  </app-reserve-bar>
+                </div>
+              </div>
+            </div>
+      
+          </div>
+      
+          <ng-container *ngIf="!ipad">
+            <div class="tab-card">
+              <h2>Citizens</h2>
+              <div *ngFor="let citizen of ($citizens | async); let index = index" style="margin-bottom: 10px">
+                <hr/>
+                <div>
+                  <strong>{{index + 1}}: {{citizen.name}} ({{citizen.id}})</strong>
+                  <button (click)="removeCitizen(citizen.id)">
+                    Remove
+                  </button>
+                </div>
+                <div class="editable-item">
+                  <button (click)="changeCitizenProperty(citizen, 'actions', 'basic')">
+                    <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
+                  </button>
+                  Actions: {{ citizen.actions }}
+                </div>
+        
+                <div class="editable-item">
+                  <button (click)="changeCitizenResources(citizen)">
+                    <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
+                  </button>
+                  <button (click)="transferCitizenResources(citizen)">Donate</button>
+                  Resources: {{ bankService?.calculateWealth(citizen?.resources) }}
+                  <!-- <button (click)="removeCitizenResources(citizen)">-</button>
+                  <button (click)="addCitizenResources(citizen)">+</button> -->
+                </div>
+        
+                <div class="editable-item">
+                  <button (click)="updateCitizenLand(citizen, division?.landCost)">Buy local</button>
+                  Land: {{ citizen?.land }}
+                </div>
+        
+                <div class="editable-item">
+                  <button (click)="changeCitizenProperty(citizen, 'advancements/safety', 'advancement', 'safety')">
+                    <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
+                  </button>
+                  <button (click)="updateAdvancement('safety', citizen, division?.advancementCosts)">Buy</button>
+                  Safety: {{ citizen?.advancements?.safety }}
+                </div>
+                <div class="editable-item">
+                  <button (click)="changeCitizenProperty(citizen, 'advancements/health', 'advancement', 'health')">
+                    <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
+                  </button>
+                  <button (click)="updateAdvancement('health', citizen, division?.advancementCosts)">Buy</button>
+                  Health: {{ citizen?.advancements?.health }}
+                </div>
+                <div class="editable-item">
+                  <button (click)="changeCitizenProperty(citizen, 'advancements/arts', 'advancement', 'arts')">
+                    <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
+                  </button>
+                  <button (click)="updateAdvancement('arts', citizen, division?.advancementCosts)">Buy</button>
+                  Arts and Culture: {{ citizen?.advancements?.arts }}
+                </div>
+                <div class="editable-item">
+                  <button (click)="changeCitizenProperty(citizen, 'advancements/knowledge', 'advancement', 'knowledge')">
+                    <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
+                  </button>
+                  <button (click)="updateAdvancement('knowledge', citizen, division?.advancementCosts)">Buy</button>
+                  Knowledge: {{ citizen?.advancements?.knowledge }}
+                </div>
+                <div class="editable-item">
+                  <button (click)="changeCitizenProperty(citizen, 'advancements/infrastructure', 'advancement', 'infrastructure')">
+                    <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
+                  </button>
+                  <button (click)="updateAdvancement('infrastructure', citizen, division?.advancementCosts)">Buy</button>
+                  Infrastructure: {{ citizen?.advancements?.infrastructure }}
+                </div>
+              </div>
+            </div>
+        
+            <div class="tab-card">
+              <h2>Principles</h2>
+              <p *ngFor="let principle of $principles | async">
+                {{ principle?.value }}
+              </p>
+            </div>
+        
+            <div class="tab-card">
+              <h2>Resolutions</h2>
+              <p *ngFor="let resolution of ($resolutions | async)">
+                {{ resolution?.value }}
+              </p>
+            </div>
+        
+            <div class="tab-card">
+              <h2>Scenarios</h2>
+              <p *ngFor="let scenario of ($scenarios | async)">
+                {{ scenario?.value }}
+              </p>
+            </div>
+          </ng-container>
+      
+          <ng-template #newSeasonTemplate>
+            <div class="modal-content" *ngIf="division.nextSeason as next">
+              <h1>New Season: <span class="new-value">{{ next?.season }}</span></h1>
               <div>
-                <div class="editable-item">
-                  <strong>Thresholds:</strong>
-                  {{ division?.reserveThresholds.low }} / {{ division?.reserveThresholds.mid }} / {{ division?.reserveThresholds.high }}
-                </div>
-                <div class="editable-item">
-                  <strong>High Thresholds Met: </strong>
-                  {{ division.highThresholdsMet }}
-                </div>
+                New GLAs:
+                <span class="new-value" *ngFor="let gla of ($pendingGLA | async)">{{ gla.division }}</span>
               </div>
-            </div>
-          </div>
-    
-          <div class="flex-row flex-wrap">
-            <app-division-advancements
-              (change)="changeAdvancement($event)"
-              [class.ipad]="ipad"
-              [ipad]="ipad"
-              class="tab-block"
-              [class.wrap-block]="ipad"
-              [advancements]="$advancements | async">
-            </app-division-advancements>
-    
-            <div class="flex--column tab-block" [class.wrap-block]="ipad">
-              <div class="editable-item">
-                <button (click)="changeDivisionProperty('actions')">
-                  <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
-                </button>
-                <strong>Actions: </strong>
-                {{ division.actions }} <span *ngIf="division.actions">({{ capacityUsed(division.actions, division.capacity) }}%)</span>
+              <div>
+                Capacity: <span class="new-value">{{ next?.capacity }}</span>
               </div>
-              <div class="editable-item">
-                <button *ngIf="ipad" (click)="mockLand('local')">
-                  <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
-                </button>
-                <strong>Local land: </strong>
-                {{ ($localLand | async)?.length }}
+              <div>
+                Harvest: <span class="new-value">{{ next?.harvest }}</span>
               </div>
-              <div class="editable-item">
-                <button *ngIf="ipad" (click)="mockLand('global')">
-                  <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
-                </button>
-                <strong>Global land: </strong>
-                {{ ($globalLand | async)?.length }}
+              <div>
+                Land Cost: <span class="new-value">{{ next?.landCost }}</span>
               </div>
-              <div class="editable-item">
-                <button *ngIf="ipad" (click)="changeDivisionProperty('reserve')">
-                  <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
-                </button>
-                <strong>Reserve: </strong>
-                {{ division?.reserve }}
+              <div *ngIf="next?.thresholds">
+                Thresholds
+                <ul style="margin: 0">
+                  <li>
+                    Low: <span class="new-value">{{ next?.thresholds[0] }}</span>
+                  </li>
+                  <li>
+                    Mid: <span class="new-value">{{ next?.thresholds[1] }}</span>
+                  </li>
+                  <li>
+                    High: <span class="new-value">{{ next?.thresholds[2] }}</span>
+                  </li>
+                </ul>
               </div>
-            </div>
-          </div>
-    
-        </div>
-    
-        <ng-container *ngIf="!ipad">
-          <div class="tab-card">
-            <h2>Citizens</h2>
-            <div *ngFor="let citizen of ($citizens | async); let index = index" style="margin-bottom: 10px">
               <hr/>
-              <div>
-                <strong>{{index + 1}}: {{citizen.name}} ({{citizen.id}})</strong>
-                <button (click)="removeCitizen(citizen.id)">
-                  Remove
-                </button>
-              </div>
-              <div class="editable-item">
-                <button (click)="changeCitizenProperty(citizen, 'actions', 'basic')">
-                  <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
-                </button>
-                Actions: {{ citizen.actions }}
-              </div>
-      
-              <div class="editable-item">
-                <button (click)="changeCitizenResources(citizen)">
-                  <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
-                </button>
-                <button (click)="transferCitizenResources(citizen)">Donate</button>
-                Resources: {{ bankService?.calculateWealth(citizen?.resources) }}
-                <!-- <button (click)="removeCitizenResources(citizen)">-</button>
-                <button (click)="addCitizenResources(citizen)">+</button> -->
-              </div>
-      
-              <div class="editable-item">
-                <button (click)="updateCitizenLand(citizen, division?.landCost)">Buy local</button>
-                Land: {{ citizen?.land }}
-              </div>
-      
-              <div class="editable-item">
-                <button (click)="changeCitizenProperty(citizen, 'advancements/safety', 'advancement', 'safety')">
-                  <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
-                </button>
-                <button (click)="updateAdvancement('safety', citizen, division?.advancementCosts)">Buy</button>
-                Safety: {{ citizen?.advancements?.safety }}
-              </div>
-              <div class="editable-item">
-                <button (click)="changeCitizenProperty(citizen, 'advancements/health', 'advancement', 'health')">
-                  <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
-                </button>
-                <button (click)="updateAdvancement('health', citizen, division?.advancementCosts)">Buy</button>
-                Health: {{ citizen?.advancements?.health }}
-              </div>
-              <div class="editable-item">
-                <button (click)="changeCitizenProperty(citizen, 'advancements/arts', 'advancement', 'arts')">
-                  <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
-                </button>
-                <button (click)="updateAdvancement('arts', citizen, division?.advancementCosts)">Buy</button>
-                Arts and Culture: {{ citizen?.advancements?.arts }}
-              </div>
-              <div class="editable-item">
-                <button (click)="changeCitizenProperty(citizen, 'advancements/knowledge', 'advancement', 'knowledge')">
-                  <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
-                </button>
-                <button (click)="updateAdvancement('knowledge', citizen, division?.advancementCosts)">Buy</button>
-                Knowledge: {{ citizen?.advancements?.knowledge }}
-              </div>
-              <div class="editable-item">
-                <button (click)="changeCitizenProperty(citizen, 'advancements/infrastructure', 'advancement', 'infrastructure')">
-                  <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
-                </button>
-                <button (click)="updateAdvancement('infrastructure', citizen, division?.advancementCosts)">Buy</button>
-                Infrastructure: {{ citizen?.advancements?.infrastructure }}
-              </div>
+              <button (click)="nextSeason()">Start Season</button>
             </div>
-          </div>
-      
-          <div class="tab-card">
-            <h2>Principles</h2>
-            <p *ngFor="let principle of $principles | async">
-              {{ principle?.value }}
-            </p>
-          </div>
-      
-          <div class="tab-card">
-            <h2>Resolutions</h2>
-            <p *ngFor="let resolution of ($resolutions | async)">
-              {{ resolution?.value }}
-            </p>
-          </div>
-      
-          <div class="tab-card">
-            <h2>Scenarios</h2>
-            <p *ngFor="let scenario of ($scenarios | async)">
-              {{ scenario?.value }}
-            </p>
-          </div>
+          </ng-template>
         </ng-container>
-    
-        <ng-template #newSeasonTemplate>
-          <div class="modal-content" *ngIf="division.nextSeason as next">
-            <h1>New Season: <span class="new-value">{{ next?.season }}</span></h1>
-            <div>
-              New GLAs:
-              <span class="new-value" *ngFor="let gla of ($pendingGLA | async)">{{ gla.division }}</span>
-            </div>
-            <div>
-              Capacity: <span class="new-value">{{ next?.capacity }}</span>
-            </div>
-            <div>
-              Harvest: <span class="new-value">{{ next?.harvest }}</span>
-            </div>
-            <div>
-              Land Cost: <span class="new-value">{{ next?.landCost }}</span>
-            </div>
-            <div *ngIf="next?.thresholds">
-              Thresholds
-              <ul style="margin: 0">
-                <li>
-                  Low: <span class="new-value">{{ next?.thresholds[0] }}</span>
-                </li>
-                <li>
-                  Mid: <span class="new-value">{{ next?.thresholds[1] }}</span>
-                </li>
-                <li>
-                  High: <span class="new-value">{{ next?.thresholds[2] }}</span>
-                </li>
-              </ul>
-            </div>
-            <hr/>
-            <button (click)="nextSeason()">Start Season</button>
-          </div>
-        </ng-template>
-      </ng-container>
-    </div>
-    <ng-template #loadingTemplate>
-      <div class="flex-column flex-center stretch-v">
-        <img class="ipad-loading" src="/assets/season_white.png"/>
-        Loading
       </div>
-    </ng-template>
-    <ng-container *ngTemplateOutlet="ipadButtons"></ng-container>
-  </div>
-</ng-template>
-
-<!-- GLOBAL -->
-<ng-template #globalBody>
-  <div
-    *ngIf="contamination !== undefined"
-    class="tab-card"
-  >
-    <app-global-capacity [showKey]="showKey" [showExceeding]="false"></app-global-capacity>
-    <div class="flex-row" style="justify-content: center">
-      Global Contamination: {{contamination}}%
+      <ng-template #loadingTemplate>
+        <div class="flex-column flex-center stretch-v">
+          <img class="ipad-loading" src="/assets/season_white.png"/>
+          Loading
+        </div>
+      </ng-template>
+      <ng-container *ngTemplateOutlet="ipadButtons"></ng-container>
     </div>
-    <hr/>
-    <div *ngFor="let div of divisions">
-      <app-society-summary
-        *ngIf="(div.listener | async) as division"
-        class="division-summary"
-        details="full"
-        [division]="division">
-      </app-society-summary>
-    </div>
-  </div>
-</ng-template>
+  </ng-template>
 
-<!-- EXPORTS -->
-<ng-template #exportsBody>
-  <div class="tab-card">
-    <app-exports
-     [showKey]="showKey"
-     [divisionKey]="divisionKey">
-    </app-exports>
-    <div class="exports-list">
-      <div *ngFor="let export of ($exports | async)">
-        <h2 style="margin: 0">TO: {{ export?.reciever }} Division</h2>
-        <em>{{ export?.header }}</em>
-        <p>{{ export?.value }}</p>
-        <br/>
-      </div>
-    </div>
-  </div>
-</ng-template>
-
-<!-- CENTRAL -->
-<ng-template #centralBody>
-  <app-chat [sender]="divisionKey" [feedName]="divisionKey" [showKey]="showKey"></app-chat>
-  <textarea
-    (keydown.enter)="submitChat(divisionKey)"
-    class="host-chat-input"
-    name="chatInput"
-    type="text"
-    [(ngModel)]="chatInput">
-  </textarea>
-  <button class="host-chat-button" (click)="submitChat(divisionKey)">SEND</button>
-</ng-template>
-
-<!-- NOTES -->
-<ng-template #notesBody>
-  <div class="button-row">
-    <button [style.font-size.px]="14" (click)="fontSizeDown()">Aa</button>
-    <button [style.font-size.px]="20" (click)="fontSizeUp()">Aa</button>
-  </div>
-  <br/>
-  <textarea [style.font-size.px]="fontSize" class="host-notes">Type notes here!</textarea>
-</ng-template>
-
-<!-- UPDATE SHEET -->
-<ng-template #updateSheet>
-  <div class="action-sheet" [class.ipad]="ipad">
-    <p>{{ _.upperFirst(changeAttribute?.name) }}</p>
-    <app-number-change
-      (afterUpdate)="onAttributeUpdate($event)"
-      [readPath]="changeAttribute?.dbPath"
-      [writePath]="changeAttribute?.dbPath">
-    </app-number-change>
-  </div>
-</ng-template>
-
-<ng-template #changeAdvancementSheet>
-  <div class="action-sheet" [class.ipad]="ipad">
-    <p>{{ _.upperFirst(changeAttribute?.name) }}</p>
-    <app-number-change
-      (afterUpdate)="onAdvancementUpdate($event, changeAttribute?.name)"
-      [readPath]="changeAttribute?.dbPath"
-      [writePath]="changeAttribute?.dbPath">
-    </app-number-change>
-  </div>
-</ng-template>
-
-<ng-template #removeResourcesSheet>
-  <div class="action-sheet flex-column" [class.ipad]="ipad">
-    <div>Remove Resources</div>
-    <ng-number-picker
-      #removeResourcePicker
-      class="number-picker"
-      [arrowKeys]="true"
-      [min]="0">
-    </ng-number-picker>
-    <button (click)="removeResources(removeResourcePicker.value)">
-      Confirm
-    </button>
-  </div>
-</ng-template>
-
-<ng-template #changeResourcesSheet>
-  <div class="action-sheet flex-column" [class.ipad]="ipad">
-    <div>Change Resources</div>
-    <ng-number-picker
-      #changeResourcePicker
-      class="number-picker"
-      [arrowKeys]="true"
-      [value]="bankService?.calculateWealth(this.selectedCitizen.resources)"
-      [min]="0">
-    </ng-number-picker>
-    <button (click)="changeResources(changeResourcePicker.value)">
-      Confirm
-    </button>
-  </div>
-</ng-template>
-
-<ng-template #addResourcesSheet>
-  <div class="action-sheet flex-column" [class.ipad]="ipad">
-    <div>Add Resources</div>
-    <ng-number-picker
-      #addResourcePicker
-      class="number-picker"
-      [arrowKeys]="true"
-      [min]="0">
-    </ng-number-picker>
-    <button (click)="addResources(addResourcePicker.value)">
-      Confirm
-    </button>
-  </div>
-</ng-template>
-
-<ng-template #transferResourcesSheet>
-  <div class="action-sheet flex-column" [class.ipad]="ipad" *ngIf="bankService?.calculateWealth(selectedCitizen.resources) as wealth">
-    <div>Transfer to Reserve</div>
-    <ng-number-picker
-      #transferResourcePicker
-      class="number-picker"
-      [arrowKeys]="true"
-      [min]="0"
-      [max]="wealth"
+  <!-- GLOBAL -->
+  <ng-template #globalBody>
+    <div
+      *ngIf="contamination !== undefined"
+      class="tab-card"
     >
-    </ng-number-picker>
-    <button (click)="transferResources('reserve', transferResourcePicker.value)">
-      Confirm
-    </button>
-  </div>
-</ng-template>
+      <app-global-capacity [showKey]="showKey" [showExceeding]="false"></app-global-capacity>
+      <div class="flex-row" style="justify-content: center">
+        Global Contamination: {{contamination}}%
+      </div>
+      <hr/>
+      <div *ngFor="let div of divisions">
+        <app-society-summary
+          *ngIf="(div.listener | async) as division"
+          class="division-summary"
+          details="full"
+          [division]="division">
+        </app-society-summary>
+      </div>
+    </div>
+  </ng-template>
 
-<ng-template #advancementSheet>
-  <div class="action-sheet flex-column" [class.ipad]="ipad">
-    <div>{{changeAttribute.name}} (cost: {{ changeAttribute?.data.cost }})</div>
+  <!-- EXPORTS -->
+  <ng-template #exportsBody>
+    <div class="tab-card">
+      <app-exports
+      [showKey]="showKey"
+      [divisionKey]="divisionKey">
+      </app-exports>
+      <div class="exports-list">
+        <div *ngFor="let export of ($exports | async)">
+          <h2 style="margin: 0">TO: {{ export?.reciever }} Division</h2>
+          <em>{{ export?.header }}</em>
+          <p>{{ export?.value }}</p>
+          <br/>
+        </div>
+      </div>
+    </div>
+  </ng-template>
 
-    <ng-container
-      *ngIf="changeAttribute?.data.wealth < changeAttribute?.data.cost">
-      <p>Not enough resources to buy advancement</p>
-      <button (click)="actionSheet.dismiss()">Ok</button>
-    </ng-container>
+  <!-- CENTRAL -->
+  <ng-template #centralBody>
+    <app-chat [sender]="divisionKey" [feedName]="divisionKey" [showKey]="showKey"></app-chat>
+    <textarea
+      (keydown.enter)="submitChat(divisionKey)"
+      class="host-chat-input"
+      name="chatInput"
+      type="text"
+      [(ngModel)]="chatInput">
+    </textarea>
+    <button class="host-chat-button" (click)="submitChat(divisionKey)">SEND</button>
+  </ng-template>
 
-    <button 
-      *ngIf="changeAttribute?.data.wealth >= changeAttribute?.data.cost"
-      (click)="buyAdvancement(changeAttribute.name, changeAttribute.data.cost, changeAttribute.dbPath)">
-      Buy
-    </button>
-  </div>
-</ng-template>
-
-<ng-template #disableColumnsSheet>
-  <div class="flex-column flex-center">
-    <h1>Columns</h1>
-    <div class="flex-row">
-      <input
-        name="show-columns"
-        #showColumnsCheckbox
-        type="checkbox"
-        [(ngModel)]="lockColumns"
-        (click)="toggleLockColumnsStatus()" 
-      >
-      <label style="font-size: 16px" for="show-columns">Set Permanently</label>
+  <!-- NOTES -->
+  <ng-template #notesBody>
+    <div class="button-row">
+      <button [style.font-size.px]="14" (click)="fontSizeDown()">Aa</button>
+      <button [style.font-size.px]="20" (click)="fontSizeUp()">Aa</button>
     </div>
     <br/>
-    <div class="flex-row">
-      <button
-        class="harvest-column-button"
-        *ngFor="let button of disableHarvestColumnButtons; let i = index"
-        [class.highlighted]="button.value"
-        (click)="toggleColumnDisabledState(i)"
-      >
-        {{button.label}}
-      </button>
+    <textarea [style.font-size.px]="fontSize" class="host-notes">Type notes here!</textarea>
+  </ng-template>
+
+  <!-- UPDATE SHEET -->
+  <ng-template #updateSheet>
+    <div class="action-sheet" [class.ipad]="ipad">
+      <p>{{ _.upperFirst(changeAttribute?.name) }}</p>
+      <app-number-change
+        (afterUpdate)="onAttributeUpdate($event)"
+        [readPath]="changeAttribute?.dbPath"
+        [writePath]="changeAttribute?.dbPath">
+      </app-number-change>
     </div>
-  </div>
-</ng-template>
+  </ng-template>
 
-<ng-template #mockLocalLandSheet>
-  <div class="action-sheet flex-column" [class.ipad]="ipad">
-    <p>Local Land</p>
-    <ng-number-picker
-      #numberPicker
-      class="number-picker"
-      [arrowKeys]="true"
-      [value]="($localLand | async)?.length"
-      [min]="0"
-    >
-    </ng-number-picker>
-    <button (click)="setMockLand('local', numberPicker.value)">Confirm</button>
-  </div>
-</ng-template>
+  <ng-template #changeAdvancementSheet>
+    <div class="action-sheet" [class.ipad]="ipad">
+      <p>{{ _.upperFirst(changeAttribute?.name) }}</p>
+      <app-number-change
+        (afterUpdate)="onAdvancementUpdate($event, changeAttribute?.name)"
+        [readPath]="changeAttribute?.dbPath"
+        [writePath]="changeAttribute?.dbPath">
+      </app-number-change>
+    </div>
+  </ng-template>
 
-<ng-template #mockGlobalLandSheet>
-  <div class="action-sheet flex-column" [class.ipad]="ipad">
-    <p>Global Land</p>
-    <ng-number-picker
-      #numberPicker
-      class="number-picker"
-      [arrowKeys]="true"
-      [value]="($globalLand | async)?.length"
-      [min]="0"
-    >
-    </ng-number-picker>
-    <button (click)="setMockLand('global', numberPicker.value)">Confirm</button>
-  </div>
-</ng-template>
-
-<ng-template #localLandSheet>
-  <div class="action-sheet flex-column" [class.ipad]="ipad">
-    <ng-container *ngIf="changeAttribute?.data.wealth >= changeAttribute?.data.cost; else noMoney">
-      <div>Purchase new land plot for {{selectedCitizen?.name}}? (cost: {{changeAttribute.data.cost}})</div>
-      <button 
-        (click)="buyLocalLand(changeAttribute.data.cost, changeAttribute.dbPath)">
+  <ng-template #removeResourcesSheet>
+    <div class="action-sheet flex-column" [class.ipad]="ipad">
+      <div>Remove Resources</div>
+      <ng-number-picker
+        #removeResourcePicker
+        class="number-picker"
+        [arrowKeys]="true"
+        [min]="0">
+      </ng-number-picker>
+      <button (click)="removeResources(removeResourcePicker.value)">
         Confirm
       </button>
-    </ng-container>
+    </div>
+  </ng-template>
 
-    <ng-template #noMoney>
-      Not enough resources to purchase land
-    </ng-template>
-  </div>
-</ng-template>
+  <ng-template #changeResourcesSheet>
+    <div class="action-sheet flex-column" [class.ipad]="ipad">
+      <div>Change Resources</div>
+      <ng-number-picker
+        #changeResourcePicker
+        class="number-picker"
+        [arrowKeys]="true"
+        [value]="bankService?.calculateWealth(this.selectedCitizen.resources)"
+        [min]="0">
+      </ng-number-picker>
+      <button (click)="changeResources(changeResourcePicker.value)">
+        Confirm
+      </button>
+    </div>
+  </ng-template>
 
-<ng-template #harvestTileSheet>
-  <div class="action-sheet" [class.ipad]="ipad">
+  <ng-template #addResourcesSheet>
+    <div class="action-sheet flex-column" [class.ipad]="ipad">
+      <div>Add Resources</div>
+      <ng-number-picker
+        #addResourcePicker
+        class="number-picker"
+        [arrowKeys]="true"
+        [min]="0">
+      </ng-number-picker>
+      <button (click)="addResources(addResourcePicker.value)">
+        Confirm
+      </button>
+    </div>
+  </ng-template>
+
+  <ng-template #transferResourcesSheet>
+    <div class="action-sheet flex-column" [class.ipad]="ipad" *ngIf="bankService?.calculateWealth(selectedCitizen.resources) as wealth">
+      <div>Transfer to Reserve</div>
+      <ng-number-picker
+        #transferResourcePicker
+        class="number-picker"
+        [arrowKeys]="true"
+        [min]="0"
+        [max]="wealth"
+      >
+      </ng-number-picker>
+      <button (click)="transferResources('reserve', transferResourcePicker.value)">
+        Confirm
+      </button>
+    </div>
+  </ng-template>
+
+  <ng-template #advancementSheet>
+    <div class="action-sheet flex-column" [class.ipad]="ipad">
+      <div>{{changeAttribute.name}} (cost: {{ changeAttribute?.data.cost }})</div>
+
+      <ng-container
+        *ngIf="changeAttribute?.data.wealth < changeAttribute?.data.cost">
+        <p>Not enough resources to buy advancement</p>
+        <button (click)="actionSheet.dismiss()">Ok</button>
+      </ng-container>
+
+      <button 
+        *ngIf="changeAttribute?.data.wealth >= changeAttribute?.data.cost"
+        (click)="buyAdvancement(changeAttribute.name, changeAttribute.data.cost, changeAttribute.dbPath)">
+        Buy
+      </button>
+    </div>
+  </ng-template>
+
+  <ng-template #disableColumnsSheet>
     <div class="flex-column flex-center">
-      <h2>Perform Harvest action for {{ selectedCitizen?.name }}</h2>
-
+      <h1>Columns</h1>
       <div class="flex-row">
-        <div 
-          class="large-action-button"
-          (click)="explore()">
-          <fa-icon size="lg" [icon]="exploreIcon"></fa-icon>
-          Explore (e)
-        </div>
-        <div 
-          class="large-action-button"
-          (click)="gather()">
-          <fa-icon size="lg" [icon]="gatherIcon"></fa-icon>
-          Gather (g)
-        </div>
-        <div 
-          class="large-action-button invert"
-          (click)="safeExplore()">
-          <fa-icon size="lg" [icon]="gatherIcon"></fa-icon>
-          Safe Expore
-        </div>
-        <div 
-          class="large-action-button invert"
-          (click)="safeGather()">
-          <fa-icon size="lg" [icon]="gatherIcon"></fa-icon>
-          Safe Gather
+        <input
+          name="show-columns"
+          #showColumnsCheckbox
+          type="checkbox"
+          [(ngModel)]="lockColumns"
+          (click)="toggleLockColumnsStatus()" 
+        >
+        <label style="font-size: 16px" for="show-columns">Set Permanently</label>
+      </div>
+      <br/>
+      <div class="flex-row">
+        <button
+          class="harvest-column-button"
+          *ngFor="let button of disableHarvestColumnButtons; let i = index"
+          [class.highlighted]="button.value"
+          (click)="toggleColumnDisabledState(i)"
+        >
+          {{button.label}}
+        </button>
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template #mockLocalLandSheet>
+    <div class="action-sheet flex-column" [class.ipad]="ipad">
+      <p>Local Land</p>
+      <ng-number-picker
+        #numberPicker
+        class="number-picker"
+        [arrowKeys]="true"
+        [value]="($localLand | async)?.length"
+        [min]="0"
+      >
+      </ng-number-picker>
+      <button (click)="setMockLand('local', numberPicker.value)">Confirm</button>
+    </div>
+  </ng-template>
+
+  <ng-template #mockGlobalLandSheet>
+    <div class="action-sheet flex-column" [class.ipad]="ipad">
+      <p>Global Land</p>
+      <ng-number-picker
+        #numberPicker
+        class="number-picker"
+        [arrowKeys]="true"
+        [value]="($globalLand | async)?.length"
+        [min]="0"
+      >
+      </ng-number-picker>
+      <button (click)="setMockLand('global', numberPicker.value)">Confirm</button>
+    </div>
+  </ng-template>
+
+  <ng-template #localLandSheet>
+    <div class="action-sheet flex-column" [class.ipad]="ipad">
+      <ng-container *ngIf="changeAttribute?.data.wealth >= changeAttribute?.data.cost; else noMoney">
+        <div>Purchase new land plot for {{selectedCitizen?.name}}? (cost: {{changeAttribute.data.cost}})</div>
+        <button 
+          (click)="buyLocalLand(changeAttribute.data.cost, changeAttribute.dbPath)">
+          Confirm
+        </button>
+      </ng-container>
+
+      <ng-template #noMoney>
+        Not enough resources to purchase land
+      </ng-template>
+    </div>
+  </ng-template>
+
+  <ng-template #harvestTileSheet>
+    <div class="action-sheet" [class.ipad]="ipad">
+      <div class="flex-column flex-center">
+        <h2>Perform Harvest action for {{ selectedCitizen?.name }}</h2>
+
+        <div class="flex-row">
+          <div 
+            class="large-action-button"
+            (click)="explore()">
+            <fa-icon size="lg" [icon]="exploreIcon"></fa-icon>
+            Explore (e)
+          </div>
+          <div 
+            class="large-action-button"
+            (click)="gather()">
+            <fa-icon size="lg" [icon]="gatherIcon"></fa-icon>
+            Gather (g)
+          </div>
+          <div 
+            class="large-action-button invert"
+            (click)="safeExplore()">
+            <fa-icon size="lg" [icon]="gatherIcon"></fa-icon>
+            Safe Expore
+          </div>
+          <div 
+            class="large-action-button invert"
+            (click)="safeGather()">
+            <fa-icon size="lg" [icon]="gatherIcon"></fa-icon>
+            Safe Gather
+          </div>
         </div>
       </div>
     </div>
-  </div>
-</ng-template>
+  </ng-template>
+</ng-container>
 
 <app-division-popups type="toast" [showKey]="showKey" [divisionKey]="divisionKey"></app-division-popups>
 <app-division-popups
