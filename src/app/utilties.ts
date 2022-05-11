@@ -10,6 +10,11 @@ export function shuffle(a) {
   return a;
 }
 
+/**
+ * Returns random integer between min and max, INCLUSIVE of min and max values, 
+ * eg getRandomInt(1,3) will randomly return the number 1, 2, or 3
+ */
+
 export function getRandomInt(min, max) {
   min = Math.ceil(min);
   max = Math.floor(max);

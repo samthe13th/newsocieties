@@ -1,7 +1,7 @@
 import { Component, HostListener, OnInit, OnDestroy, ViewChild, TemplateRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AngularFireDatabase } from '@angular/fire/database';
-import { pluckRandom, promiseOne } from 'src/app/utilties';
+import { getRandomInt, pluckRandom, promiseOne } from 'src/app/utilties';
 import { LandTile, LandCardTypes } from 'src/app/interfaces';
 import * as _ from 'lodash';
 import { trim, find, findIndex, includes, toNumber, each, partition } from 'lodash';
@@ -409,11 +409,54 @@ export class HostComponent implements OnInit, OnDestroy {
     this.dismissSheet();
   }
 
-  scanResource() {
+  async scanResource() {
     this.isScanning = true;
-    // setTimeout(() => {
-    //   this.isScanning = false;
-    // }, 1000)
+
+    let totalHarvest: number;
+    let contamPercent: number;
+    let contamLevel: number;
+
+    await new Promise((resolve) => combineLatest(
+        this.db.object(`shows/${this.showKey}/contamination/current`).valueChanges(),
+        this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/harvest`).valueChanges(),
+        this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/contaminantLevel`).valueChanges()
+      ).pipe(
+      take(1)
+    ).subscribe(([percent, harvest, level]: [number, number, 1 | 2 | 3]) => { 
+      totalHarvest = harvest
+      contamPercent = percent
+      contamLevel = level;
+      resolve(null)
+    }));
+
+    console.log({totalHarvest, contamPercent, contamLevel})
+
+    let isContaminated;
+    this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/scan`)
+      .query.ref.transaction((scan: { contaminantsFound: number, harvested: number }) => { 
+        let currentScan = scan ?? { contaminantsFound: 0, harvested: 0 }
+        const totalContams = Math.ceil((contamPercent/100) * totalHarvest) ?? 0
+        const contamsRemaining = totalContams - currentScan.contaminantsFound;
+        const harvestRemaining = totalHarvest - currentScan.harvested;
+        const pick = getRandomInt(1, harvestRemaining);
+        isContaminated = pick <= contamsRemaining;
+        
+        currentScan.contaminantsFound = isContaminated ? currentScan.contaminantsFound + 1 : currentScan.contaminantsFound;
+        currentScan.harvested++;
+
+        return currentScan;
+      }).then((_scan) => {
+        this.processScan(isContaminated, contamLevel);
+      })
+  }
+
+  processScan(isContaminated, level) {
+    if (isContaminated) {
+      const contaminantType = this.divisionService.getContaminantValue(level)
+      alert(`Contamination found! Type: ${contaminantType}`)
+    } else {
+      alert('No contamination found :)')
+    }
   }
 
   setFullScreen() {
@@ -1291,7 +1334,7 @@ export class HostComponent implements OnInit, OnDestroy {
   setNewContamination() {
     combineLatest(
       this.db.object(`shows/${this.showKey}/contamination/current`).valueChanges(),
-      this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/contaminantLevel`).valueChanges()
+      this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/contaminantLevel`).valueChanges(),
     ).pipe(
       take(1)
     ).subscribe(([percent, level]) => {

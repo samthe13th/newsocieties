@@ -8,6 +8,7 @@ import { LandCardValues, LandTile, LandCardTypes } from 'src/app/interfaces';
 import { BankService } from 'src/app/services/bank.service';
 import { pluckRandom, getRandomInt } from 'src/app/utilties';
 import { Howl } from 'howler';
+import { DivisionService } from 'src/app/services/division-service.service';
 
 const MAX_HARVEST = 49;
 const HARVEST_ROW_LENGTH = 7;
@@ -65,7 +66,8 @@ export class LandGridComponent implements OnInit {
   constructor(
     private db: AngularFireDatabase,
     private bankService: BankService,
-    private _bottomSheet: MatBottomSheet
+    private divisionService: DivisionService,
+    private _bottomSheet: MatBottomSheet,
   ) {}
 
   getPosition(id) {
@@ -179,15 +181,8 @@ export class LandGridComponent implements OnInit {
         );
         contaminate.forEach((i) => {
           if (!this.landTiles[i].harvested) {
-            const random = getRandomInt(1, 10);
-            let contamValue = 1;
-            if (random > 5 && level > 1) {
-              contamValue = 2;
-            }
-            if (random > 8 && level > 2) {
-              contamValue = 3
-            }
-            this.landTiles[i].type =  LandCardTypes.C;
+            const contamValue = this.divisionService.getContaminantValue(level);
+            this.landTiles[i].type = LandCardTypes.C;
             this.landTiles[i].value = contamValue;
           }
         })

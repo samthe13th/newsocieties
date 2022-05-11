@@ -4,7 +4,7 @@ import { combineLatest } from 'rxjs';
 import { map, tap, take } from 'rxjs/operators';
 import { reduce, filter, slice } from 'lodash';
 import * as _ from 'lodash';
-import { pluckRandom } from '../utilties';
+import { getRandomInt, pluckRandom } from '../utilties';
 
 const DIVISION_SCORE = {
   small: {
@@ -330,6 +330,18 @@ export class DivisionService {
     const R3 = thresholdPoints;
     const R2 = R3 * 2;
     return { R3, R2, R1: Math.max(harvest - (R2 + R3), 0) }
+  }
+
+  getContaminantValue(level) {
+    const random = getRandomInt(1,10)
+    console.log({random})
+    if (random > 8) {
+      return (level > 2) ? 3 : 1
+    }
+    if (random > 5 && level > 1) {
+      return 2
+    }
+    return 1
   }
 
   calculateDivisionScore$(showKey, divisionKey) {
