@@ -40,3 +40,16 @@ export function pluckRandom(array, total) {
 export function promiseOne(dbCall) {
   return dbCall.valueChanges().pipe(take(1)).toPromise();
 }
+
+export function formatDate(date, format) {
+  const month = date.getMonth() + 1;
+
+  const map = {
+      mm: month >= 10 ? month : `0${month}`,
+      dd: date.getDate(),
+      yy: date.getFullYear().toString().slice(-2),
+      yyyy: date.getFullYear()
+  }
+
+  return format.replace(/mm|dd|yy|yyy/gi, matched => map[matched])
+}

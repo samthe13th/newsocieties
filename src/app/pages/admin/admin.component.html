@@ -168,6 +168,15 @@
       <br/>
 
       <div class="admin-section" *ngIf="$contamination | async as contam">
+        Show Number
+        <ng-number-picker
+          class="number-picker"
+          (valueChange)="onChangeShowNumber($event)" 
+          [min]="0"
+          [value]="showNumber">
+        </ng-number-picker>
+        <hr/>
+
         <google-chart
           width="300px"
           height="200px"

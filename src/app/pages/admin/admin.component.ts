@@ -8,7 +8,7 @@ import { DIVISION_TEMPLATE, SHOW_TEMPLATE, SHOW_DEFAULTS } from './templates';
 import { map } from 'rxjs/operators';
 import * as moment from 'moment';
 import { ActivatedRoute } from '@angular/router';
-import { pluckRandom, promiseOne } from 'src/app/utilties';
+import { formatDate, pluckRandom, promiseOne } from 'src/app/utilties';
 import { TimelineComponent } from 'src/app/components/shared/timeline/timeline.component';
 
 const DIVISIONS = ['N', 'S', 'E', 'W', 'NE', 'SE', 'SW', 'NW'];
@@ -80,6 +80,7 @@ export class AdminComponent implements OnInit, AfterViewInit {
     [20, 10],
     [40, 30],
   ]
+  today;
 
   chart = {
     columns: [
@@ -97,6 +98,7 @@ export class AdminComponent implements OnInit, AfterViewInit {
     }
   }
 
+  showNumber = 1;
   currentTab;
   time;
   pauseAtMinute = null;
@@ -135,6 +137,7 @@ export class AdminComponent implements OnInit, AfterViewInit {
   ) {}
 
   ngOnInit() {
+    this.today = formatDate(new Date(), 'mmddyy')
     this.showKey = this.route.snapshot.params.show;
     this.db.object(`events`)
       .valueChanges()
@@ -220,6 +223,11 @@ export class AdminComponent implements OnInit, AfterViewInit {
   ngOnDestroy() {
     this.destroy$.next(true);
     this.destroy$.unsubscribe();
+  }
+
+  onChangeShowNumber(n) {
+    console.log("NEW: ", n)
+    this.db.object(`shows/${this.showKey}/showNumber`).set(n).then((n) => console.log("set show nuber: ",n))
   }
 
   onTabChange(tab) {

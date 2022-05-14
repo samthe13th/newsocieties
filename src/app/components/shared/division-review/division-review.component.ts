@@ -37,9 +37,7 @@ export class DivisionReviewComponent implements OnInit {
           this.divisionService.$advancements(this.showKey, this.divisionKey),
           this.db.list(`shows/${this.showKey}/divisions/${toReview}/chartData`).valueChanges().pipe(
             map((data: any[]) => {
-              console.log({data})
               const percent = data.reduce((acc, [_, c, a]) => (acc + ((a - c) / c) * 100), 0)
-              console.log({percent})
               return `${Math.round(percent)}%`
             }),
           ),

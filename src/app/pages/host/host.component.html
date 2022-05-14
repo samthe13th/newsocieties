@@ -36,8 +36,7 @@
     [tabs]="[
       { id: 'division', tabTemplate: divisionTab, bodyTemplate: ipadDivisionTemplate },
       { id: 'vote', tabTemplate: voteTab, bodyTemplate: ipadVoteTemplate },
-      { id: 'review', tabTemplate: reviewTab, bodyTemplate: ipadReviewTemplate },
-      { id: 'chat', tabTemplate: chatTab, bodyTemplate: ipadChatTemplate }
+      { id: 'review', tabTemplate: reviewTab, bodyTemplate: ipadReviewTemplate }
     ]">
   </app-tabs>
 
@@ -54,7 +53,7 @@
         <div class="progress-bar"></div>
         <div class="scanline"></div>
       </ng-container>
-      <div *ngIf="!isScanning" class="scanner-button close" (click)="exitScan()"></div>
+      <div *ngIf="!isScanning" class="scanner-button close" (click)="exitScan(); exitFullScreen()"></div>
       <div 
         *ngIf="scanResult" 
         class="scan-result"
@@ -462,7 +461,7 @@
   <ng-template #notes>Notes</ng-template>
 
   <ng-template #ipadReviewTemplate>
-    Review
+    <button (click)="generateArchivedReview()">Generate Review</button>
   </ng-template>
 
   <ng-template #ipadChatTemplate>
@@ -533,7 +532,7 @@
         <button *ngIf="voteDropdownSelect && voteState !== 'final'" (click)="customVoteOption()">Custom</button>
         <button *ngIf="divisionVote?.selection" (click)="implement()">Implement</button>
       </div>
-      <div *ngIf="ipad" class="scan-button" (click)="scanMode = true">
+      <div *ngIf="ipad" class="scan-button" (click)="scanMode = true; setFullScreen()">
         SCAN
       </div>
     </div>

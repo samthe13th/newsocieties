@@ -1,7 +1,7 @@
 import { Component, HostListener, OnInit, OnDestroy, ViewChild, TemplateRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AngularFireDatabase } from '@angular/fire/database';
-import { getRandomInt, pluckRandom, promiseOne } from 'src/app/utilties';
+import { formatDate, getRandomInt, pluckRandom, promiseOne } from 'src/app/utilties';
 import { LandTile, LandCardTypes } from 'src/app/interfaces';
 import * as _ from 'lodash';
 import { trim, find, findIndex, includes, toNumber, each, partition } from 'lodash';
@@ -15,6 +15,7 @@ import { faPen, faGavel, faScroll, faLandmark, faBullseye, faEyeSlash, faGlobe, 
 import { LandGridComponent } from 'src/app/components/shared/land-grid/land-grid.component';
 import * as fa from '@fortawesome/free-solid-svg-icons';
 import * as moment from 'moment';
+import { DemoTilesComponent } from 'src/app/components/shared/demo-tiles/demo-tiles.component';
 
 const DIVISIONS = ["N", "NE", "W", "NW", "E", "SW", "S", "SE"];
 
@@ -160,7 +161,10 @@ export class HostComponent implements OnInit, OnDestroy {
   set voteDropdownSelect(value) {
     console.log('set: ', value, this.focus)
     this._voteDropdownSelect = value;
-    this.startVote(this.focus);
+    if (this.focus) {
+      this.startVote(this.focus);
+    }
+
     // if (value && this.ipad) {
     //   this.startVote(this.ipadTab)
     // }
@@ -890,20 +894,63 @@ export class HostComponent implements OnInit, OnDestroy {
   onVoteOptionChange(ev) {
     console.log("on vote option change: ", ev)
   }
+
+  async generateArchivedReview() {
+    const showNumber = await this.db.object(`shows/${this.showKey}/showNumber`).valueChanges().pipe(take(1)).toPromise();
+    const archiveId = `${formatDate(new Date(), 'mmddyy')}/${showNumber}`;
+    const review = await combineLatest(
+      this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/score`).valueChanges(),
+      this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/reserve`).valueChanges(),
+      this.divisionService.$advancements(this.showKey, this.divisionKey),
+      this.db.list(`shows/${this.showKey}/divisions/${this.divisionKey}/chartData`).valueChanges().pipe(
+        map((data: any[]) => {
+          const percent = data.reduce((acc, [_, c, a]) => (acc + ((a - c) / c) * 100), 0)
+          return `${Math.round(percent)}%`
+        }),
+      ),
+      this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/citizens`).valueChanges().pipe(
+        map((citizens) => {
+          console.log({citizens})
+          let inHand = 0;
+          each(citizens, (c) => {
+            inHand += this.bankService.calculateWealth(c.resources);
+          })
+          return inHand;
+        }),
+        tap((hand) => console.log({hand}))
+      ),
+      this.db.list(`shows/${this.showKey}/divisions/${this.divisionKey}/localLand`).valueChanges(),
+      this.db.list(`shows/${this.showKey}/divisions/${this.divisionKey}/globalLand`).valueChanges(),
+      this.db.list(`shows/${this.showKey}/divisions/${this.divisionKey}/principles`).valueChanges(),
+      this.db.list(`shows/${this.showKey}/divisions/${this.divisionKey}/resolutions`).valueChanges(),
+      this.db.list(`shows/${this.showKey}/divisions/${this.divisionKey}/scenarios`).valueChanges(),
+    ).pipe(
+      map(([score, reserve, advancements, exceededCapacity, inHand, localLand, globalLand, principles, resolutions, scenarios]) => ({
+        code: this.divisionKey, score, reserve, advancements, exceededCapacity, inHand, localLand, globalLand, principles, resolutions, scenarios
+      })),
+      take(1)
+    ).toPromise();
+    console.log({review})
+    this.db.object(`shows/${this.showKey}/archive/${archiveId}/${this.divisionKey}`).set(review).then(() => console.log("review set"))
+  }
+
   startVote(focus) {
     console.log("vote on : ", focus, this.voteDropdownSelect)
     this.db.object(`${this.divisionPath}/focus`).set(focus);
     this.showModal = false;
     this.action = 'voting';
-    
-    setTimeout(() => {
-      this.db.object(`${this.divisionPath}/vote`).set({
-        type: this.voteType,
-        ...this.voteDropdownSelect,
-        state: 'voting',
-        votes: {}
-      })
-    }, 1000)
+
+    if (this.voteDropdownSelect) {
+      setTimeout(() => {
+        this.db.object(`${this.divisionPath}/vote`).set({
+          type: this.voteType,
+          ...this.voteDropdownSelect,
+          state: 'voting',
+          votes: {}
+        })
+      }, 1000)
+    }
+  
   }
 
   newResolution() {
