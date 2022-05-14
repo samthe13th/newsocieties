@@ -22,6 +22,7 @@ export class ButtonGroupComponent implements OnInit {
     icon: string,
   }[]
   @Input() size: 'md' | 'lg' = 'md'
+  @Input() look: 'default' | 'round' = 'default';
 
   private _selectById: string
   @Input()
@@ -34,6 +35,7 @@ export class ButtonGroupComponent implements OnInit {
   @Input() selectedClass: string = 'button-selected';
 
   ngOnInit() {
+    console.log('init button group. LOOK: ', this.look)
     this.setButton();
   }
   

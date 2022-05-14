@@ -1,10 +1,4 @@
-.button-group__options {
-  display: flex;
-  border: solid 1px black;
-  border-radius: 10px;
-}
-
-.button-group__button {
+%button-group-button-base {
   margin: 0;
   align-items: center;
   padding: 10px;
@@ -32,17 +26,57 @@
   .button-group-label {
     font-size: 14px;
   }
+}
 
-  &:first-child {
-    border-radius: 10px 0 0 10px;
+.button-group__options {
+  display: flex;
+  border: solid 1px black;
+  border-radius: 10px;
+
+  .button-group__button {
+    @extend %button-group-button-base;
+
+    &:first-child {
+      border-radius: 10px 0 0 10px;
+    }
+  
+    &:last-child {
+      border-radius: 0 10px 10px 0
+    }
+  
+    &:not(:last-child) {
+      border-right: 1px solid;
+    }
   }
+}
 
-  &:last-child {
-    border-radius: 0 10px 10px 0
-  }
+.button-group__options--round {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  max-width: 320px;
+  justify-content: center;
 
-  &:not(:last-child) {
-    border-right: 1px solid;
+  .button-group__button {
+    @extend %button-group-button-base;
+    background: black;
+    border-radius: 100%;
+    color: white;
+    margin: 5px;
+    width: 30px;
+    height: 30px;
+    font-size: 30px;
+    font-family: sans-serif;
+
+    &:hover,
+    &:active {
+      background: white;
+      color: black;
+    }
+
+    &:not(:last-child) {
+      margin-right: 10px;
+    }
   }
 }
 

@@ -344,6 +344,28 @@ export class DivisionService {
     return 1
   }
 
+  getContamDemoTileData(value = 1) {
+    if (value === 3) {
+      return [
+        ['X', 'X', 'X'],
+        ['X', 'C', 'X'],
+        ['X', 'X', 'X']
+      ]
+    }
+    if (value === 2) {
+      return [
+        ['O', 'X', 'O'],
+        ['X', 'C', 'X'],
+        ['O', 'X', 'O']
+      ]
+    }
+    return [
+      ['O', '0', 'O'],
+      ['X', 'C', 'X'],
+      ['O', '0', 'O']
+    ]
+  }
+
   calculateDivisionScore$(showKey, divisionKey) {
     const divisionPath = `shows/${showKey}/divisions/${divisionKey}`;
     

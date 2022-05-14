@@ -43,14 +43,40 @@
 
   <div *ngIf="scanMode" class="app-fullscreen-overlay">
     <div class="scanner">
-      <div class="scanning" [class.animate]="isScanning">
+      <div *ngIf="!scanResult" class="scanning" [class.animate]="isScanning">
         <div class="ripple1"></div>
         <div class="ripple2"></div>
         <div class="ripple3"></div>
         <div *ngIf="!isScanning" class="ripple-center"></div>
       </div>
-      <button *ngIf="!isScanning" class="scanner-button scan" (click)="scanResource()">SCAN</button>
-      <div class="scanner-button close" (click)="scanMode = false; isScanning = false"></div>
+      <button *ngIf="!isScanning && !scanResult" class="scanner-button scan" (click)="scanResource()">SCAN</button>
+      <ng-container *ngIf="isScanning && !scanResult">
+        <div class="progress-bar"></div>
+        <div class="scanline"></div>
+      </ng-container>
+      <div *ngIf="!isScanning" class="scanner-button close" (click)="exitScan()"></div>
+      <div 
+        *ngIf="scanResult" 
+        class="scan-result"
+        [class.clean]="!scanResult?.contaminated"
+        [class.contaminated]="scanResult?.contaminated"
+        >
+        <h2>{{scanResult?.header}}</h2>
+        <fa-icon
+          *ngIf="!scanResult?.contaminated"
+          size="lg"
+          [icon]="fa.faCheckCircle">
+        </fa-icon>
+        <img *ngIf="scanResult?.contaminated" [src]="scanResult?.image">
+        <div class="scan-result-report" *ngIf="scanResult?.contaminated">
+          <h3>Report additional contaminations</h3>
+          <app-button-group
+            look="round"
+            (select)="reportContaminations($event)"
+            [buttons]="reportContaminationButtons">
+          </app-button-group>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -453,10 +479,10 @@
         <app-button-group
           (select)="onIpadVoteFocusSelect($event)"
           [selectById]="obs.focus"
-          size="lg"
+          size="md"
           [buttons]="ipadFocusButtons">
         </app-button-group>
-        <ng-container *ngIf="voteDropdown !== null">
+        <div class="ipad-vote-select-wrap stack-h" *ngIf="voteDropdown !== null">
           <select
             [ngModel]="voteDropdownSelect"
             (ngModelChange)="onVoteDropdownSelectChange($event, obs.focus)"
@@ -468,8 +494,8 @@
               <span *ngIf="option?.votedOn">**</span>{{option?.title}}
             </option>
           </select>
-        <button (click)="autoPick(focus)">Autopick</button>
-      </ng-container>
+          <button class="action-button" (click)="autoPick(focus)">Autopick</button>
+        </div>
       </div>
       <ng-container>
         <app-vote
@@ -568,7 +594,7 @@
                 [advancements]="$advancements | async">
               </app-division-advancements>
       
-              <div class="flex--column tab-block" [class.wrap-block]="ipad">
+              <div class="flex--column tab-block stack" [class.wrap-block]="ipad">
                 <div class="editable-item">
                   <button *ngIf="ipad" (click)="changeDivisionProperty('reserve')">
                     <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>

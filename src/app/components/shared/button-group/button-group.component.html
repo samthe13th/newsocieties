@@ -1,4 +1,7 @@
-<div class="button-group__options">
+<div
+  [class.button-group__options]="look === 'default'"
+  [class.button-group__options--round]="look === 'round'"
+  >
   <div 
     *ngFor="let button of buttons; let i = index" 
     class="button-group__button {{ button?.id === currentButton?.id ? selectedClass : unselectedClass }}"

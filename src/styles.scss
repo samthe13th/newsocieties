@@ -117,8 +117,7 @@ select {
     width: 100%;
     flex-direction: column; 
     align-items: center;
-    font-size: 24px;
-    margin: 20px;
+    margin: 10px;
   }
 
   select {
@@ -131,23 +130,19 @@ select {
   }
 
   .app-vote.central {
-    transition: opacity 1s ease-in-out;
     height: 100%;
-    font-size: 24px;
     flex: 3;
     align-items: stretch;
 
     > .vote-wrapper {
-      font-size: 1em;
-      line-height: 1em;
       align-items: center;
       max-width: 100%;
       border-radius: 0;
 
       .vote-prompt {
-        font-size: 1.2em;
-        line-height: 1.2em;
-        margin-bottom: 1.6em;
+        font-size: 20px;
+        line-height: 20px;
+        margin-bottom: 10px;
       }
     }
   }
@@ -246,9 +241,16 @@ select {
     } 
   }
   p {
-    line-height: 10px;
-    margin-bottom: 10px;
+    line-height: 1em;
+    &:last-child {
+      margin-bottom: 0;
+    }
+    &:not(:last-child) {
+      margin-bottom: 10px;
+    }
   }
+
+
 }
 
 .app-division-chart {
@@ -589,28 +591,34 @@ select {
         margin: 40px;
         font-size: 30px;
         padding: 10px;
+        border: solid 1px;
       }
     }
   }
 
   .modal-content {
-    font-size: 2em;
+    font-size: 1em;
     line-height: 1.5em;
   }
 
   .folder__tabs .folder__tab {
-    font-size: 24px;
-    padding: 15px;
+    font-size: 20px;
+    padding: 10px;
+  }
+
+  .action-button {
+    font-size: 1em;
+    padding: 10px;
   }
 
   button {
     font-size: 0.9em;
-    padding: 5px 10px;
+    padding: 5px 7px;
     margin-right: 10px;
   }
 
   .tab-card {
-    font-size: 30px;
+    font-size: 20px;
     line-height: 1.8em;
   }
 }
@@ -858,7 +866,7 @@ select {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 30px;
+  height: 15px;
   font-family: sans-serif;
 }
 
@@ -882,6 +890,10 @@ select {
 .editable-item {
   > * {
     margin-right: 5px;
+  }
+
+  .ipad-reserve-bar {
+    margin-top: 5px;
   }
 }
 
@@ -988,7 +1000,7 @@ select {
 
 .tab-block {
   width: 100%;
-  padding: 20px;
+  padding: 15px;
   box-sizing: border-box;
   background: #eeeeee;
   border-radius: 10px;
@@ -997,7 +1009,7 @@ select {
   &.wrap-block {
     flex: 1;
     width: 100%;
-    min-width: 300px;
+    min-width: 200px;
   }
 }
 

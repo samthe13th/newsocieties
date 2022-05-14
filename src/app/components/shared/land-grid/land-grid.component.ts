@@ -360,11 +360,7 @@ export class LandGridComponent implements OnInit {
       this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/divisionLargePopup`).set({
         type: 'Contaminant',
         value: 2,
-        data: [
-          ['O', 'X', 'O'],
-          ['X', 'C', 'X'],
-          ['O', 'X', 'O']
-        ],
+        data: this.divisionService.getContamDemoTileData(2),
         header: `A new type of contaminant has been uncovered`,
         message: `This contaminant can spread in two directions`,
       })
@@ -373,11 +369,7 @@ export class LandGridComponent implements OnInit {
       this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/divisionLargePopup`).set({
         type: 'Contaminant',
         value: 3,
-        data: [
-          ['X', 'X', 'X'],
-          ['X', 'C', 'X'],
-          ['X', 'X', 'X']
-        ],
+        data: this.divisionService.getContamDemoTileData(3),
         header: `A new type of contaminant has been uncovered`,
         message: `This contaminant can spread in ALL directions`,
       })
