@@ -35,10 +35,24 @@
     (tabChange)="onIpadTabChange($event, obs.focus)"
     [tabs]="[
       { id: 'division', tabTemplate: divisionTab, bodyTemplate: ipadDivisionTemplate },
-      { id: 'vote', tabTemplate: voteTab, bodyTemplate: ipadVoteTemplate },
-      { id: 'review', tabTemplate: reviewTab, bodyTemplate: ipadReviewTemplate }
+      { id: 'vote', tabTemplate: voteTab, bodyTemplate: ipadVoteTemplate }
     ]">
   </app-tabs>
+
+  <div class="ipad-fullscreen-toggle">
+    <fa-icon
+      *ngIf="!fullscreen"
+      size="lg"
+      [icon]="fa.faCaretSquareUp"
+      (click)="setFullScreen()">
+    </fa-icon>
+    <fa-icon
+      *ngIf="fullscreen"
+      size="lg"
+      [icon]="fa.faCaretSquareDown"
+      (click)="exitFullScreen()">
+    </fa-icon>
+  </div>
 
   <div *ngIf="scanMode" class="app-fullscreen-overlay">
     <div class="scanner">
@@ -53,19 +67,31 @@
         <div class="progress-bar"></div>
         <div class="scanline"></div>
       </ng-container>
-      <div *ngIf="!isScanning" class="scanner-button close" (click)="exitScan(); exitFullScreen()"></div>
+      <div *ngIf="!isScanning" class="scanner-button close" (click)="exitScan()"></div>
       <div 
         *ngIf="scanResult" 
         class="scan-result"
         [class.clean]="!scanResult?.contaminated"
         [class.contaminated]="scanResult?.contaminated"
         >
-        <h2>{{scanResult?.header}}</h2>
-        <fa-icon
+
+        <div class="success-graphic">
+          <h2>{{scanResult?.header}}</h2>
+          <ng-container *ngIf="!scanResult?.contaminated">
+            <fa-icon
+              size="lg"
+              [icon]="fa.faCheckCircle">
+            </fa-icon>
+          </ng-container>
+        </div>
+
+        <button
           *ngIf="!scanResult?.contaminated"
-          size="lg"
-          [icon]="fa.faCheckCircle">
-        </fa-icon>
+          class="scanner-button scan"
+          (click)="resetScan(); scanResource()">
+          New Scan
+        </button>
+
         <img *ngIf="scanResult?.contaminated" [src]="scanResult?.image">
         <div class="scan-result-report" *ngIf="scanResult?.contaminated">
           <h3>Report additional contaminations</h3>
@@ -532,7 +558,7 @@
         <button *ngIf="voteDropdownSelect && voteState !== 'final'" (click)="customVoteOption()">Custom</button>
         <button *ngIf="divisionVote?.selection" (click)="implement()">Implement</button>
       </div>
-      <div *ngIf="ipad" class="scan-button" (click)="scanMode = true; setFullScreen()">
+      <div *ngIf="ipad" class="scan-button" (click)="scanMode = true">
         SCAN
       </div>
     </div>
@@ -547,8 +573,7 @@
             <div class="tab-block">
               <strong>Season:</strong>
               {{ division.season }}
-              <button (click)="newSeason(division)">New Season</button>
-              <button (click)="resetSeason(division)">Reset Season</button>
+              <!-- <button (click)="resetSeason(division)">Reset Season</button> -->
               <div><strong>Division: </strong>{{ division.name }}</div>
               <div><strong>Score: </strong>{{ division.score }} ({{ division.VP }})</div>
               <div class="editable-item">
@@ -564,24 +589,6 @@
                 {{ division.highThresholdsMet }}
               </div>
             </div>
-
-            <div class="tab-block">
-              <div class="editable-item">
-                <strong>Harvest Cards:</strong>
-                {{ division?.harvest }}
-              </div>
-              <div class="flex-row stack-h lg" *ngIf="obs.reserveData">
-                <div>
-                  R1: <span class="badge">{{ obs.reserveData?.deck.R1 }}</span>
-                </div>
-                <div>
-                  R2: <span class="badge">{{ obs.reserveData?.deck.R2 }}</span>
-                </div>
-                <div>
-                  R3: <span class="badge">{{ obs.reserveData?.deck.R3 }}</span>
-                </div>
-              </div>
-            </div>
       
             <div class="flex-row flex-wrap">
               <app-division-advancements
@@ -593,7 +600,7 @@
                 [advancements]="$advancements | async">
               </app-division-advancements>
       
-              <div class="flex--column tab-block stack" [class.wrap-block]="ipad">
+              <div class="flex--column tab-block stack--lg" [class.wrap-block]="ipad">
                 <div class="editable-item">
                   <button *ngIf="ipad" (click)="changeDivisionProperty('reserve')">
                     <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
@@ -631,7 +638,46 @@
                 </div>
               </div>
             </div>
-      
+
+            <div class="tab-block">
+              <button (click)="newSeason(division)">New Season</button>
+              <div class="editable-item">
+                <strong>Harvest Cards:</strong>
+                {{ division?.harvest }}
+              </div>
+              <div class="flex-row stack-h lg" *ngIf="obs.reserveData">
+                <div class="ipad-card-deal">
+                  <app-harvest-image
+                    [contaminated]="false"
+                    [division]="divisionKey"
+                    type="R"
+                    [value]="1">
+                  </app-harvest-image> = <span class="badge">
+                    {{ obs.reserveData?.deck.R1 }}
+                  </span>
+                </div>
+                <div class="ipad-card-deal">
+                  <app-harvest-image
+                    [contaminated]="false"
+                    [division]="divisionKey"
+                    type="R"
+                    [value]="2">
+                  </app-harvest-image> = <span class="badge">
+                    {{ obs.reserveData?.deck.R2 }}
+                  </span>
+                </div>
+                <div class="ipad-card-deal">
+                  <app-harvest-image
+                    [contaminated]="false"
+                    [division]="divisionKey"
+                    type="R"
+                    [value]="3">
+                  </app-harvest-image> = <span class="badge">
+                    {{ obs.reserveData?.deck.R3 }}
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
       
           <ng-container *ngIf="!ipad">

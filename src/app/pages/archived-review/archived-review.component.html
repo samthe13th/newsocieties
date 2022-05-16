@@ -1,0 +1,20 @@
+Review
+<ng-container *ngIf="$divisionReview | async as division">
+  <h1>{{division?.code}} DIVISION</h1>
+  <div><strong>Score: </strong>{{division?.score}}</div>
+  <div><strong>Reserve: </strong>{{division?.reserve}}</div>
+  <div><strong>Land Acquired (local): </strong>{{division?.localLand?.length}}</div>
+  <div><strong>Land Acquired (global): </strong>{{division?.globalLand?.length}}</div>
+  <div *ngFor="let adv of division.advancements">
+    <strong>{{adv.name}}: </strong>{{ adv.individual + adv.communal }}
+  </div>
+  <div><strong>Exceeded Capacity: </strong>{{division?.exceededCapacity }}</div>
+  <div><strong>Resources In-Hand: </strong>{{division?.inHand }}</div>
+  <br/>
+  <h2>Principles</h2>
+  <p *ngFor="let p of division.principles">{{p.value}}</p>
+  <h2>Resolutions</h2>
+  <p *ngFor="let r of division.resolutions">{{r.value}}</p>
+  <h2>Crises</h2>
+  <p *ngFor="let s of division.scenarios">{{s.value}}</p>
+</ng-container>

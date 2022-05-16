@@ -76,6 +76,7 @@ export class HostComponent implements OnInit, OnDestroy {
   scanMode = false;
   showSize = 'normal';
   ipad = true;
+  fullscreen = false;
 
   // ICONS
   faPen = faPen;
@@ -461,12 +462,16 @@ export class HostComponent implements OnInit, OnDestroy {
         console.log('scanning in progress... ')
         setTimeout(() => {
           this.processScan(isContaminated, contamLevel, harvestRemaining, contamsRemaining);
-        }, 3000)
+        }, 1500)
       })
   }
 
   exitScan() {
     this.scanMode = false;
+    this.resetScan();
+  }
+
+  resetScan() {
     this.isScanning = false;
     this.scanResult = undefined;
   }
@@ -540,6 +545,7 @@ export class HostComponent implements OnInit, OnDestroy {
   }
 
   setFullScreen() {
+    this.fullscreen = true;
     const elem: any = document.documentElement as any;
     if (elem.requestFullscreen) {
       elem.requestFullscreen();
@@ -553,6 +559,7 @@ export class HostComponent implements OnInit, OnDestroy {
   }
 
   exitFullScreen() {
+    this.fullscreen = false;
     const doc: any = document;
     if (doc.exitFullscreen) {
       document.exitFullscreen();
@@ -886,6 +893,7 @@ export class HostComponent implements OnInit, OnDestroy {
   }
 
   autoPick(focus) {
+    console.log('autopick: ', focus, this.voteDropdown, this.voteDropdownSelect)
     const untouched = this.voteDropdown.filter((option) => !option.votedOn);
     console.log('untouched: ', untouched)
     this.voteDropdownSelect = pluckRandom(untouched, 1)[0];
@@ -896,7 +904,7 @@ export class HostComponent implements OnInit, OnDestroy {
   }
 
   async generateArchivedReview() {
-    const showNumber = await this.db.object(`shows/${this.showKey}/showNumber`).valueChanges().pipe(take(1)).toPromise();
+    const showNumber = await this.db.object(`shows/${this.showKey}/showNumber`).valueChanges().pipe(take(1)).toPromise() ?? 1;
     const archiveId = `${formatDate(new Date(), 'mmddyy')}/${showNumber}`;
     const review = await combineLatest(
       this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/score`).valueChanges(),

@@ -12,14 +12,18 @@ import { ActivatedRoute } from '@angular/router';
 export class ReviewComponent implements OnInit {
   showKey: string;
   divisionKey: string;
+  date: string;
+  showNumber: string;
 
   constructor(private route: ActivatedRoute) {
   }
   
   ngOnInit() {
-    const { show, division } = this.route.snapshot.params;
+    const { show, division, date, showNumber } = this.route.snapshot.params;
     this.showKey = show;
     this.divisionKey = division;
+    this.date = date;
+    this.showNumber = showNumber
 
     console.log("REVIEW: ", show, division);
   }

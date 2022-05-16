@@ -11,6 +11,7 @@ import { AdminComponent } from './admin/admin.component';
 import { GoogleChartsModule } from 'angular-google-charts';
 import { SummaryComponent } from './summary/summary.component';
 import { ReviewComponent } from './review/review.component';
+import { ArchivedReviewComponent } from './archived-review/archived-review.component';
 
 
 const pages = [
@@ -19,7 +20,8 @@ const pages = [
   PlayerComponent, 
   AdminComponent,
   SummaryComponent,
-  ReviewComponent
+  ReviewComponent,
+  ArchivedReviewComponent,
 ]
 
 @NgModule({
