@@ -549,9 +549,9 @@
   <ng-template #ipadButtons>
     <div class="ipad-buttons">
       <div class="flex-row">
-        <button *ngIf="voteState === 'review'" (click)="noDecision()">No Decision</button>
+        <button *ngIf="voteDropdownSelect && voteState !== 'final' && obs.focus === 'principles'" (click)="noDecision()">No Decision</button>
         <button
-          *ngIf="voteDropdownSelect && voteState !== 'final' && (obs.focus === 'resolutions' || obs.focus === 'scenarios')"
+          *ngIf="voteDropdownSelect && voteState !== 'final' && (obs.focus === 'resolutions' || obs.focus === 'scenario')"
           (click)="doNotAct(obs.focus)">
           Do not act
         </button>

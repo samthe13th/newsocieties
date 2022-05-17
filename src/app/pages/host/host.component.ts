@@ -324,7 +324,7 @@ export class HostComponent implements OnInit, OnDestroy {
               message: `The ${div.name} is now at a ${div.score} rating`,
             })
             this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/landmarks/${div.score}`).set(true)
-          }, 3500)
+          }, this.ipad ? 0 : 3500)
         }
       })
     );
@@ -508,10 +508,13 @@ export class HostComponent implements OnInit, OnDestroy {
       });
     }
     console.log("scan result: ", this.scanResult)
-    this.exitScan();
+    this.resetScan();
   }
 
-  processScan(isContaminated, level, harvestRemaining, contamsRemaining) {
+  async processScan(isContaminated, level, harvestRemaining, contamsRemaining) {
+    await this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/actions`).query.ref.transaction((actions: number) => {
+      return actions ? ++actions : 1
+    })
     if (isContaminated) {
       const contaminantValue = this.divisionService.getContaminantValue(level)
       this.scanResult = {
