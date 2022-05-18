@@ -62,7 +62,15 @@
         <div class="ripple3"></div>
         <div *ngIf="!isScanning" class="ripple-center"></div>
       </div>
-      <button *ngIf="!isScanning && !scanResult" class="scanner-button scan" (click)="scanResource()">SCAN</button>
+
+      <ng-container *ngIf="!isScanning && !scanResult">
+          <button 
+          class="scanner-button scan"
+          (click)="currentSeason == 0 ? mockScan() : scanResource()">
+          SCAN
+        </button>
+      </ng-container>
+
       <ng-container *ngIf="isScanning && !scanResult">
         <div class="progress-bar"></div>
         <div class="scanline"></div>
@@ -558,9 +566,23 @@
         <button *ngIf="voteDropdownSelect && voteState !== 'final'" (click)="customVoteOption()">Custom</button>
         <button *ngIf="divisionVote?.selection" (click)="implement()">Implement</button>
       </div>
-      <div *ngIf="ipad" class="scan-button" (click)="scanMode = true">
+
+      <div *ngIf="ipad && currentSeason !== 0" class="scan-button" (click)="scanMode = true">
         SCAN
       </div>
+      <div class="flex-row stack-h" *ngIf="ipad && currentSeason === 0">
+        <div 
+          class="scan-button" 
+          (click)="demoScan(false)">
+          Scan: R
+        </div>
+        <div
+          class="scan-button"
+          (click)="demoScan(true)">
+          Scan: C
+        </div>
+      </div>
+
     </div>
   </ng-template>
 

@@ -74,6 +74,7 @@ export class HostComponent implements OnInit, OnDestroy {
   modalContent: TemplateRef<any>;
 
   scanMode = false;
+  demoScanContaminated = false;
   showSize = 'normal';
   ipad = true;
   fullscreen = false;
@@ -176,6 +177,7 @@ export class HostComponent implements OnInit, OnDestroy {
   scanContamTiles;
   landCost;
   customVoteInput;
+  currentSeason;
   voteState;
   selectedCitizen;
   selectedLandTile;
@@ -293,6 +295,7 @@ export class HostComponent implements OnInit, OnDestroy {
     this.$vote = this.db.object(`${this.divisionPath}/vote`).valueChanges().pipe(
       tap((vote: any) => { console.log('VOTE: ', vote); this.voteState = vote?.state })
     )
+  
     this.db.object(`${this.divisionPath}/landmarks`).valueChanges().pipe(
       takeUntil(this.destroy$)
     ).subscribe((landmarks) => {
@@ -310,6 +313,8 @@ export class HostComponent implements OnInit, OnDestroy {
       filter((x) => x !== null && x !== undefined),
       tap((div: any) => {
         this.landCost = div.landCost;
+        this.currentSeason = div.season;
+        console.log('SET CURRENT SEASON: ', this.currentSeason)
         if (div.score !== 'Low' && this.divisionScore !== div.score && !this.landmarks?.[div.score]) {
           this.divisionScore = div.score;
           setTimeout(() => {
@@ -411,7 +416,14 @@ export class HostComponent implements OnInit, OnDestroy {
     this.dismissSheet();
   }
 
+  mockScan() {
+    console.log('mock scan')
+    this.isScanning = true;
+    this.processScan(this.demoScanContaminated);
+  }
+
   async scanResource() {
+    console.log('scan resource')
     this.isScanning = true;
 
     let totalHarvest: number;
@@ -455,9 +467,7 @@ export class HostComponent implements OnInit, OnDestroy {
         return currentScan;
       }).then((_scan) => {
         console.log('scanning in progress... ')
-        setTimeout(() => {
-          this.processScan(isContaminated, contamLevel, harvestRemaining, contamsRemaining);
-        }, 1500)
+        this.processScan(isContaminated, contamLevel, harvestRemaining, contamsRemaining);
       })
   }
 
@@ -471,7 +481,16 @@ export class HostComponent implements OnInit, OnDestroy {
     this.scanResult = undefined;
   }
 
+  demoScan(contam) {
+    this.demoScanContaminated = contam;
+    this.scanMode = true;
+  }
+
   async reportContaminations(button) {
+    if (this.currentSeason === 0) {
+      this.resetScan();
+      return;
+    }
     const toReport = _.toNumber(button.label)
     if (toReport > 0) {
       await this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/scan`)
@@ -506,27 +525,29 @@ export class HostComponent implements OnInit, OnDestroy {
     this.resetScan();
   }
 
-  async processScan(isContaminated, level, harvestRemaining, contamsRemaining) {
-    if (isContaminated) {
-      const contaminantValue = this.divisionService.getContaminantValue(level)
-      this.scanResult = {
-        harvestRemaining,
-        contamsRemaining,
-        contaminated: true,
-        header: 'Contaminant detected',
-        image: `../assets/C${contaminantValue}.png`
+  async processScan(isContaminated, level=1, harvestRemaining=0, contamsRemaining=0) {
+    setTimeout(() => {
+      if (isContaminated) {
+        const contaminantValue = this.divisionService.getContaminantValue(level)
+        this.scanResult = {
+          harvestRemaining,
+          contamsRemaining,
+          contaminated: true,
+          header: 'Contaminant detected',
+          image: `../assets/C${contaminantValue}.png`
+        }
+        this.reportContaminationButtons = this.generateReportContaminationButtons(contaminantValue);
+      } else {
+        this.scanResult = {
+          harvestRemaining,
+          contamsRemaining,
+          contaminated: false,
+          header: 'No contaminants detected',
+          image: ''
+        }
       }
-      this.reportContaminationButtons = this.generateReportContaminationButtons(contaminantValue);
-    } else {
-      this.scanResult = {
-        harvestRemaining,
-        contamsRemaining,
-        contaminated: false,
-        header: 'No contaminants detected',
-        image: ''
-      }
-    }
-    this.isScanning = false;
+      this.isScanning = false;
+    }, 1500)
   }
 
   generateReportContaminationButtons(value) {
