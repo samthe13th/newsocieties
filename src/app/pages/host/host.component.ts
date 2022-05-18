@@ -237,10 +237,6 @@ export class HostComponent implements OnInit, OnDestroy {
       }
     )
 
-    this.$deck = combineLatest(
-
-    )
-
     this.$reserveData = combineLatest(
       this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/reserve`).valueChanges(),
       this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/reserveThresholds`).valueChanges(),
@@ -512,9 +508,6 @@ export class HostComponent implements OnInit, OnDestroy {
   }
 
   async processScan(isContaminated, level, harvestRemaining, contamsRemaining) {
-    await this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/actions`).query.ref.transaction((actions: number) => {
-      return actions ? ++actions : 1
-    })
     if (isContaminated) {
       const contaminantValue = this.divisionService.getContaminantValue(level)
       this.scanResult = {
@@ -577,7 +570,7 @@ export class HostComponent implements OnInit, OnDestroy {
 
   async updatePositions() {
     const divisionPath = `shows/${this.showKey}/divisions/${this.divisionKey}`;
-    const citizens = await promiseOne(this.db.list(`${divisionPath}/citizens`))
+    const citizens = await promiseOne(this.db.list(`${divisionPath}/citizens`));
     this.positions = citizens.map((c: any) => c?.id);
     this.db.object(`${divisionPath}/positions`).set(this.positions);
   }
