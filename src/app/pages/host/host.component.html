@@ -640,10 +640,13 @@
             </div>
 
             <div class="tab-block">
-              <button (click)="newSeason(division)">New Season</button>
+              <div class="flex-row">
+                  <button (click)="updateNextSeason()">New Harvest</button>
+                  <button (click)="newSeason(division)">New Season</button>
+              </div>
               <div class="editable-item">
                 <strong>Harvest Cards:</strong>
-                {{ division?.harvest }}
+                {{ division?.nextSeason?.harvest }}
               </div>
               <div class="flex-row stack-h lg" *ngIf="obs.reserveData">
                 <div class="ipad-card-deal">

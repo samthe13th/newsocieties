@@ -241,10 +241,9 @@ export class HostComponent implements OnInit, OnDestroy {
       this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/reserve`).valueChanges(),
       this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/reserveThresholds`).valueChanges(),
       this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/color`).valueChanges(),
-      this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/harvest`).valueChanges(),
+      this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/nextSeason/harvest`).valueChanges(),
     ).pipe(
       map(([reserve, thresholds, color, harvest]: [any, any, string, number]) => {
-        console.log('test: ', harvest, thresholds, toNumber(reserve), toNumber(thresholds.high), toNumber(reserve) / toNumber(thresholds.high ))
         return {
           reserve: {
             value: reserve,
@@ -1440,9 +1439,13 @@ export class HostComponent implements OnInit, OnDestroy {
     }, 3000)
   }
 
+  updateNextSeason() {
+    this.divisionService.newSeason(this.showKey, this.divisionKey, this.showSize);
+  }
+
   newSeason(division) {
     if (!division) return;
-    this.divisionService.newSeason(this.showKey, this.divisionKey, this.showSize);
+    this.updateNextSeason();
     this.modalContent = this.newSeasonModal;
     this.showModal = true;
   }
