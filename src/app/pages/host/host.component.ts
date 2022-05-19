@@ -178,6 +178,7 @@ export class HostComponent implements OnInit, OnDestroy {
   scanResult;
   isScanning = false;
   scanContamTiles;
+  scanCount = 1;
 
   landCost;
   customVoteInput;
@@ -425,7 +426,6 @@ export class HostComponent implements OnInit, OnDestroy {
   }
 
   async scanResource() {
-    console.log('scan resource')
     this.isScanning = true;
 
     let totalHarvest: number;
@@ -438,39 +438,61 @@ export class HostComponent implements OnInit, OnDestroy {
         this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/contaminantLevel`).valueChanges()
       ).pipe(
       take(1)
-    ).subscribe(([percent, harvest, level]: [number, number, 1 | 2 | 3]) => { 
-      totalHarvest = harvest
-      contamPercent = percent
+    ).subscribe(([percent, harvest, level]: [number, number, 1 | 2 | 3]) => {
+      totalHarvest = harvest;
+      contamPercent = percent;
       contamLevel = level;
-      resolve(null)
+      resolve(null);
     }));
 
-    console.log({totalHarvest, contamPercent, contamLevel})
+    console.log({totalHarvest, contamPercent, contamLevel});
 
     let isContaminated;
     let contamsRemaining; 
     let harvestRemaining;
+    let scanResults;
 
     this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/scan`)
       .query.ref.transaction((scan: { contaminantsFound: number, harvested: number }) => { 
-        let currentScan = scan ?? { contaminantsFound: 0, harvested: 0 }
-        const totalContams = Math.ceil((contamPercent/100) * totalHarvest) ?? 0
+        const currentScan = scan ?? { contaminantsFound: 0, harvested: 0 };
+        const totalContams = Math.ceil((contamPercent / 100) * totalHarvest) ?? 0;
+
         contamsRemaining = totalContams - currentScan.contaminantsFound;
         harvestRemaining = totalHarvest - currentScan.harvested;
         
-        const pick = getRandomInt(1, harvestRemaining);
+        scanResults = this.getScanResults(contamsRemaining, harvestRemaining);
+        console.log({scanResults})
 
-        isContaminated = (pick <= contamsRemaining) && contamsRemaining > 0;
-        console.log("SCAN: ", scan, { totalHarvest, totalContams, contamsRemaining, harvestRemaining, pick })
-        
-        currentScan.contaminantsFound = isContaminated ? currentScan.contaminantsFound + 1 : currentScan.contaminantsFound;
-        currentScan.harvested++;
+        currentScan.contaminantsFound += scanResults?.contaminantsFound;
+        currentScan.harvested += scanResults?.harvested;
 
         return currentScan;
-      }).then((_scan) => {
-        console.log('scanning in progress... ')
-        this.processScan(isContaminated, contamLevel, harvestRemaining, contamsRemaining);
-      })
+      }).then(() => {
+        this.processScan(scanResults, contamLevel, harvestRemaining, contamsRemaining);
+      });
+  }
+
+  getScanResults(_contamsRemaining, _harvestRemaining) {
+    let contamsRemaining = _contamsRemaining;
+    let harvestRemaining = _harvestRemaining;
+
+    const results = _.range(this.scanCount).map(() => {
+      const pick = getRandomInt(1, harvestRemaining);
+      const isContaminated = (pick <= contamsRemaining) && (contamsRemaining  > 0);
+      contamsRemaining = isContaminated ? Math.max((contamsRemaining - 1), 0) : contamsRemaining;
+      harvestRemaining = Math.max(0, harvestRemaining - 1);
+      return isContaminated;
+    });
+
+    return {
+      results,
+      contaminantsFound: _contamsRemaining - contamsRemaining,
+      harvested: _harvestRemaining - harvestRemaining
+    };
+  }
+
+  onScanCountChange(value: number) {
+    this.scanCount = value;
   }
 
   exitScan() {
@@ -479,6 +501,7 @@ export class HostComponent implements OnInit, OnDestroy {
   }
 
   resetScan() {
+    this.scanCount = 1;
     this.isScanning = false;
     this.scanResult = undefined;
   }
@@ -527,27 +550,43 @@ export class HostComponent implements OnInit, OnDestroy {
     this.resetScan();
   }
 
-  async processScan(isContaminated, level=1, harvestRemaining=0, contamsRemaining=0) {
+  async processScan(scanResults, level=1, harvestRemaining=0, contamsRemaining=0) {
+    console.log('process this: ', scanResults)
     setTimeout(() => {
-      if (isContaminated) {
-        const contaminantValue = this.divisionService.getContaminantValue(level)
-        this.scanResult = {
-          harvestRemaining,
-          contamsRemaining,
-          contaminated: true,
-          header: 'Contaminant detected',
-          image: `../assets/C${contaminantValue}.png`
+      if (scanResults.harvested === 1) {
+        if (scanResults.contaminantsFound === 1) {
+          const contaminantValue = this.divisionService.getContaminantValue(level)
+          this.scanResult = {
+            harvestRemaining,
+            contamsRemaining,
+            contaminated: true,
+            multi: null,
+            header: 'Contaminant detected',
+            image: `../assets/C${contaminantValue}.png`
+          }
+          this.reportContaminationButtons = this.generateReportContaminationButtons(contaminantValue);
+        } else {
+          this.scanResult = {
+            harvestRemaining,
+            contamsRemaining,
+            contaminated: false,
+            multi: null,
+            header: 'No contaminants detected',
+            image: ''
+          }
         }
-        this.reportContaminationButtons = this.generateReportContaminationButtons(contaminantValue);
       } else {
         this.scanResult = {
           harvestRemaining,
           contamsRemaining,
-          contaminated: false,
-          header: 'No contaminants detected',
-          image: ''
+          contaminated: null,
+          multi: true,
+          results: scanResults.results,
+          header: null,
+          image: null
         }
       }
+
       this.isScanning = false;
     }, 1500)
   }

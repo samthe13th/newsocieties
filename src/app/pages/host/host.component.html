@@ -64,21 +64,38 @@
         <div *ngIf="!isScanning" class="ripple-center"></div>
       </div>
 
-      <ng-container *ngIf="!isScanning && !scanResult">
-          <button 
+      <div class="scanner-button-wrap" *ngIf="!isScanning && !scanResult">
+        <button 
           class="scanner-button scan"
           (click)="currentSeason == 0 ? mockScan() : scanResource()">
           SCAN
         </button>
-      </ng-container>
+        <ng-number-picker
+          class="number-picker"
+          [arrowKeys]="true"
+          [min]="0"
+          (valueChange)="onScanCountChange($event)"
+          [value]="scanCount">
+        </ng-number-picker>
+      </div>
 
       <ng-container *ngIf="isScanning && !scanResult">
         <div class="progress-bar"></div>
         <div class="scanline"></div>
       </ng-container>
       <div *ngIf="!isScanning" class="scanner-button close" (click)="exitScan()"></div>
+      <div *ngIf="scanResult && scanResult?.multi">
+        <h1>Scan Results</h1>
+        <div class="multi-scan-results stack">
+          <div class="multi-scan-row stack-h" *ngFor="let result of scanResult.results; let i = index">
+            <span class="item-index">{{i + 1}}</span>
+            <span *ngIf="result" class="multi-scan-result contaminated">Contaminated</span>
+            <span *ngIf="!result" class="multi-scan-result clean">Not contaminated</span>
+          </div>
+        </div>
+      </div>
       <div 
-        *ngIf="scanResult" 
+        *ngIf="scanResult && !scanResult?.multi" 
         class="scan-result"
         [class.clean]="!scanResult?.contaminated"
         [class.contaminated]="scanResult?.contaminated"

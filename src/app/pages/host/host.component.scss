@@ -327,9 +327,20 @@
     }
   }
 
-  .scanner-button {
+  .scanner-button-wrap {
     position: absolute;
+    bottom: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 20px;
+    font-family: sans-serif;
+    display: flex; 
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
 
+  .scanner-button {
     &.close {
       position: absolute; 
       bottom: 10px;
@@ -343,14 +354,13 @@
     }
 
     &.scan {
-      bottom: 60px;
-      left: 50%;
-      transform: translateX(-50%);
       font-size: 20px;
       font-family: sans-serif;
       background: #ffffff;
       border-style: none;
-      padding: 20px;
+      padding: 15px;
+      margin-right: 0;
+      margin-bottom: 15px;
 
       &:active, 
       &:focus {
@@ -527,6 +537,46 @@
   width: 100%;
   height: 420px;
   overflow: auto;
+}
+
+.multi-scan-results {
+  display: flex; 
+  flex-direction: column;
+  width: 100%;
+  max-width: 300px;
+  justify-content: center;
+
+  .multi-scan-row {
+    display: flex; 
+    width: 100%;
+    justify-content: space-between;
+
+    > * {
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      white-space: nowrap;
+      border-radius: 10px;
+    }
+  }
+
+  .item-index {
+    width: 0;
+    background: white;
+    color: black;
+  }
+
+  .multi-scan-result {
+    width: 100%;
+
+    &.contaminated {
+      background: #b82a19;
+    }
+    &.clean {
+      background: #5E9B7E;
+    }
+  }
 }
 
 .folder__body.host-selected-tab {
