@@ -35,7 +35,8 @@
     (tabChange)="onIpadTabChange($event, obs.focus)"
     [tabs]="[
       { id: 'division', tabTemplate: divisionTab, bodyTemplate: ipadDivisionTemplate },
-      { id: 'vote', tabTemplate: voteTab, bodyTemplate: ipadVoteTemplate }
+      { id: 'vote', tabTemplate: voteTab, bodyTemplate: ipadVoteTemplate },
+      { id: 'review', tabTemplate: reviewTab, bodyTemplate: ipadReviewTemplate }
     ]">
   </app-tabs>
 
@@ -495,7 +496,14 @@
   <ng-template #notes>Notes</ng-template>
 
   <ng-template #ipadReviewTemplate>
-    <button (click)="generateArchivedReview()">Generate Review</button>
+    <app-archived-review-display
+      [divisionKey]="divisionKey"
+      [showKey]="showKey"
+      [date]="showDate"
+      [showNumber]="showNumber"
+    >
+    </app-archived-review-display>
+    <ng-container *ngTemplateOutlet="ipadButtons"></ng-container>
   </ng-template>
 
   <ng-template #ipadChatTemplate>
@@ -557,19 +565,25 @@
   <ng-template #ipadButtons>
     <div class="ipad-buttons">
       <div class="flex-row">
-        <button *ngIf="voteDropdownSelect && voteState !== 'final' && obs.focus === 'principles'" (click)="noDecision()">No Decision</button>
-        <button
-          *ngIf="voteDropdownSelect && voteState !== 'final' && (obs.focus === 'resolutions' || obs.focus === 'scenario')"
-          (click)="doNotAct(obs.focus)">
-          Do not act
-        </button>
-        <button *ngIf="voteDropdownSelect && voteState !== 'final'" (click)="customVoteOption()">Custom</button>
-        <button *ngIf="divisionVote?.selection" (click)="implement()">Implement</button>
+        <ng-container *ngIf="ipadTab === 'review'">
+            <button (click)="generateArchivedReview()">Generate Review</button>
+        </ng-container>
+        <ng-container *ngIf="ipadTab === 'vote'">
+            <button *ngIf="voteDropdownSelect && voteState !== 'final' && obs.focus === 'principles'" (click)="noDecision()">No Decision</button>
+            <button
+              *ngIf="voteDropdownSelect && voteState !== 'final' && (obs.focus === 'resolutions' || obs.focus === 'scenario')"
+              (click)="doNotAct(obs.focus)">
+              Do not act
+            </button>
+            <button *ngIf="voteDropdownSelect && voteState !== 'final'" (click)="customVoteOption()">Custom</button>
+            <button *ngIf="divisionVote?.selection" (click)="implement()">Implement</button>
+        </ng-container>
       </div>
 
       <div *ngIf="ipad && currentSeason !== 0" class="scan-button" (click)="scanMode = true">
         SCAN
       </div>
+
       <div class="flex-row stack-h" *ngIf="ipad && currentSeason === 0">
         <div 
           class="scan-button" 

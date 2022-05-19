@@ -282,6 +282,18 @@ select {
   border-radius: 10px;
 }
 
+.app-archived-review-display {
+  display: flex;
+  flex-direction: column;
+  background: #fff6e0;
+  padding: 20px;
+  font-size: 20px;
+  line-height: 30px;
+  color: #563900;
+  height: 100%;
+  overflow: auto;
+}
+
 .app-advancement-summary {
   height: 100%;
   width: 100%; 

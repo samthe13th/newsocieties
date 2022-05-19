@@ -45,10 +45,12 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { TimelineComponent } from './shared/timeline/timeline.component';
 import { DivisionAdvComponent } from './shared/division-adv/division-adv.component';
 import { DivisionAdvancmentsComponent } from './host/division-advancements/division-advancements.component';
+import { ArchivedReviewDisplayComponent, } from './shared/archived-review-display/archived-review-display.component';
 
 const components = [
   AdvancementTrackComponent,
   AdvancementSummaryComponent,
+  ArchivedReviewDisplayComponent,
   ButtonGroupComponent,
   BannerComponent,
   CardComponent,

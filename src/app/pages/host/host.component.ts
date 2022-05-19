@@ -172,9 +172,13 @@ export class HostComponent implements OnInit, OnDestroy {
     // }
   }
 
+  showDate;
+  showNumber;
+  showKey;
   scanResult;
   isScanning = false;
   scanContamTiles;
+
   landCost;
   customVoteInput;
   currentSeason;
@@ -187,12 +191,11 @@ export class HostComponent implements OnInit, OnDestroy {
   divisions;
   actionSheet;
   voteResultFunds = 0;
-  division;
   contamination;
   harvest;
   divisionColor;
   divisionKey;
-  showKey;
+
   divisionPath;
   landTilesPath;
   chatInput = "";
@@ -210,7 +213,6 @@ export class HostComponent implements OnInit, OnDestroy {
   leftTab;
   ipadTab;
   citizenCount = 0;
-  citizens;
   positions;
   lockColumns;
   divisionScore;
@@ -230,14 +232,7 @@ export class HostComponent implements OnInit, OnDestroy {
     this.divisionKey = this.route.snapshot.params.division;
     this.showKey = this.route.snapshot.params.show;
     this.ipad = this.route.snapshot.queryParams.ipad == 'true';
-
-    this.db.object('shows').valueChanges().pipe(takeUntil(this.destroy$)).subscribe(
-      (shows) => {
-        if (!shows[this.showKey]) {
-          window.location.reload();
-        }
-      }
-    )
+    this.setShowArchiveParams();
 
     this.$reserveData = combineLatest(
       this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/reserve`).valueChanges(),
@@ -333,7 +328,6 @@ export class HostComponent implements OnInit, OnDestroy {
         tap((citizens) => {
           if (this.citizenCount !== citizens.length) {
             this.updatePositions();
-            this.citizens = citizens;
           }
           this.citizenCount = citizens.length;
       })
@@ -388,6 +382,14 @@ export class HostComponent implements OnInit, OnDestroy {
     this.getResolutions();
     this.getPrinciples();
     this.getScenarios();
+  }
+
+  async setShowArchiveParams() {
+    this.showNumber = await this.db.object(`shows/${this.showKey}/showNumber`)
+      .valueChanges()
+      .pipe(take(1))
+      .toPromise() ?? 1;
+    this.showDate = formatDate(new Date(), 'mmddyy');
   }
 
   changeAdvancement({ key, type }) {
@@ -920,8 +922,7 @@ export class HostComponent implements OnInit, OnDestroy {
   }
 
   async generateArchivedReview() {
-    const showNumber = await this.db.object(`shows/${this.showKey}/showNumber`).valueChanges().pipe(take(1)).toPromise() ?? 1;
-    const archiveId = `${formatDate(new Date(), 'mmddyy')}/${showNumber}`;
+    const archiveId = `${this.showDate}/${this.showNumber}`;
     const review = await combineLatest(
       this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/score`).valueChanges(),
       this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/reserve`).valueChanges(),
