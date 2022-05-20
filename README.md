@@ -27,5 +27,9 @@ Run `ng build` to build the project. The build artifacts will be stored in the `
 ### 05/19/2022
 #### IPAD updates
 * Hosts can now scan multiple harvest tiles at once, via a number-selector beneath the "SCAN" button on the scanning screen -- this is intended to be used in the case of scanning owned-land at the beginning of a season
-* "Review" tab added to ipad UI. A review for a division can be generated via a "Generate Review" button. Once generated, reviews can also be accessed at a unique url with the format: https://new-societies-8049d.web.app/main/archive/{DATE}/{SHOWNUMBER}/{DIVISION}. For example: https://new-societies-8049d.web.app/main/archive/051922/1/N is the review url for the north division, May 19th 2022, show #1.
+* "Review" tab added to ipad UI. A review for a division can be generated via a "Generate Review" button at the bottom of the screen. Once generated, reviews can also be accessed at a unique url with the format: https://new-societies-8049d.web.app/main/archive/{DATE}/{SHOWNUMBER}/{DIVISION}. For example: https://new-societies-8049d.web.app/main/archive/051922/1/N is the review url for the north division, May 19th 2022, show #1.
 * Show-number can be adjusted in the admin-panel at the top of the "Show" tab
+
+### 05/20/2022
+#### IPAD updates
+* Central will now get a popup whenever a division score changes

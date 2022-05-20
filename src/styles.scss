@@ -1,5 +1,6 @@
 @import '~@angular/material/theming';
 @include mat-core();
+@import '~ngx-toastr/toastr';
 
 $new-societies-primary: mat-palette($mat-indigo);
 $new-societies-accent: mat-palette($mat-pink, A200, A100, A400);

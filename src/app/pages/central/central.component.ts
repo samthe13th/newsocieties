@@ -6,6 +6,8 @@ import { trim, find, differenceWith, sortBy, includes } from 'lodash';
 import { map } from 'rxjs/operators';
 import * as moment from 'moment';
 import { ActivatedRoute } from '@angular/router';
+import { ToastrService } from 'ngx-toastr';
+
 
 const DIVISIONS = ['N', 'S', 'E', 'W', 'NE', 'SE', 'SW', 'NW'];
 
@@ -34,6 +36,7 @@ export class CentralComponent implements OnInit, AfterViewInit {
   $time: Observable<any>;
   $contamination: Observable<any>;
   $unseenMessages: Observable<any>;
+  $divisionRatings: Observable<any>;
 
   private destroy$ = new Subject<boolean>();
 
@@ -55,6 +58,7 @@ export class CentralComponent implements OnInit, AfterViewInit {
   constructor(
     private db: AngularFireDatabase,
     private route: ActivatedRoute,
+    private toastr: ToastrService
   ) {}
 
   ngOnInit() {
@@ -88,6 +92,27 @@ export class CentralComponent implements OnInit, AfterViewInit {
     )
 
     this.divisions = DIVISIONS;
+    
+    this.$divisionRatings = combineLatest(
+      this.divisions.map(
+        (key) => this.db.object(`shows/${this.showKey}/divisions/${key}/divisionLargePopup`)
+          .valueChanges()
+          .pipe(
+            tap((divisionPopup: any) => { 
+              console.log({divisionPopup});
+              if (divisionPopup?.type === 'Rating') {
+                console.log("TOAST: ", divisionPopup.message)
+                this.toastr.info(divisionPopup?.message, "Rating change", { 
+                  closeButton: true,
+                  disableTimeOut: true,
+                  tapToDismiss: false
+                });
+              }
+            })
+          )
+        )
+      ).pipe(takeUntil(this.destroy$));
+    this.$divisionRatings.subscribe();
   }
 
   ngAfterViewInit() {

@@ -416,6 +416,10 @@ export class AdminComponent implements OnInit, AfterViewInit {
       const costs = _costs.split('|');
       const consequences = _consequences.split('|');
 
+      if (consequences.length > options.length) {
+        console.log("add no-action consequence: ", consequences[consequences.length - 1])
+      }
+
       return {
         title: title.trim(),
         prompt: header[0], 

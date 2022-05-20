@@ -10,6 +10,7 @@ import { NgModule } from '@angular/core';
 import { PagesModule } from './pages/pages.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { GoogleChartsModule } from 'angular-google-charts';
+import { ToastrModule } from 'ngx-toastr';
 
 @NgModule({
   declarations: [
@@ -17,6 +18,10 @@ import { GoogleChartsModule } from 'angular-google-charts';
   ],
   imports: [
     AngularFireModule.initializeApp(environment.firebase),
+    ToastrModule.forRoot({
+      autoDismiss: false,
+      preventDuplicates: true
+    }),
     AppRoutingModule,
     FormsModule,
     ReactiveFormsModule,
