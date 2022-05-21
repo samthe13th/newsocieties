@@ -33,3 +33,11 @@ Run `ng build` to build the project. The build artifacts will be stored in the `
 ### 05/20/2022
 #### IPAD updates
 * Central will now get a popup whenever a division score changes
+
+### 05/21/2022
+#### IPAD UPDATES
+* BUG FIX: Season 0 scanning: r and scanning: c both say “scan results” but not the contaminant or contaminant-free screen 
+* BUG FIX: If you scan more than ~12, there’s no scrolling option on the tablets. The screen cuts off at #12 and anything below that cannot be accessed.
+* BUG FIX: On scan screen, most (not all) of the of the tablets show black text, but some show white
+* harvest size changed to the following values:  low = 21, mid-low = 28, mid = 35, mid-high = 42, high = 49. 
+* “Resources in hand” removed from review
