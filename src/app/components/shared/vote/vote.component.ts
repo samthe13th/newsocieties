@@ -61,6 +61,7 @@ export class VoteComponent implements OnInit {
       .valueChanges()
       .pipe(
         tap((vote) => {
+          console.log('vote: ', vote)
           if (vote?.noDecision) {
             this.selectedOption = undefined;
           }

@@ -12,6 +12,7 @@ import { formatDate, pluckRandom, promiseOne } from 'src/app/utilties';
 import { TimelineComponent } from 'src/app/components/shared/timeline/timeline.component';
 
 const DIVISIONS = ['N', 'S', 'E', 'W', 'NE', 'SE', 'SW', 'NW'];
+const ABC = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 const DIVISION_NAMES = {
   N: 'North',
   S: 'South',
@@ -309,24 +310,36 @@ export class AdminComponent implements OnInit, AfterViewInit {
     return data;
   }
 
-  parseScenariosData(_data) {
-    const data = _data.map(([title, _header, ...options]) => {
+  parseScenariosData(_data: any) {
+    const data = _data.map(([
+      title,
+      _header,
+      _secondaryPrompt,
+      _secondaryPromptTrigger,
+      _secondaryPromptOptions,
+      ...options]) => {
       const header = _header.split('|');
 
       return {
         title,
         prompt: header[0], 
         result: header[1],
-        options: options.map((option, i) => { 
+        options: options.map((option, i) => {
           return option ? { 
             prompt: option.split('|')[0],
             result: option.split('|')[1],
+            secondaryPrompt: (ABC[i] === _secondaryPromptTrigger) ? {
+              prompt: _secondaryPrompt,
+              options: _secondaryPromptOptions.split('|')
+            } : null,
             votes: 0
           } : null
         })
       }
     });
     data.shift();
+
+    console.log("SCENARIOS DATA: ", data)
 
     return data;
   }

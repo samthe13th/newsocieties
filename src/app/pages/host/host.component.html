@@ -399,12 +399,10 @@
     <h1>Principle</h1>
     <ng-container *ngIf="voteDropdown">
       <select
-        style="background: green"
         [(ngModel)]="voteDropdownSelect"
         name="vote-options"
         id="vote-options">
         <option
-          style="background-color: yellow"
           *ngFor="let option of voteDropdown"
           [ngValue]="option">
           {{option?.title}}
@@ -482,6 +480,21 @@
       class="text-input"
       name="customVoteInput"/>
     <button (click)="implement(customVoteInput)">Confirm</button>
+  </ng-template>
+
+  <ng-template #secondaryVoteTemplate>
+    {{ divisionVote?.selection?.secondaryPrompt?.prompt }}
+    <select
+      [(ngModel)]="secondaryVoteDropdownSelect"
+      name="secondary-vote-options"
+      id="secondary-vote-options">
+      <option
+        *ngFor="let option of divisionVote?.selection?.secondaryPrompt?.options"
+        [ngValue]="option">
+        {{option}}
+      </option>
+    </select>
+    <button (click)="implementSecondaryVote()">Confirm</button>
   </ng-template>
 
   <ng-template #resolutionReviewTemplate>

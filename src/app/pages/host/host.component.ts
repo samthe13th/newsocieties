@@ -54,6 +54,7 @@ export class HostComponent implements OnInit, OnDestroy {
   @ViewChild('reviewTemplate') reviewTemplate: TemplateRef<any>;
   @ViewChild('newSeasonTemplate') newSeasonModal: TemplateRef<any>;
   @ViewChild('customVoteTemplate') customVoteTemplate: TemplateRef<any>;
+  @ViewChild('secondaryVoteTemplate') secondaryVoteTemplate: TemplateRef<any>;
   
   @ViewChild('landGrid') landGrid: LandGridComponent;
   @ViewChild('focusButtonsComponent') focusButtonsComponent: ButtonGroupComponent;
@@ -166,11 +167,9 @@ export class HostComponent implements OnInit, OnDestroy {
     if (this.focus) {
       this.startVote(this.focus);
     }
-
-    // if (value && this.ipad) {
-    //   this.startVote(this.ipadTab)
-    // }
   }
+  secondaryVoteDropdownSelect;
+
 
   showDate;
   showNumber;
@@ -1100,6 +1099,7 @@ export class HostComponent implements OnInit, OnDestroy {
 
   onSelectionChange(selection) {
     this.divisionVote = selection;
+    console.log("SELECTION CHANGE: ", selection);
   }
 
   onVoteChange(vote) {
@@ -1185,12 +1185,16 @@ export class HostComponent implements OnInit, OnDestroy {
     this.showModal = true;
   }
 
+  implementSecondaryVote() {
+    console.log("implement secondary vote: ", this.divisionVote);
+    this.setScenario(this.divisionVote.selection);
+    this.showModal = false;
+  }
+
   implement(customVote=null) {
     const selection = customVote
       ? { result: customVote }
       : this.divisionVote.selection;
-
-    console.log("IMPLEMENT: ", selection, this.divisionVote)
 
     if (!this.divisionVote) return;
     if (this.divisionVote.vote.type === 'resolution') {
@@ -1202,7 +1206,14 @@ export class HostComponent implements OnInit, OnDestroy {
       console.log("principle vote... ")
       this.setPrinciple(selection);
     } else if (this.divisionVote.vote.type === 'scenario') {
-      this.setScenario(selection);
+      console.log("Check for secondary prompt: ", this.divisionVote.selection);
+      if (this.divisionVote?.selection?.secondaryPrompt) {
+        this.modalContent = this.secondaryVoteTemplate;
+        this.showModal = true;
+        return
+      } else {
+        this.setScenario(selection);
+      }
     }
 
     this.showModal = false;
@@ -1299,14 +1310,18 @@ export class HostComponent implements OnInit, OnDestroy {
   }
 
   setScenario(selection) {
+    const additionalMessage = selection.secondaryPrompt
+      ? `${selection.secondaryPrompt.prompt} ${this.secondaryVoteDropdownSelect}`
+      : ''
     const scenario = `${this.divisionVote.vote.result} ${selection.result}`;
+    const note = `${additionalMessage} division.`;
 
     this.db.object(`${this.divisionPath}/vote`).update({
       state: 'final',
       selected: selection
     })
 
-    this.pushToCentral('scenarios', scenario)
+    this.pushToCentral('scenarios', scenario, note)
   }
 
   setPrinciple(selection) {
@@ -1345,7 +1360,7 @@ export class HostComponent implements OnInit, OnDestroy {
     this.pushToCentral('resolutions', resolution);
   }
 
-  async pushToCentral(type, message) {
+  async pushToCentral(type, message, note=null) {
     console.log("push to central: ", type, message)
     const entries = await promiseOne(this.db.list(`${this.divisionPath}/${type}`));
     const indexOfEntry = findIndex(entries, ['title', this.divisionVote.vote.title]);
@@ -1366,6 +1381,7 @@ export class HostComponent implements OnInit, OnDestroy {
       type: 'vote',
       header: this.divisionVote.vote.title,
       value: message,
+      note,
       timestamp: moment().format('h:mm:ss')
     })
 

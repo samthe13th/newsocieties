@@ -21,5 +21,7 @@
     </div>
     <div class="chat-bubble-header" *ngIf="feedItem.header">{{feedItem.header}}</div>
     <div [innerHTML]="feedItem?.value"></div>
+    <br/>
+    <em>{{feedItem?.note}}</em>
   </div>
 </div>

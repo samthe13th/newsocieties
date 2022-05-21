@@ -41,3 +41,4 @@ Run `ng build` to build the project. The build artifacts will be stored in the `
 * BUG FIX: On scan screen, most (not all) of the of the tablets show black text, but some show white
 * harvest size changed to the following values:  low = 21, mid-low = 28, mid = 35, mid-high = 42, high = 49. 
 * “Resources in hand” removed from review
+* Add secondary options to scenarios
