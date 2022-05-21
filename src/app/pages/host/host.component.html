@@ -84,7 +84,7 @@
         <div class="scanline"></div>
       </ng-container>
       <div *ngIf="!isScanning" class="scanner-button close" (click)="exitScan()"></div>
-      <div *ngIf="scanResult && scanResult?.multi">
+      <div class="multi-scan-results-wrapper" *ngIf="scanResult && scanResult?.multi">
         <h1>Scan Results</h1>
         <div class="multi-scan-results stack">
           <div class="multi-scan-row stack-h" *ngFor="let result of scanResult.results; let i = index">

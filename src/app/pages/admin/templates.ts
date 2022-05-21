@@ -4,7 +4,7 @@ const COMMON_DEFAULTS = {
     mid: 10,
     high: 15
   },
-  harvest: 18,
+  harvest: 21,
   landCost: 4
 }
 
@@ -87,7 +87,7 @@ export const DIVISION_TEMPLATE = {
   nextSeason: {
     season: 1,
     capacity: 12,
-    harvest: 25
+    harvest: 28
   },
   exports: {
     messages: [],

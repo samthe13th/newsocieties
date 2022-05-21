@@ -8,7 +8,7 @@
     <strong>{{adv.name}}: </strong>{{ adv.individual + adv.communal }}
   </div>
   <div><strong>Exceeded Capacity: </strong>{{division?.exceededCapacity }}</div>
-  <div><strong>Resources In-Hand: </strong>{{division?.inHand }}</div>
+  <div *ngIf="!ipad"><strong>Resources In-Hand: </strong>{{division?.inHand }}</div>
   <br/>
   <h2>Principles</h2>
   <p *ngFor="let p of division.principles">{{p.value}}</p>

@@ -6,40 +6,48 @@ import { reduce, filter, slice } from 'lodash';
 import * as _ from 'lodash';
 import { getRandomInt, pluckRandom } from '../utilties';
 
+const HARVEST = {
+  low: 21,
+  midLow: 28,
+  mid: 35,
+  midHigh: 42,
+  high: 49
+}
+
 const DIVISION_SCORE = {
   small: {
     Low:  {
       VP: 0,
       capacity: 6,
-      harvest: 18,
+      harvest: HARVEST.low,
       landCost: 4,
       thresholds: [5, 10, 15],
     },
     "Mid-Low": {
       VP: 4,
       capacity: 10,
-      harvest: 25,
+      harvest: HARVEST.midLow,
       landCost: 5,
       thresholds: [7, 12, 17],
     },
     Mid: {
       VP: 8,
       capacity: 14,
-      harvest: 34,
+      harvest: HARVEST.mid,
       landCost: 6,
       thresholds: [9, 14, 19],
     },
     "Mid-High": {
       VP: 12,
       capacity: 18,
-      harvest: 42,
+      harvest: HARVEST.midHigh,
       landCost: 8,
       thresholds: [11, 16, 21],
     },
     "High": {
       VP: 16,
       capacity: 22,
-      harvest: 49,
+      harvest: HARVEST.high,
       landCost: 10,
       thresholds: [13, 18, 23],
     }
@@ -48,35 +56,35 @@ const DIVISION_SCORE = {
     Low:  {
       VP: 0,
       capacity: 9,
-      harvest: 18,
+      harvest: HARVEST.low,
       landCost: 4,
       thresholds: [5, 10, 15],
     },
     "Mid-Low": {
       VP: 4,
       capacity: 14,
-      harvest: 25,
+      harvest: HARVEST.midLow,
       landCost: 5,
       thresholds: [7, 12, 17],
     },
     Mid: {
       VP: 8,
       capacity: 19,
-      harvest: 34,
+      harvest: HARVEST.mid,
       landCost: 6,
       thresholds: [9, 14, 19],
     },
     "Mid-High": {
       VP: 12,
       capacity: 24,
-      harvest: 42,
+      harvest: HARVEST.midHigh,
       landCost: 8,
       thresholds: [11, 16, 21],
     },
     "High": {
       VP: 16,
       capacity: 29,
-      harvest: 49,
+      harvest: HARVEST.high,
       landCost: 10,
       thresholds: [13, 18, 23],
     }
@@ -85,35 +93,35 @@ const DIVISION_SCORE = {
     Low:  {
       VP: 0,
       capacity: 12,
-      harvest: 18,
+      harvest: HARVEST.low,
       landCost: 4,
       thresholds: [5, 10, 15],
     },
     "Mid-Low": {
       VP: 4,
       capacity: 18,
-      harvest: 25,
+      harvest: HARVEST.midLow,
       landCost: 5,
       thresholds: [7, 12, 17],
     },
     Mid: {
       VP: 8,
       capacity: 24,
-      harvest: 34,
+      harvest: HARVEST.mid,
       landCost: 6,
       thresholds: [9, 14, 19],
     },
     "Mid-High": {
       VP: 12,
       capacity: 30,
-      harvest: 42,
+      harvest: HARVEST.midHigh,
       landCost: 8,
       thresholds: [11, 16, 21],
     },
     "High": {
       VP: 16,
       capacity: 36,
-      harvest: 49,
+      harvest: HARVEST.high,
       landCost: 10,
       thresholds: [13, 18, 23],
     }
@@ -122,35 +130,35 @@ const DIVISION_SCORE = {
     Low:  {
       VP: 0,
       capacity: 12,
-      harvest: 18,
+      harvest: HARVEST.low,
       landCost: 4,
       thresholds: [5, 10, 15],
     },
     "Mid-Low": {
       VP: 6,
       capacity: 18,
-      harvest: 25,
+      harvest: HARVEST.midLow,
       landCost: 5,
       thresholds: [7, 12, 17],
     },
     Mid: {
       VP: 12,
       capacity: 24,
-      harvest: 34,
+      harvest: HARVEST.mid,
       landCost: 6,
       thresholds: [9, 14, 19],
     },
     "Mid-High": {
       VP: 18,
       capacity: 30,
-      harvest: 42,
+      harvest: HARVEST.midHigh,
       landCost: 8,
       thresholds: [11, 16, 21],
     },
     "High": {
       VP: 24,
       capacity: 36,
-      harvest: 49,
+      harvest: HARVEST.high,
       landCost: 10,
       thresholds: [13, 18, 23],
     }
@@ -161,35 +169,35 @@ const SCORE = {
   Low:  {
     VP: 0,
     capacity: 12,
-    harvest: 18,
+    harvest: HARVEST.low,
     landCost: 4,
     thresholds: [5, 10, 15],
   },
   "Mid-Low": {
     VP: 6,
     capacity: 18,
-    harvest: 25,
+    harvest: HARVEST.midLow,
     landCost: 5,
     thresholds: [7, 12, 17],
   },
   Mid: {
     VP: 12,
     capacity: 24,
-    harvest: 34,
+    harvest: HARVEST.mid,
     landCost: 6,
     thresholds: [9, 14, 19],
   },
   "Mid-High": {
     VP: 18,
     capacity: 30,
-    harvest: 42,
+    harvest: HARVEST.midHigh,
     landCost: 8,
     thresholds: [11, 16, 21],
   },
   "High": {
     VP: 24,
     capacity: 36,
-    harvest: 49,
+    harvest: HARVEST.high,
     landCost: 10,
     thresholds: [13, 18, 23],
   }

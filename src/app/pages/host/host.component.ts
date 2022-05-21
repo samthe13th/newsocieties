@@ -422,7 +422,10 @@ export class HostComponent implements OnInit, OnDestroy {
   mockScan() {
     console.log('mock scan')
     this.isScanning = true;
-    this.processScan(this.demoScanContaminated);
+    this.processScan({
+      harvested: 1,
+      contaminantsFound: this.demoScanContaminated ? 1 : 0
+    });
   }
 
   async scanResource() {
