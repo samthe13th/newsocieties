@@ -523,7 +523,8 @@ export class AdminComponent implements OnInit, AfterViewInit {
     if (!confirm("This will reset all show data. Are you sure you want to do this?")) {
       return
     }
-    let users = await promiseOne(this.db.object(`shows/${this.showKey}/users`));
+    const users = await promiseOne(this.db.object(`shows/${this.showKey}/users`));
+    const archive = await promiseOne(this.db.object(`shows/${this.showKey}/archive`));
     const showSize = await promiseOne(this.db.object(`showSize`));
     const contamination: any = await promiseOne(this.db.object(`shows/${this.showKey}/contamination`));
     const timeline = await promiseOne(this.db.object('timeline'));
@@ -536,6 +537,7 @@ export class AdminComponent implements OnInit, AfterViewInit {
       divisions,
       ...SHOW_TEMPLATE,
       timeline,
+      archive,
       users: users ? Object.keys(users).reduce((acc, key) => {
         return { ...acc, [key]: {
           ...users[key],
