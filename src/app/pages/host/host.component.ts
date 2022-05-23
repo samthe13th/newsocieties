@@ -580,7 +580,7 @@ export class HostComponent implements OnInit, OnDestroy {
   async processScan(scanResults, level=1, harvestRemaining=0, contamsRemaining=0) {
     console.log('process this: ', scanResults)
     setTimeout(() => {
-      if (scanResults.results.length > 1) {
+      if (scanResults?.results?.length > 1) {
         this.scanResult = {
           harvestRemaining,
           contamsRemaining,
