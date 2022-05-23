@@ -79,10 +79,10 @@
         </ng-number-picker>
       </div>
 
-      <ng-container *ngIf="isScanning && !scanResult">
+      <!-- <ng-container *ngIf="isScanning && !scanResult">
         <div class="progress-bar"></div>
         <div class="scanline"></div>
-      </ng-container>
+      </ng-container> -->
       <div *ngIf="!isScanning" class="scanner-button close" (click)="exitScan()"></div>
       <div class="multi-scan-results-wrapper" *ngIf="scanResult && scanResult?.multi">
         <h1>Scan Results</h1>

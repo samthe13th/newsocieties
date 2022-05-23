@@ -445,7 +445,6 @@ export class HostComponent implements OnInit, OnDestroy {
   }
 
   mockScan() {
-    console.log('mock scan')
     this.isScanning = true;
     this.processScan({
       harvested: 1,
@@ -581,7 +580,17 @@ export class HostComponent implements OnInit, OnDestroy {
   async processScan(scanResults, level=1, harvestRemaining=0, contamsRemaining=0) {
     console.log('process this: ', scanResults)
     setTimeout(() => {
-      if (scanResults.harvested === 1) {
+      if (scanResults.results.length > 1) {
+        this.scanResult = {
+          harvestRemaining,
+          contamsRemaining,
+          contaminated: null,
+          multi: true,
+          results: scanResults.results,
+          header: null,
+          image: null
+        }
+      } else {
         if (scanResults.contaminantsFound === 1) {
           const contaminantValue = this.divisionService.getContaminantValue(level)
           this.scanResult = {
@@ -603,20 +612,10 @@ export class HostComponent implements OnInit, OnDestroy {
             image: ''
           }
         }
-      } else {
-        this.scanResult = {
-          harvestRemaining,
-          contamsRemaining,
-          contaminated: null,
-          multi: true,
-          results: scanResults.results,
-          header: null,
-          image: null
-        }
       }
 
       this.isScanning = false;
-    }, 1500)
+    }, 300)
   }
 
   generateReportContaminationButtons(value) {
