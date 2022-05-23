@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnDestroy } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnDestroy, HostListener } from '@angular/core';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -22,6 +22,17 @@ export class NumberChangeComponent implements OnDestroy {
   @Input() updateButtonText = 'Update';
   @Input() value = 0;
   @Input() min;
+  @Input() transformFunction: (value) => any;
+
+  @HostListener('document:keypress', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent) { 
+    console.log('key event: ', event)
+    if (event.key === 'Enter') {
+      console.log("ENTER");
+      this.write();
+    }
+    // this.key = event.key;
+  }
 
   private _max;
   @Input() 
@@ -52,8 +63,12 @@ export class NumberChangeComponent implements OnDestroy {
   }
 
   write() {
-    this.db.object(this.writePath).set(this.value).then(() => {
-      this.afterUpdate.emit(this.value);
+    setTimeout(() => {
+      const value = this.transformFunction ? this.transformFunction(this.value) : this.value;
+      console.log("push value: ", value)
+      this.db.object(this.writePath).set(value).then(() => {
+        this.afterUpdate.emit(value);
+      })
     })
   }
 

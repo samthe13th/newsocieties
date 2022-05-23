@@ -31,6 +31,7 @@ const DIVISIONS = ["N", "NE", "W", "NW", "E", "SW", "S", "SE"];
 export class HostComponent implements OnInit, OnDestroy {
   @HostListener('window:keyup', ['$event'])
   keyEvent(event: KeyboardEvent) {
+    console.log({event})
     const numberKey = toNumber(event.key);
     if (this.hostAction === 'harvest') {
       if (this.actionSheet === undefined && this.positions[numberKey - 1]) {
@@ -42,6 +43,15 @@ export class HostComponent implements OnInit, OnDestroy {
       if (this.hostAction === 'harvest' && event.key === 'g') {
         this.gather();
       }
+    }
+  }
+
+  @HostListener('document:keypress', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent) { 
+    console.log('key event: ', event)
+    if (event.key === 'Enter') {
+      console.log("ENTER", this.actionSheet);
+      // this.write();
     }
   }
 
@@ -219,6 +229,16 @@ export class HostComponent implements OnInit, OnDestroy {
   landmarks;
   reportContaminationButtons;
 
+  generateMockLand = (value) => _.range(value).map((n) => ({
+    division: this.divisionKey,
+    id: 0,
+    color: this.divisionColor,
+    name: 'X'
+  }))
+
+  localLandWritePath;
+  globalLandWritePath;
+
   constructor(
     private db: AngularFireDatabase,
     private route: ActivatedRoute,
@@ -228,10 +248,16 @@ export class HostComponent implements OnInit, OnDestroy {
     public bankService: BankService
   ) {}
 
+  onKeydown(ev) {
+    console.log({ev})
+  }
+
   ngOnInit() {
     this.divisionKey = this.route.snapshot.params.division;
     this.showKey = this.route.snapshot.params.show;
     this.ipad = this.route.snapshot.queryParams.ipad == 'true';
+    this.localLandWritePath = `shows/${this.showKey}/divisions/${this.divisionKey}/localLand`
+    this.globalLandWritePath = `shows/${this.showKey}/divisions/${this.divisionKey}/globalLand`
     this.setShowArchiveParams();
 
     this.$reserveData = combineLatest(
@@ -408,7 +434,7 @@ export class HostComponent implements OnInit, OnDestroy {
 
   async setMockLand(type, value) {
     console.log('mock land: ', type, value);
-    const mockLand = _.range(value).map((n)=> ({
+    const mockLand = _.range(value).map((n) => ({
       division: this.divisionKey,
       id: 0,
       color: this.divisionColor,

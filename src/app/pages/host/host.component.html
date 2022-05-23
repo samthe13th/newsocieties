@@ -956,6 +956,7 @@
     <div class="action-sheet" [class.ipad]="ipad">
       <p>{{ _.upperFirst(changeAttribute?.name) }}</p>
       <app-number-change
+        #updateNumber
         (afterUpdate)="onAttributeUpdate($event)"
         [readPath]="changeAttribute?.dbPath"
         [writePath]="changeAttribute?.dbPath">
@@ -1085,30 +1086,24 @@
   <ng-template #mockLocalLandSheet>
     <div class="action-sheet flex-column" [class.ipad]="ipad">
       <p>Local Land</p>
-      <ng-number-picker
-        #numberPicker
-        class="number-picker"
-        [arrowKeys]="true"
+      <app-number-change
+        (afterUpdate)="onAttributeUpdate($event)"
         [value]="($localLand | async)?.length"
-        [min]="0"
-      >
-      </ng-number-picker>
-      <button (click)="setMockLand('local', numberPicker.value)">Confirm</button>
+        [transformFunction]="generateMockLand"
+        [writePath]="localLandWritePath">
+      </app-number-change>
     </div>
   </ng-template>
 
   <ng-template #mockGlobalLandSheet>
     <div class="action-sheet flex-column" [class.ipad]="ipad">
       <p>Global Land</p>
-      <ng-number-picker
-        #numberPicker
-        class="number-picker"
-        [arrowKeys]="true"
+      <app-number-change
+        (afterUpdate)="onAttributeUpdate($event)"
         [value]="($globalLand | async)?.length"
-        [min]="0"
-      >
-      </ng-number-picker>
-      <button (click)="setMockLand('global', numberPicker.value)">Confirm</button>
+        [transformFunction]="generateMockLand"
+        [writePath]="globalLandWritePath">
+      </app-number-change>
     </div>
   </ng-template>
 
