@@ -776,10 +776,12 @@ export class HostComponent implements OnInit, OnDestroy {
     this.leftTab = tab.id;
   }
 
-  async onIpadTabChange(tab, focus) {
-    console.log('ipad tab: ', tab, focus)
+  async onIpadTabChange(tab, _focus) {
+    const focus = _.includes(['principles', 'resolutions', 'scenario'], _focus)
+      ? _focus
+      : 'principles';
     this.ipadTab = tab.id;
-    this.setIpadVoteFocus(focus ?? 'principles');
+    this.setIpadVoteFocus(focus);
   }
 
   onHarvestColumnSelect(select) {
@@ -966,8 +968,10 @@ export class HostComponent implements OnInit, OnDestroy {
   }
 
   onIpadVoteFocusSelect(button) {
-    console.log("on ipad vote focus select: ", button)
-    this.setIpadVoteFocus(button?.id ?? 'principles');
+    const focus = _.includes(['principles', 'resolutions', 'scenario'], button?.id)
+      ? button?.id
+      : 'principles';
+    this.setIpadVoteFocus(button?.id);
   }
 
   onFocusSelect(button) {
