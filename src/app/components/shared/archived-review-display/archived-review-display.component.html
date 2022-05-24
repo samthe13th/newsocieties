@@ -2,10 +2,17 @@
   <h1>{{division?.code}} DIVISION</h1>
   <div><strong>Score: </strong>{{division?.score}}</div>
   <div><strong>Reserve: </strong>{{division?.reserve}}</div>
-  <div><strong>Land Acquired (local): </strong>{{division?.localLand?.length}}</div>
-  <div><strong>Land Acquired (global): </strong>{{division?.globalLand?.length}}</div>
+  <div>
+    <strong>Land Acquired (local): </strong>{{division?.localLand?.length}}
+    | <em>Sold: {{ division?.sell?.localLand }}</em>
+  </div>
+  <div>
+    <strong>Land Acquired (global): </strong>{{division?.globalLand?.length}}
+    | <em>Sold: {{ division?.sell?.globalLand }}</em>
+  </div>
   <div *ngFor="let adv of division.advancements">
     <strong>{{adv.name}}: </strong>{{ adv.individual + adv.communal }}
+    | <em>Sold: {{ division?.sell?.advancements[adv.key] }}</em>
   </div>
   <div><strong>Exceeded Capacity: </strong>{{division?.exceededCapacity }}</div>
   <div *ngIf="!ipad"><strong>Resources In-Hand: </strong>{{division?.inHand }}</div>

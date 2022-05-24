@@ -144,6 +144,7 @@ export class HostComponent implements OnInit, OnDestroy {
   $deck;
   $advancements;
   $vote;
+  $sell;
   $division;
   $citizens;
   $capacity;
@@ -330,6 +331,8 @@ export class HostComponent implements OnInit, OnDestroy {
       this.showSize = showSize;
     })
 
+    this.$sell = this.db.object(`${this.divisionPath}/sell`).valueChanges();
+
     this.$division = this.db.object(this.divisionPath).valueChanges().pipe(
       filter((x) => x !== null && x !== undefined),
       tap((div: any) => {
@@ -366,7 +369,10 @@ export class HostComponent implements OnInit, OnDestroy {
     this.$divisionReview = this.db.object(`${this.divisionPath}/divisionReview`).valueChanges();
     this.$principles = this.db.list(`${this.divisionPath}/principles`).valueChanges();
     this.$scenarios = this.db.list(`${this.divisionPath}/scenarios`).valueChanges();
-    this.$focus = this.db.object(`${this.divisionPath}/focus`).valueChanges().pipe(tap((focus: string) => this.focus = focus));
+    this.$focus = this.db.object(`${this.divisionPath}/focus`).valueChanges().pipe(tap((focus: string) => { 
+      console.log("FOCUS: ", focus)
+      return this.focus = focus }));
+
     this.$turn = this.db.object(`${this.divisionPath}/turn`).valueChanges();
     this.$pendingGLA = this.db.list(`${this.divisionPath}/pendingGLA`).valueChanges();
     this.$localLand = this.db.list(`${this.divisionPath}/localLand`).valueChanges();
@@ -773,7 +779,7 @@ export class HostComponent implements OnInit, OnDestroy {
   async onIpadTabChange(tab, focus) {
     console.log('ipad tab: ', tab, focus)
     this.ipadTab = tab.id;
-    this.setIpadVoteFocus(focus);
+    this.setIpadVoteFocus(focus ?? 'principles');
   }
 
   onHarvestColumnSelect(select) {
@@ -960,7 +966,8 @@ export class HostComponent implements OnInit, OnDestroy {
   }
 
   onIpadVoteFocusSelect(button) {
-    this.setIpadVoteFocus(button?.id);
+    console.log("on ipad vote focus select: ", button)
+    this.setIpadVoteFocus(button?.id ?? 'principles');
   }
 
   onFocusSelect(button) {
@@ -993,10 +1000,11 @@ export class HostComponent implements OnInit, OnDestroy {
       this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/score`).valueChanges(),
       this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/reserve`).valueChanges(),
       this.divisionService.$advancements(this.showKey, this.divisionKey),
+      this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/sell`).valueChanges(),
       this.db.list(`shows/${this.showKey}/divisions/${this.divisionKey}/chartData`).valueChanges().pipe(
         map((data: any[]) => {
-          const percent = data.reduce((acc, [_, c, a]) => (acc + ((a - c) / c) * 100), 0)
-          return `${Math.round(percent)}%`
+          const percent = data.reduce((acc, [_, c, a]) => (acc + ((a - c) / c) * 100), 0);
+          return `${Math.round(percent)}%`;
         }),
       ),
       this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/citizens`).valueChanges().pipe(
@@ -1016,12 +1024,12 @@ export class HostComponent implements OnInit, OnDestroy {
       this.db.list(`shows/${this.showKey}/divisions/${this.divisionKey}/resolutions`).valueChanges(),
       this.db.list(`shows/${this.showKey}/divisions/${this.divisionKey}/scenarios`).valueChanges(),
     ).pipe(
-      map(([score, reserve, advancements, exceededCapacity, inHand, localLand, globalLand, principles, resolutions, scenarios]) => ({
-        code: this.divisionKey, score, reserve, advancements, exceededCapacity, inHand, localLand, globalLand, principles, resolutions, scenarios
+      map(([score, reserve, advancements, sell, exceededCapacity, inHand, localLand, globalLand, principles, resolutions, scenarios]) => ({
+        code: this.divisionKey, score, reserve, advancements, sell, exceededCapacity, inHand, localLand, globalLand, principles, resolutions, scenarios
       })),
       take(1)
     ).toPromise();
-    console.log({review})
+    console.log({review});
     this.db.object(`shows/${this.showKey}/archive/${archiveId}/${this.divisionKey}`).set(review).then(() => console.log("review set"))
   }
 
@@ -1051,7 +1059,8 @@ export class HostComponent implements OnInit, OnDestroy {
   }
 
 
-  async setIpadVoteFocus(type) {
+  async setIpadVoteFocus(_type) {
+    const type = _type === 'none' ? 'principles' : _type;
     console.log("set ipad focus: ", type)
     //this.voteDropdown = null;
     this.voteDropdownSelect = null;
@@ -1068,6 +1077,7 @@ export class HostComponent implements OnInit, OnDestroy {
   }
 
   async setFocus(type) {
+    console.log('set focus: ', type)
     const lastResolution = await promiseOne(this.db.object(`${this.divisionPath}/lastResolution`))
 
     if (type === 'principles') {

@@ -2,7 +2,8 @@
     focus: $focus | async,
     vote: $vote | async,
     lastResolution: $lastResolution | async,
-    reserveData: $reserveData | async
+    reserveData: $reserveData | async, 
+    sell: $sell | async
   } as obs">
   <div *ngIf="showModal === true" class="modal-wrap">
     <div class="modal small">
@@ -35,6 +36,7 @@
     (tabChange)="onIpadTabChange($event, obs.focus)"
     [tabs]="[
       { id: 'division', tabTemplate: divisionTab, bodyTemplate: ipadDivisionTemplate },
+      { id: 'sell', tabTemplate: sellTab, bodyTemplate: ipadSellTemplate },
       { id: 'vote', tabTemplate: voteTab, bodyTemplate: ipadVoteTemplate },
       { id: 'review', tabTemplate: reviewTab, bodyTemplate: ipadReviewTemplate }
     ]">
@@ -517,6 +519,7 @@
   <ng-template #voteTab>Vote</ng-template>
   <ng-template #reviewTab>Review</ng-template>
   <ng-template #chatTab>Chat</ng-template>
+  <ng-template #sellTab>Sell</ng-template>
   <ng-template #central>
     Central
     <ng-container *ngIf="($unseenChat | async) as unseenChat">
@@ -548,9 +551,9 @@
           Loading
         </div> -->
         <app-button-group
+          size="md"
           (select)="onIpadVoteFocusSelect($event)"
           [selectById]="obs.focus"
-          size="md"
           [buttons]="ipadFocusButtons">
         </app-button-group>
         <div class="ipad-vote-select-wrap stack-h" *ngIf="voteDropdown !== null">
@@ -886,6 +889,61 @@
       </ng-template>
       <ng-container *ngTemplateOutlet="ipadButtons"></ng-container>
     </div>
+  </ng-template>
+
+  <!-- SELL -->
+  <ng-template #ipadSellTemplate>
+    <div class="tab-card">
+        <div class="tab-block stack">
+            <h2>Advancements Sold</h2>
+            <div class="editable-item">
+              <button (click)="changeDivisionProperty('sell/advancements/safety', 'Safety')">
+                <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
+              </button>
+              Safety: {{ obs.sell?.advancements?.safety }}
+            </div>
+            <div class="editable-item">
+              <button (click)="changeDivisionProperty('sell/advancements/health', 'Health')">
+                <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
+              </button>
+              Health: {{ obs.sell?.advancements?.health }}
+            </div>
+            <div class="editable-item">
+              <button (click)="changeDivisionProperty('sell/advancements/arts', 'Arts')">
+                <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
+              </button>
+              Arts: {{ obs.sell?.advancements?.arts }}
+            </div>
+            <div class="editable-item">
+              <button (click)="changeDivisionProperty('sell/advancements/knowledge', 'Knowledge')">
+                <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
+              </button>
+              Knowledge: {{ obs.sell?.advancements?.knowledge }}
+            </div>
+            <div class="editable-item">
+              <button (click)="changeDivisionProperty('sell/advancements/infrastructure', 'Infrastructure')">
+                <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
+              </button>
+              Infrastructure: {{ obs.sell?.advancements?.infrastructure }}
+            </div>
+          </div>
+        <div class="tab-block stack">
+          <h2>Land Sold</h2>
+          <div class="editable-item">
+            <button (click)="changeDivisionProperty('sell/localLand', 'Local Land')">
+              <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
+            </button>
+            Local Land: {{ obs.sell?.localLand }}
+          </div>
+          <div class="editable-item">
+            <button (click)="changeDivisionProperty('sell/globalLand', 'Global Land')">
+              <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
+            </button>
+            Global Land: {{ obs.sell?.globalLand }}
+          </div>
+        </div>
+    </div>
+    <ng-container *ngTemplateOutlet="ipadButtons"></ng-container>
   </ng-template>
 
   <!-- GLOBAL -->

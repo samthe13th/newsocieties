@@ -17,7 +17,7 @@ import { ArchivedReviewComponent } from './archived-review/archived-review.compo
 const pages = [
   CentralComponent,
   HostComponent,
-  PlayerComponent, 
+  PlayerComponent,
   AdminComponent,
   SummaryComponent,
   ReviewComponent,

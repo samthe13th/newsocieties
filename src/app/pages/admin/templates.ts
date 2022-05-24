@@ -32,6 +32,17 @@ export const DIVISION_TEMPLATE = {
   harvestColumn: [true, true, true, true, true, true, true],
   lockHarvestColumns: false,
   marketView: 'localLand',
+  sell: {
+    advancements: {
+      safety: 0,
+      arts: 0,
+      health: 0,
+      knowledge: 0,
+      infrastructure: 0
+    },
+    localLand: 0,
+    globalLand: 0
+  },
   advancements: {
     safety: {
       communal: 0,
