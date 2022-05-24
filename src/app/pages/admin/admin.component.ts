@@ -10,6 +10,7 @@ import * as moment from 'moment';
 import { ActivatedRoute } from '@angular/router';
 import { formatDate, pluckRandom, promiseOne } from 'src/app/utilties';
 import { TimelineComponent } from 'src/app/components/shared/timeline/timeline.component';
+import { DivisionService } from './../../services/division-service.service';
 
 const DIVISIONS = ['N', 'S', 'E', 'W', 'NE', 'SE', 'SW', 'NW'];
 const ABC = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -135,6 +136,7 @@ export class AdminComponent implements OnInit, AfterViewInit {
   constructor(
     private db: AngularFireDatabase,
     private route: ActivatedRoute,
+    private divisionService: DivisionService
   ) {}
 
   ngOnInit() {
@@ -203,6 +205,10 @@ export class AdminComponent implements OnInit, AfterViewInit {
     })
 
     this.divisions = DIVISIONS;
+
+    this.divisionService.getDivisionAlerts(this.showKey)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe();
   }
 
   ngAfterViewInit() {

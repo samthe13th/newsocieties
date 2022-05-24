@@ -1,3 +1,4 @@
+import { DivisionService } from './../../services/division-service.service';
 import { Component, OnInit, AfterViewInit, ViewChild, ViewChildren, TemplateRef, ElementRef, QueryList } from '@angular/core';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { take, tap, takeUntil } from 'rxjs/operators';
@@ -6,7 +7,6 @@ import { trim, find, differenceWith, sortBy, includes } from 'lodash';
 import { map } from 'rxjs/operators';
 import * as moment from 'moment';
 import { ActivatedRoute } from '@angular/router';
-import { ToastrService } from 'ngx-toastr';
 
 
 const DIVISIONS = ['N', 'S', 'E', 'W', 'NE', 'SE', 'SW', 'NW'];
@@ -36,7 +36,7 @@ export class CentralComponent implements OnInit, AfterViewInit {
   $time: Observable<any>;
   $contamination: Observable<any>;
   $unseenMessages: Observable<any>;
-  $divisionRatings: Observable<any>;
+  $divisionAlerts: Observable<any>;
 
   private destroy$ = new Subject<boolean>();
 
@@ -58,7 +58,7 @@ export class CentralComponent implements OnInit, AfterViewInit {
   constructor(
     private db: AngularFireDatabase,
     private route: ActivatedRoute,
-    private toastr: ToastrService
+    private divisionService: DivisionService
   ) {}
 
   ngOnInit() {
@@ -93,26 +93,9 @@ export class CentralComponent implements OnInit, AfterViewInit {
 
     this.divisions = DIVISIONS;
     
-    this.$divisionRatings = combineLatest(
-      this.divisions.map(
-        (key) => this.db.object(`shows/${this.showKey}/divisions/${key}/divisionLargePopup`)
-          .valueChanges()
-          .pipe(
-            tap((divisionPopup: any) => { 
-              console.log({divisionPopup});
-              if (divisionPopup?.type === 'Rating') {
-                console.log("TOAST: ", divisionPopup.message)
-                this.toastr.info(divisionPopup?.message, "Rating change", { 
-                  closeButton: true,
-                  disableTimeOut: true,
-                  tapToDismiss: false
-                });
-              }
-            })
-          )
-        )
-      ).pipe(takeUntil(this.destroy$));
-    this.$divisionRatings.subscribe();
+    this.divisionService.getDivisionAlerts(this.showKey)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe();
   }
 
   ngAfterViewInit() {

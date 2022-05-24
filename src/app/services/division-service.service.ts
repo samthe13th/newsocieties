@@ -1,11 +1,18 @@
 import { Injectable } from '@angular/core';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { combineLatest } from 'rxjs';
-import { map, tap, take } from 'rxjs/operators';
-import { reduce, filter, slice } from 'lodash';
+import * as rxo from 'rxjs/operators';
 import * as _ from 'lodash';
 import { getRandomInt, pluckRandom } from '../utilties';
+import { ToastrService } from 'ngx-toastr';
 
+const DIVISIONS = ['N', 'S', 'E', 'W', 'NE', 'SE', 'SW', 'NW'];
+
+const TOASTR_CONFIG = {
+  closeButton: true,
+  disableTimeOut: true,
+  tapToDismiss: false
+}
 const HARVEST = {
   low: 21,
   midLow: 28,
@@ -207,7 +214,8 @@ const SCORE = {
 export class DivisionService {
   
   constructor(
-    private db: AngularFireDatabase
+    private db: AngularFireDatabase,
+    private toastr: ToastrService
   ) {
   }
 
@@ -230,7 +238,7 @@ export class DivisionService {
 
   async transferCitizen(showKey, oldDivisionKey, newDivisionKey, code) {
     const path = `shows/${showKey}/divisions/${oldDivisionKey}/citizens/${code}`;
-    const citizen: any = await this.db.object(path).valueChanges().pipe(take(1)).toPromise();
+    const citizen: any = await this.db.object(path).valueChanges().pipe(rxo.take(1)).toPromise();
     await this.db.object(path).remove();
     return new Promise((resolve) => {
       this.db.object(`shows/${showKey}/divisions/${newDivisionKey}/citizens/${code}`).set(
@@ -244,9 +252,9 @@ export class DivisionService {
     const divisionPath = `shows/${showKey}/divisions/${divisionKey}`;
     const landTiles: any = await this.db.object(`${divisionPath}/landTiles`)
       .valueChanges()
-      .pipe(take(1))
+      .pipe(rxo.take(1))
       .toPromise();
-    const freePlots = filter(landTiles, (tile) => tile.owner === undefined);
+    const freePlots = _.filter(landTiles, (tile) => tile.owner === undefined);
     const plotIndex = pluckRandom(freePlots, 1)[0].index;
     
     console.log("plot index: ", plotIndex, "owner: ", request.id)
@@ -266,7 +274,7 @@ export class DivisionService {
       this.db.object(`shows/${showKey}/divisions/${divisionKey}/advancements`).valueChanges(),
       this.db.list(`shows/${showKey}/divisions/${divisionKey}/citizens`).valueChanges()
     ).pipe(
-      map(([adv, citizens]: [any, any]) => {
+      rxo.map(([adv, citizens]: [any, any]) => {
         console.log("calc: ", adv, citizens)
         const individualAdvancements = _.map(citizens, c => _.toArray(c.advancements));
         const [iArts, iHealth, iInfrastructure, iKnowledge, iSafety] = _.map(
@@ -281,6 +289,44 @@ export class DivisionService {
         ]
       })
     )
+  }
+
+  getDivisionAlerts(showKey) {
+    return combineLatest([
+      ...DIVISIONS.map(
+        (key) => this.db.object(`shows/${showKey}/divisions/${key}/divisionLargePopup`)
+          .valueChanges()
+          .pipe(
+            rxo.map((popup: any) => popup?.type === 'Rating' ? ({
+                header: 'SCORE CHANGE',
+                message: popup?.message,
+                config: TOASTR_CONFIG
+              }) : null
+            ),
+            rxo.filter((alert) => alert !== null),
+            rxo.tap((alert) => {
+              this.toastr.success(alert.message, alert.header, alert.config);
+            })
+          )
+        ),
+      ...DIVISIONS.map(
+        (key: string) => this.db.object(`shows/${showKey}/divisions/${key}/season`)
+          .valueChanges()
+          .pipe(
+            rxo.map(
+              (season) => season > 0 ? ({
+                header: 'SEASON CHANGE',
+                message: `${key} division is now on Season ${season}!`,
+                config: TOASTR_CONFIG
+              }) : null
+            ),
+            rxo.filter((alert) => alert !== null),
+            rxo.tap((alert) => {
+              this.toastr.info(alert.message, alert.header, alert.config)
+            })
+          ),
+        )
+      ])
   }
 
   acquireLand(showKey, divisionKey, data) {
@@ -311,8 +357,8 @@ export class DivisionService {
         this.db.object(`${divisionPath}/reserve`).valueChanges(),
         this.db.object(`${divisionPath}/reserveThresholds`).valueChanges()
       ).pipe(
-        take(1),
-        map(([reserve,reserveThresholds]: [number,any]) => {
+        rxo.take(1),
+        rxo.map(([reserve,reserveThresholds]: [number,any]) => {
           console.log({reserve, reserveThresholds});
           const points = this.thresholdPoints(reserve, reserveThresholds);
           resolve(points)
@@ -383,7 +429,7 @@ export class DivisionService {
       this.db.object(`${divisionPath}/highThresholdsMet`).valueChanges(),
       this.$advancements(showKey, divisionKey)
     ).pipe(
-      map(([
+      rxo.map(([
         globalLand,
         localLand,
         highthresholdsMet,
@@ -393,12 +439,12 @@ export class DivisionService {
           + (globalLand.length * 0.8)
           + localLand.length
           + highthresholdsMet
-          + (0.35 * reduce(advancements, (acc, A) => A.individual + A.communal + acc, 0))
+          + (0.35 * _.reduce(advancements, (acc, A) => A.individual + A.communal + acc, 0))
         );
         console.log('calc VP ', round(VP))
         return { VP: round(VP) }
       }),
-      tap((updates) => {
+      rxo.tap((updates) => {
         this.db.object(divisionPath).update(updates)
       })
     )
@@ -421,14 +467,14 @@ export class DivisionService {
     const dbPath = `shows/${showKey}/divisions/${divisionKey}/citizens/${playerId}`;
     const citizen: any = await this.db.object(dbPath)
       .valueChanges()
-      .pipe(take(1))
+      .pipe(rxo.take(1))
       .toPromise()
     const resources = citizen?.resources;
 
     return new Promise((resolve) => {
       if (resources) {
         const toDestroy = Math.ceil(resources.length / 2);
-        const adjustedResources = slice(resources, toDestroy);
+        const adjustedResources = _.slice(resources, toDestroy);
         const toastMessage = toDestroy > 0 
           ? `Half of collected resources been destroyed`
           : ''
@@ -447,13 +493,13 @@ export class DivisionService {
     const divisionPath = `shows/${showKey}/divisions/${divisionKey}`;
     const pendingGLA: any = await this.db.list(`${divisionPath}/pendingGLA`)
       .valueChanges()
-      .pipe(take(1))
+      .pipe(rxo.take(1))
       .toPromise();
     const landTiles: any = await this.db.object(`${divisionPath}/landTiles`)
       .valueChanges()
-      .pipe(take(1))
+      .pipe(rxo.take(1))
       .toPromise();
-    const freePlots = filter(landTiles, (tile) => tile.owner === undefined);
+    const freePlots = _.filter(landTiles, (tile) => tile.owner === undefined);
 
     const plotIndexes: number[] = pluckRandom(freePlots, pendingGLA.length)
       .map(tile => tile.index);
@@ -477,7 +523,7 @@ export class DivisionService {
     const divisionPath = `shows/${showKey}/divisions/${divisionKey}`;
     this.db.object(divisionPath)
       .valueChanges()
-      .pipe(take(1))
+      .pipe(rxo.take(1))
       .subscribe((division: any) => {
         console.log({division})
         const score = this.getScore(showSize, division?.VP);
