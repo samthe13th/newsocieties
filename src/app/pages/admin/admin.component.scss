@@ -9,6 +9,13 @@
   flex: 3;
 }
 
+.admin-panel-left {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  overflow: auto;
+}
+
 .admin-section {
   margin: 5px;
   background: white;

@@ -12,7 +12,7 @@ import { formatDate, pluckRandom, promiseOne } from 'src/app/utilties';
 import { TimelineComponent } from 'src/app/components/shared/timeline/timeline.component';
 import { DivisionService } from './../../services/division-service.service';
 
-const DIVISIONS = ['N', 'S', 'E', 'W', 'NE', 'SE', 'SW', 'NW'];
+const DIVISIONS = ['N', 'E', 'S', 'W', 'NE', 'SE', 'SW', 'NW'];
 const ABC = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 const DIVISION_NAMES = {
   N: 'North',
@@ -64,6 +64,7 @@ export class AdminComponent implements OnInit, AfterViewInit {
   @ViewChild('timelinePreview') timelinePreview: TemplateRef<any>;
   @ViewChild('eventTemplate') eventTemplate: TemplateRef<any>;
   @ViewChild('addUserCodeTemplate') addUserCodeTemplate: TemplateRef<any>;
+  @ViewChild('newShowTemplate') newShowTemplate: TemplateRef<any>;
 
   @ViewChildren('division') bodyTemplates: QueryList<TemplateRef<any>>;
   @ViewChildren('tab') tabTemplates: QueryList<TemplateRef<any>>;
@@ -74,6 +75,7 @@ export class AdminComponent implements OnInit, AfterViewInit {
   $time: Observable<any>;
   $contamination: Observable<any>;
   $pauseAtMinute: Observable<any>;
+  $showSize: Observable<any>;
 
   private destroy$ = new Subject<boolean>();
 
@@ -99,6 +101,16 @@ export class AdminComponent implements OnInit, AfterViewInit {
       }
     }
   }
+
+  showSizeDropdown = {
+    value: 'full',
+    options: [
+      { value: 'small' },
+      { value: 'medium' },
+      { value: 'large' },
+      { value: 'full' }
+    ]
+  };
 
   showNumber = 1;
   currentTab;
@@ -140,6 +152,7 @@ export class AdminComponent implements OnInit, AfterViewInit {
   ) {}
 
   ngOnInit() {
+    console.log("DROPDOWNTEST: ", this.showSizeDropdown.options)
     this.today = formatDate(new Date(), 'mmddyy')
     this.showKey = this.route.snapshot.params.show;
     this.db.object(`events`)
@@ -159,6 +172,8 @@ export class AdminComponent implements OnInit, AfterViewInit {
       ]))
     )
 
+    this.$showSize = this.db.object('showSize').valueChanges();
+
     this.$pauseAtMinute = this.db.object(`shows/${this.showKey}/pauseAtMinute`).valueChanges(),
 
     this.$time = combineLatest(
@@ -169,12 +184,10 @@ export class AdminComponent implements OnInit, AfterViewInit {
     ).pipe(
       takeUntil(this.destroy$),
       map(([start, pauseAtMinute, clock, live]) => {
-        console.log({pauseAtMinute})
         const a = moment(start);
         const b = moment(clock.getTime());
         const time = Math.floor(moment.duration(b.diff(a)).asMinutes());
         if (this.timeline && pauseAtMinute !== null && time > pauseAtMinute) {
-          console.log("INSERT PAUSE")
           this.timeline.insertPause(pauseAtMinute);
           this.db.object(`shows/${this.showKey}/pauseAtMinute`).set(time)
         }
@@ -525,13 +538,14 @@ export class AdminComponent implements OnInit, AfterViewInit {
     this.showModal = true;
   }
 
-  async resetShow() {
-    if (!confirm("This will reset all show data. Are you sure you want to do this?")) {
-      return
-    }
+  async confirmResetShow(showSize) {
+    this.modalContent = undefined;
+    this.showModal = false;
+    console.log('confirm reset for show size: ', showSize);
+
+    await this.db.object('showSize').set(showSize);
     const users = await promiseOne(this.db.object(`shows/${this.showKey}/users`));
     const archive = await promiseOne(this.db.object(`shows/${this.showKey}/archive`));
-    const showSize = await promiseOne(this.db.object(`showSize`));
     const contamination: any = await promiseOne(this.db.object(`shows/${this.showKey}/contamination`));
     const timeline = await promiseOne(this.db.object('timeline'));
     const divisions = this.generateDivisions(showSize);
@@ -558,6 +572,11 @@ export class AdminComponent implements OnInit, AfterViewInit {
     }).then((res) => {
       this.buildShow(this.showKey)
     })
+  }
+
+  resetShow() {
+    this.modalContent = this.newShowTemplate;
+    this.showModal = true;
   }
 
   wipeShows() {

@@ -9,7 +9,7 @@ import * as moment from 'moment';
 import { ActivatedRoute } from '@angular/router';
 
 
-const DIVISIONS = ['N', 'S', 'E', 'W', 'NE', 'SE', 'SW', 'NW'];
+const DIVISIONS = ['N', 'E', 'S', 'W', 'NE', 'SE', 'SW', 'NW'];
 
 @Component({
   selector: 'app-central',
