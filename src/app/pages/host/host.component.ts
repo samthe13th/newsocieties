@@ -458,23 +458,44 @@ export class HostComponent implements OnInit, OnDestroy {
     });
   }
 
+  getThresholdReached(reserve, thresholds) {
+    let threshold = 0;
+    thresholds.forEach((th) => {
+      if (reserve >= th) {
+        threshold++;
+      }
+    });
+    return threshold;
+  }
+
   async scanResource() {
     this.isScanning = true;
 
     let totalHarvest: number;
     let contamPercent: number;
     let contamLevel: number;
+    let thresholdReached: number;
 
     await new Promise((resolve) => combineLatest(
         this.db.object(`shows/${this.showKey}/contamination/current`).valueChanges(),
         this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/harvest`).valueChanges(),
-        this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/contaminantLevel`).valueChanges()
+        this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/contaminantLevel`).valueChanges(),
+        this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/reserve`).valueChanges(),
+        this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/reserveThresholds`).valueChanges(),
       ).pipe(
       take(1)
-    ).subscribe(([percent, harvest, level]: [number, number, 1 | 2 | 3]) => {
+    ).subscribe(([percent, harvest, level, reserve, { low, mid, high }]: [
+        number,
+        number,
+        1 | 2 | 3,
+        number,
+        { low: number, mid: number, high: number }
+      ]) => {
       totalHarvest = harvest;
-      contamPercent = percent;
+      thresholdReached = this.getThresholdReached(reserve, [low, mid, high]);
+      contamPercent = Math.max(5, percent - (thresholdReached * 5));
       contamLevel = level;
+      console.log('threshold reached: ', thresholdReached, 'og percent: ', percent, 'adjusted percent: ', contamPercent);
       resolve(null);
     }));
 
