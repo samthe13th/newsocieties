@@ -1,0 +1,297 @@
+<div class="host-main" *ngIf="{ 
+  focus: $focus | async,
+  playerView: $playerView | async,
+  pageState: $pageState | async,
+  vote: $vote | async,
+  actions: $actions | async, 
+  capacity: $capacity | async,
+  turnButtons: $turnButtons | async,
+  turn: $turn | async,
+  divisionReview: $divisionReview | async
+} as obs">
+    <app-button-group
+        #focusButtonsComponent
+        (select)="onFocusSelect($event)"
+        [selectById]="obs.focus"
+        [buttons]="focusButtons">
+    </app-button-group>
+
+    <app-state
+        [templates]="{
+        main: mainTemplate,
+        newSeason: newSeasonOverlayTemplate
+        }"
+        [templateName]="pageState"
+        class="host-main">
+    </app-state>  
+
+    <ng-template #newSeasonOverlayTemplate>
+        <div>
+        A new Season is beginning...
+        </div>
+    </ng-template>
+
+    <ng-template #mainTemplate>
+        <div class="focus-wrapper" *ngIf="obs?.playerView">
+        <div class="flex-row" >
+            <app-player-view-control
+            [class.app-pulse--sm]="obs.playerView?.views?.resources && obs.playerView?.highlight === 'resources'"
+            name="resources"
+            label="Reserve"
+            [short]="true"
+            [highlight]="obs.playerView?.highlight === 'resources'"
+            [show]="obs.playerView?.views?.resources"
+            (highlightChange)="onPlayerDataButtonClick('resources', 'highlight')"
+            (visibilityChange)="onPlayerDataButtonClick('resources', 'visible')">
+            </app-player-view-control>
+            <app-player-view-control
+            [class.app-pulse--sm]="obs.playerView?.views?.divisions && obs.playerView?.highlight === 'divisions'"
+            name="divisions"
+            label="Divisions"
+            [short]="true"
+            [highlight]="obs.playerView?.highlight === 'divisions'"
+            [show]="obs.playerView?.views?.divisions"
+            (highlightChange)="onPlayerDataButtonClick('divisions', 'highlight')"
+            (visibilityChange)="onPlayerDataButtonClick('divisions', 'visible')">
+            </app-player-view-control>
+            <app-player-view-control
+            [class.app-pulse--sm]="obs.playerView?.views?.global && obs.playerView?.highlight === 'global'"
+            name="global"
+            label="GLC"
+            [short]="true"
+            [highlight]="obs.playerView?.highlight === 'global'"
+            [show]="obs.playerView?.views?.global"
+            (highlightChange)="onPlayerDataButtonClick('global', 'highlight')"
+            (visibilityChange)="onPlayerDataButtonClick('global', 'visible')">
+            </app-player-view-control>
+        </div>
+
+        <div class="flex-row" style="height: 100%; margin-top: 5px; min-height: 0">
+
+            <div *ngIf="obs.focus === 'none'" style="width: 100%; height: 100%"></div>
+
+            <div *ngIf="obs.focus === 'harvest'" class="harvest-wrapper">
+            <app-land-grid
+                #landGrid
+                *ngIf="action === 'harvesting'"
+                (gatherResource)="onGather($event)"
+                (select)="onSelectLandTile($event)"
+                [markCards]="true"
+                [showKey]="showKey"
+                [isHost]="true"
+                [divisionKey]="divisionKey"
+                [updatePath]="landTilesPath"> 
+            </app-land-grid>
+            </div>
+
+            <div
+            *ngIf="obs.focus === 'principles' || obs.focus === 'resolutions' || obs.focus === 'scenario'"
+            class="resolution-wrapper">
+            <ng-container *ngIf="obs?.vote">
+                <app-vote 
+                (selectionChange)="onSelectionChange($event)"
+                (voteChange)="onVoteChange($event)"
+                [showVotes]="true"
+                [allowSelection]="obs.vote?.state === 'review'"
+                [showKey]="showKey"
+                role="central"
+                [divisionId]="divisionKey"
+                ></app-vote>
+                <div *ngIf="obs.focus === 'principles' && obs.vote?.state === 'final'">
+                <em>{{obs.vote?.selected?.remark}}</em>
+                </div>
+            </ng-container>
+            </div>
+        
+            <div *ngIf="obs.focus === 'resolutionReview' && obs.lastResolution">
+            <ng-container *ngTemplateOutlet="resolutionReviewTemplate"></ng-container>
+            <button (click)="newResolution()">New Resolution</button>
+            </div>
+
+            <div class="host-division-review-wrap" *ngIf="obs.focus === 'review'">
+            <app-division-review
+                [showKey]="showKey"
+                [divisionKey]="divisionKey">
+            </app-division-review>
+            </div>
+
+            <app-market 
+                *ngIf="obs.focus === 'misc'"
+                [showHeader]="false"
+                [showKey]="showKey" 
+                [landCost]="landCost"
+                role="host"
+                [divisionKey]="divisionKey">
+            </app-market>
+
+            <div class="player-data">
+            <app-player-view-control
+                [class.app-pulse--sm]="obs.playerView?.views?.player && obs.playerView?.highlight === 'player'"
+                name="player"
+                label="Player"
+                [constant]="true"
+                [highlight]="obs.playerView?.highlight === 'player'"
+                [show]="obs.playerView?.views?.player"
+                (highlightChange)="onPlayerDataButtonClick('player', 'highlight')"
+                (visibilityChange)="onPlayerDataButtonClick('player', 'visible')">
+            </app-player-view-control>
+            <app-player-view-control
+                [class.app-pulse--sm]="obs.playerView?.views?.otherPlayers && obs.playerView?.highlight === 'otherPlayers'"
+                name="otherPlayers"
+                label="Other Players"
+                [constant]="true"
+                [highlight]="obs.playerView?.highlight === 'otherPlayers'"
+                [show]="obs.playerView?.views?.otherPlayers"
+                (highlightChange)="onPlayerDataButtonClick('otherPlayers', 'highlight')"
+                (visibilityChange)="onPlayerDataButtonClick('otherPlayers', 'visible')">
+            </app-player-view-control>
+            <app-player-view-control
+                [class.app-pulse--sm]="obs.playerView?.views?.advancements && obs.playerView?.highlight === 'advancements'"
+                name="advancements"
+                label="Adv."
+                [highlight]="obs.playerView?.highlight === 'advancements'"
+                [show]="obs.playerView?.views?.advancements"
+                (highlightChange)="onPlayerDataButtonClick('advancements', 'highlight')"
+                (visibilityChange)="onPlayerDataButtonClick('advancements', 'visible')">
+            </app-player-view-control>
+            </div>
+        </div>
+        </div>
+
+        <div class="harvest-controls">
+        <ng-container *ngIf="obs.focus === 'harvest'">
+            <div class="harvest-data">
+            <app-player-turn
+                (turnChange)="onTurnChange($event)"
+                [divisionPath]="divisionPath">
+            </app-player-turn>
+            <div class="turn-actions">
+                Actions Taken: {{ obs?.actions }} / {{ obs?.capacity }}
+            </div>
+            </div>
+            <hr/>
+            <div class="harvest-buttons">
+            <app-button-group
+                *ngIf="obs?.turnButtons"
+                (select)="onTurnSelect($event.id)"
+                [selectById]="obs?.turn"
+                [buttons]="turnButtons">
+            </app-button-group>
+            <div class="button-row">
+                <button (click)="exploreOwnedLand(landGrid)">Flip owned</button>
+                <button (click)="gatherGLA(landGrid)">Gather GLA</button>
+                <button (click)="disableColumns()">Disable Columns</button>
+            </div>
+            </div>
+        </ng-container>
+        <ng-container *ngIf="obs.focus === 'principles' || obs.focus === 'resolutions' || obs.focus === 'scenario'">
+            <div>
+            <button *ngIf="voteState === 'voting'" (click)="closePolls()">Close Polls</button>
+            <button *ngIf="obs.focus === 'principles' && voteState === 'review'" (click)="noDecision()">No Decision</button>
+            <button 
+                *ngIf="(obs.focus === 'scenario' || obs.focus === 'resolutions') && voteState === 'review'"
+                (click)="doNotAct(obs.focus)">
+                Do not act
+            </button>
+            <button *ngIf="voteState === 'review'" (click)="customVoteOption()">Custom</button>
+            <button *ngIf="voteState === 'review' && divisionVote" (click)="implement()">Implement</button>
+            </div>
+        </ng-container>
+        <div *ngIf="obs.focus === 'review'">
+            <app-button-group
+            (select)="setReviewDivision($event)"
+            [selectById]="obs?.divisionReview"
+            [buttons]="divisionButtons">
+            </app-button-group>
+        </div>
+        <div *ngIf="obs.focus === 'misc'">
+            <button (click)="marketView('localLand')">Local Land</button>
+            <button (click)="marketView('globalLand')">Global Land</button>
+            <button (click)="marketView('advancements')">Advancements</button>
+        </div>
+        </div>
+    </ng-template>
+</div>
+
+<ng-template #harvestTemplate>
+      Go to harvest
+      <button (click)="startHarvest()">Start</button>
+      </ng-template>
+    
+      <ng-template #principleTemplate>
+        <h1>Principle</h1>
+        <ng-container *ngIf="voteDropdown">
+          <select
+            [(ngModel)]="voteDropdownSelect"
+            name="vote-options"
+            id="vote-options">
+            <option
+              *ngFor="let option of voteDropdown"
+              [ngValue]="option">
+              {{option?.title}}
+            </option>
+          </select>
+          <br/>
+          <button (click)="autoPick('principles')">Autopick</button>
+        </ng-container>
+    
+        <button *ngIf="voteDropdownSelect" (click)="startVote('principles')">Select Principle</button>
+      </ng-template>
+    
+      <ng-template #resolutionReviewModalTemplate>
+        Show results of last resolution
+        <button (click)="reviewLastResolution()">Continue</button>
+      </ng-template>
+    
+      <ng-template #resolutionTemplate>
+        <h1>Resolution</h1>
+        <ng-container *ngIf="voteDropdown">
+          <select
+            [(ngModel)]="voteDropdownSelect"
+            name="vote-options"
+            id="vote-options">
+            <option
+              *ngFor="let option of voteDropdown"
+              [ngValue]="option">
+              {{option?.title}}
+            </option>
+          </select>
+          <br/>
+          <button (click)="autoPick('resolutions')">Autopick</button>
+        </ng-container>
+    
+        <button
+          *ngIf="voteDropdownSelect"
+          (click)="startVote('resolutions')">
+          Vote on Resolution
+        </button>
+      </ng-template>
+    
+      <ng-template #scenarioTemplate>
+        <h1>Scenario</h1>
+        <select
+          *ngIf="voteDropdown"
+          [(ngModel)]="voteDropdownSelect"
+          name="vote-options"
+          id="vote-options">
+          <option
+            *ngFor="let option of voteDropdown"
+            [ngValue]="option">
+            {{option?.title}}
+          </option>
+        </select>
+    
+        <button *ngIf="voteDropdownSelect" (click)="startVote('scenario')">Vote on Scenario</button>
+      </ng-template>
+    
+      <ng-template #miscTemplate>
+        Open market
+        <button (click)="startMisc(); marketView('localLand')">Local Land</button>
+        <button (click)="startMisc(); marketView('globalLand')">Global Land</button>
+        <button (click)="startMisc(); marketView('advancements')">Advancements</button>
+      </ng-template>
+    
+      <ng-template #reviewTemplate>
+        Start Review
+        <button (click)="startReview()">Continue</button>
+      </ng-template>

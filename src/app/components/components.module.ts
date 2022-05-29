@@ -27,6 +27,7 @@ import { DivisionPopupsComponent } from './shared/division-popups/division-popup
 import { HarvestImageComponent } from './shared/harvest-image/harvest-image.component';
 import { PlayerViewControlComponent } from './host/player-view-control/player-view-control.component';
 import { NewsFeedComponent } from './host/news-feed/news-feed.component';
+import { FocusTabComponent } from './host/focus-tab/focus-tab.component';
 import { BannerComponent } from './player/banner/banner.component';
 import { ReserveBarComponent } from './player/banner/reserve-bar/reserve-bar.component';
 import { PlayerAdvancementsComponent } from './player/player-advancements/player-advancements.component';
@@ -63,6 +64,7 @@ const components = [
   DivisionPopupsComponent,
   DivisionReviewComponent,
   ExportsComponent,
+  FocusTabComponent,
   GlobalCapacityComponent,
   GlobalLandComponent,
   HarvestImageComponent,

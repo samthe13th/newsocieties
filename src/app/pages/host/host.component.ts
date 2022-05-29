@@ -4,8 +4,10 @@ import { AngularFireDatabase } from '@angular/fire/database';
 import { formatDate, getRandomInt, pluckRandom, promiseOne } from 'src/app/utilties';
 import { LandTile, LandCardTypes } from 'src/app/interfaces';
 import * as _ from 'lodash';
+import * as fa from '@fortawesome/free-solid-svg-icons';
+import * as moment from 'moment';
 import { trim, find, findIndex, includes, toNumber, each, partition } from 'lodash';
-import { take, delay, map, tap, filter, takeUntil } from 'rxjs/operators'
+import { take, delay, map, tap, filter, takeUntil } from 'rxjs/operators';
 import { Subject, combineLatest } from 'rxjs';
 import { BankService } from 'src/app/services/bank.service';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
@@ -13,11 +15,10 @@ import { ButtonGroupComponent } from 'src/app/components/shared/button-group/but
 import { DivisionService } from 'src/app/services/division-service.service';
 import { faPen, faGavel, faScroll, faLandmark, faBullseye, faEyeSlash, faGlobe, faLeaf, faCartPlus, faEye, faShoppingBag, faMicroscope } from '@fortawesome/free-solid-svg-icons';
 import { LandGridComponent } from 'src/app/components/shared/land-grid/land-grid.component';
-import * as fa from '@fortawesome/free-solid-svg-icons';
-import * as moment from 'moment';
 import { DemoTilesComponent } from 'src/app/components/shared/demo-tiles/demo-tiles.component';
-
-const DIVISIONS = ["N", "NE", "W", "NW", "E", "SW", "S", "SE"];
+import { AbstractHostComponent } from './abstract-host.directive'
+import { IPAD_FOCUS_BUTTONS, FOCUS_BUTTONS, DIVISIONS } from './constants';
+import { DatabaseService } from 'src/app/services/database-service.service';
 
 @Component({
   selector: 'app-host',
@@ -28,10 +29,9 @@ const DIVISIONS = ["N", "NE", "W", "NW", "E", "SW", "S", "SE"];
     '[class.app-ipad-host]': 'ipad'
   }
 })
-export class HostComponent implements OnInit, OnDestroy {
+export class HostComponent extends AbstractHostComponent implements OnInit, OnDestroy {
   @HostListener('window:keyup', ['$event'])
   keyEvent(event: KeyboardEvent) {
-    console.log({event})
     const numberKey = toNumber(event.key);
     if (this.hostAction === 'harvest') {
       if (this.actionSheet === undefined && this.positions[numberKey - 1]) {
@@ -46,26 +46,17 @@ export class HostComponent implements OnInit, OnDestroy {
     }
   }
 
-  @HostListener('document:keypress', ['$event'])
-  handleKeyboardEvent(event: KeyboardEvent) { 
-    console.log('key event: ', event)
-    if (event.key === 'Enter') {
-      console.log("ENTER", this.actionSheet);
-      // this.write();
-    }
-  }
-
-  @ViewChild('harvestTemplate') harvestTemplate: TemplateRef<any>;
-  @ViewChild('principleTemplate') principleTemplate: TemplateRef<any>;
-  @ViewChild('resolutionTemplate') resolutionTemplate: TemplateRef<any>;
-  @ViewChild('resolutionReviewModalTemplate') resolutionReviewModalTemplate: TemplateRef<any>;
-  @ViewChild('scenarioTemplate') scenarioTemplate: TemplateRef<any>;
-  @ViewChild('miscTemplate') miscTemplate: TemplateRef<any>;
-  @ViewChild('reviewTemplate') reviewTemplate: TemplateRef<any>;
+  // @ViewChild('harvestTemplate') harvestTemplate: TemplateRef<any>;
+  // @ViewChild('principleTemplate') principleTemplate: TemplateRef<any>;
+  // @ViewChild('resolutionTemplate') resolutionTemplate: TemplateRef<any>;
+  // @ViewChild('resolutionReviewModalTemplate') resolutionReviewModalTemplate: TemplateRef<any>;
+  // @ViewChild('scenarioTemplate') scenarioTemplate: TemplateRef<any>;
+  // @ViewChild('miscTemplate') miscTemplate: TemplateRef<any>;
+  // @ViewChild('reviewTemplate') reviewTemplate: TemplateRef<any>;
   @ViewChild('newSeasonTemplate') newSeasonModal: TemplateRef<any>;
   @ViewChild('customVoteTemplate') customVoteTemplate: TemplateRef<any>;
   @ViewChild('secondaryVoteTemplate') secondaryVoteTemplate: TemplateRef<any>;
-  
+
   @ViewChild('landGrid') landGrid: LandGridComponent;
   @ViewChild('focusButtonsComponent') focusButtonsComponent: ButtonGroupComponent;
   @ViewChild('updateSheet') updateSheet: TemplateRef<any>;
@@ -82,118 +73,53 @@ export class HostComponent implements OnInit, OnDestroy {
 
   @ViewChild('harvestTileSheet', { static: false }) harvestTileSheet: TemplateRef<any>;
 
-  modalContent: TemplateRef<any>;
+  public modalContent: TemplateRef<any>;
+  
+  $deck;
+  $citizens;
+  $focus;
+  $citizenAdvancements;
+  $turnButtons;
+  $overlay;
+
 
   scanMode = false;
   demoScanContaminated = false;
   showSize = 'normal';
   ipad = true;
   fullscreen = false;
-
-  // ICONS
-  faPen = faPen;
   fa = fa;
-  exploreIcon = faEye;
-  gatherIcon = faShoppingBag;
-  visibleIcon = faEyeSlash;
-  highlightIcon = faBullseye;
-  radarIcon = faMicroscope;
-
   showModal = false;
   _ = _;
-
-  focusButtons = [
-    { id: 'harvest', label: 'Harvest', faIcon: faLeaf },
-    { id: 'principles', label: 'Principle', faIcon: faLandmark },
-    { id: 'resolutions', label: 'Resolution', faIcon: faGavel },
-    { id: 'scenario', label: 'Scenario', faIcon: faGlobe },
-    { id: 'misc', label: 'Market', faIcon: faCartPlus },
-    { id: 'review', label: 'Review', faIcon: faScroll }
-  ]
-
-  ipadFocusButtons = [
-    { id: 'principles', label: 'Principle' },
-    { id: 'resolutions', label: 'Resolution' },
-    { id: 'scenario', label: 'Scenario' },
-  ]
-
   ipadTabs;
   ipadDesktop;
-
+  ipadFocusButtons = IPAD_FOCUS_BUTTONS;
   divisionButtons = DIVISIONS.map(d => ({
     id: d,
     label: d
   }))
-
   disableHarvestColumnButtons = []
-
   resourceType = 3;
   resourceTypes = [
     { id: '3', label: '3' },
     { id: '2', label: '2' },
     { id: '1', label: '1'}
   ]
-
   visibleDataButtons = [
-    { id: 'visible', faIcon: this.visibleIcon },
-    { id: 'highlight', faIcon: this.highlightIcon },
+    { id: 'visible', faIcon: this.fa?.faEyeSlash },
+    { id: 'highlight', faIcon: this.fa?.faBullseye },
   ]
 
-  private destroy$ = new Subject<boolean>();
-  
-  $deck;
-  $advancements;
-  $vote;
-  $sell;
-  $division;
-  $citizens;
-  $capacity;
-  $resolutions;
-  $divisionReview;
-  $principles;
-  $scenarios;
-  $turn;
-  $focus;
-  $unseenNotifications;
-  $unseenChat;
-  $unseenNews;
-  $citizenAdvancements;
-  $pendingGLA;
-  $localLand;
-  $globalLand;
-  $turnButtons;
-  $lastResolution;
-  $exports;
-  $actions;
-  $playerView;
-  $overlay;
-  $pageState;
-  $reserveData;
-
-  private _voteDropdownSelect;
-  get voteDropdownSelect() { return this._voteDropdownSelect };
-  set voteDropdownSelect(value) {
-    console.log('set: ', value, this.focus)
-    this._voteDropdownSelect = value;
-    if (this.focus) {
-      this.startVote(this.focus);
-    }
-  }
   secondaryVoteDropdownSelect;
-
-
   showDate;
   showNumber;
-  showKey;
   scanResult;
   isScanning = false;
   scanContamTiles;
   scanCount = 1;
-
   landCost;
   customVoteInput;
   currentSeason;
-  voteState;
   selectedCitizen;
   selectedLandTile;
   changeAttribute;
@@ -205,9 +131,6 @@ export class HostComponent implements OnInit, OnDestroy {
   contamination;
   harvest;
   divisionColor;
-  divisionKey;
-
-  divisionPath;
   landTilesPath;
   chatInput = "";
   focus = 'none';
@@ -219,7 +142,7 @@ export class HostComponent implements OnInit, OnDestroy {
   globalResolutions;
   globalPrinciples; 
   globalScenarios;
-  voteDropdown;
+  //voteDropdown;
   rightTab;
   leftTab;
   ipadTab;
@@ -229,6 +152,30 @@ export class HostComponent implements OnInit, OnDestroy {
   divisionScore;
   landmarks;
   reportContaminationButtons;
+  localLandWritePath;
+  globalLandWritePath;
+
+  constructor(
+    public dbService: DatabaseService,
+    public db: AngularFireDatabase,
+    public route: ActivatedRoute,
+    public divisionService: DivisionService,
+    private bank: BankService,
+    private bottomSheet: MatBottomSheet,
+    public bankService: BankService
+  ) {
+    super(dbService, db, route, divisionService);
+  }
+
+  // private _voteDropdownSelect;
+  // get voteDropdownSelect() { return this._voteDropdownSelect };
+  // set voteDropdownSelect(value) {
+  //   console.log('set: ', value, this.focus)
+  //   this._voteDropdownSelect = value;
+  //   if (this.focus) {
+  //     this.startVote(this.focus);
+  //   }
+  // }
 
   generateMockLand = (value) => _.range(value).map((n) => ({
     division: this.divisionKey,
@@ -237,87 +184,21 @@ export class HostComponent implements OnInit, OnDestroy {
     name: 'X'
   }))
 
-  localLandWritePath;
-  globalLandWritePath;
-
-  constructor(
-    private db: AngularFireDatabase,
-    private route: ActivatedRoute,
-    private bank: BankService,
-    private bottomSheet: MatBottomSheet,
-    private divisionService: DivisionService,
-    public bankService: BankService
-  ) {}
-
-  onKeydown(ev) {
-    console.log({ev})
-  }
-
   ngOnInit() {
-    this.divisionKey = this.route.snapshot.params.division;
-    this.showKey = this.route.snapshot.params.show;
+    super.ngOnInit();
     this.ipad = this.route.snapshot.queryParams.ipad == 'true';
     this.localLandWritePath = `shows/${this.showKey}/divisions/${this.divisionKey}/localLand`
     this.globalLandWritePath = `shows/${this.showKey}/divisions/${this.divisionKey}/globalLand`
     this.setShowArchiveParams();
 
-    this.$reserveData = combineLatest(
-      this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/reserve`).valueChanges(),
-      this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/reserveThresholds`).valueChanges(),
-      this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/color`).valueChanges(),
-      this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/nextSeason/harvest`).valueChanges(),
-    ).pipe(
-      map(([reserve, thresholds, color, harvest]: [any, any, string, number]) => {
-        return {
-          reserve: {
-            value: reserve,
-            percent: Math.min(100, toPercent(reserve, thresholds.high))
-          },
-          thresholds: [
-            { 
-              value: thresholds.low,
-              percent: toPercent(thresholds.low, thresholds.high),
-            },
-            {
-              value: thresholds.mid,
-              percent: toPercent(thresholds.mid, thresholds.high),
-            },
-            {
-              value: thresholds.high,
-              percent: 100
-            }
-          ],
-          color,
-          deck: this.divisionService.getDeck(reserve, thresholds, harvest)
-        }
-      })
-    )
-
-    this.db.object('shows').valueChanges().pipe(takeUntil(this.destroy$)).subscribe(
-      (shows) => {
-        if (!shows[this.showKey]) {
-          window.location.reload();
-        }
-      }
-    )
-
-    this.$advancements = this.divisionService.$advancements(this.showKey, this.divisionKey).pipe(
-      tap((n) => console.log({n}))
-    )
-    this.divisionPath = `shows/${this.showKey}/divisions/${this.divisionKey}`;
     this.landTilesPath = `${this.divisionPath}/landTiles`;
     this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/color`).valueChanges()
-      .pipe(take(1)).subscribe((color) =>{
+      .pipe(
+        take(1)
+      ).subscribe((color) =>{
         this.divisionColor = color;
       })
-    this.$pageState = this.db.object(`${this.divisionPath}/focus`).valueChanges()
-      .pipe(
-        map(focus => focus !== 'new-season' ? 'main' : 'newSeason')
-      )
-    this.$vote = this.db.object(`${this.divisionPath}/vote`).valueChanges().pipe(
-      tap((vote: any) => { console.log('VOTE: ', vote); this.voteState = vote?.state })
-    )
-  
+
     this.db.object(`${this.divisionPath}/landmarks`).valueChanges().pipe(
       takeUntil(this.destroy$)
     ).subscribe((landmarks) => {
@@ -327,13 +208,10 @@ export class HostComponent implements OnInit, OnDestroy {
     this.db.object(`showSize`).valueChanges().pipe(
       takeUntil(this.destroy$)
     ).subscribe((showSize: any) => {
-      console.log("set showsize: ", showSize)
       this.showSize = showSize;
     })
 
-    this.$sell = this.db.object(`${this.divisionPath}/sell`).valueChanges();
-
-    this.$division = this.db.object(this.divisionPath).valueChanges().pipe(
+    this.$division.pipe(
       filter((x) => x !== null && x !== undefined),
       tap((div: any) => {
         this.landCost = div.landCost;
@@ -361,36 +239,19 @@ export class HostComponent implements OnInit, OnDestroy {
           this.citizenCount = citizens.length;
       })
     )
-    this.$actions = this.db.object(`${this.divisionPath}/actions`).valueChanges();
-    this.$capacity = this.db.object(`${this.divisionPath}/capacity`).valueChanges();
-    this.$exports = this.db.list(`${this.divisionPath}/exports`).valueChanges().pipe(map((exports) => exports.reverse()));
-    this.$lastResolution = this.db.object(`${this.divisionPath}/lastResolution`).valueChanges()
-    this.$resolutions = this.db.list(`${this.divisionPath}/resolutions`).valueChanges();
-    this.$divisionReview = this.db.object(`${this.divisionPath}/divisionReview`).valueChanges();
-    this.$principles = this.db.list(`${this.divisionPath}/principles`).valueChanges();
-    this.$scenarios = this.db.list(`${this.divisionPath}/scenarios`).valueChanges();
-    this.$focus = this.db.object(`${this.divisionPath}/focus`).valueChanges().pipe(tap((focus: string) => { 
-      console.log("FOCUS: ", focus)
-      return this.focus = focus }));
 
-    this.$turn = this.db.object(`${this.divisionPath}/turn`).valueChanges();
-    this.$pendingGLA = this.db.list(`${this.divisionPath}/pendingGLA`).valueChanges();
-    this.$localLand = this.db.list(`${this.divisionPath}/localLand`).valueChanges();
-    this.$globalLand = this.db.list(`${this.divisionPath}/globalLand`).valueChanges();
-    this.$unseenNotifications = this.db.list(`${this.divisionPath}/unseenNotifications`).valueChanges();
-    this.$unseenChat = this.db.object(`${this.divisionPath}/unseenChat`).valueChanges();
-    this.$unseenNews = this.db.object(`${this.divisionPath}/unseenNews`).valueChanges();
+    this.$focus = this.db.object(`${this.divisionPath}/focus`).valueChanges().pipe(
+      tap((focus: string) => { 
+      return this.focus = focus
+    }));
+
+
     this.$turnButtons = this.db.list(`${this.divisionPath}/citizens`)
       .valueChanges()
       .pipe(
         map((citizens: any) => citizens.map((c, index) => ({ id: c.id, label: index + 1 })))
       )
-    this.$playerView = combineLatest(
-      this.db.object(`${this.divisionPath}/playerViewHighlight`).valueChanges(),
-      this.db.object(`${this.divisionPath}/playerViews`).valueChanges()
-    ).pipe(
-      map(([highlight, views]) => ({highlight, views}))
-    )
+
 
     this.db.object(`shows/${this.showKey}`)
       .valueChanges()
@@ -402,7 +263,6 @@ export class HostComponent implements OnInit, OnDestroy {
     this.divisionService.calculateDivisionScore$(this.showKey, this.divisionKey)
       .pipe(takeUntil(this.destroy$))
       .subscribe();
-    // this.divisionService.thresholdListener$(this.showKey, this.divisionKey).subscribe();
 
     this.db.object(`shows/${this.showKey}/contamination/current`)
       .valueChanges()
@@ -560,19 +420,10 @@ export class HostComponent implements OnInit, OnDestroy {
           if (contaminated) {
             contamsFound++;
           }
-          console.log(n, ': ', {
-            harvestRemainging: this.scanResult.harvestRemaining - n,
-            contamsRemaining: this.scanResult.contamsRemaining - contamsFound,
-            randn,
-            contamsFound,
-            contaminated
-          })
-          return  contaminated
+          return contaminated
         }) 
 
         const contaminants = _.filter(picks, p => p === true).length;
-        console.log('random picks: ', picks, contaminants);
-        console.log('harvested: ', _.toNumber(scan.contaminantsFound), ' + ', toReport)
         return {
           contaminantsFound: _.toNumber(scan.contaminantsFound) + contaminants,
           harvested: _.toNumber(scan.contaminantsFound) + toReport,
@@ -784,10 +635,6 @@ export class HostComponent implements OnInit, OnDestroy {
     this.setIpadVoteFocus(focus);
   }
 
-  onHarvestColumnSelect(select) {
-    console.log('select: ', select)
-  }
-
   updateCitizenLand(citizen, landCost) {
     this.selectedCitizen = citizen;
     this.changeAttribute = {
@@ -875,7 +722,6 @@ export class HostComponent implements OnInit, OnDestroy {
         division: divisionKey
       }]).then(() => {
         if (!this.notLocal(tile) && this.selectedCitizen) {
-          console.log("push new popup")
           this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/divisionPopup`).set({
             tile: tile.index,
             type: LandCardTypes.R,
@@ -961,10 +807,6 @@ export class HostComponent implements OnInit, OnDestroy {
   onTurnSelect(id) {
     this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/turn`)
       .set(id)
-    // this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/divisionPopup`).set({
-    //   message: `It is now ${this.selectedCitizen.name}'s turn!`,
-    //   duration: 2000
-    // })
   }
 
   onIpadVoteFocusSelect(button) {
@@ -1679,11 +1521,8 @@ export class HostComponent implements OnInit, OnDestroy {
   }
   
   ngOnDestroy() {
+    super.ngOnDestroy();
     this.destroy$.next(true);
     this.destroy$.unsubscribe();
   }
-}
-
-function toPercent(n, d) {
-  return Math.round((toNumber(n) / toNumber(d)) * 100)
 }

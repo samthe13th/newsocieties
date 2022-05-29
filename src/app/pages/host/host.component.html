@@ -22,7 +22,7 @@
     selectedClass="host-selected-tab"
     (tabChange)="onLeftTabChange($event)"
     [tabs]="[
-      { id: 'division', tabTemplate: divisionTab, bodyTemplate: ipadDivisionTemplate },
+      { id: 'division', tabTemplate: divisionTab, bodyTemplate: divisionTemplate },
       { id: 'global', tabTemplate: globalTab, bodyTemplate: globalBody },
       { id: 'exports', tabTemplate: exportsTab, bodyTemplate: exportsBody }
     ]">
@@ -35,7 +35,7 @@
     selectedClass="host-selected-tab"
     (tabChange)="onIpadTabChange($event, obs.focus)"
     [tabs]="[
-      { id: 'division', tabTemplate: divisionTab, bodyTemplate: ipadDivisionTemplate },
+      { id: 'division', tabTemplate: divisionTab, bodyTemplate: divisionTemplate },
       { id: 'sell', tabTemplate: sellTab, bodyTemplate: ipadSellTemplate },
       { id: 'vote', tabTemplate: voteTab, bodyTemplate: ipadVoteTemplate },
       { id: 'review', tabTemplate: reviewTab, bodyTemplate: ipadReviewTemplate }
@@ -183,7 +183,12 @@
   </ng-template>
 
   <ng-template #focusBody>
-    <div class="host-main" *ngIf="obs.focus">
+    <app-focus-tab
+      [showKey]="showKey"
+      [divisionKey]="divisionKey"
+    >
+    </app-focus-tab>
+    <!-- <div class="host-main" *ngIf="obs.focus">
       <app-button-group
         #focusButtonsComponent
         (select)="onFocusSelect($event)"
@@ -389,7 +394,7 @@
         </div>
       </ng-template>
 
-    </div>  
+    </div>   -->
   </ng-template>
 
   <ng-template #harvestTemplate>
@@ -546,10 +551,6 @@
   <ng-template #ipadVoteTemplate>
     <div class="ipad-vote">
       <div class="ipad-select-wrapper">
-        <!-- <div *ngIf="voteDropdown === null" class="flex-column flex-center stretch-v">
-          <img class="ipad-loading" src="/assets/season_white.png"/>
-          Loading
-        </div> -->
         <app-button-group
           size="md"
           (select)="onIpadVoteFocusSelect($event)"
@@ -634,7 +635,7 @@
   </ng-template>
 
   <!-- DIVISION -->
-  <ng-template #ipadDivisionTemplate>
+  <ng-template #divisionTemplate>
     <div class="ipad-division-wrapper">
       <div class="stack overflow-auto stretch-v">
         <ng-container *ngIf="($division | async) as division; else loadingTemplate">
@@ -725,7 +726,7 @@
                     type="R"
                     [value]="1">
                   </app-harvest-image> = <span class="badge">
-                    {{ obs.reserveData?.deck.R1 }}
+                    {{ obs.reserveData?.deck?.R1 }}
                   </span>
                 </div>
                 <div class="ipad-card-deal">
@@ -735,7 +736,7 @@
                     type="R"
                     [value]="2">
                   </app-harvest-image> = <span class="badge">
-                    {{ obs.reserveData?.deck.R2 }}
+                    {{ obs.reserveData?.deck?.R2 }}
                   </span>
                 </div>
                 <div class="ipad-card-deal">
@@ -745,7 +746,7 @@
                     type="R"
                     [value]="3">
                   </app-harvest-image> = <span class="badge">
-                    {{ obs.reserveData?.deck.R3 }}
+                    {{ obs.reserveData?.deck?.R3 }}
                   </span>
                 </div>
               </div>
@@ -891,7 +892,7 @@
     </div>
   </ng-template>
 
-  <!-- SELL -->
+  <!-- IPAD SELL -->
   <ng-template #ipadSellTemplate>
     <div class="tab-card">
         <div class="tab-block stack">
@@ -1190,25 +1191,25 @@
           <div 
             class="large-action-button"
             (click)="explore()">
-            <fa-icon size="lg" [icon]="exploreIcon"></fa-icon>
+            <fa-icon size="lg" [icon]="fa?.faEye"></fa-icon>
             Explore (e)
           </div>
           <div 
             class="large-action-button"
             (click)="gather()">
-            <fa-icon size="lg" [icon]="gatherIcon"></fa-icon>
+            <fa-icon size="lg" [icon]="fa?.faShoppingBag"></fa-icon>
             Gather (g)
           </div>
           <div 
             class="large-action-button invert"
             (click)="safeExplore()">
-            <fa-icon size="lg" [icon]="gatherIcon"></fa-icon>
+            <fa-icon size="lg" [icon]="fa?.faShoppingBag"></fa-icon>
             Safe Expore
           </div>
           <div 
             class="large-action-button invert"
             (click)="safeGather()">
-            <fa-icon size="lg" [icon]="gatherIcon"></fa-icon>
+            <fa-icon size="lg" [icon]="fa?.faShoppingBag"></fa-icon>
             Safe Gather
           </div>
         </div>

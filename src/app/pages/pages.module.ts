@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { HostComponent } from './host/host.component';
+import { AbstractHostComponent } from './host/abstract-host.directive';
 import { CentralComponent } from './central/central.component';
 import { PlayerComponent } from './player/player.component';
 import { ComponentsModule } from '../components/components.module';
@@ -17,11 +18,12 @@ import { ArchivedReviewComponent } from './archived-review/archived-review.compo
 const pages = [
   CentralComponent,
   HostComponent,
+  AbstractHostComponent,
   PlayerComponent,
   AdminComponent,
   SummaryComponent,
   ReviewComponent,
-  ArchivedReviewComponent,
+  ArchivedReviewComponent
 ]
 
 @NgModule({
