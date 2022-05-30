@@ -98,6 +98,25 @@
   font-size: 25px;
 }
 
+.ipad-global {
+  display: flex; 
+  flex-wrap: wrap;
+  justify-content: center;
+
+  .ipad-global-item {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    margin-bottom: 10px;
+    padding: 10px;
+
+    > * {
+      align-items: center;
+      margin-right: 0;
+    }
+  }
+}
+
 .ipad-card-deal {
   display: inline-flex;
   justify-content: center;
@@ -446,7 +465,7 @@
 
     &.animate {
       transform: translate3d(0, 0, 0);
-      
+
       .ripple1::after {
         animation: scan-ripple 1.5s ease-out forwards;
       }

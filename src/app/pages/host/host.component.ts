@@ -169,6 +169,7 @@ export class HostComponent implements OnInit, OnDestroy {
   $overlay;
   $pageState;
   $reserveData;
+  $globalData;
 
   private _voteDropdownSelect = null;
   get voteDropdownSelect() { return this._voteDropdownSelect };
@@ -309,6 +310,19 @@ export class HostComponent implements OnInit, OnDestroy {
 
     this.$advancements = this.divisionService.$advancements(this.showKey, this.divisionKey).pipe(
       tap((n) => console.log({n}))
+    )
+    this.$globalData = combineLatest(DIVISIONS.map((key: string) => (
+      this.db.object(`shows/${this.showKey}/divisions/${key}`).valueChanges()
+    ))).pipe(
+      tap((glc) => console.log({glc})),
+      map((divisions) => _.map(divisions, (division) => ({
+        landCost: division?.landCost,
+        color: division?.color,
+        season: division?.season,
+        score: division?.score,
+        key: division?.code
+      }))),
+      tap((after) => console.log({after}))
     )
     this.divisionPath = `shows/${this.showKey}/divisions/${this.divisionKey}`;
     this.landTilesPath = `${this.divisionPath}/landTiles`;
