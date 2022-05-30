@@ -59,6 +59,7 @@ export class NumberChangeComponent implements OnDestroy {
   }
 
   onValueChange(value) {
+    console.log("VALUE CHANGE: ", value)
     this.value = value;
   }
 
