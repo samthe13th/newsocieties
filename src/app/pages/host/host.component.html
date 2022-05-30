@@ -662,14 +662,20 @@
                     {{ division.highThresholdsMet }}
                   </div>
                 </div>
-                <div class="tab-block dark center" [class.wrap-block]="ipad">
+                <div class="tab-block compact center" [class.wrap-block]="ipad">
                   <div class="ipad-global" *ngIf="$globalData | async as glData">
                     <div class="ipad-global-item" *ngFor="let div of glData">
                         <span class="division-summary-code" [style.background]="div?.color">{{div?.key}}</span>
                         <div class="flex-row">
                             <i class="ns-icon">
-                                <img src="/assets/land_white.png"/>
-                              </i>
+                              <img src="/assets/season_white.png"/>
+                            </i>
+                            <span>{{div?.season}}</span>
+                        </div>
+                        <div class="flex-row">
+                            <i class="ns-icon">
+                              <img src="/assets/land_white.png"/>
+                            </i>
                             <span>{{div?.landCost}}</span>
                         </div>
                     </div>

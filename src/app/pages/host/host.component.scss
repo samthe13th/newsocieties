@@ -108,10 +108,16 @@
     justify-content: center;
     flex-direction: column;
     margin-bottom: 10px;
-    padding: 10px;
+    padding: 5px;
+    flex: 1;
+    margin: 2px;
+    background: #000000;
+    color: white;
+    border-radius: 5px;
 
     > * {
-      align-items: center;
+      display: flex;
+      justify-content: center;
       margin-right: 0;
     }
   }

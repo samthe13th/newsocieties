@@ -1061,6 +1061,10 @@ select {
     color: white;
   }
 
+  &.compact {
+    padding: 2px;
+  }
+
   &.center {
     display: flex; 
     flex-direction: column; 
