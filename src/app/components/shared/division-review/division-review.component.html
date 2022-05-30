@@ -2,6 +2,9 @@
   <h1>{{division?.code}} DIVISION</h1>
   <div><strong>Score: </strong>{{division?.score}}</div>
   <div><strong>Reserve: </strong>{{division?.reserve}}</div>
+  <i class="ns-icon">
+    <img src="/assets/season_white.png"/>
+  </i>
   <div><strong>Land Acquired (local): </strong>{{division?.localLand.length}}</div>
   <div><strong>Land Acquired (global): </strong>{{division?.globalLand.length}}</div>
   <div *ngFor="let adv of division.advancements">

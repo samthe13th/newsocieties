@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { take } from 'rxjs/operators';
 
@@ -12,7 +12,7 @@ const DIVISIONS = ["NW", "N", "NE", "W", "C", "E", "SW", "S", "SE"];
     '[class.society-grid]': 'true',
   }
 })
-export class SocietyGridComponent {
+export class SocietyGridComponent implements OnInit {
   divisions;
   Math = Math;
 
@@ -22,6 +22,7 @@ export class SocietyGridComponent {
   @Input() details = 'full';
   @Input() isAdmin = false;
   @Input() large = false;
+  @Input() graph = true;
 
   ngOnInit() {
     this.db.object(`shows/${this.showKey}`)

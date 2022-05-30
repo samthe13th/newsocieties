@@ -8,3 +8,16 @@
     align-items: center;
   }
 }
+
+.summary-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  width: 100%;
+  font-family: sans-serif;
+  font-weight: normal;
+
+  * {
+    font-family: sans-serif
+  }
+}

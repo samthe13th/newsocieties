@@ -1,15 +1,26 @@
-<ng-container *ngIf="$chartData | async as data">
-  <google-chart
-    [width]="width"
-    [height]="height"
-    [type]="chart.type"
-    [data]="data"
-    [columns]="chart.columns"
-    [options]="chart.options"
-  >
-  </google-chart>
-  <div class="chart-legend">
-    Actions <span class="key-block red"></span>
-    vs Capacity <span class="key-block blue"></span>
-  </div>
+<div *ngIf="graph === false" class="data-chart stack-h">
+  <ng-container *ngIf="$rawData | async as data">
+    <div class="data-chart-item" *ngFor="let d of data">
+      <span>{{d.s}}</span><span [title]="'Actions: ' + d.a + ' | Capacity: ' + d.c" class="highlight">{{d.diff}}</span>
+    </div>
+  </ng-container>
+</div>
+
+<ng-container *ngIf="graph === true">
+  <ng-container *ngIf="$chartData | async as data">
+    <google-chart
+      *ngIf="graph === true"
+      [width]="width"
+      [height]="height"
+      [type]="chart.type"
+      [data]="data"
+      [columns]="chart.columns"
+      [options]="chart.options"
+    >
+    </google-chart>
+    <div class="chart-legend">
+      Actions <span class="key-block red"></span>
+      vs Capacity <span class="key-block blue"></span>
+    </div>
+  </ng-container>
 </ng-container>

@@ -286,13 +286,43 @@ select {
 .app-archived-review-display {
   display: flex;
   flex-direction: column;
+  align-items: center;
   background: #fff6e0;
+  color: black;
   padding: 20px;
   font-size: 20px;
   line-height: 30px;
-  color: #563900;
   height: 100%;
   overflow: auto;
+  border: solid;
+
+  h1 {
+    font-size: 40px;
+    margin: 40px;
+    margin-bottom: 40px;
+  }
+
+  h2 {
+    font-size: 30px;
+    margin-top: 10px;
+    margin-bottom: 30px;
+  }
+
+  p {
+    text-align: center;
+    margin: 20px 40px;
+
+    &:first-child {
+      margin-top: 0;
+    }
+    &:not(:last-child) {
+      border-bottom: solid 1px;
+      padding-bottom: 20px;
+    }
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
 }
 
 .app-advancement-summary {
@@ -1609,7 +1639,7 @@ select {
 
 .app-society-summary {
   display: flex;
-  justify-content: center;
+  justify-content: space-around;
   align-items: center;
   width: 100%;
   border: solid 1px white;
@@ -1700,6 +1730,19 @@ select {
   > img {
     height: 24px;
     width: 24px;
+  }
+}
+
+.ns-icon--divider {
+  font-size: 16px;
+  display: flex; 
+  align-items: center;
+  justify-content: center;
+  filter: brightness(0);
+
+  img {
+    width: 80px;
+    margin: 40px;
   }
 }
 

@@ -13,6 +13,7 @@ import * as _ from 'lodash';
 })
 export class DivisionChartComponent implements OnInit {
   $chartData;
+  $rawData;
 
   chart = {
     type: "LineChart",
@@ -37,7 +38,8 @@ export class DivisionChartComponent implements OnInit {
   @Input() showKey;
   @Input() width = 300;
   @Input() height = 200;
-
+  @Input() graph = true;
+  
   constructor(private db: AngularFireDatabase) {}
 
   ngOnInit() {
@@ -46,6 +48,16 @@ export class DivisionChartComponent implements OnInit {
       .pipe(
         tap((n) => console.log({n})),
         filter((data) => !_.isEmpty(data))
-      )
+      );
+
+    this.$rawData = this.db.list(`shows/${this.showKey}/divisions/${this.divisionKey}/chartData`)
+      .valueChanges()
+      .pipe(
+        filter((data) => !_.isEmpty(data)),
+        map((data) => data.map(([s, c, a]: [number, number, number]) => {
+            const diff = a - c;
+            return { s, c, a, diff: (diff >= 0) ? `+${Math.abs(diff)}` : `-${Math.abs(diff)}` };
+          }))
+      );
   }
 }

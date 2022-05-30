@@ -2,6 +2,10 @@
   <h1>{{division?.code}} DIVISION</h1>
   <div><strong>Score: </strong>{{division?.score}}</div>
   <div><strong>Reserve: </strong>{{division?.reserve}}</div>
+  <div><strong>Exceeded Capacity: </strong>{{division?.exceededCapacity }}</div>
+
+  <br/>
+
   <div>
     <strong>Land Acquired (local): </strong>{{division?.localLand?.length}}
     | <em>Sold: {{ division?.sell?.localLand }}</em>
@@ -10,17 +14,33 @@
     <strong>Land Acquired (global): </strong>{{division?.globalLand?.length}}
     | <em>Sold: {{ division?.sell?.globalLand }}</em>
   </div>
+
+  <br/>
+  
   <div *ngFor="let adv of division.advancements">
     <strong>{{adv.name}}: </strong>{{ adv.individual + adv.communal }}
     | <em>Sold: {{ division?.sell?.advancements[adv.key] }}</em>
   </div>
-  <div><strong>Exceeded Capacity: </strong>{{division?.exceededCapacity }}</div>
-  <div *ngIf="!ipad"><strong>Resources In-Hand: </strong>{{division?.inHand }}</div>
-  <br/>
+  <i class="ns-icon--divider">
+    <img src="/assets/R1.png"/>
+  </i>
+  <!-- <div *ngIf="!ipad"><strong>Resources In-Hand: </strong>{{division?.inHand }}</div> -->
   <h2>Principles</h2>
-  <p *ngFor="let p of division.principles">{{p.value}}</p>
+  <div class="vote-results">
+    <p *ngFor="let p of division.principles">{{p.value}}</p>
+  </div>
+  <i class="ns-icon--divider">
+    <img src="/assets/R1.png"/>
+  </i>
   <h2>Resolutions</h2>
-  <p *ngFor="let r of division.resolutions">{{r.value}}</p>
+  <div class="vote-results">
+    <p *ngFor="let r of division.resolutions">{{r.value}}</p>
+  </div>
+  <i class="ns-icon--divider">
+    <img src="/assets/R1.png"/>
+  </i>
   <h2>Crises</h2>
-  <p *ngFor="let s of division.scenarios">{{s.value}}</p>
+  <div class="vote-results">
+    <p *ngFor="let s of division.scenarios">{{s.value}}</p>
+  </div>
 </ng-container>
