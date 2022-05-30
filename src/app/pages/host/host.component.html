@@ -558,6 +558,7 @@
         </app-button-group>
         <div class="ipad-vote-select-wrap stack-h" *ngIf="voteDropdown !== null">
           <select
+            matNativeControl
             [ngModel]="voteDropdownSelect"
             (ngModelChange)="onVoteDropdownSelectChange($event, obs.focus)"
             name="vote-options"

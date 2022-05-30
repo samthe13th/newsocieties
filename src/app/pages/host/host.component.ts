@@ -170,7 +170,7 @@ export class HostComponent implements OnInit, OnDestroy {
   $pageState;
   $reserveData;
 
-  private _voteDropdownSelect;
+  private _voteDropdownSelect = null;
   get voteDropdownSelect() { return this._voteDropdownSelect };
   set voteDropdownSelect(value) {
     console.log('set: ', value, this.focus)
@@ -229,6 +229,12 @@ export class HostComponent implements OnInit, OnDestroy {
   divisionScore;
   landmarks;
   reportContaminationButtons;
+
+  ipadDropdownSelections = {
+    principles: null,
+    resolutions: null,
+    scenario: null
+  };
 
   generateMockLand = (value) => _.range(value).map((n) => ({
     division: this.divisionKey,
@@ -992,7 +998,7 @@ export class HostComponent implements OnInit, OnDestroy {
     const focus = _.includes(['principles', 'resolutions', 'scenario'], button?.id)
       ? button?.id
       : 'principles';
-    this.setIpadVoteFocus(button?.id);
+    this.setIpadVoteFocus(focus);
   }
 
   onFocusSelect(button) {
@@ -1086,9 +1092,7 @@ export class HostComponent implements OnInit, OnDestroy {
 
   async setIpadVoteFocus(_type) {
     const type = _type === 'none' ? 'principles' : _type;
-    console.log("set ipad focus: ", type)
-    //this.voteDropdown = null;
-    this.voteDropdownSelect = null;
+    console.log("set ipad focus: ", type, )
     this.clearVote();
     if (type === 'principles') {
       this.setVoteDropdown('principles');
@@ -1167,9 +1171,10 @@ export class HostComponent implements OnInit, OnDestroy {
   }
 
   onVoteDropdownSelectChange(selection, focus) {
-    console.log("dropdown change: ", selection, focus)
     this._voteDropdownSelect = selection;
-    this.startVote(focus)
+    this.ipadDropdownSelections[focus] = selection;
+    console.log("dropdown change: ", selection, focus, this.ipadDropdownSelections)
+    this.startVote(focus);
   }
 
   closePolls() {
@@ -1218,6 +1223,7 @@ export class HostComponent implements OnInit, OnDestroy {
 
   doNotAct(type) {
     console.log("implement do not act")
+    this.voteDropdownSelect.resolved = true;
     this.db.object(`${this.divisionPath}/vote`).update({
       state: 'final',
       noDecision: true,
@@ -1231,6 +1237,7 @@ export class HostComponent implements OnInit, OnDestroy {
   }
 
   noDecision() {
+    this.voteDropdownSelect.resolved = true;
     console.log("implements no decision")
     this.db.object(`${this.divisionPath}/vote`).update({
       state: 'final',
@@ -1275,7 +1282,7 @@ export class HostComponent implements OnInit, OnDestroy {
         this.setScenario(selection);
       }
     }
-
+    this.voteDropdownSelect.resolved = true;
     this.showModal = false;
   }
 
@@ -1325,10 +1332,10 @@ export class HostComponent implements OnInit, OnDestroy {
   }
 
   setVoteDropdown(type) {
-    console.log('set vote dropdown: ', type)
+    console.log('set vote dropdown: ', type, 'VOTE SELECTION: ', this.voteDropdownSelect);
     const divisionPath = `shows/${this.showKey}/divisions/${this.divisionKey}`;
-    // this.voteDropdown = null;
-    // this.voteDropdownSelect = null;
+    this.voteDropdown = null;
+    this.voteDropdownSelect = null;
     
     if (type === 'resolutions') {
       this.db.list(`${divisionPath}/resolutions`).valueChanges().pipe(take(1))
@@ -1341,7 +1348,10 @@ export class HostComponent implements OnInit, OnDestroy {
               ? { ...resolution, votedOn: true }
               : resolution
           });
-          console.log("VOTE DROPDOWN: ", this.voteDropdown)
+          if (!this.ipadDropdownSelections.resolutions?.resolved) {
+            this.voteDropdownSelect = this.ipadDropdownSelections.resolutions
+          }
+          console.log("!SET RESOLUTION ", this.voteDropdownSelect)
         });
     } else if (type === 'principles') {
       this.db.list(`${divisionPath}/principles`).valueChanges().pipe(take(1))
@@ -1353,7 +1363,11 @@ export class HostComponent implements OnInit, OnDestroy {
               ? { ...principle, votedOn: true }
               : principle
           });
-          console.log("VOTE DROPDOWN: ", this.voteDropdown)
+          if (!this.ipadDropdownSelections.principles?.resolved) {
+            this.voteDropdownSelect = this.ipadDropdownSelections.principles;
+          }
+
+          console.log("!VOTE PRINCIPLE: ", this.voteDropdownSelect)
         })
     } else if (type === 'scenarios') {
       this.db.list(`${divisionPath}/scenarios`).valueChanges().pipe(take(1))
@@ -1365,8 +1379,13 @@ export class HostComponent implements OnInit, OnDestroy {
               ? { ...scenario, votedOn: true }
               : scenario
           })
+          if (!this.ipadDropdownSelections.scenario?.resolved) {
+            this.voteDropdownSelect = this.ipadDropdownSelections.scenario;
+          }
+          console.log("!SET SCENARIO ", this.voteDropdownSelect)
         })
     }
+    console.log("!dropdown select: ", this.voteDropdownSelect)
   }
 
   setScenario(selection) {

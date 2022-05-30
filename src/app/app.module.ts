@@ -11,12 +11,14 @@ import { PagesModule } from './pages/pages.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { GoogleChartsModule } from 'angular-google-charts';
 import { ToastrModule } from 'ngx-toastr';
+import { MatSelectModule } from '@angular/material/select';
 
 @NgModule({
   declarations: [
     AppComponent
   ],
   imports: [
+    MatSelectModule,
     AngularFireModule.initializeApp(environment.firebase),
     ToastrModule.forRoot({
       autoDismiss: false,
