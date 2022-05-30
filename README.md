@@ -58,3 +58,13 @@ Run `ng build` to build the project. The build artifacts will be stored in the `
 #### IPAD UPDATES
 * New "Sell" tab for ipad where hosts can log advancements and land that are sold-off. These amounts are also reflected in the final reviews
 * BUG FIX: Principles vote-tab should be engaged by default now (should fix the issue of need to select multiple times before the vote dropdown becomes available)
+
+### 05/26/2022
+#### GENERAL UPDATES
+* Division tab order for admin/central changed to be N,E,S,W,NE,SE,SW,NW 
+* Admin panel can now change the show size when resetting the show (if you click "Reset Show" a dialog will appear where you can set the show size).
+
+### 05/29/2022
+#### GENERAL UPDATES
+* Summary page for central displays division capacity/actions as simple text rather than as a graph
+* Contamination for a division is now partially based on the reserve threshold met by a division at the time of scanning a resource
