@@ -445,6 +445,8 @@
     overflow: hidden;
 
     &.animate {
+      transform: translate3d(0, 0, 0);
+      
       .ripple1::after {
         animation: scan-ripple 1.5s ease-out forwards;
       }

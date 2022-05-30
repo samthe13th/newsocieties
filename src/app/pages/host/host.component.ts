@@ -457,7 +457,6 @@ export class HostComponent implements OnInit, OnDestroy {
   }
 
   mockScan() {
-    this.isScanning = true;
     this.processScan({
       harvested: 1,
       contaminantsFound: this.demoScanContaminated ? 1 : 0
@@ -475,8 +474,6 @@ export class HostComponent implements OnInit, OnDestroy {
   }
 
   async scanResource() {
-    this.isScanning = true;
-
     let totalHarvest: number;
     let contamPercent: number;
     let contamLevel: number;
@@ -612,6 +609,7 @@ export class HostComponent implements OnInit, OnDestroy {
 
   async processScan(scanResults, level=1, harvestRemaining=0, contamsRemaining=0) {
     console.log('process this: ', scanResults)
+    this.isScanning = true;
     setTimeout(() => {
       if (scanResults?.results?.length > 1) {
         this.scanResult = {
