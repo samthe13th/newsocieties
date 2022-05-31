@@ -38,7 +38,8 @@
       { id: 'division', tabTemplate: divisionTab, bodyTemplate: ipadDivisionTemplate },
       { id: 'sell', tabTemplate: sellTab, bodyTemplate: ipadSellTemplate },
       { id: 'vote', tabTemplate: voteTab, bodyTemplate: ipadVoteTemplate },
-      { id: 'review', tabTemplate: reviewTab, bodyTemplate: ipadReviewTemplate }
+      { id: 'review', tabTemplate: reviewTab, bodyTemplate: ipadReviewTemplate },
+      { id: 'central', tabTemplate: central, bodyTemplate: centralBody }
     ]">
   </app-tabs>
 
@@ -1017,15 +1018,17 @@
 
   <!-- CENTRAL -->
   <ng-template #centralBody>
-    <app-chat [sender]="divisionKey" [feedName]="divisionKey" [showKey]="showKey"></app-chat>
-    <textarea
-      (keydown.enter)="submitChat(divisionKey)"
-      class="host-chat-input"
-      name="chatInput"
-      type="text"
-      [(ngModel)]="chatInput">
-    </textarea>
-    <button class="host-chat-button" (click)="submitChat(divisionKey)">SEND</button>
+    <div class="central-chat">
+        <app-chat [sender]="divisionKey" [feedName]="divisionKey" [showKey]="showKey"></app-chat>
+        <textarea
+          (keydown.enter)="submitChat(divisionKey)"
+          class="host-chat-input"
+          name="chatInput"
+          type="text"
+          [(ngModel)]="chatInput">
+        </textarea>
+        <button class="host-chat-button" (click)="submitChat(divisionKey)">SEND</button>
+    </div>
   </ng-template>
 
   <!-- NOTES -->
