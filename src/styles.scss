@@ -660,8 +660,8 @@ select {
   }
 
   button {
-    font-size: 20px;
-    padding: 5px 7px;
+    font-size: 22px;
+    padding: 6px 9px;
     margin-right: 10px;
   }
 
@@ -1050,7 +1050,7 @@ select {
 
 .tab-block {
   width: 100%;
-  padding: 15px;
+  padding: 10px;
   box-sizing: border-box;
   background: #eeeeee;
   border-radius: 10px;
@@ -1059,10 +1059,6 @@ select {
   &.dark {
     background: black;
     color: white;
-  }
-
-  &.compact {
-    padding: 2px;
   }
 
   &.center {

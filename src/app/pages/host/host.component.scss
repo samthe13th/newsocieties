@@ -116,11 +116,15 @@
     background: #000000;
     color: white;
     border-radius: 5px;
+    line-height: 1.5;
 
     > * {
       display: flex;
       justify-content: center;
       margin-right: 0;
+      &:first-child {
+        margin-bottom: 5px;
+      }
     }
   }
 }
@@ -153,7 +157,11 @@
 }
 
 .ipad-reserve-bar {
-  margin-bottom: 30px;
+  margin-bottom: 45px;
+
+  > .reserve-scale {
+    font-size: 18px;
+  }
 }
 
 .ipad-remark {

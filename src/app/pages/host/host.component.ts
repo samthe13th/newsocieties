@@ -17,7 +17,7 @@ import * as fa from '@fortawesome/free-solid-svg-icons';
 import * as moment from 'moment';
 import { DemoTilesComponent } from 'src/app/components/shared/demo-tiles/demo-tiles.component';
 
-const DIVISIONS = ["N", "NE", "W", "NW", "E", "SW", "S", "SE"];
+const DIVISIONS = ["N", "E", "S", "W", "NE", "SE", "SW", "NW"];
 
 @Component({
   selector: 'app-host',
@@ -223,7 +223,7 @@ export class HostComponent implements OnInit, OnDestroy {
   voteDropdown;
   rightTab;
   leftTab;
-  ipadTab;
+  ipadTab = 'division';
   citizenCount = 0;
   positions;
   lockColumns;
@@ -1614,7 +1614,7 @@ export class HostComponent implements OnInit, OnDestroy {
     this.divisionService.newSeason(this.showKey, this.divisionKey, this.showSize);
   }
 
-  newSeason(division) {
+  newSeason(division=true) {
     if (!division) return;
     this.updateNextSeason();
     this.modalContent = this.newSeasonModal;
