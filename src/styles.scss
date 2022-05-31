@@ -167,7 +167,7 @@ select {
   }
   &--lg {
     > *:not(:last-child) {
-      margin-bottom: 15px;
+      margin-bottom: 20px;
     }
   }
 }
@@ -252,7 +252,7 @@ select {
       margin-bottom: 0;
     }
     &:not(:last-child) {
-      margin-bottom: 15px;
+      margin-bottom: 20px;
     }
   }
 
@@ -660,7 +660,7 @@ select {
   }
 
   button {
-    font-size: 18px;
+    font-size: 20px;
     padding: 6px 9px;
     margin-right: 10px;
   }
