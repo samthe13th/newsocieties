@@ -1,8 +1,9 @@
-import { Component, Input, Output, EventEmitter, OnDestroy, HostListener } from '@angular/core';
+import { ViewChild, Component, Input, Output, EventEmitter, OnDestroy, HostListener } from '@angular/core';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { toNumber  } from 'lodash';
+import { NumberPickerComponent } from 'ng-number-picker';
 
 @Component({
   selector: 'app-number-change',
@@ -15,23 +16,22 @@ import { toNumber  } from 'lodash';
 export class NumberChangeComponent implements OnDestroy {
   private destroy$ = new Subject<boolean>();
 
+  @ViewChild('picker') picker: NumberPickerComponent;
+
   @Output() afterUpdate = new EventEmitter<number>();
 
   @Input() writePath: string;
   @Input() readPath: string;
   @Input() updateButtonText = 'Update';
   @Input() value = 0;
-  @Input() min;
+  @Input() min = 0;
   @Input() transformFunction: (value) => any;
 
   @HostListener('document:keypress', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) { 
-    console.log('key event: ', event)
     if (event.key === 'Enter') {
-      console.log("ENTER");
       this.write();
     }
-    // this.key = event.key;
   }
 
   private _max;
@@ -49,21 +49,15 @@ export class NumberChangeComponent implements OnDestroy {
     if (this.readPath) {
       this.db.object(this.readPath)
         .valueChanges()
-        .pipe(
-          takeUntil(this.destroy$)
-        )
+        .pipe(takeUntil(this.destroy$))
         .subscribe((n: number) => {
           this.value = n;
         })
     }
   }
 
-  onValueChange(value) {
-    console.log("VALUE CHANGE: ", value)
-    this.value = value;
-  }
-
-  write() {
+  write(picker = null) {
+    this.value = this.picker?.value;
     setTimeout(() => {
       const value = this.transformFunction ? this.transformFunction(this.value) : this.value;
       console.log("push value: ", value)

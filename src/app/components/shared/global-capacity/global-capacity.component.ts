@@ -48,7 +48,7 @@ export class GlobalCapacityComponent implements OnInit {
     ).pipe(
       map(([centralAdjustment, ...data]) => {
         console.log({centralAdjustment, data})
-        // zip will regroup the data by data by season rather than by division
+        // zip will regroup the data by season rather than by division
         return { grouped: zip(...data), centralAdjustment };
       }),
       map(({ grouped, centralAdjustment }) => {
@@ -57,11 +57,14 @@ export class GlobalCapacityComponent implements OnInit {
         let lastSeasonActual = 0;
         let lastSeasonCapacity = 0;
 
+        console.log({grouped})
+
         each(grouped, (season) => {
           let seasonActual = 0;
           let seasonCapacity = lastSeasonCapacity - lastSeasonActual;
 
           compact(season).forEach(([_season, _capacity, _actual]) => {
+            console.log({ _season, _capacity, _actual})
             seasonActual += _actual;
             seasonCapacity += _capacity;
           })
@@ -69,9 +72,13 @@ export class GlobalCapacityComponent implements OnInit {
           global.actual += seasonActual;
           global.capacity += seasonCapacity;
 
+          console.log('SEASON ', season, 'Actual: ', seasonActual, 'Cap: ', seasonCapacity, ' GLOBAL: ', global)
+
           lastSeasonActual = seasonActual;
           lastSeasonCapacity = seasonCapacity;
         })
+
+        console.log("FINAL GLOBAL: ", global)
 
         global.exceeding = `${Math.round(((global.actual / global.capacity) ?? 0) * 100) - 100}%`;
         
