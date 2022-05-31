@@ -204,6 +204,7 @@ export class HostComponent implements OnInit, OnDestroy {
   actionSheet;
   voteResultFunds = 0;
   contamination;
+  divisionContamination;
   harvest;
   divisionColor;
   divisionKey;
@@ -424,12 +425,25 @@ export class HostComponent implements OnInit, OnDestroy {
       .subscribe();
     // this.divisionService.thresholdListener$(this.showKey, this.divisionKey).subscribe();
 
-    this.db.object(`shows/${this.showKey}/contamination/current`)
-      .valueChanges()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((level) => {
-        this.contamination = level;
+    combineLatest(
+      this.db.object(`shows/${this.showKey}/contamination/current`).valueChanges(),
+      this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/reserve`).valueChanges(),
+      this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/reserveThresholds`).valueChanges(),
+    ).pipe(
+      takeUntil(this.destroy$),
+      map(([contamination, reserve, { low, mid, high }]: [
+        number, number, { low: number, mid: number, high: number }
+      ]) => {
+        const thresholdReached = this.getThresholdReached(reserve, [low, mid, high]);
+        return {
+          divisionContam: Math.max(5, contamination - (thresholdReached * 5)),
+          globalContam: contamination
+        }
       })
+    ).subscribe(({ divisionContam, globalContam }) => {
+      this.contamination = globalContam;
+      this.divisionContamination = divisionContam;
+    })
 
     this.getResolutions();
     this.getPrinciples();
@@ -605,15 +619,13 @@ export class HostComponent implements OnInit, OnDestroy {
             contamsFound,
             contaminated
           })
-          return  contaminated
+          return contaminated
         }) 
 
         const contaminants = _.filter(picks, p => p === true).length;
-        console.log('random picks: ', picks, contaminants);
-        console.log('harvested: ', _.toNumber(scan.contaminantsFound), ' + ', toReport)
         return {
           contaminantsFound: _.toNumber(scan.contaminantsFound) + contaminants,
-          harvested: _.toNumber(scan.contaminantsFound) + toReport,
+          harvested: _.toNumber(scan.harvested) + toReport,
         }
       });
     }

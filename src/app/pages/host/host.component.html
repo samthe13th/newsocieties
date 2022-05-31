@@ -626,12 +626,15 @@
         <div 
           class="scan-button" 
           (click)="demoScan(false)">
-          R
+          <fa-icon
+            size="md"
+            [icon]="fa.faCheckCircle">
+          </fa-icon>
         </div>
         <div
-          class="scan-button"
+          class="scan-button contaminant"
           (click)="demoScan(true)">
-          C
+          <img src="../assets/C3.png"/>
         </div>
       </div>
 
@@ -648,10 +651,10 @@
 
             <div class="flex-row flex-wrap">
               <div class="tab-block" [class.wrap-block]="ipad">
+                  <!-- <button (click)="resetSeason(division)">Reset Season</button> -->
+                  <h1>{{ division.name }}</h1>
                   <strong>Season:</strong>
                   {{ division.season }}
-                  <!-- <button (click)="resetSeason(division)">Reset Season</button> -->
-                  <div><strong>Division: </strong>{{ division.name }}</div>
                   <div><strong>Score: </strong>{{ division.score }} ({{ division.VP }})</div>
                   <div class="editable-item">
                     <strong>Land cost: </strong>
@@ -662,8 +665,8 @@
                     {{ division?.capacity }}
                   </div>
                   <div>
-                    <strong>High Thresholds: </strong>
-                    {{ division.highThresholdsMet }}
+                    <strong>Contamination: </strong>
+                    {{divisionContamination}}%
                   </div>
                 </div>
                 <div class="tab-block center" [class.wrap-block]="ipad">
@@ -718,7 +721,8 @@
                     <fa-icon size="sm" [icon]="fa.faPen"></fa-icon>
                   </button>
                   <strong>Actions: </strong>
-                  {{ division.actions }} <span *ngIf="division.actions">({{ capacityUsed(division.actions, division.capacity) }}%)</span>
+                  {{ division.actions }} / {{ division?.capacity}} 
+                  <!-- <span *ngIf="division.actions">({{ capacityUsed(division.actions, division.capacity) }}%)</span> -->
                 </div>
                 <div class="editable-item">
                   <button *ngIf="ipad" (click)="mockLand('local')">

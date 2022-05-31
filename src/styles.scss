@@ -660,7 +660,7 @@ select {
   }
 
   button {
-    font-size: 22px;
+    font-size: 18px;
     padding: 6px 9px;
     margin-right: 10px;
   }
@@ -669,6 +669,9 @@ select {
     font-size: 20px;
     line-height: 1.8em;
     overflow: auto;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 5px;
   }
 }
 
