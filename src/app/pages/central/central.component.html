@@ -14,10 +14,11 @@
 <ng-template #show>Show</ng-template>
 <ng-template #summary>Summary</ng-template>
 <ng-template #users>Users</ng-template>
+<ng-template #finalVote>Final Vote</ng-template>
 
 <ng-template #showBody>
   <div class="flex-row" style="overflow: hidden">
-    <div class="timeline-wrapper">
+    <div class="central-tab">
       <h2>Global Contamination Level: {{($contamination | async)?.current}}%</h2>
       <ng-container *ngIf="$time | async as timer">
         <ng-container *ngIf="timer.live">
@@ -43,6 +44,49 @@
   </div>
   <br/>
   <app-users-grid *ngIf="showKey" [showKey]="showKey"></app-users-grid>
+</ng-template>
+
+<ng-template #finalVoteBody>
+  <div class="central-tab flex-row stack-h" *ngIf="$finalVote | async as finalVote">
+    <div>
+        <h2>Tallies</h2>
+        <table>
+          <tr>
+            <th>Place</th>
+            <th>Division</th>
+            <th>Total Votes</th>
+          </tr>
+          <tr *ngFor="let total of finalVote.totals; let i = index">
+            <td><strong>{{i + 1}}</strong></td>
+            <td>{{total.division}}</td>
+            <td>{{total.value}}</td>
+          </tr>
+        </table>
+      </div>
+
+    <div>
+      <h2>Votes Submited</h2>
+      <table>
+        <tr>
+          <th>Division</th>
+          <th>Vote 1</th>
+          <th>Vote 2</th>
+        </tr>
+        <tr *ngFor="let divisionFinalVote of finalVote.finalVotes">
+          <td><strong>{{divisionFinalVote.division}}</strong></td>
+          <ng-container *ngIf="divisionFinalVote.votes as votes">
+            <td><strong>{{votes.first.division}}: </strong> {{votes.first.weight}}</td>
+            <td><strong>{{votes.second.division}}: </strong> {{votes.second.weight}}</td>
+          </ng-container>
+          <ng-container *ngIf="!divisionFinalVote.votes">
+              <td>waiting for vote...</td>
+              <td>waiting for vote...</td>
+          </ng-container>
+        </tr>
+      </table>
+    </div>
+
+  </div>
 </ng-template>
 
 <ng-container *ngFor="let div of divisions">

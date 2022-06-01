@@ -24,7 +24,8 @@
     <ng-number-picker
       [(value)]="dirtyMagicInput"
       class="number-picker"
-      [min]="-100"
+      [max]="10000"
+      [min]="-10000"
       [arrowKeys]="true">
     </ng-number-picker>
     <button (click)="modifyGlobalCapacity()">Update</button>

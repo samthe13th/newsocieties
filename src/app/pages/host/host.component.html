@@ -67,7 +67,7 @@
         <div *ngIf="!isScanning" class="ripple-center"></div>
       </div>
 
-      <div class="scanner-button-wrap" *ngIf="!isScanning && !scanResult">
+      <div class="scanner-button-wrap ipad" *ngIf="!isScanning && !scanResult">
         <button 
           class="scanner-button scan"
           (click)="currentSeason == 0 ? mockScan() : scanResource()">
@@ -544,6 +544,54 @@
     Chat
   </ng-template>
 
+  <ng-template #ipadFinalVoteTemplate>
+    <div class="ipad-vote ipad">
+        <h2>First Vote</h2>
+        <select
+          [(ngModel)]="finalVote.first.division"
+          name="vote-options"
+          id="vote-options">
+          <option
+            *ngFor="let option of DIVISIONS"
+            [ngValue]="option">
+            {{option}}
+          </option>
+        </select>
+        <ng-number-picker
+          class="number-picker"
+          [arrowKeys]="true"
+          [(value)]="finalVote.first.weight"
+          [min]="1"
+          [max]="5"
+          >
+        </ng-number-picker>
+    
+        <br>
+    
+        <h2>Second Vote</h2>
+        <select
+          [(ngModel)]="finalVote.second.division"
+          name="vote-options"
+          id="vote-options">
+          <option
+            *ngFor="let option of DIVISIONS"
+            [ngValue]="option">
+            {{option}}
+          </option>
+        </select>
+        <ng-number-picker
+          class="number-picker"
+          [arrowKeys]="true"
+          [(value)]="finalVote.second.weight"
+          [min]="1"
+          [max]="5"
+          >
+        </ng-number-picker>
+        <hr/>
+        <button (click)="submitFinalVote()">Submit</button>
+    </div>
+  </ng-template>
+
   <ng-template #ipadVoteTemplate>
     <div class="ipad-vote">
       <div class="ipad-select-wrapper">
@@ -602,6 +650,7 @@
       <div class="flex-row">
         <ng-container *ngIf="ipadTab === 'review'">
             <button (click)="generateArchivedReview()">Generate Review</button>
+            <button (click)="startFinalVote()">Final Vote</button>
         </ng-container>
         <ng-container *ngIf="ipadTab === 'vote'">
             <button *ngIf="voteDropdownSelect && voteState !== 'final' && obs.focus === 'principles'" (click)="noDecision()">No Decision</button>
@@ -614,7 +663,7 @@
             <button *ngIf="divisionVote?.selection" (click)="implement()">Implement</button>
         </ng-container>
         <ng-container *ngIf="ipadTab === 'division'">
-          <button (click)="updateNextSeason()">New Harvest</button>
+          <button (click)="newHarvest()">New Harvest</button>
           <button (click)="newSeason()">New Season</button>
         </ng-container>
       </div>

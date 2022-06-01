@@ -65,6 +65,7 @@ export class HostComponent implements OnInit, OnDestroy {
   @ViewChild('newSeasonTemplate') newSeasonModal: TemplateRef<any>;
   @ViewChild('customVoteTemplate') customVoteTemplate: TemplateRef<any>;
   @ViewChild('secondaryVoteTemplate') secondaryVoteTemplate: TemplateRef<any>;
+  @ViewChild('ipadFinalVoteTemplate') ipadFinalVoteTemplate: TemplateRef<any>;
   
   @ViewChild('landGrid') landGrid: LandGridComponent;
   @ViewChild('focusButtonsComponent') focusButtonsComponent: ButtonGroupComponent;
@@ -82,6 +83,7 @@ export class HostComponent implements OnInit, OnDestroy {
 
   @ViewChild('harvestTileSheet', { static: false }) harvestTileSheet: TemplateRef<any>;
 
+  DIVISIONS = DIVISIONS
   modalContent: TemplateRef<any>;
 
   scanMode = false;
@@ -114,7 +116,7 @@ export class HostComponent implements OnInit, OnDestroy {
   ipadFocusButtons = [
     { id: 'principles', label: 'Principle' },
     { id: 'resolutions', label: 'Resolution' },
-    { id: 'scenario', label: 'Scenario' },
+    { id: 'scenario', label: 'Scenario' }
   ]
 
   ipadTabs;
@@ -231,6 +233,17 @@ export class HostComponent implements OnInit, OnDestroy {
   divisionScore;
   landmarks;
   reportContaminationButtons;
+
+  finalVote = {
+    first: {
+      division: 'N',
+      weight: 1,
+    },
+    second: {
+      division: 'N',
+      weight: 1
+    }
+  }
 
   ipadDropdownSelections = {
     principles: null,
@@ -683,6 +696,18 @@ export class HostComponent implements OnInit, OnDestroy {
       count = 9;
     }
     return _.range(count).map(n => ({ id: `report-${n}`, label: `${n}` }))
+  }
+
+  startFinalVote() {
+    this.modalContent = this.ipadFinalVoteTemplate;
+    this.showModal = true;
+  }
+
+  submitFinalVote() {;
+    this.showModal = false;
+    if (confirm("Are you sure you want to submit these votes?")) {
+      this.db.object(`shows/${this.showKey}/finalVotes/${this.divisionKey}`).set(this.finalVote);
+    }
   }
 
   setFullScreen() {
@@ -1620,6 +1645,12 @@ export class HostComponent implements OnInit, OnDestroy {
     setTimeout(() => {
       this.db.object(`shows/${this.showKey}/divisions/${this.divisionKey}/focus`).set('harvest');
     }, 3000)
+  }
+
+  newHarvest() {
+    if (confirm("Are you sure you want to start a new harvest?")) {
+      this.updateNextSeason();
+    }
   }
 
   updateNextSeason() {

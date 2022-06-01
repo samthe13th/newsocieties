@@ -1,9 +1,9 @@
 import { DivisionService } from './../../services/division-service.service';
-import { Component, OnInit, AfterViewInit, ViewChild, ViewChildren, TemplateRef, ElementRef, QueryList } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild, ViewChildren, TemplateRef, ElementRef, OnDestroy, QueryList } from '@angular/core';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { take, tap, takeUntil } from 'rxjs/operators';
-import { timer, combineLatest, Observable, Subject, forkJoin, pipe } from 'rxjs';
-import { trim, find, differenceWith, sortBy, includes } from 'lodash';
+import { timer, combineLatest, Observable, Subject } from 'rxjs';
+import { reverse, toArray, trim, find, differenceWith, sortBy, includes, reduce } from 'lodash';
 import { map } from 'rxjs/operators';
 import * as moment from 'moment';
 import { ActivatedRoute } from '@angular/router';
@@ -19,16 +19,19 @@ const DIVISIONS = ['N', 'E', 'S', 'W', 'NE', 'SE', 'SW', 'NW'];
     '[class.app-central]': 'true'
   }
 })
-export class CentralComponent implements OnInit, AfterViewInit {
+export class CentralComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('show') showTab: TemplateRef<any>;
   @ViewChild('summary') summaryTab: TemplateRef<any>;
   @ViewChild('users') usersTab: TemplateRef<any>;
+  @ViewChild('finalVote') finalVoteTab: TemplateRef<any>;
   @ViewChild('showBody') showBody: TemplateRef<any>;
   @ViewChild('summaryBody') summaryBody: TemplateRef<any>;
   @ViewChild('usersBody') usersBody: TemplateRef<any>;
+  @ViewChild('finalVoteBody') finalVoteBody: TemplateRef<any>;
   @ViewChild('fileUpload') fileUpload: ElementRef;
   @ViewChild('eventTemplate') eventTemplate: TemplateRef<any>;
   @ViewChild('addUserCodeTemplate') addUserCodeTemplate: TemplateRef<any>;
+
   @ViewChildren('division') bodyTemplates: QueryList<TemplateRef<any>>;
   @ViewChildren('tab') tabTemplates: QueryList<TemplateRef<any>>;
 
@@ -37,6 +40,7 @@ export class CentralComponent implements OnInit, AfterViewInit {
   $contamination: Observable<any>;
   $unseenMessages: Observable<any>;
   $divisionAlerts: Observable<any>;
+  $finalVote: Observable<any>;
 
   private destroy$ = new Subject<boolean>();
 
@@ -91,6 +95,26 @@ export class CentralComponent implements OnInit, AfterViewInit {
       })
     )
 
+    this.$finalVote = combineLatest(
+      DIVISIONS.map((division) => (
+        this.db.object(`shows/${this.showKey}/finalVotes/${division}`).valueChanges()
+          .pipe(
+            map((votes) => ({ division, votes }))
+          )
+      )
+    )).pipe(
+      map((finalVotes) => {
+        const totals = this.getFinalVoteTotals(finalVotes);
+        return {
+          finalVotes,
+          totals
+        };
+      }),
+      tap((finalVote) => {
+        console.log({finalVote})
+      })
+    )
+
     this.divisions = DIVISIONS;
     
     this.divisionService.getDivisionAlerts(this.showKey)
@@ -107,6 +131,7 @@ export class CentralComponent implements OnInit, AfterViewInit {
         { id: 'show', tabTemplate: this.showTab, bodyTemplate: this.showBody },
         { id: 'users', tabTemplate: this.usersTab, bodyTemplate: this.usersBody },
         { id: 'summary', tabTemplate: this.summaryTab, bodyTemplate: this.summaryBody },
+        { id: 'final-vote', tabTemplate: this.finalVoteTab, bodyTemplate: this.finalVoteBody },
         ...DIVISIONS.map((div, i) => {
           return { id: div, tabTemplate: tabTemplates[i], bodyTemplate: bodyTemplates[i] }
         })
@@ -117,6 +142,27 @@ export class CentralComponent implements OnInit, AfterViewInit {
   ngOnDestroy() {
     this.destroy$.next(true);
     this.destroy$.unsubscribe();
+  }
+
+  getFinalVoteTotals(finalVotes) {
+    const voteTotals = reduce(finalVotes, (acc, finalVote) => {
+      const result = { ...acc };
+      if (finalVote.votes) {
+        result[finalVote.votes.first.division].value += finalVote.votes.first.weight;
+        result[finalVote.votes.second.division].value += finalVote.votes.second.weight;
+      }
+      return result;
+    }, {
+      N: { value: 0, division: 'N' },
+      E: { value: 0, division: 'E' },
+      S: { value: 0, division: 'S' },
+      W: { value: 0, division: 'W' },
+      NE: { value: 0, division: 'NE' },
+      NW: { value: 0, division: 'NW' },
+      SE: { value: 0, division: 'SE' },
+      SW: { value: 0, division: 'SW' }
+    })
+    return reverse(sortBy(toArray(voteTotals), ['value']));
   }
 
   onTabChange(tab) {
