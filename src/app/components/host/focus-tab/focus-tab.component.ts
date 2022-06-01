@@ -1,5 +1,5 @@
 import { FOCUS_BUTTONS } from './../../../pages/host/constants';
-import { Component, Input, TemplateRef, ViewChild } from '@angular/core';
+import { Component, Input, TemplateRef, ViewChild, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import * as rx from 'rxjs/operators';
 import * as _ from 'lodash';
@@ -13,7 +13,15 @@ import { DatabaseService } from 'src/app/services/database-service.service';
     '[class.app-focus-tab]': 'true'
   }
 })
-export class FocusTabComponent {
+export class FocusTabComponent implements OnInit {
+  @ViewChild('harvestTemplate') harvestTemplate: TemplateRef<any>;
+  @ViewChild('principleTemplate') principleTemplate: TemplateRef<any>;
+  @ViewChild('resolutionTemplate') resolutionTemplate: TemplateRef<any>;
+  @ViewChild('resolutionReviewModalTemplate') resolutionReviewModalTemplate: TemplateRef<any>;
+  @ViewChild('scenarioTemplate') scenarioTemplate: TemplateRef<any>;
+  @ViewChild('miscTemplate') miscTemplate: TemplateRef<any>;
+  @ViewChild('reviewTemplate') reviewTemplate: TemplateRef<any>;
+
   public $focus: Observable<any>;
   public $playerView: Observable<any>;
   public $pageState: Observable<any>;
@@ -30,13 +38,14 @@ export class FocusTabComponent {
   focus;
   voteType;
 
-  @ViewChild('harvestTemplate') harvestTemplate: TemplateRef<any>;
-  @ViewChild('principleTemplate') principleTemplate: TemplateRef<any>;
-  @ViewChild('resolutionTemplate') resolutionTemplate: TemplateRef<any>;
-  @ViewChild('resolutionReviewModalTemplate') resolutionReviewModalTemplate: TemplateRef<any>;
-  @ViewChild('scenarioTemplate') scenarioTemplate: TemplateRef<any>;
-  @ViewChild('miscTemplate') miscTemplate: TemplateRef<any>;
-  @ViewChild('reviewTemplate') reviewTemplate: TemplateRef<any>;
+  private _voteDropdownSelect;
+  get voteDropdownSelect() { return this._voteDropdownSelect };
+  set voteDropdownSelect(value) {
+    this._voteDropdownSelect = value;
+    if (this.focus) {
+      this.startVote(this.focus);
+    }
+  }
 
   @Input() showKey;
   @Input() divisionKey;
@@ -55,14 +64,16 @@ export class FocusTabComponent {
     this.$divisionReview = this.dbService.getDivisionObject(this.showKey, this.divisionKey, 'divisionReview');
   }
 
-  private _voteDropdownSelect;
-  get voteDropdownSelect() { return this._voteDropdownSelect };
-  set voteDropdownSelect(value) {
-    console.log('set: ', value, this.focus)
-    this._voteDropdownSelect = value;
-    if (this.focus) {
-      this.startVote(this.focus);
-    }
+  ngOnInit() {
+    this.getResolutions();
+    this.getPrinciples();
+    this.getScenarios();
+  }
+
+  autoPick(focus) {
+    console.log('autopick: ', focus, this.voteDropdown, this.voteDropdownSelect)
+    const untouched = this.voteDropdown.filter((option) => !option.votedOn);
+    this.voteDropdownSelect = pluckRandom(untouched, 1)[0];
   }
 
   onFocusSelect(button) {
@@ -131,12 +142,48 @@ export class FocusTabComponent {
           this.voteType = 'scenario';
           await this.getScenarios();
           this.voteDropdown = this.globalScenarios.map((scenario) => {
-            return (find(scenarios, ['title', scenario.title]))
+            return (_.find(scenarios, ['title', scenario.title]))
               ? { ...scenario, votedOn: true }
               : scenario
           })
         })
     }
+  }
+
+  async getPrinciples() {
+    return new Promise((resolve) => {
+      this.db.list(`principles`)
+      .valueChanges()
+      .pipe(take(1))
+      .subscribe((principles) => {
+        this.globalPrinciples = principles;
+        resolve(principles);
+      });
+    })
+  }
+
+  async getResolutions() {
+    return new Promise((resolve) => {
+      this.db.list(`resolutions`)
+      .valueChanges()
+      .pipe(take(1))
+      .subscribe((resolutions) => {
+        this.globalResolutions = resolutions;
+        resolve(resolutions);
+      });
+    })
+  }
+
+  async getScenarios() {
+    return new Promise((resolve) => {
+      return this.db.list(`scenarios`)
+      .valueChanges()
+      .pipe(take(1))
+      .subscribe((scenarios) => {
+        this.globalScenarios = scenarios;
+        resolve(scenarios);
+      });
+    })
   }
 
 }
