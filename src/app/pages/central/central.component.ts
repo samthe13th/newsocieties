@@ -109,9 +109,6 @@ export class CentralComponent implements OnInit, AfterViewInit, OnDestroy {
           finalVotes,
           totals
         };
-      }),
-      tap((finalVote) => {
-        console.log({finalVote})
       })
     )
 

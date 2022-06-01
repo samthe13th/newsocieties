@@ -43,10 +43,10 @@ export function promiseOne(dbCall) {
 
 export function formatDate(date, format) {
   const month = date.getMonth() + 1;
-
+  const day = date.getDate()
   const map = {
       mm: month >= 10 ? month : `0${month}`,
-      dd: date.getDate(),
+      dd: day >= 10 ? day : `0${day}`,
       yy: date.getFullYear().toString().slice(-2),
       yyyy: date.getFullYear()
   }

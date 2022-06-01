@@ -237,11 +237,11 @@ export class HostComponent implements OnInit, OnDestroy {
   finalVote = {
     first: {
       division: 'N',
-      weight: 1,
+      weight: 0,
     },
     second: {
       division: 'N',
-      weight: 1
+      weight: 0
     }
   }
 
