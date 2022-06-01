@@ -85,6 +85,8 @@ Run `ng build` to build the project. The build artifacts will be stored in the `
 ### 06/01/2022
 #### GENERAL UPDATES
 * Dirty magic now has a max value of 10000
-* Final votes can be viewed by central/admin in a new "Final Vote" tab 
+* Final votes can be viewed by central/admin in a new "Final Vote" tab
+* Date formatting for QR code urls fixed (June 1st was being written as 06122 instead of 060122)
 #### IPAD UPDATES
 * Final votes can be entered by a host via a "Final Vote" button in the Review tab
+* Final votes can be weighted as 0 if necessary
