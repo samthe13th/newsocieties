@@ -1,8 +1,8 @@
-import { Component, OnInit, AfterViewInit, ViewChild, ViewChildren, TemplateRef, ElementRef, QueryList } from '@angular/core';
+import { Component, OnDestroy, OnInit, AfterViewInit, ViewChild, ViewChildren, TemplateRef, ElementRef, QueryList } from '@angular/core';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { take, takeUntil, tap } from 'rxjs/operators';
 import { timer, Observable, Subject, combineLatest } from 'rxjs';
-import { trim, keyBy, range, capitalize, toNumber, find, differenceWith, sortBy } from 'lodash';
+import { reverse, toArray, reduce, trim, keyBy, range, capitalize, toNumber, find, differenceWith, sortBy } from 'lodash';
 import * as Papa from 'papaparse';
 import { DIVISION_TEMPLATE, SHOW_TEMPLATE, SHOW_DEFAULTS } from './templates';
 import { map } from 'rxjs/operators';
@@ -46,13 +46,15 @@ const ADVANCEMENTS = ["safety", "health", "arts", "knowledge", "infrastructure"]
     '[class.app-central]': 'true'
   }
 })
-export class AdminComponent implements OnInit, AfterViewInit {
+export class AdminComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('show') showTab: TemplateRef<any>;
   @ViewChild('summary') summaryTab: TemplateRef<any>;
   @ViewChild('users') usersTab: TemplateRef<any>;
+  @ViewChild('finalVote') finalVoteTab: TemplateRef<any>;
   @ViewChild('showBody') showBody: TemplateRef<any>;
   @ViewChild('summaryBody') summaryBody: TemplateRef<any>;
   @ViewChild('usersBody') usersBody: TemplateRef<any>;
+  @ViewChild('finalVoteBody') finalVoteBody: TemplateRef<any>;
 
   @ViewChild('fileUpload') fileUpload: ElementRef;
 
@@ -76,6 +78,7 @@ export class AdminComponent implements OnInit, AfterViewInit {
   $contamination: Observable<any>;
   $pauseAtMinute: Observable<any>;
   $showSize: Observable<any>;
+  $finalVote: Observable<any>;
 
   private destroy$ = new Subject<boolean>();
 
@@ -199,6 +202,23 @@ export class AdminComponent implements OnInit, AfterViewInit {
       })
     )
 
+    this.$finalVote = combineLatest(
+      DIVISIONS.map((division) => (
+        this.db.object(`shows/${this.showKey}/finalVotes/${division}`).valueChanges()
+          .pipe(
+            map((votes) => ({ division, votes }))
+          )
+      )
+    )).pipe(
+      map((finalVotes) => {
+        const totals = this.getFinalVoteTotals(finalVotes);
+        return {
+          finalVotes,
+          totals
+        };
+      })
+    )
+
     timer(0, 1000).pipe(
       takeUntil(this.destroy$)
     ).pipe(takeUntil(this.destroy$)).subscribe(() => {
@@ -233,6 +253,7 @@ export class AdminComponent implements OnInit, AfterViewInit {
         { id: 'show', tabTemplate: this.showTab, bodyTemplate: this.showBody },
         { id: 'users', tabTemplate: this.usersTab, bodyTemplate: this.usersBody },
         { id: 'summary', tabTemplate: this.summaryTab, bodyTemplate: this.summaryBody },
+        { id: 'final-vote', tabTemplate: this.finalVoteTab, bodyTemplate: this.finalVoteBody },
         ...DIVISIONS.map((div, i) => {
           return { id: div, tabTemplate: tabTemplates[i], bodyTemplate: bodyTemplates[i] }
         })
@@ -243,6 +264,27 @@ export class AdminComponent implements OnInit, AfterViewInit {
   ngOnDestroy() {
     this.destroy$.next(true);
     this.destroy$.unsubscribe();
+  }
+
+  getFinalVoteTotals(finalVotes) {
+    const voteTotals = reduce(finalVotes, (acc, finalVote) => {
+      const result = { ...acc };
+      if (finalVote.votes) {
+        result[finalVote.votes.first.division].value += finalVote.votes.first.weight;
+        result[finalVote.votes.second.division].value += finalVote.votes.second.weight;
+      }
+      return result;
+    }, {
+      N: { value: 0, division: 'N' },
+      E: { value: 0, division: 'E' },
+      S: { value: 0, division: 'S' },
+      W: { value: 0, division: 'W' },
+      NE: { value: 0, division: 'NE' },
+      NW: { value: 0, division: 'NW' },
+      SE: { value: 0, division: 'SE' },
+      SW: { value: 0, division: 'SW' }
+    })
+    return reverse(sortBy(toArray(voteTotals), ['value']));
   }
 
   onChangeShowNumber(n) {
