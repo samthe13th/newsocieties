@@ -221,6 +221,7 @@
          class="number-picker"
          (valueChange)="onChangeContamMin($event)" 
          [min]="0"
+         [max]="100"
          [value]="contam?.min">
         </ng-number-picker>
 
@@ -229,6 +230,7 @@
          class="number-picker"
          (valueChange)="onChangeContamMax($event)" 
          [min]="0"
+         [max]="100"
          [value]="contam?.max">
         </ng-number-picker>
 
@@ -237,6 +239,7 @@
          class="number-picker"
          (valueChange)="onChangeContamStart($event)" 
          [min]="0"
+         [max]="1000"
          [value]="contam?.start">
         </ng-number-picker>
 
@@ -245,6 +248,7 @@
          class="number-picker"
          (valueChange)="onChangeContamEnd($event)" 
          [min]="0"
+         [max]="1000"
          [value]="contam?.end">
         </ng-number-picker>
       </div>
