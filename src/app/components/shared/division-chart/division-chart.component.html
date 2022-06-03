@@ -1,5 +1,7 @@
+<button (click)="editActions(divisionKey)" style="margin-bottom: 10px">Edit</button>
+
 <div *ngIf="graph === false" class="data-chart stack-h">
-  <ng-container *ngIf="$rawData | async as data">
+  <ng-container *ngIf="$textData | async as data">
     <div class="data-chart-item" *ngFor="let d of data">
       <span>{{d.s}}</span><span [title]="'Actions: ' + d.a + ' | Capacity: ' + d.c" class="highlight">{{d.diff}}</span>
     </div>
@@ -24,3 +26,43 @@
     </div>
   </ng-container>
 </ng-container>
+
+<div *ngIf="showModal === true" class="modal-wrap">
+  <div class="modal small">
+    <h1>{{divisionKey}} Division Data</h1>
+    <table>
+      <tr>
+        <th>Season</th>
+        <th>Actions</th>
+        <th>Capacity</th>
+      </tr>
+      <tr *ngFor="let item of rawData; let i = index">
+        <td>{{item[0]}}</td>
+        <td>
+          <ng-number-picker
+            [(value)]="item[2]"
+            class="number-picker"
+            [max]="1000"
+            [min]="0"
+            [arrowKeys]="true">
+          </ng-number-picker>
+        </td>
+        <td>
+          <ng-number-picker
+            [(value)]="item[1]"
+            class="number-picker"
+            [max]="1000"
+            [min]="0"
+            [arrowKeys]="true">
+          </ng-number-picker>
+        </td>
+      </tr>
+    </table>
+    <button class="action-button" (click)="updateChartData()">Update</button>
+    <button
+      class="cancel-button"
+      (click)="closeModal()">
+      Cancel
+    </button>
+  </div>
+</div>

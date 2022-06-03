@@ -20,6 +20,8 @@ export class SocietySummaryComponent {
   @Input() large = false;
   @Input() graph = true;
 
+  showModal = false;
+
   calculateReserve(reserve) {
     return reserve ? reserve.reduce((acc, R) => acc + R, 0) : undefined
   }

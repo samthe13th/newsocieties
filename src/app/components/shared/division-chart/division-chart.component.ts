@@ -13,7 +13,7 @@ import * as _ from 'lodash';
 })
 export class DivisionChartComponent implements OnInit {
   $chartData;
-  $rawData;
+  $textData;
 
   chart = {
     type: "LineChart",
@@ -34,6 +34,10 @@ export class DivisionChartComponent implements OnInit {
     }
   }
 
+  rawData;
+  chartDataPath;
+  showModal = false;
+
   @Input() divisionKey;
   @Input() showKey;
   @Input() width = 300;
@@ -43,21 +47,39 @@ export class DivisionChartComponent implements OnInit {
   constructor(private db: AngularFireDatabase) {}
 
   ngOnInit() {
-    this.$chartData = this.db.list(`shows/${this.showKey}/divisions/${this.divisionKey}/chartData`)
+    this.chartDataPath = `shows/${this.showKey}/divisions/${this.divisionKey}/chartData`;
+    this.$chartData = this.db.list(this.chartDataPath)
       .valueChanges()
       .pipe(
         tap((n) => console.log({n})),
         filter((data) => !_.isEmpty(data))
       );
 
-    this.$rawData = this.db.list(`shows/${this.showKey}/divisions/${this.divisionKey}/chartData`)
+    this.$textData = this.db.list(this.chartDataPath)
       .valueChanges()
       .pipe(
         filter((data) => !_.isEmpty(data)),
+        tap((data) => {
+          this.rawData = data;
+          console.log('raw: ', data)
+        }),
         map((data) => data.map(([s, c, a]: [number, number, number]) => {
-            const diff = a - c;
-            return { s, c, a, diff: (diff >= 0) ? `+${Math.abs(diff)}` : `-${Math.abs(diff)}` };
-          }))
+          const diff = a - c;
+          return { s, c, a, diff: (diff >= 0) ? `+${Math.abs(diff)}` : `-${Math.abs(diff)}` };
+        })),
       );
+  }
+
+  editActions(divisionKey) {
+    this.showModal = true;
+  }
+
+  updateChartData() {
+    this.db.object(this.chartDataPath).set(this.rawData);
+    this.showModal = false;
+  }
+
+  closeModal() {
+    this.showModal = false;
   }
 }
