@@ -421,24 +421,29 @@ export class DivisionService {
   }
 
   calculateDivisionScore$(showKey, divisionKey) {
+    console.log('calc div score')
     const divisionPath = `shows/${showKey}/divisions/${divisionKey}`;
     
     return combineLatest(
       this.db.list(`${divisionPath}/globalLand`).valueChanges(),
       this.db.list(`${divisionPath}/localLand`).valueChanges(),
       this.db.object(`${divisionPath}/highThresholdsMet`).valueChanges(),
+      this.db.object(`${divisionPath}/season`).valueChanges(),
       this.$advancements(showKey, divisionKey)
     ).pipe(
       rxo.map(([
         globalLand,
         localLand,
         highthresholdsMet,
+        season,
         advancements
-      ]: [ any, any, number, any ]) => {
+      ]: [ any, any, number, number, any ]) => {
+        console.log("CALC ALL", globalLand, localLand, highthresholdsMet, season, advancements)
         const VP = (
           + (globalLand.length * 0.8)
           + localLand.length
           + highthresholdsMet
+          + season * 0.25
           + (0.35 * _.reduce(advancements, (acc, A) => A.individual + A.communal + acc, 0))
         );
         console.log('calc VP ', round(VP))
